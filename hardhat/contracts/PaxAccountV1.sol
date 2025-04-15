@@ -87,6 +87,13 @@ contract PaxAccountV1 is
      */
     event PaymentMethodAdded(uint256 paymentMethodId, address paymentMethod);
 
+    /**
+     * @notice Emitted when a new PaxAccount proxy is created
+     * @param paxAccount The address of the newly created PaxAccount proxy
+     * @dev Provides transparency for tracking new account deployments
+     */
+    event PaxAccountCreated(address indexed paxAccount);
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -119,6 +126,7 @@ contract PaxAccountV1 is
         numberOfPaymentMethods = 1;
 
         emit PaymentMethodAdded(0, initialPrimaryPaymentMethod);
+        emit PaxAccountCreated(address(this));
     }
 
     /**
