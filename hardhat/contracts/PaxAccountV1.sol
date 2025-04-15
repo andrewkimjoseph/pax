@@ -70,13 +70,13 @@ contract PaxAccountV1 is
      * @notice Emitted when tokens are withdrawn to a payment method
      * @param paymentMethod The address of the payment method that received the tokens
      * @param amountRequested The amount of tokens withdrawn
-     * @param currency The token currency name
+     * @param currencySymbol The token currency name
      * @dev Provides transparency for token movement out of the contract
      */
     event TokenWithdrawn(
         address paymentMethod,
         uint256 amountRequested,
-        string currency
+        bytes32 currencySymbol
     );
 
     /**
@@ -151,7 +151,7 @@ contract PaxAccountV1 is
         // Update historical withdrawal amount
         historicalTokenWithdrawalAmounts[address(currency)] += amountRequested;
 
-        emit TokenWithdrawn(paymentMethod, amountRequested, currency.name());
+        emit TokenWithdrawn(paymentMethod, amountRequested, bytes32(bytes(currency.symbol())));
     }
 
     /**
