@@ -103,29 +103,29 @@ contract PaxAccountV1 is
      * @notice Initializes the contract instead of using a constructor
      * @dev Sets up the contract with initial owner and primary payment method
      *      Adds the primary payment method as the first registered payment method (ID 0)
-     * @param initialOwner The address that will become the contract owner
-     * @param initialPrimaryPaymentMethod The address of the initial primary payment method
+     * @param _owner The address that will become the contract owner
+     * @param _primaryPaymentMethod The address of the initial primary payment method
      */
     function initialize(
-        address initialOwner,
-        address initialPrimaryPaymentMethod
+        address _owner,
+        address _primaryPaymentMethod
     ) public initializer {
         require(
-            initialPrimaryPaymentMethod != address(0),
+            _primaryPaymentMethod != address(0),
             "Primary payment method cannot be zero address"
         );
 
-        __Ownable_init(initialOwner);
+        __Ownable_init(_owner);
         __UUPSUpgradeable_init();
 
-        primaryPaymentMethod = initialPrimaryPaymentMethod;
+        primaryPaymentMethod = _primaryPaymentMethod;
 
         // Add the primary payment method as the first payment method
         bytes32 key = keccak256(abi.encodePacked(uint256(0)));
-        paymentMethods[key] = initialPrimaryPaymentMethod;
+        paymentMethods[key] = _primaryPaymentMethod;
         numberOfPaymentMethods = 1;
 
-        emit PaymentMethodAdded(0, initialPrimaryPaymentMethod);
+        emit PaymentMethodAdded(0, _primaryPaymentMethod);
         emit PaxAccountCreated(address(this));
     }
 
