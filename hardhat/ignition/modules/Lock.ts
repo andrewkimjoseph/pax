@@ -1,21 +1,41 @@
-// This setup uses Hardhat Ignition to manage smart contract deployments.
-// Learn more about it at https://hardhat.org/ignition
-
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
-import { parseEther } from "viem";
+import { taskManagerConstructorArgs } from "../../taskManagerConstructorArgs";
 
-const JAN_1ST_2030 = 1893456000;
-const ONE_GWEI: bigint = parseEther("0.001");
+const RESEARCHER_WALLET_ADDRESS = taskManagerConstructorArgs[0];
+const _REWARD_AMOUNT_PER_PARTICIPANT_IN_WEI = taskManagerConstructorArgs[1];
+const _TARGET_NUMBER_OF_PARTICIPANTS = taskManagerConstructorArgs[2];
+const _REWARDTOKEN = taskManagerConstructorArgs[3];
 
-const LockModule = buildModule("LockModule", (m) => {
-  const unlockTime = m.getParameter("unlockTime", JAN_1ST_2030);
-  const lockedAmount = m.getParameter("lockedAmount", ONE_GWEI);
 
-  const lock = m.contract("Lock", [unlockTime], {
-    value: lockedAmount,
-  });
+const ClosedSurveyV6Module = buildModule("ClosedSurveyV6Module", (imb) => {
+  const researcher = imb.getParameter(
+    "researcher",
+    RESEARCHER_WALLET_ADDRESS
+  );
 
-  return { lock };
+  const _rewardAmountPerParticipantInWei = imb.getParameter(
+    "_rewardAmountPerParticipantInWei",
+    String(_REWARD_AMOUNT_PER_PARTICIPANT_IN_WEI)
+  );
+
+  const _targetNumberOfParticipants = imb.getParameter(
+    "_targetNumberOfParticipants",
+    String(_TARGET_NUMBER_OF_PARTICIPANTS)
+  );
+
+  const _rewardToken = imb.getParameter(
+    "_rewardToken",
+    _REWARDTOKEN
+  );
+
+  const closedSurveyV6 = imb.contract("contracts/ClosedSurveyV6.sol:ClosedSurveyV6", [
+    researcher,
+    _rewardAmountPerParticipantInWei,
+    _targetNumberOfParticipants,
+    _rewardToken
+  ]);
+
+  return { closedSurveyV6 };
 });
 
-export default LockModule;
+export default ClosedSurveyV6Module;
