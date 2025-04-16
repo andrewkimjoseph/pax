@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -140,7 +139,7 @@ contract PaxAccountV1 is
     function withdrawToPaymentMethod(
         uint256 paymentMethodId,
         uint256 amountRequested,
-        IERC20MetadataUpgradeable currency
+        ERC20Upgradeable currency
     ) external onlyOwner {
         bytes32 key = keccak256(abi.encodePacked(paymentMethodId));
         address paymentMethod = paymentMethods[key];
@@ -233,7 +232,7 @@ contract PaxAccountV1 is
      * @param tokens Array of token addresses to check balances for
      * @return Array of TokenBalance structs containing token addresses and balances
      */
-    function getTokenBalances(IERC20MetadataUpgradeable[] calldata tokens)
+    function getTokenBalances(ERC20Upgradeable[] calldata tokens)
         external
         view
         returns (TokenBalance[] memory)
