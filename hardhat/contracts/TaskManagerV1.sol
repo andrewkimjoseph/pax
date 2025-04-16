@@ -94,6 +94,13 @@ contract TaskManagerV1 is Ownable, Pausable {
     uint256 private numberOfUsedClaimingSignatures;
 
     /**
+     * @notice Emitted when a new TaskManager is created
+     * @param taskManager The address of the newly created TaskManager
+     * @dev Used for off-chain tracking and verification of contract deployment
+     */
+    event TaskManagerCreated(address indexed taskManager);
+
+    /**
      * @notice Emitted when a participantProxy completes the screening process
      * @param participantProxy The address of the screened participantProxy
      * @dev Used for off-chain tracking and verification of the screening process
@@ -362,6 +369,7 @@ contract TaskManagerV1 is Ownable, Pausable {
     /**
      * @notice Initializes the task management contract with initial parameters
      * @dev Sets up the contract with taskManager address, reward amount, participantProxy target, and reward token
+     *      Emits a TaskManagerCreated event to record the deployment on-chain
      * @param taskManager Address of the taskManager who will own and manage the contract
      * @param _rewardAmountPerParticipantProxyInWei Amount in wei to reward each participantProxy
      * @param _targetNumberOfParticipantProxies Maximum number of participantProxies for the task
@@ -397,6 +405,8 @@ contract TaskManagerV1 is Ownable, Pausable {
 
         rewardAmountPerParticipantProxyInWei = _rewardAmountPerParticipantProxyInWei;
         targetNumberOfParticipantProxies = _targetNumberOfParticipantProxies;
+        
+        emit TaskManagerCreated(address(this));
     }
 
     /**
