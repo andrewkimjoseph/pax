@@ -1,7 +1,14 @@
 {
   "name": "hardhat-project",
   "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@nomicfoundation/hardhat-toolbox-viem": "^3.0.0",
-    "hardhat": "^2.22.19"
+    "@types/chai": "^4.3.20",
+    "chai": "^4.5.0",
+    "hardhat": "^2.23.0"
+  },
+  "dependencies": {
+    "@privy-io/server-auth": "^1.20.2",
+    "permissionless": "^0.2.42"
   }
 }
