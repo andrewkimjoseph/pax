@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 // Author: @andrewkimjoseph
 
@@ -18,7 +19,7 @@ import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
  *      non-custodial EOAs, which abstracts the custody experience from end users.
  *      Rewards are sent to PaxAccount contract addresses, not directly to end-users.
  */
-contract TaskManagerV1 is Ownable, Pausable {
+contract TaskManagerV1 is Ownable, Pausable, EIP712 {
     using ECDSA for bytes32;
 
     /**
@@ -32,6 +33,14 @@ contract TaskManagerV1 is Ownable, Pausable {
      * @dev Marked as immutable to save gas and prevent changes after deployment
      */
     address private immutable signer;
+
+    // keccak256("ScreeningRequest(address participant,string taskId,uint256 nonce)")
+    bytes32 private constant SCREENING_REQUEST_TYPEHASH = 
+        keccak256("ScreeningRequest(address participant,string taskId,uint256 nonce)");
+        
+    // keccak256("RewardClaimRequest(address participant,string rewardId,uint256 nonce)")
+    bytes32 private constant REWARD_CLAIM_REQUEST_TYPEHASH = 
+        keccak256("RewardClaimRequest(address participant,string rewardId,uint256 nonce)");
 
     /**
      * @notice Mapping to track participantProxies who have received rewards
@@ -395,7 +404,7 @@ contract TaskManagerV1 is Ownable, Pausable {
         uint256 _rewardAmountPerParticipantProxyInWei,
         uint256 _targetNumberOfParticipantProxies,
         address _rewardToken
-    ) Ownable(taskMaster) {
+    ) Ownable(taskMaster) EIP712("TaskManager", "1") {
         require(
             _rewardToken != address(0),
             "Zero address given for reward Token"
@@ -467,77 +476,55 @@ contract TaskManagerV1 is Ownable, Pausable {
     }
 
     /**
-     * @notice Creates a hash for screening signature verification
-     * @dev Combines contract-specific data with participantProxy info to prevent cross-contract replay attacks
+     * @notice Creates a hash for screening signature verification using EIP-712
+     * @dev Combines contract-specific data with participantProxy info
      * @param participantProxy The wallet address of the participantProxy being screened
      * @param taskId A unique identifier for this specific task
      * @param nonce Unique number to prevent replay attacks
-     * @return bytes32 The keccak256 hash of the packed parameters
-     *
-     * The hash includes:
-     * 1. Contract address - Prevents cross-contract replay
-     * 2. Chain ID - Prevents cross-chain replay
-     * 3. ParticipantProxy address - Links signature to specific participantProxy
-     * 4. taskId - Links signature to specific task
-     * 5. Nonce - Ensures uniqueness of each signature
+     * @return bytes32 The EIP-712 typed data hash
      */
     function getMessageHashForParticipantProxyScreening(
         address participantProxy,
         string memory taskId,
         uint256 nonce
     ) private view returns (bytes32) {
-        return
-            keccak256(
-                abi.encodePacked(
-                    address(this),
-                    block.chainid,
-                    participantProxy,
-                    taskId,
-                    nonce
-                )
-            );
+        return _hashTypedDataV4(keccak256(abi.encode(
+            SCREENING_REQUEST_TYPEHASH,
+            participantProxy,
+            keccak256(bytes(taskId)),
+            nonce
+        )));
     }
 
     /**
-     * @notice Creates a hash for reward claiming signature verification
-     * @dev Combines contract-specific data with participantProxy info to prevent cross-contract replay attacks
+     * @notice Creates a hash for reward claiming signature verification using EIP-712
+     * @dev Combines contract-specific data with participantProxy info
      * @param participantProxy The wallet address of the participantProxy claiming the reward
      * @param rewardId A unique identifier for this specific reward claim
      * @param nonce Unique number to prevent replay attacks
-     * @return bytes32 The keccak256 hash of the packed parameters
-     *
-     * The hash includes:
-     * 1. Contract address - Prevents cross-contract replay
-     * 2. Chain ID - Prevents cross-chain replay
-     * 3. ParticipantProxy address - Links signature to specific participantProxy
-     * 4. RewardId - Links signature to specific reward
-     * 5. Nonce - Ensures uniqueness of each signature
+     * @return bytes32 The EIP-712 typed data hash
      */
     function getMessageHashForRewardClaiming(
         address participantProxy,
         string memory rewardId,
         uint256 nonce
     ) private view returns (bytes32) {
-        return
-            keccak256(
-                abi.encodePacked(
-                    address(this),
-                    block.chainid,
-                    participantProxy,
-                    rewardId,
-                    nonce
-                )
-            );
+        return _hashTypedDataV4(keccak256(abi.encode(
+            REWARD_CLAIM_REQUEST_TYPEHASH,
+            participantProxy,
+            keccak256(bytes(rewardId)),
+            nonce
+        )));
     }
 
     /**
-     * @notice Verifies that a signature is valid for participantProxy screening
-     * @dev Recovers the signer from the signature and compares with contract owner
+     * @notice Verifies that a signature is valid for participantProxy screening using EIP-712
+     * @dev Recovers the signer from the signature and compares with contract signer
      * @param participantProxy Address of the participantProxy being screened
      * @param taskId Unique identifier for this screening
      * @param nonce Unique number to prevent replay attacks
      * @param signature Cryptographic signature to verify
-     * @return bool True if signature was signed by the contract owner, false otherwise
+     * @return bool True if signature was signed by the contract signer, false otherwise
      */
     function verifySignatureForParticipantProxyScreening(
         address participantProxy,
@@ -545,25 +532,23 @@ contract TaskManagerV1 is Ownable, Pausable {
         uint256 nonce,
         bytes memory signature
     ) private view returns (bool) {
-        bytes32 messageHash = getMessageHashForParticipantProxyScreening(
+        bytes32 hash = getMessageHashForParticipantProxyScreening(
             participantProxy,
             taskId,
             nonce
         );
-        bytes32 ethSignedMessageHash = MessageHashUtils.toEthSignedMessageHash(
-            messageHash
-        );
-        return ethSignedMessageHash.recover(signature) == signer;
+        address recoveredSigner = ECDSA.recover(hash, signature);
+        return recoveredSigner == signer;
     }
 
     /**
-     * @notice Verifies that a signature is valid for reward claiming
-     * @dev Recovers the signer from the signature and compares with contract owner
+     * @notice Verifies that a signature is valid for reward claiming using EIP-712
+     * @dev Recovers the signer from the signature and compares with contract signer
      * @param participantProxy Address of the participantProxy claiming the reward
      * @param rewardId Unique identifier for this reward claim
      * @param nonce Unique number to prevent replay attacks
      * @param signature Cryptographic signature to verify
-     * @return bool True if signature was signed by the contract owner, false otherwise
+     * @return bool True if signature was signed by the contract signer, false otherwise
      */
     function verifySignatureForRewardClaiming(
         address participantProxy,
@@ -571,15 +556,13 @@ contract TaskManagerV1 is Ownable, Pausable {
         uint256 nonce,
         bytes memory signature
     ) private view returns (bool) {
-        bytes32 messageHash = getMessageHashForRewardClaiming(
+        bytes32 hash = getMessageHashForRewardClaiming(
             participantProxy,
             rewardId,
             nonce
         );
-        bytes32 ethSignedMessageHash = MessageHashUtils.toEthSignedMessageHash(
-            messageHash
-        );
-        return ethSignedMessageHash.recover(signature) == signer;
+        address recoveredSigner = ECDSA.recover(hash, signature);
+        return recoveredSigner == signer;
     }
 
     /**
