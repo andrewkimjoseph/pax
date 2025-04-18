@@ -1,5 +1,5 @@
 import { Address, parseEther } from "viem";
-import { create2Factory, waitForUserOperationReceipt } from "../utils/clients";
+import { create2Factory, masterOwner, waitForUserOperationReceipt } from "../utils/clients";
 import { getTaskManagerDeployDataAndSalt, findContractAddressFromLogs, REWARD_TOKEN_ADDRESS } from "../utils/helpers";
 import { WalletInfo } from "../utils/wallets";
 
@@ -17,7 +17,8 @@ export async function deployTaskManager(
   targetParticipants: bigint = 5n,
   rewardTokenAddress: Address = REWARD_TOKEN_ADDRESS
 ): Promise<Address> {
-  console.log(`Deploying TaskManager for owner: ${taskManagerWallet.serverWalletAccount.address}`);
+  console.log(`Deploying TaskManager for signer: ${taskManagerWallet.serverWalletAccount.address}`);
+  console.log(`Owner (taskMaster): ${taskManagerWallet.safeSmartAccount.address}`);
   console.log(`Reward amount: ${rewardAmount} wei`);
   console.log(`Target participants: ${targetParticipants}`);
   console.log(`Reward token address: ${rewardTokenAddress}`);
@@ -25,13 +26,14 @@ export async function deployTaskManager(
   // Get deployment data with salt for CREATE2
   const { deployData } = getTaskManagerDeployDataAndSalt(
     taskManagerWallet.serverWalletAccount.address,
+    taskManagerWallet.safeSmartAccount.address,
     rewardAmount,
     targetParticipants,
     rewardTokenAddress
   );
 
-  // Deploy using CREATE2 factory via account abstraction
   const userOpHash = await taskManagerWallet.client.sendUserOperation({
+
     calls: [
       {
         to: create2Factory,
@@ -39,6 +41,8 @@ export async function deployTaskManager(
         data: deployData,
       },
     ],
+    
+
   });
 
   console.log("User operation hash:", userOpHash);
@@ -55,7 +59,7 @@ export async function deployTaskManager(
   // Retrieve contract address from logs
   const contractAddress = await findContractAddressFromLogs(
     txHash,
-    "TaskManagerCreated(address)"
+    "TaskManagerCreated(address,address,address)"
   );
 
   if (!contractAddress) {

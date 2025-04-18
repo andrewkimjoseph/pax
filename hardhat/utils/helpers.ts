@@ -62,15 +62,17 @@ import {
   
   // Get TaskManager deployment data with salt
   export function getTaskManagerDeployDataAndSalt(
-    taskManager: Address,
+    signerAddress: Address,
+    taskMaster: Address,
     _rewardAmountPerParticipantProxyInWei: bigint,
     _targetNumberOfParticipantProxies: bigint,
     _rewardToken: Address
   ): { deployData: Hex; salt: Hex } {
     const salt = toHex(randomBytes(32), { size: 32 });
   
-    const args: readonly [Address, bigint, bigint, Address] = [
-      taskManager,
+    const args: readonly [Address, Address, bigint, bigint, Address] = [
+      signerAddress,
+      taskMaster,
       _rewardAmountPerParticipantProxyInWei,
       _targetNumberOfParticipantProxies,
       _rewardToken,

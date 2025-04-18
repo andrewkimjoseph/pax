@@ -107,7 +107,9 @@ describe("3. TaskManager Tests", function () {
             value: 0n,
             data: screeningData,
           },
+          
         ],
+       
       });
 
       // Wait for receipt
@@ -124,10 +126,13 @@ describe("3. TaskManager Tests", function () {
       expect(finalScreened).to.be.true;
 
       // Check screened participant count increased
-      const screenedCount = await readContractState(
-        taskManagerAddress,
-        taskManagerV1ABI,
-        "getNumberOfScreenedParticipantProxies"
+
+      const screenedCount = Number(
+        await readContractState(
+          taskManagerAddress,
+          taskManagerV1ABI,
+          "getNumberOfScreenedParticipantProxies"
+        )
       );
 
       console.log(`Number of screened participants: ${screenedCount}`);
@@ -320,7 +325,7 @@ describe("3. TaskManager Tests", function () {
       // Prepare pause data
       const pauseData = encodeFunctionData({
         abi: taskManagerV1ABI,
-        functionName: "pausetask",
+        functionName: "pauseTask",
       });
 
       // Send pause transaction
@@ -348,7 +353,7 @@ describe("3. TaskManager Tests", function () {
       // Now unpause
       const unpauseData = encodeFunctionData({
         abi: taskManagerV1ABI,
-        functionName: "unpausetask",
+        functionName: "unpauseTask",
       });
 
       const unpauseOpHash = await taskManagerWallet.client.sendUserOperation({
@@ -584,7 +589,7 @@ describe("3. TaskManager Tests", function () {
       // Try to pause the task
       const pauseData = encodeFunctionData({
         abi: taskManagerV1ABI,
-        functionName: "pausetask",
+        functionName: "pauseTask",
       });
 
       // Send transaction and expect it to fail
@@ -769,16 +774,21 @@ describe("3. TaskManager Tests", function () {
 
     it("should track signature usage correctly", async function () {
       // Get current signature usage counts
-      const screeningSigCount = await readContractState(
-        taskManagerAddress,
-        taskManagerV1ABI,
-        "getNumberOfUsedScreeningSignatures"
+
+      const screeningSigCount = Number(
+        await readContractState(
+          taskManagerAddress,
+          taskManagerV1ABI,
+          "getNumberOfUsedScreeningSignatures"
+        )
       );
 
-      const claimingSigCount = await readContractState(
-        taskManagerAddress,
-        taskManagerV1ABI,
-        "getNumberOfUsedClaimingSignatures"
+      const claimingSigCount = Number(
+        await readContractState(
+          taskManagerAddress,
+          taskManagerV1ABI,
+          "getNumberOfUsedClaimingSignatures"
+        )
       );
 
       console.log(`Used screening signatures count: ${screeningSigCount}`);

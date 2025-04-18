@@ -6,6 +6,7 @@ import { taskManagerV1ABI } from "../abis/taskManagerV1";
 import { paxAccountV1ABI } from "../abis/paxAccountV1";
 import { erc20ABI } from "../abis/erc20";
 import { createScreeningSignaturePackage, createRewardClaimSignaturePackage } from "../utils/signatures";
+import { WalletInfo } from "../utils/wallets";
 
 // Import global variables from setup test
 declare global {
@@ -13,7 +14,7 @@ declare global {
     taskManager: Address;
     paxAccounts: Address[];
   };
-  var testWallets: any;
+  var testWallets: { [key: string]: WalletInfo };
 }
 
 describe("4. Integration Tests", function() {
@@ -21,7 +22,7 @@ describe("4. Integration Tests", function() {
 
   let taskManagerAddress: Address;
   let paxAccountAddresses: Address[] = [];
-  let wallets: any = {};
+  let wallets: { [key: string]: WalletInfo } = {};
 
   before(function() {
     // First try to load from file
@@ -261,7 +262,7 @@ describe("4. Integration Tests", function() {
       // First, pause the contract
       const pauseData = encodeFunctionData({
         abi: taskManagerV1ABI,
-        functionName: "pausetask",
+        functionName: "pauseTask",
       });
       
       console.log("Pausing contract...");
@@ -330,7 +331,7 @@ describe("4. Integration Tests", function() {
       // Now unpause for subsequent tests
       const unpauseData = encodeFunctionData({
         abi: taskManagerV1ABI,
-        functionName: "unpausetask",
+        functionName: "unpauseTask",
       });
       
       console.log("Unpausing contract...");

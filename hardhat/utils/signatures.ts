@@ -1,139 +1,267 @@
 import {
   Address,
   Hex,
-  encodePacked,
-  keccak256,
-  toBytes,
-  recoverMessageAddress,
-  hashMessage,
-  recoverAddress,
-  ByteArray,
+  verifyTypedData,
 } from "viem";
 import { celo } from "viem/chains";
 import { WalletInfo } from "./wallets";
 
+// Define the types for screening requests
+type ScreeningRequestTypes = {
+  EIP712Domain: [
+    { name: 'name'; type: 'string' },
+    { name: 'version'; type: 'string' },
+    { name: 'chainId'; type: 'uint256' },
+    { name: 'verifyingContract'; type: 'address' }
+  ];
+  ScreeningRequest: [
+    { name: 'participant'; type: 'address' },
+    { name: 'taskId'; type: 'string' },
+    { name: 'nonce'; type: 'uint256' }
+  ];
+};
+
+// Define the types for reward claim requests
+type RewardClaimRequestTypes = {
+  EIP712Domain: [
+    { name: 'name'; type: 'string' },
+    { name: 'version'; type: 'string' },
+    { name: 'chainId'; type: 'uint256' },
+    { name: 'verifyingContract'; type: 'address' }
+  ];
+  RewardClaimRequest: [
+    { name: 'participant'; type: 'address' },
+    { name: 'rewardId'; type: 'string' },
+    { name: 'nonce'; type: 'uint256' }
+  ];
+};
+
+// Define a concrete domain type with required fields
+type TaskManagerDomain = {
+  name: string;
+  version: string;
+  chainId: bigint;
+  verifyingContract: Address;
+};
+
+// Create a domain object for EIP-712 signatures
+const createDomain = (contractAddress: Address): TaskManagerDomain => ({
+  name: 'TaskManager',
+  version: '1',
+  chainId: BigInt(celo.id),
+  verifyingContract: contractAddress
+});
+
 /**
- * Create a message hash for participant screening similar to how TaskManager contract does it
+ * Sign a screening request using EIP-712 typed data
+ * @param taskManagerWallet The wallet of the TaskManager (owner)
  * @param contractAddress TaskManager contract address
  * @param participant Address of the participant being screened
  * @param taskId Unique identifier for this task
  * @param nonce Random value to prevent replay attacks
- * @returns The keccak256 hash of the packed parameters
+ * @returns Promise containing the signature
  */
-export function createScreeningMessageHash(
+export async function signScreeningRequest(
+  taskManagerWallet: WalletInfo,
   contractAddress: Address,
   participant: Address,
   taskId: string,
   nonce: bigint
-): ByteArray {
-  const [types, data] = [
-    ["address", "uint256", "address", "string", "uint256"],
-    [contractAddress, celo.id, participant, taskId, nonce],
-  ];
+): Promise<Hex> {
+  const types: ScreeningRequestTypes = {
+    EIP712Domain: [
+      { name: 'name', type: 'string' },
+      { name: 'version', type: 'string' },
+      { name: 'chainId', type: 'uint256' },
+      { name: 'verifyingContract', type: 'address' }
+    ],
+    ScreeningRequest: [
+      { name: 'participant', type: 'address' },
+      { name: 'taskId', type: 'string' },
+      { name: 'nonce', type: 'uint256' }
+    ]
+  };
+  
+  const domain = createDomain(contractAddress);
+  
+  const message = {
+    participant,
+    taskId,
+    nonce
+  };
 
-  return keccak256(encodePacked(types, data), "bytes");
+  return taskManagerWallet.serverWalletAccount.signTypedData({
+    domain,
+    types,
+    primaryType: 'ScreeningRequest',
+    message
+  });
 }
 
 /**
- * Create a message hash for reward claiming similar to how TaskManager contract does it
+ * Sign a reward claim request using EIP-712 typed data
+ * @param taskManagerWallet The wallet of the TaskManager (owner)
  * @param contractAddress TaskManager contract address
  * @param participant Address of the participant claiming the reward
  * @param rewardId Unique identifier for this reward claim
  * @param nonce Random value to prevent replay attacks
- * @returns The keccak256 hash of the packed parameters
+ * @returns Promise containing the signature
  */
-export function createRewardClaimMessageHash(
+export async function signRewardClaimRequest(
+  taskManagerWallet: WalletInfo,
   contractAddress: Address,
   participant: Address,
   rewardId: string,
   nonce: bigint
-): ByteArray {
-  const [types, data] = [
-    ["address", "uint256", "address", "string", "uint256"],
-    [contractAddress, celo.id, participant, rewardId, nonce],
-  ];
-  return keccak256(encodePacked(types, data), "bytes");
-}
-
-/**
- * Sign a screening message hash using the TaskManager's wallet
- * @param taskManagerWallet The wallet of the TaskManager (owner)
- * @param messageHash Hash to sign
- * @returns Promise containing the signature
- */
-export async function signScreeningMessageHash(
-  taskManagerWallet: WalletInfo,
-  messageHash: ByteArray
 ): Promise<Hex> {
-  return taskManagerWallet.serverWalletAccount.signMessage({
-    message: { raw: messageHash },
+  const types: RewardClaimRequestTypes = {
+    EIP712Domain: [
+      { name: 'name', type: 'string' },
+      { name: 'version', type: 'string' },
+      { name: 'chainId', type: 'uint256' },
+      { name: 'verifyingContract', type: 'address' }
+    ],
+    RewardClaimRequest: [
+      { name: 'participant', type: 'address' },
+      { name: 'rewardId', type: 'string' },
+      { name: 'nonce', type: 'uint256' }
+    ]
+  };
+  
+  const domain = createDomain(contractAddress);
+  
+  const message = {
+    participant,
+    rewardId,
+    nonce
+  };
+
+  return taskManagerWallet.serverWalletAccount.signTypedData({
+    domain,
+    types,
+    primaryType: 'RewardClaimRequest',
+    message
   });
 }
 
 /**
- * Sign a reward claim message hash using the TaskManager's wallet
- * @param taskManagerWallet The wallet of the TaskManager (owner)
- * @param messageHash Hash to sign
- * @returns Promise containing the signature
- */
-export async function signRewardClaimMessageHash(
-  taskManagerWallet: WalletInfo,
-  messageHash: ByteArray
-): Promise<Hex> {
-  return taskManagerWallet.serverWalletAccount.signMessage({
-    message: { raw: messageHash },
-  });
-}
-
-/**
- * Verify that a signature is valid and was signed by the expected signer
- * @param messageHash The hash that was signed
- * @param signature The resulting signature
+ * Verify that a screening signature is valid and was signed by the expected signer
+ * @param contractAddress TaskManager contract address
+ * @param participant Address of the participant being screened
+ * @param taskId Unique identifier for this task
+ * @param nonce Random value to prevent replay attacks
+ * @param signature The signature to verify
  * @param expectedSigner The address that should have signed the message
  * @returns Promise resolving to true if the signature is valid, false otherwise
  */
-// export async function verifySignature(
-//   messageHash: Hex,
-//   signature: Hex,
-//   expectedSigner: Address
-// ): Promise<boolean> {
-//   try {
-//     // To match the on-chain verification, we need to:
-//     // 1. Hash the messageHash with Ethereum's message prefix
-//     const ethSignedMessageHash = hashMessage({
-//       raw: toBytes(messageHash),
-//     });
-
-//     // 2. Recover address from the signature
-//     const recoveredAddress = await recoverAddress({
-//       hash: ethSignedMessageHash,
-//       signature,
-//     });
-
-//     return recoveredAddress.toLowerCase() === expectedSigner.toLowerCase();
-//   } catch (error) {
-//     console.error("Signature verification error:", error);
-
-//     // For debugging only - remove in production
-//     console.log("Message hash:", messageHash);
-//     console.log("Signature:", signature);
-//     console.log("Expected signer:", expectedSigner);
-
-//     return false;
-//   }
-// }
-
-// Update the verifySignature function:
-export async function verifySignature(
-  messageHash: ByteArray,
+export async function verifyScreeningSignature(
+  contractAddress: Address,
+  participant: Address,
+  taskId: string,
+  nonce: bigint,
   signature: Hex,
   expectedSigner: Address
 ): Promise<boolean> {
-  // Always return true to bypass signature verification in tests
-  // This will allow on-chain transactions to be sent and tested
-  // while avoiding the local signature verification issues
-  return true;
+  try {
+    const types: ScreeningRequestTypes = {
+      EIP712Domain: [
+        { name: 'name', type: 'string' },
+        { name: 'version', type: 'string' },
+        { name: 'chainId', type: 'uint256' },
+        { name: 'verifyingContract', type: 'address' }
+      ],
+      ScreeningRequest: [
+        { name: 'participant', type: 'address' },
+        { name: 'taskId', type: 'string' },
+        { name: 'nonce', type: 'uint256' }
+      ]
+    };
+    
+    const domain = createDomain(contractAddress);
+    
+    const message = {
+      participant,
+      taskId,
+      nonce
+    };
+
+    // For simplicity in test environments
+    // return true;
+
+    // For production:
+    return await verifyTypedData({
+      address: expectedSigner,
+      domain,
+      types,
+      primaryType: 'ScreeningRequest',
+      message,
+      signature
+    });
+  } catch (error) {
+    console.error("Signature verification error:", error);
+    return false;
+  }
 }
+
+/**
+ * Verify that a reward claim signature is valid and was signed by the expected signer
+ * @param contractAddress TaskManager contract address
+ * @param participant Address of the participant claiming the reward
+ * @param rewardId Unique identifier for this reward claim
+ * @param nonce Random value to prevent replay attacks
+ * @param signature The signature to verify
+ * @param expectedSigner The address that should have signed the message
+ * @returns Promise resolving to true if the signature is valid, false otherwise
+ */
+export async function verifyRewardClaimSignature(
+  contractAddress: Address,
+  participant: Address,
+  rewardId: string,
+  nonce: bigint,
+  signature: Hex,
+  expectedSigner: Address
+): Promise<boolean> {
+  try {
+    const types: RewardClaimRequestTypes = {
+      EIP712Domain: [
+        { name: 'name', type: 'string' },
+        { name: 'version', type: 'string' },
+        { name: 'chainId', type: 'uint256' },
+        { name: 'verifyingContract', type: 'address' }
+      ],
+      RewardClaimRequest: [
+        { name: 'participant', type: 'address' },
+        { name: 'rewardId', type: 'string' },
+        { name: 'nonce', type: 'uint256' }
+      ]
+    };
+    
+    const domain = createDomain(contractAddress);
+    
+    const message = {
+      participant,
+      rewardId,
+      nonce
+    };
+
+    // // For simplicity in test environments
+    // return true;
+
+    // For production:
+    return await verifyTypedData({
+      address: expectedSigner,
+      domain,
+      types,
+      primaryType: 'RewardClaimRequest',
+      message,
+      signature
+    });
+  } catch (error) {
+    console.error("Signature verification error:", error);
+    return false;
+  }
+}
+
 /**
  * Create a complete screening signature package for a participant
  * @param taskManagerContract TaskManager contract address
@@ -150,26 +278,24 @@ export async function createScreeningSignaturePackage(
   taskId: string,
   nonce: bigint
 ) {
-  const messageHash = createScreeningMessageHash(
+  const signature = await signScreeningRequest(
+    taskManagerWallet,
     taskManagerContract,
     participantAddress,
     taskId,
     nonce
   );
 
-  const signature = await signScreeningMessageHash(
-    taskManagerWallet,
-    messageHash
-  );
-
-  const isValid = await verifySignature(
-    messageHash,
+  const isValid = await verifyScreeningSignature(
+    taskManagerContract,
+    participantAddress,
+    taskId,
+    nonce,
     signature,
-    taskManagerWallet.address
+    taskManagerWallet.serverWalletAccount.address
   );
 
   return {
-    messageHash,
     signature,
     isValid,
     participantAddress,
@@ -194,26 +320,24 @@ export async function createRewardClaimSignaturePackage(
   rewardId: string,
   nonce: bigint
 ) {
-  const messageHash = createRewardClaimMessageHash(
+  const signature = await signRewardClaimRequest(
+    taskManagerWallet,
     taskManagerContract,
     participantAddress,
     rewardId,
     nonce
   );
 
-  const signature = await signRewardClaimMessageHash(
-    taskManagerWallet,
-    messageHash
-  );
-
-  const isValid = await verifySignature(
-    messageHash,
+  const isValid = await verifyRewardClaimSignature(
+    taskManagerContract,
+    participantAddress,
+    rewardId,
+    nonce,
     signature,
-    taskManagerWallet.address
+    taskManagerWallet.serverWalletAccount.address
   );
 
   return {
-    messageHash,
     signature,
     isValid,
     participantAddress,
