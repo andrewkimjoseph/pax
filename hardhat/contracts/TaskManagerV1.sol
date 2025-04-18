@@ -2,7 +2,7 @@
 pragma solidity ^0.8.28;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
@@ -12,9 +12,16 @@ import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 /**
  * @notice Smart contract for managing a task completion system with ERC20 token rewards
- * @dev Inherits from Ownable for TaskManager access control and Pausable for emergency stops
+ * @dev Inherits from Ownable for TaskManager access control, Pausable for emergency stops,
+ *      and EIP712 for typed structured data signing.
  *      This contract handles the complete lifecycle of tasks: participantProxy screening,
- *      signature verification, and reward distribution to PaxAccount contracts
+ *      signature verification using EIP-712 typed data, and reward distribution to PaxAccount contracts.
+ *      
+ *      The contract implements EIP-712 for secure, structured, and human-readable message signing, which, generally speaking:
+ *      - Improves security by preventing signature replay across different domains and contracts
+ *      - Enhances UX by allowing wallet providers to display human-readable data for signing
+ *      - Follows industry standards for message signing in dApps
+ *      
  *      Note: ParticipantProxies in this system are smart account wallets rather than
  *      non-custodial EOAs, which abstracts the custody experience from end users.
  *      Rewards are sent to PaxAccount contract addresses, not directly to end-users.
@@ -26,7 +33,7 @@ contract TaskManagerV1 is Ownable, Pausable, EIP712 {
      * @notice Reference to the ERC20 token contract used for rewards
      * @dev Marked as immutable to save gas and prevent changes after deployment
      */
-    IERC20Metadata private immutable rewardToken;
+    IERC20 private immutable rewardToken;
 
     /**
      * @notice Reference to the signer used to verify screening and reward claiming signatures
@@ -184,7 +191,7 @@ contract TaskManagerV1 is Ownable, Pausable, EIP712 {
      */
     event GivenTokenWithdrawn(
         address taskMaster,
-        IERC20Metadata tokenAddress,
+        IERC20 tokenAddress,
         uint256 rewardAmount
     );
 
@@ -367,7 +374,7 @@ contract TaskManagerV1 is Ownable, Pausable, EIP712 {
      * @dev Used for withdrawal of any token to prevent zero-value transfers
      * @param token The ERC20 token contract to check balance for
      */
-    modifier onlyIfContractHasAnyGivenToken(IERC20Metadata token) {
+    modifier onlyIfContractHasAnyGivenToken(IERC20 token) {
         require(
             token.balanceOf(address(this)) > 0,
             "Contract does not have any of the given token"
@@ -393,7 +400,7 @@ contract TaskManagerV1 is Ownable, Pausable, EIP712 {
      * @dev Sets up the contract with taskMaster address, signer address, reward amount, participantProxy target, and reward token
      *      Emits a TaskManagerCreated event to record the deployment on-chain
      * @param _signer Address of the signer who will verify screening and reward claiming signatures (server wallet, owner of taskMaster)
-     * @param taskMaster Address of the taskMaster who will own and manage the contract (smart account wallet, owned by the signer)
+     * @param taskMaster Address of the taskMaster who will own and manage the contract (smart account wallet, owned by the _signer)
      * @param _rewardAmountPerParticipantProxyInWei Amount in wei to reward each participantProxy
      * @param _targetNumberOfParticipantProxies Maximum number of participantProxies for the task
      * @param _rewardToken Address of the ERC20 token contract used for rewards
@@ -424,7 +431,7 @@ contract TaskManagerV1 is Ownable, Pausable, EIP712 {
             "Invalid number of target participantProxies"
         );
 
-        rewardToken = IERC20Metadata(_rewardToken);
+        rewardToken = IERC20(_rewardToken);
 
         signer = _signer;
 
@@ -719,7 +726,7 @@ contract TaskManagerV1 is Ownable, Pausable, EIP712 {
      * @dev Useful for recovering tokens accidentally sent to the contract
      * @param token The ERC20 token contract to withdraw tokens from
      */
-    function withdrawAllGivenTokenToTaskMaster(IERC20Metadata token)
+    function withdrawAllGivenTokenToTaskMaster(IERC20 token)
         external
         onlyOwner
         whenNotPaused
@@ -890,7 +897,7 @@ contract TaskManagerV1 is Ownable, Pausable, EIP712 {
     function getRewardTokenContractAddress()
         external
         view
-        returns (IERC20Metadata)
+        returns (IERC20)
     {
         return rewardToken;
     }
