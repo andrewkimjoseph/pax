@@ -2,14 +2,15 @@ import * as fs from "fs";
 import * as path from "path";
 import { expect } from "chai";
 import { Address, parseEther } from "viem";
-import { WALLET_IDS, getWalletInfo, WalletInfo } from "../utils/wallets";
-import { deployTaskManager } from "../deploy/deployTaskManager";
-import { deployPaxAccountProxy } from "../deploy/deployPaxAccount";
-import { publicClient } from "../utils/clients";
-import { taskManagerV1ABI } from "../abis/taskManagerV1";
-import { paxAccountV1ABI } from "../abis/paxAccountV1";
-import { readContractState, REWARD_TOKEN_ADDRESS } from "../utils/helpers";
-import { erc20ABI } from "../abis/erc20";
+import { WALLET_IDS, getWalletInfo, WalletInfo } from "./utils/wallets";
+
+import { participantOne, participantThree, participantTwo, publicClient } from "./utils/clients";
+import { taskManagerV1ABI } from "./abis/taskManagerV1";
+import { paxAccountV1ABI } from "./abis/paxAccountV1";
+import { readContractState, REWARD_TOKEN_ADDRESS } from "./utils/helpers";
+import { erc20ABI } from "./abis/erc20";
+import { deployTaskManager } from "./deploy/deployTaskManager";
+import { deployPaxAccountProxy } from "./deploy/deployPaxAccount";
 
 // Global variables to store deployed contract addresses
 let taskManagerAddress: Address;
@@ -22,25 +23,20 @@ function saveAddressesToFile() {
     // Create deployment data object
     const deploymentData = {
       taskManager: taskManagerAddress,
-      paxAccounts: [
-        "0x77706f9002080fd00ecb01adce46c44afc2e551b",
-        "0xec01f608fed1eeb393b8361aa39c47391bc7c0d6",
-        "0xdf5a523e8431dd0909e07f5a2275da3ad9965178",
-        "0x4ce85a97586ca2646633d60c341c7e3f433e8b65",
-      ],
+      paxAccounts: paxAccountAddresses,
       walletAddresses: {
         taskManager: wallets.TASK_MANAGER.address,
-        participant2: wallets.PARTICIPANT_2.address,
-        participant3: wallets.PARTICIPANT_3.address,
-        participant4: wallets.PARTICIPANT_4.address,
+        participant2: participantOne.address,
+        participant3: participantTwo.address,
+        participant4: participantThree.address,
       },
       rewardToken: REWARD_TOKEN_ADDRESS,
       timestamp: new Date().toISOString(),
-      network: "celo", // You may want to make this dynamic
+      network: "celoAlfajores", // You may want to make this dynamic
     };
 
     // Create deployments directory if it doesn't exist
-    const deploymentsDir = path.join(__dirname, "../deployments");
+    const deploymentsDir = path.join(__dirname, "./deployments");
     if (!fs.existsSync(deploymentsDir)) {
       fs.mkdirSync(deploymentsDir, { recursive: true });
     }
@@ -62,9 +58,9 @@ describe("1. Initial Setup Tests", function () {
     // Setup all wallet accounts
     console.log("Setting up wallet accounts...");
     wallets.TASK_MANAGER = await getWalletInfo(WALLET_IDS.TASK_MANAGER, true);
-    wallets.PARTICIPANT_2 = await getWalletInfo(WALLET_IDS.PARTICIPANT_2);
-    wallets.PARTICIPANT_3 = await getWalletInfo(WALLET_IDS.PARTICIPANT_3);
-    wallets.PARTICIPANT_4 = await getWalletInfo(WALLET_IDS.PARTICIPANT_4);
+    wallets.PARTICIPANT_2 = await getWalletInfo(WALLET_IDS.PARTICIPANT_2, false, participantOne);
+    wallets.PARTICIPANT_3 = await getWalletInfo(WALLET_IDS.PARTICIPANT_3, false, participantTwo);
+    wallets.PARTICIPANT_4 = await getWalletInfo(WALLET_IDS.PARTICIPANT_4, false, participantThree);
 
     console.log("Task Manager wallet address:", wallets.TASK_MANAGER.address);
     console.log("Participant 2 wallet address:", wallets.PARTICIPANT_2.address);
@@ -101,45 +97,45 @@ describe("1. Initial Setup Tests", function () {
     );
   });
 
-  // it("should deploy PaxAccount proxies for all participants", async function() {
-  //   // Deploy PaxAccount for Task Manager / Participant 1
-  //   const paxAccount1 = await deployPaxAccountProxy(
-  //     wallets.TASK_MANAGER,
-  //     wallets.TASK_MANAGER.address // Use its own address as primary payment method
-  //   );
-  //   paxAccountAddresses.push(paxAccount1);
+  it("should deploy PaxAccount proxies for all participants", async function() {
+    // Deploy PaxAccount for Task Manager / Participant 1
+    const paxAccount1 = await deployPaxAccountProxy(
+      wallets.TASK_MANAGER,
+      wallets.TASK_MANAGER.address // Use its own address as primary payment method
+    );
+    paxAccountAddresses.push(paxAccount1);
 
-  //   // Deploy PaxAccount for Participant 2
-  //   const paxAccount2 = await deployPaxAccountProxy(
-  //     wallets.PARTICIPANT_2,
-  //     wallets.PARTICIPANT_2.address // Use its own address as primary payment method
-  //   );
-  //   paxAccountAddresses.push(paxAccount2);
+    // Deploy PaxAccount for Participant 2
+    const paxAccount2 = await deployPaxAccountProxy(
+      wallets.PARTICIPANT_2,
+      wallets.PARTICIPANT_2.address // Use its own address as primary payment method
+    );
+    paxAccountAddresses.push(paxAccount2);
 
-  //   // Deploy PaxAccount for Participant 3
-  //   const paxAccount3 = await deployPaxAccountProxy(
-  //     wallets.PARTICIPANT_3,
-  //     wallets.PARTICIPANT_3.address // Use its own address as primary payment method
-  //   );
-  //   paxAccountAddresses.push(paxAccount3);
+    // Deploy PaxAccount for Participant 3
+    const paxAccount3 = await deployPaxAccountProxy(
+      wallets.PARTICIPANT_3,
+      wallets.PARTICIPANT_3.address // Use its own address as primary payment method
+    );
+    paxAccountAddresses.push(paxAccount3);
 
-  //   // Deploy PaxAccount for Participant 4
-  //   const paxAccount4 = await deployPaxAccountProxy(
-  //     wallets.PARTICIPANT_4,
-  //     wallets.PARTICIPANT_4.address // Use its own address as primary payment method
-  //   );
-  //   paxAccountAddresses.push(paxAccount4);
+    // Deploy PaxAccount for Participant 4
+    const paxAccount4 = await deployPaxAccountProxy(
+      wallets.PARTICIPANT_4,
+      wallets.PARTICIPANT_4.address // Use its own address as primary payment method
+    );
+    paxAccountAddresses.push(paxAccount4);
 
-  //   // Verify all PaxAccounts were deployed successfully
-  //   expect(paxAccountAddresses.length).to.equal(4);
+    // Verify all PaxAccounts were deployed successfully
+    expect(paxAccountAddresses.length).to.equal(4);
 
-  //   for (const address of paxAccountAddresses) {
-  //     expect(address).to.match(/^0x[a-fA-F0-9]{40}$/);
-  //   }
+    for (const address of paxAccountAddresses) {
+      expect(address).to.match(/^0x[a-fA-F0-9]{40}$/);
+    }
 
-  //   // Save the addresses after successful deployment
-  //   saveAddressesToFile();
-  // });
+    // Save the addresses after successful deployment
+    saveAddressesToFile();
+  });
 
   // Rest of the tests remain the same...
 

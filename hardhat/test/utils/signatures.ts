@@ -3,7 +3,7 @@ import {
   Hex,
   verifyTypedData,
 } from "viem";
-import { celo } from "viem/chains";
+import { celo, celoAlfajores } from "viem/chains";
 import { WalletInfo } from "./wallets";
 
 // Define the types for screening requests
@@ -48,7 +48,7 @@ type TaskManagerDomain = {
 const createDomain = (contractAddress: Address): TaskManagerDomain => ({
   name: 'TaskManager',
   version: '1',
-  chainId: BigInt(celo.id),
+  chainId: BigInt(celoAlfajores.id),
   verifyingContract: contractAddress
 });
 

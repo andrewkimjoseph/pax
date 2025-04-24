@@ -1,20 +1,20 @@
 import { expect } from "chai";
 import { Address, encodeFunctionData, parseEther } from "viem";
-import { publicClient, waitForUserOperationReceipt } from "../utils/clients";
+import { publicClient, waitForUserOperationReceipt } from "./utils/clients";
 import {
   readContractState,
   generateRandomTaskId,
   generateRandomRewardId,
   generateRandomNonce,
   loadDeployedAddresses,
-} from "../utils/helpers";
-import { taskManagerV1ABI } from "../abis/taskManagerV1";
-import { erc20ABI } from "../abis/erc20";
+} from "./utils/helpers";
+import { taskManagerV1ABI } from "./abis/taskManagerV1";
+import { erc20ABI } from "./abis/erc20";
 import {
   createScreeningSignaturePackage,
   createRewardClaimSignaturePackage,
-} from "../utils/signatures";
-import { WalletInfo } from "../utils/wallets";
+} from "./utils/signatures";
+import { WalletInfo } from "./utils/wallets";
 
 // Import global variables from setup test
 declare global {

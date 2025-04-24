@@ -33,7 +33,8 @@ const walletCache = new Map<string, WalletInfo>();
  */
 export async function getWalletInfo(
   walletId: string,
-  isTaskMaster: boolean = false
+  isTaskMaster: boolean = false,
+  passedAccount: LocalAccount | null = null 
 ): Promise<WalletInfo> {
   // Return from cache if available
   if (walletCache.has(walletId)) {
@@ -64,13 +65,13 @@ export async function getWalletInfo(
       smartAccountAddress,
       safeSmartAccount,
       serverWalletAccount,
-    } = await createSmartAccountClientFromPrivyWalletId(walletId);
+    } = await createSmartAccountClientFromPrivyWalletId(walletId, passedAccount);
     walletInfo = {
       walletId,
       address: smartAccountAddress,
       client: smartAccountClient,
       safeSmartAccount,
-      serverWalletAccount,
+      serverWalletAccount: serverWalletAccount,
     };
   }
   // Store in cache

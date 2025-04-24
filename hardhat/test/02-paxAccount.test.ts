@@ -1,10 +1,10 @@
 import { expect } from "chai";
 import { Address, encodeFunctionData, parseEther } from "viem";
-import { publicClient, waitForUserOperationReceipt } from "../utils/clients";
-import { loadDeployedAddresses, readContractState, REWARD_TOKEN_ADDRESS } from "../utils/helpers";
-import { paxAccountV1ABI } from "../abis/paxAccountV1";
-import { erc20ABI } from "../abis/erc20";
-import { WalletInfo } from "../utils/wallets";
+import { publicClient, waitForUserOperationReceipt } from "./utils/clients";
+import { loadDeployedAddresses, readContractState, REWARD_TOKEN_ADDRESS } from "./utils/helpers";
+import { paxAccountV1ABI } from "./abis/paxAccountV1";
+import { erc20ABI } from "./abis/erc20";
+import { WalletInfo } from "./utils/wallets";
 
 // Import global variables from setup test
 declare global {
