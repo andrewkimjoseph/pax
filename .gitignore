@@ -2,3 +2,5 @@
 .deps/
 .prettierrc.json
 hardhat/contracts/artifacts
+
+deployments/

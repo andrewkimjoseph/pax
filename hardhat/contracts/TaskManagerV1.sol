@@ -2,30 +2,52 @@
 pragma solidity ^0.8.28;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 // Author: @andrewkimjoseph
 
 /**
  * @notice Smart contract for managing a task completion system with ERC20 token rewards
- * @dev Inherits from Ownable for taskManager access control and Pausable for emergency stops
+ * @dev Inherits from Ownable for TaskManager access control, Pausable for emergency stops,
+ *      and EIP712 for typed structured data signing.
  *      This contract handles the complete lifecycle of tasks: participantProxy screening,
- *      signature verification, and reward distribution to PaxAccount contracts
- *      Note: ParticipantProxies in this system are server-managed wallets rather than
+ *      signature verification using EIP-712 typed data, and reward distribution to PaxAccount contracts.
+ *      
+ *      The contract implements EIP-712 for secure, structured, and human-readable message signing, which, generally speaking:
+ *      - Improves security by preventing signature replay across different domains and contracts
+ *      - Enhances UX by allowing wallet providers to display human-readable data for signing
+ *      - Follows industry standards for message signing in dApps
+ *      
+ *      Note: ParticipantProxies in this system are smart account wallets rather than
  *      non-custodial EOAs, which abstracts the custody experience from end users.
  *      Rewards are sent to PaxAccount contract addresses, not directly to end-users.
  */
-contract TaskManagerV1 is Ownable, Pausable {
+contract TaskManagerV1 is Ownable, Pausable, EIP712 {
     using ECDSA for bytes32;
 
     /**
      * @notice Reference to the ERC20 token contract used for rewards
      * @dev Marked as immutable to save gas and prevent changes after deployment
      */
-    IERC20Metadata private immutable rewardToken;
+    IERC20 private immutable rewardToken;
+
+    /**
+     * @notice Reference to the signer used to verify screening and reward claiming signatures
+     * @dev Marked as immutable to save gas and prevent changes after deployment
+     */
+    address private immutable signer;
+
+    // keccak256("ScreeningRequest(address participant,string taskId,uint256 nonce)")
+    bytes32 private constant SCREENING_REQUEST_TYPEHASH = 
+        keccak256("ScreeningRequest(address participant,string taskId,uint256 nonce)");
+        
+    // keccak256("RewardClaimRequest(address participant,string rewardId,uint256 nonce)")
+    bytes32 private constant REWARD_CLAIM_REQUEST_TYPEHASH = 
+        keccak256("RewardClaimRequest(address participant,string rewardId,uint256 nonce)");
 
     /**
      * @notice Mapping to track participantProxies who have received rewards
@@ -96,9 +118,16 @@ contract TaskManagerV1 is Ownable, Pausable {
     /**
      * @notice Emitted when a new TaskManager is created
      * @param taskManager The address of the newly created TaskManager
+     * @param taskMaster The address of the taskMaster (owner) of the newly created TaskManager
+     * @param signer The address of the signer of the newly created TaskManager
+     
      * @dev Used for off-chain tracking and verification of contract deployment
      */
-    event TaskManagerCreated(address indexed taskManager);
+    event TaskManagerCreated(
+        address indexed taskManager,
+        address indexed taskMaster,
+        address indexed signer
+    );
 
     /**
      * @notice Emitted when a participantProxy completes the screening process
@@ -146,23 +175,23 @@ contract TaskManagerV1 is Ownable, Pausable {
     );
 
     /**
-     * @notice Emitted when reward funds are withdrawn by the taskManager
-     * @param taskManager The address of the taskManager who withdrew the funds
+     * @notice Emitted when reward funds are withdrawn by the taskMaster
+     * @param taskMaster The address of the taskMaster who withdrew the funds
      * @param rewardAmount The amount of reward token withdrawn in wei
-     * @dev Provides transparency for fund withdrawals by the taskManager
+     * @dev Provides transparency for fund withdrawals by the taskMaster
      */
-    event RewardTokenWithdrawn(address taskManager, uint256 rewardAmount);
+    event RewardTokenWithdrawn(address taskMaster, uint256 rewardAmount);
 
     /**
-     * @notice Emitted when a given token is withdrawn by the taskManager
-     * @param taskManager The address of the taskManager who withdrew the funds
+     * @notice Emitted when a given token is withdrawn by the taskMaster
+     * @param taskMaster The address of the taskMaster who withdrew the funds
      * @param tokenAddress The address of the given token withdrawn
      * @param rewardAmount The amount of the given token withdrawn in wei
      * @dev Allows withdrawal of any ERC20 tokens accidentally sent to the contract
      */
     event GivenTokenWithdrawn(
-        address taskManager,
-        IERC20Metadata tokenAddress,
+        address taskMaster,
+        IERC20 tokenAddress,
         uint256 rewardAmount
     );
 
@@ -170,7 +199,7 @@ contract TaskManagerV1 is Ownable, Pausable {
      * @notice Emitted when the reward amount per participantProxy is updated
      * @param oldRewardTokenRewardAmountPerParticipantProxyInWei The previous reward amount
      * @param newRewardTokenRewardAmountPerParticipantProxyInWei The new reward amount
-     * @dev Provides transparency for configuration changes by the taskManager
+     * @dev Provides transparency for configuration changes by the taskMaster
      */
     event RewardAmountUpdated(
         uint256 oldRewardTokenRewardAmountPerParticipantProxyInWei,
@@ -181,7 +210,7 @@ contract TaskManagerV1 is Ownable, Pausable {
      * @notice Emitted when the target number of participantProxies is updated
      * @param oldTargetNumberOfParticipantProxies The previous target number
      * @param newTargetNumberOfParticipantProxies The new target number
-     * @dev Provides transparency for configuration changes by the taskManager
+     * @dev Provides transparency for configuration changes by the taskMaster
      */
     event TargetNumberOfParticipantProxiesUpdated(
         uint256 oldTargetNumberOfParticipantProxies,
@@ -190,7 +219,7 @@ contract TaskManagerV1 is Ownable, Pausable {
 
     /**
      * @notice Verifies that the screening signature is valid and was signed by the contract owner
-     * @dev Used to validate taskManager-approved screening attempts
+     * @dev Used to validate signer-approved screening attempts
      * @param participantProxy The wallet address of the participantProxy being screened
      * @param taskId Unique identifier for this task instance
      * @param nonce Unique number to prevent replay attacks
@@ -216,7 +245,7 @@ contract TaskManagerV1 is Ownable, Pausable {
 
     /**
      * @notice Verifies that the claiming signature is valid and was signed by the contract owner
-     * @dev Used to validate taskManager-approved reward claims
+     * @dev Used to validate signer-approved reward claims
      * @param participantProxy The wallet address of the participantProxy claiming the reward
      * @param rewardId Unique identifier for this reward claim
      * @param nonce Unique number to prevent replay attacks
@@ -345,7 +374,7 @@ contract TaskManagerV1 is Ownable, Pausable {
      * @dev Used for withdrawal of any token to prevent zero-value transfers
      * @param token The ERC20 token contract to check balance for
      */
-    modifier onlyIfContractHasAnyGivenToken(IERC20Metadata token) {
+    modifier onlyIfContractHasAnyGivenToken(IERC20 token) {
         require(
             token.balanceOf(address(this)) > 0,
             "Contract does not have any of the given token"
@@ -368,28 +397,29 @@ contract TaskManagerV1 is Ownable, Pausable {
 
     /**
      * @notice Initializes the task management contract with initial parameters
-     * @dev Sets up the contract with taskManager address, reward amount, participantProxy target, and reward token
+     * @dev Sets up the contract with taskMaster address, signer address, reward amount, participantProxy target, and reward token
      *      Emits a TaskManagerCreated event to record the deployment on-chain
-     * @param taskManager Address of the taskManager who will own and manage the contract
+     * @param _signer Address of the signer who will verify screening and reward claiming signatures (server wallet, owner of taskMaster)
+     * @param taskMaster Address of the taskMaster who will own and manage the contract (smart account wallet, owned by the _signer)
      * @param _rewardAmountPerParticipantProxyInWei Amount in wei to reward each participantProxy
      * @param _targetNumberOfParticipantProxies Maximum number of participantProxies for the task
      * @param _rewardToken Address of the ERC20 token contract used for rewards
      */
     constructor(
-        address taskManager,
+        address _signer,
+        address taskMaster,
         uint256 _rewardAmountPerParticipantProxyInWei,
         uint256 _targetNumberOfParticipantProxies,
         address _rewardToken
-    ) Ownable(taskManager) {
+    ) Ownable(taskMaster) EIP712("TaskManager", "1") {
         require(
             _rewardToken != address(0),
             "Zero address given for reward Token"
         );
 
-        require(
-            taskManager != address(0),
-            "Zero address given for taskManager"
-        );
+        require(taskMaster != address(0), "Zero address given for taskMaster");
+
+        require(_signer != address(0), "Zero address given for _signer");
 
         require(
             _rewardAmountPerParticipantProxyInWei > 0,
@@ -401,12 +431,14 @@ contract TaskManagerV1 is Ownable, Pausable {
             "Invalid number of target participantProxies"
         );
 
-        rewardToken = IERC20Metadata(_rewardToken);
+        rewardToken = IERC20(_rewardToken);
+
+        signer = _signer;
 
         rewardAmountPerParticipantProxyInWei = _rewardAmountPerParticipantProxyInWei;
         targetNumberOfParticipantProxies = _targetNumberOfParticipantProxies;
-        
-        emit TaskManagerCreated(address(this));
+
+        emit TaskManagerCreated(address(this), taskMaster, _signer);
     }
 
     /**
@@ -451,77 +483,55 @@ contract TaskManagerV1 is Ownable, Pausable {
     }
 
     /**
-     * @notice Creates a hash for screening signature verification
-     * @dev Combines contract-specific data with participantProxy info to prevent cross-contract replay attacks
+     * @notice Creates a hash for screening signature verification using EIP-712
+     * @dev Combines contract-specific data with participantProxy info
      * @param participantProxy The wallet address of the participantProxy being screened
      * @param taskId A unique identifier for this specific task
      * @param nonce Unique number to prevent replay attacks
-     * @return bytes32 The keccak256 hash of the packed parameters
-     *
-     * The hash includes:
-     * 1. Contract address - Prevents cross-contract replay
-     * 2. Chain ID - Prevents cross-chain replay
-     * 3. ParticipantProxy address - Links signature to specific participantProxy
-     * 4. taskId - Links signature to specific task
-     * 5. Nonce - Ensures uniqueness of each signature
+     * @return bytes32 The EIP-712 typed data hash
      */
     function getMessageHashForParticipantProxyScreening(
         address participantProxy,
         string memory taskId,
         uint256 nonce
     ) private view returns (bytes32) {
-        return
-            keccak256(
-                abi.encodePacked(
-                    address(this),
-                    block.chainid,
-                    participantProxy,
-                    taskId,
-                    nonce
-                )
-            );
+        return _hashTypedDataV4(keccak256(abi.encode(
+            SCREENING_REQUEST_TYPEHASH,
+            participantProxy,
+            keccak256(bytes(taskId)),
+            nonce
+        )));
     }
 
     /**
-     * @notice Creates a hash for reward claiming signature verification
-     * @dev Combines contract-specific data with participantProxy info to prevent cross-contract replay attacks
+     * @notice Creates a hash for reward claiming signature verification using EIP-712
+     * @dev Combines contract-specific data with participantProxy info
      * @param participantProxy The wallet address of the participantProxy claiming the reward
      * @param rewardId A unique identifier for this specific reward claim
      * @param nonce Unique number to prevent replay attacks
-     * @return bytes32 The keccak256 hash of the packed parameters
-     *
-     * The hash includes:
-     * 1. Contract address - Prevents cross-contract replay
-     * 2. Chain ID - Prevents cross-chain replay
-     * 3. ParticipantProxy address - Links signature to specific participantProxy
-     * 4. RewardId - Links signature to specific reward
-     * 5. Nonce - Ensures uniqueness of each signature
+     * @return bytes32 The EIP-712 typed data hash
      */
     function getMessageHashForRewardClaiming(
         address participantProxy,
         string memory rewardId,
         uint256 nonce
     ) private view returns (bytes32) {
-        return
-            keccak256(
-                abi.encodePacked(
-                    address(this),
-                    block.chainid,
-                    participantProxy,
-                    rewardId,
-                    nonce
-                )
-            );
+        return _hashTypedDataV4(keccak256(abi.encode(
+            REWARD_CLAIM_REQUEST_TYPEHASH,
+            participantProxy,
+            keccak256(bytes(rewardId)),
+            nonce
+        )));
     }
 
     /**
-     * @notice Verifies that a signature is valid for participantProxy screening
-     * @dev Recovers the signer from the signature and compares with contract owner
+     * @notice Verifies that a signature is valid for participantProxy screening using EIP-712
+     * @dev Recovers the signer from the signature and compares with contract signer
      * @param participantProxy Address of the participantProxy being screened
      * @param taskId Unique identifier for this screening
      * @param nonce Unique number to prevent replay attacks
      * @param signature Cryptographic signature to verify
-     * @return bool True if signature was signed by the contract owner, false otherwise
+     * @return bool True if signature was signed by the contract signer, false otherwise
      */
     function verifySignatureForParticipantProxyScreening(
         address participantProxy,
@@ -529,25 +539,23 @@ contract TaskManagerV1 is Ownable, Pausable {
         uint256 nonce,
         bytes memory signature
     ) private view returns (bool) {
-        bytes32 messageHash = getMessageHashForParticipantProxyScreening(
+        bytes32 hash = getMessageHashForParticipantProxyScreening(
             participantProxy,
             taskId,
             nonce
         );
-        bytes32 ethSignedMessageHash = MessageHashUtils.toEthSignedMessageHash(
-            messageHash
-        );
-        return ethSignedMessageHash.recover(signature) == owner();
+        address recoveredSigner = ECDSA.recover(hash, signature);
+        return recoveredSigner == signer;
     }
 
     /**
-     * @notice Verifies that a signature is valid for reward claiming
-     * @dev Recovers the signer from the signature and compares with contract owner
+     * @notice Verifies that a signature is valid for reward claiming using EIP-712
+     * @dev Recovers the signer from the signature and compares with contract signer
      * @param participantProxy Address of the participantProxy claiming the reward
      * @param rewardId Unique identifier for this reward claim
      * @param nonce Unique number to prevent replay attacks
      * @param signature Cryptographic signature to verify
-     * @return bool True if signature was signed by the contract owner, false otherwise
+     * @return bool True if signature was signed by the contract signer, false otherwise
      */
     function verifySignatureForRewardClaiming(
         address participantProxy,
@@ -555,15 +563,13 @@ contract TaskManagerV1 is Ownable, Pausable {
         uint256 nonce,
         bytes memory signature
     ) private view returns (bool) {
-        bytes32 messageHash = getMessageHashForRewardClaiming(
+        bytes32 hash = getMessageHashForRewardClaiming(
             participantProxy,
             rewardId,
             nonce
         );
-        bytes32 ethSignedMessageHash = MessageHashUtils.toEthSignedMessageHash(
-            messageHash
-        );
-        return ethSignedMessageHash.recover(signature) == owner();
+        address recoveredSigner = ECDSA.recover(hash, signature);
+        return recoveredSigner == signer;
     }
 
     /**
@@ -698,10 +704,10 @@ contract TaskManagerV1 is Ownable, Pausable {
     }
 
     /**
-     * @notice Allows the taskManager to withdraw all remaining reward tokens
+     * @notice Allows the taskMaster to withdraw all remaining reward tokens
      * @dev Transfers the entire contract balance of reward tokens to the owner
      */
-    function withdrawAllRewardTokenToTaskManager()
+    function withdrawAllRewardTokenToTaskMaster()
         external
         onlyOwner
         whenNotPaused
@@ -716,11 +722,11 @@ contract TaskManagerV1 is Ownable, Pausable {
     }
 
     /**
-     * @notice Allows the taskManager to withdraw any ERC20 token from the contract
+     * @notice Allows the taskMaster to withdraw any ERC20 token from the contract
      * @dev Useful for recovering tokens accidentally sent to the contract
      * @param token The ERC20 token contract to withdraw tokens from
      */
-    function withdrawAllGivenTokenTotaskManager(IERC20Metadata token)
+    function withdrawAllGivenTokenToTaskMaster(IERC20 token)
         external
         onlyOwner
         whenNotPaused
@@ -736,7 +742,7 @@ contract TaskManagerV1 is Ownable, Pausable {
 
     /**
      * @notice Updates the reward amount given for each task completion
-     * @dev Can be adjusted by the taskManager to respond to token price changes
+     * @dev Can be adjusted by the taskMaster to respond to token price changes
      * @param _newRewardAmountPerParticipantProxyInWei New reward amount in token's smallest unit (wei)
      */
     function updateRewardAmountPerParticipantProxy(
@@ -793,7 +799,7 @@ contract TaskManagerV1 is Ownable, Pausable {
      * @notice Temporarily halts all task operations including screening and reward claims
      * @dev Used in emergency situations or when issues are detected
      */
-    function pausetask() external onlyOwner {
+    function pauseTask() external onlyOwner {
         _pause();
     }
 
@@ -801,7 +807,7 @@ contract TaskManagerV1 is Ownable, Pausable {
      * @notice Resumes normal task operations after a pause
      * @dev Enables screening and reward claims to proceed again
      */
-    function unpausetask() external onlyOwner {
+    function unpauseTask() external onlyOwner {
         _unpause();
     }
 
@@ -891,7 +897,7 @@ contract TaskManagerV1 is Ownable, Pausable {
     function getRewardTokenContractAddress()
         external
         view
-        returns (IERC20Metadata)
+        returns (IERC20)
     {
         return rewardToken;
     }
@@ -984,11 +990,20 @@ contract TaskManagerV1 is Ownable, Pausable {
     }
 
     /**
-     * @notice Gets the address of the contract owner (taskManager)
+     * @notice Gets the address of the contract owner (taskMaster)
      * @dev The owner has special permissions to manage the task
-     * @return address The taskManager's address
+     * @return address The taskMaster's address
      */
     function getOwner() external view returns (address) {
         return owner();
+    }
+
+    /**
+     * @notice Gets the address of the signer
+     * @dev The signer verifies screening and reward claiming signatures
+     * @return address The signer address
+     */
+    function getSigner() external view returns (address) {
+        return signer;
     }
 }
