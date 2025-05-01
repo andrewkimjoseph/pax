@@ -21,6 +21,8 @@ class PaxColors {
   /// Accent pink - used for secondary highlights and gradients
   static const Color pink = Color(0xFFFF5C86);
 
+  static const Color specialPink = Color(0xFFEC89A7);
+
   /// Medium purple - used for secondary UI elements and active states
   static const Color mediumPurple = Color(0xFF625C89);
 
