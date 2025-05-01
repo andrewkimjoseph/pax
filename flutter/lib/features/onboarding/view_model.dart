@@ -196,6 +196,14 @@ class OnboardingViewModel extends Notifier<OnboardingModel> {
     // This might involve setting a flag in shared preferences
     // and navigating to the sign-in or main app screen
   }
+
+  void resetOnboarding() {
+    // Jump to the first page without animation
+    state.pageController.jumpToPage(0);
+
+    // Update the state
+    state = state.copyWith(currentPageIndex: 0, isLastPage: false);
+  }
 }
 
 // Create a combined provider that will rebuild the UI when the state changes
