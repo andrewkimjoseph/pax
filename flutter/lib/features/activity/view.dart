@@ -7,20 +7,21 @@ import 'package:pax/features/home/achievements/view.dart';
 import 'package:pax/features/home/dashboard/view.dart';
 import 'package:pax/features/home/task/view.dart';
 import 'package:pax/features/onboarding/view_model.dart';
+import 'package:pax/widgets/activity_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../theming/colors.dart' show PaxColors;
 import '../../utils/clipper.dart';
 
-class HomeView extends ConsumerStatefulWidget {
-  const HomeView({super.key});
+class ActivityView extends ConsumerStatefulWidget {
+  const ActivityView({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _HomeViewState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _ActivityViewState();
 }
 
-class _HomeViewState extends ConsumerState<HomeView> {
+class _ActivityViewState extends ConsumerState<ActivityView> {
   int index = 0;
   int selected = 0;
   String? screenName;
@@ -36,21 +37,17 @@ class _HomeViewState extends ConsumerState<HomeView> {
       headers: [
         AppBar(
           padding: EdgeInsets.all(8),
-
-          backgroundColor: PaxColors.lightGrey,
+          backgroundColor: PaxColors.white,
           header: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                screenName ?? 'Dashboard',
+                'Activity',
                 style: Theme.of(context).typography.base.copyWith(
                   fontWeight: FontWeight.w900,
                   fontSize: 32,
                   color: PaxColors.black, // The purple color from your images
                 ),
               ),
-
-              SvgPicture.asset('lib/assets/svgs/active_notification.svg'),
             ],
           ).withPadding(bottom: 8),
           subtitle: Row(
@@ -73,18 +70,18 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     .withBorderRadius(borderRadius: BorderRadius.circular(7)),
                 onPressed: () {
                   setState(() {
-                    screenName = 'Dashboard';
                     index = 0;
                   });
                 },
 
                 child: Text(
-                  'Dashboard',
+                  'Task Completions',
                   style: TextStyle(
                     color: index == 0 ? PaxColors.white : PaxColors.black,
                   ),
                 ),
               ).withPadding(right: 8),
+
               Button(
                 style: const ButtonStyle.primary(density: ButtonDensity.dense)
                     .withBackgroundColor(
@@ -103,13 +100,12 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     .withBorderRadius(borderRadius: BorderRadius.circular(7)),
                 onPressed: () {
                   setState(() {
-                    screenName = 'Tasks';
                     index = 1;
                   });
                 },
 
                 child: Text(
-                  'Tasks',
+                  'Rewards',
                   style: TextStyle(
                     color: index == 1 ? PaxColors.white : PaxColors.black,
                   ),
@@ -134,13 +130,12 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     .withBorderRadius(borderRadius: BorderRadius.circular(7)),
                 onPressed: () {
                   setState(() {
-                    screenName = 'Achievements';
                     index = 2;
                   });
                 },
 
                 child: Text(
-                  'Achievements',
+                  'Withdrawals',
                   style: TextStyle(
                     color: index == 2 ? PaxColors.white : PaxColors.black,
                   ),
@@ -151,9 +146,21 @@ class _HomeViewState extends ConsumerState<HomeView> {
         ),
       ],
 
-      child: IndexedStack(
-        index: index,
-        children: [DashboardView(), TaskView(), AchievementsView()],
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            // for (var item in [1, 2, 3, 4, 5, 6, 7])
+            ActivityCard('payout').withPadding(all: 8),
+            ActivityCard('task_completion').withPadding(all: 8),
+            ActivityCard('reward').withPadding(all: 8),
+            ActivityCard('payout').withPadding(all: 8),
+            ActivityCard('task_completion').withPadding(all: 8),
+            ActivityCard('reward').withPadding(all: 8),
+            ActivityCard('payout').withPadding(all: 8),
+            ActivityCard('task_completion').withPadding(all: 8),
+            ActivityCard('reward').withPadding(all: 8),
+          ],
+        ),
       ),
     );
   }

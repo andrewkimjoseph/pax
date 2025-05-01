@@ -50,6 +50,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
 
           // Page content
           Expanded(
+            flex: 3,
             child: PageView.builder(
               controller: onboardingViewModel.pageController,
               onPageChanged: (index) {
@@ -66,7 +67,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                       page.title,
                       style: Theme.of(context).typography.base.copyWith(
                         fontWeight: FontWeight.w900,
-                        fontSize: 32,
+                        fontSize: 30,
                         color:
                             PaxColors
                                 .deepPurple, // The purple color from your images
@@ -92,21 +93,23 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
           ),
 
           // Page indicator
-          SmoothPageIndicator(
-            controller: onboardingViewModel.pageController,
-            count: onboardingViewModel.pageCount,
-            onDotClicked: (index) {
-              if (onboardingViewModel.currentPageIndex - index == 1 ||
-                  onboardingViewModel.currentPageIndex - index == -1) {
-                onboardingViewModel.goToPage(index);
-              } else {
-                onboardingViewModel.jumpToPage(index);
-              }
-            },
-            effect: const ExpandingDotsEffect(
-              activeDotColor: PaxColors.deepPurple,
-              dotHeight: 16,
-              dotWidth: 16,
+          Expanded(
+            child: SmoothPageIndicator(
+              controller: onboardingViewModel.pageController,
+              count: onboardingViewModel.pageCount,
+              onDotClicked: (index) {
+                if (onboardingViewModel.currentPageIndex - index == 1 ||
+                    onboardingViewModel.currentPageIndex - index == -1) {
+                  onboardingViewModel.goToPage(index);
+                } else {
+                  onboardingViewModel.jumpToPage(index);
+                }
+              },
+              effect: const ExpandingDotsEffect(
+                activeDotColor: PaxColors.deepPurple,
+                dotHeight: 16,
+                dotWidth: 16,
+              ),
             ),
           ),
 
@@ -122,7 +125,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
               onboardingViewModel.isLastPage
                   ? SizedBox(
                     width: MediaQuery.of(context).size.width * 0.9,
-
+                    height: 48,
                     child: Button(
                       style: const ButtonStyle.outline()
                       // .withBackgroundColor(
@@ -130,15 +133,14 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                       //   hoverColor: Colors.purple,
                       // )
                       .withBorder(border: Border.all(color: Colors.black)),
-                      // .withForegroundColor(color: Colors.white)
-                      // .withBorderRadius(
-                      //   hoverBorderRadius: BorderRadius.circular(16),
-                      // )
+
                       onPressed: () {
                         // Handle skip action
                         // onboardingViewModel.skipOnboarding();
 
-                        context.go('/home');
+                        onboardingViewModel.resetOnboarding();
+
+                        context.pushReplacement('/');
                       },
 
                       child: Row(
@@ -152,7 +154,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                           // CircularProgressIndicator().withMargin(right: 8),
                           Text(
                             'Sign in with Google',
-                            style: Theme.of(context).typography.base.copyWith(
+                            style: TextStyle(
                               fontWeight: FontWeight.w900,
                               fontSize: 14,
                               color:
@@ -169,11 +171,12 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                     children: [
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.4,
+                        height: 48,
                         child: Button(
                           style: const ButtonStyle.outline()
                               .withBackgroundColor(
                                 color: PaxColors.lightGrey,
-                                hoverColor: Colors.purple,
+                                // hoverColor: Colors.purple,
                               )
                               .withBorder(
                                 border: Border.all(color: Colors.transparent),
@@ -196,7 +199,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                       ),
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.4,
-
+                        height: 48,
                         child: PrimaryButton(
                           onPressed: () {
                             if (onboardingViewModel.isLastPage) {
@@ -208,16 +211,21 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                             }
                           },
                           child: Text(
-                            onboardingViewModel.isLastPage
-                                ? 'Get Started'
-                                : 'Continue',
+                            'Continue',
+                            style: Theme.of(context).typography.base.copyWith(
+                              fontWeight: FontWeight.normal,
+                              fontSize: 14,
+                              color:
+                                  PaxColors
+                                      .white, // The purple color from your images
+                            ),
                           ),
                         ),
                       ),
                     ],
                   ),
             ],
-          ).withPadding(top: 20, bottom: 20).withMargin(top: 60),
+          ).withPadding(top: 32, bottom: 32),
         ],
       ),
     );
