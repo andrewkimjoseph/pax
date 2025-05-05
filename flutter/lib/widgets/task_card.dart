@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -141,7 +142,9 @@ class TaskCard extends ConsumerWidget {
           SizedBox(
             width: double.infinity,
             child: Button(
-              onPressed: () {},
+              onPressed: () {
+                context.go('/task');
+              },
               style: const ButtonStyle.primary(
                 density: ButtonDensity.normal,
               ).withBorderRadius(borderRadius: BorderRadius.circular(7)),
