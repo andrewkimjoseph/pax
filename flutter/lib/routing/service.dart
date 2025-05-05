@@ -1,15 +1,26 @@
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pax/features/help_and_support/contact_support/view.dart';
+import 'package:pax/features/help_and_support/faq/view.dart';
+import 'package:pax/features/help_and_support/view.dart';
 import 'package:pax/features/home/view.dart';
+import 'package:pax/features/task_page/task_completed/view.dart';
+import 'package:pax/features/task_page/view.dart';
+import 'package:pax/features/payment_methods/minipay/view.dart';
+import 'package:pax/features/payment_methods/view.dart';
 import 'package:pax/features/profile/view.dart';
 import 'package:pax/features/root/view.dart';
+import 'package:pax/features/wallet/view.dart';
+import 'package:pax/features/wallet/withdraw/select_wallet/review_summary/view.dart';
+import 'package:pax/features/wallet/withdraw/select_wallet/view.dart';
+import 'package:pax/features/wallet/withdraw/view.dart';
 import '../features/onboarding/view.dart';
 import 'routes.dart';
 
 class RoutingService {
   static final GoRouter routerConfig = GoRouter(
-    initialLocation: Routes.root,
+    initialLocation: Routes.onboarding,
     routes: [
       // Root
       GoRoute(
@@ -23,9 +34,88 @@ class RoutingService {
                 (BuildContext context, GoRouterState state) => OnboardingView(),
           ),
           GoRoute(
+            path: "wallet",
+            builder:
+                (BuildContext context, GoRouterState state) => WalletView(),
+            routes: [
+              GoRoute(
+                path: "withdraw",
+                builder:
+                    (BuildContext context, GoRouterState state) =>
+                        WithdrawView(),
+
+                routes: [
+                  GoRoute(
+                    path: "select-wallet",
+                    builder:
+                        (BuildContext context, GoRouterState state) =>
+                            SelectWalletView(),
+                    routes: [
+                      GoRoute(
+                        path: "review-summary",
+                        builder:
+                            (BuildContext context, GoRouterState state) =>
+                                ReviewSummaryView(),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          GoRoute(
             path: "profile",
             builder:
                 (BuildContext context, GoRouterState state) => ProfileView(),
+          ),
+          GoRoute(
+            path: "help-and-support",
+            builder:
+                (BuildContext context, GoRouterState state) =>
+                    HelpAndSupportView(),
+            routes: [
+              GoRoute(
+                path: "faq",
+                builder:
+                    (BuildContext context, GoRouterState state) => FAQView(),
+              ),
+              GoRoute(
+                path: "contact-support",
+                builder:
+                    (BuildContext context, GoRouterState state) =>
+                        ContactSupportView(),
+              ),
+            ],
+          ),
+
+          GoRoute(
+            path: "task",
+            builder:
+                (BuildContext context, GoRouterState state) => TaskPageView(),
+            routes: [
+              GoRoute(
+                path: "task-complete",
+                builder:
+                    (BuildContext context, GoRouterState state) =>
+                        TaskCompleteView(),
+              ),
+            ],
+          ),
+
+          GoRoute(
+            path: "payment-methods",
+            builder:
+                (BuildContext context, GoRouterState state) =>
+                    PaymentMethodsView(),
+
+            routes: [
+              GoRoute(
+                path: "minipay-connection",
+                builder:
+                    (BuildContext context, GoRouterState state) =>
+                        MiniPayConnectionView(),
+              ),
+            ],
           ),
           // Home and sub-routes
           GoRoute(
