@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/routing/service.dart';
-import 'features/onboarding/view.dart';
 import 'theming/theme_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -20,9 +19,16 @@ class _AppState extends ConsumerState<App> {
   Widget build(BuildContext context) {
     return ShadcnApp.router(
       routerConfig: routerConfig,
-
       title: 'My App',
-      theme: ref.read(themeProvider),
+      theme: ref.watch(themeProvider),
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.noScaling),
+          child: child ?? CircularProgressIndicator(),
+        );
+      },
     );
   }
 }

@@ -26,7 +26,7 @@ class PaxColorScheme {
     primaryForeground: PaxColors.white, // Text on primary colored elements
     secondary: Colors.transparent, // Secondary actions background
     secondaryForeground: PaxColors.deepPurple, // Secondary action text
-    muted: PaxColors.lightLilac, // De-emphasized UI elements
+    muted: PaxColors.lightGrey, // De-emphasized UI elements
     mutedForeground: PaxColors.mediumPurple, // Text on muted elements
     accent: PaxColors.orange, // Highlight/accent color
     accentForeground: PaxColors.deepPurple, // Text on accent elements

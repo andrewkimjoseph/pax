@@ -1,11 +1,12 @@
 class Routes {
   // Root routes
-  static const onboarding = "/onboarding";
-  static const home = "/home";
-  static const activity = "/activity";
-  static const account = "/account";
-  static const wallet = "/wallet";
-  static const notifications = "/notifications";
+  static const root = "/";
+  static const onboarding = "${root}onboarding";
+  static const home = "${root}home";
+  static const activity = "${root}activity";
+  static const account = "${root}account";
+  static const wallet = "${root}wallet";
+  static const notifications = "${root}notifications";
 
   // Home sub-routes
   static const dashboard = "$home/dashboard";
