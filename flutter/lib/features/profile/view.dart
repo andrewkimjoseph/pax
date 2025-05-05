@@ -1,19 +1,9 @@
-// ignore_for_file: unused_import
-
-import 'package:flutter/material.dart' show Divider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
-import 'package:pax/features/home/achievements/view.dart';
-import 'package:pax/features/home/dashboard/view.dart';
-import 'package:pax/features/home/task/view.dart';
-import 'package:pax/features/onboarding/view_model.dart';
-import 'package:pax/widgets/account_option_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../theming/colors.dart' show PaxColors;
-import '../../utils/clipper.dart';
 
 class ProfileView extends ConsumerStatefulWidget {
   const ProfileView({super.key});
@@ -23,8 +13,10 @@ class ProfileView extends ConsumerStatefulWidget {
 }
 
 class _ProfileViewState extends ConsumerState<ProfileView> {
-  PhoneNumber? _phoneNumber;
+  PhoneNumber? phoneNumber;
   String? selectedValue;
+  DateTime? _value;
+  String? genderValue;
   @override
   void initState() {
     super.initState();
@@ -36,25 +28,30 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
       headers: [
         AppBar(
           padding: EdgeInsets.all(8),
-          leading: [
-            GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onPanDown: (details) {
-                context.pop();
-              },
-              child: SvgPicture.asset(
-                'lib/assets/svgs/arrow_left_long.svg',
-              ).withPadding(left: 16),
-            ),
-          ],
-          trailing: [Icon(Icons.more_vert)],
-          title: Text(
-            "My Profile",
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 20),
-          ),
 
           backgroundColor: PaxColors.white,
+          child: Row(
+            children: [
+              GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onPanDown: (details) {
+                  context.pop();
+                },
+                child: SvgPicture.asset(
+                  'lib/assets/svgs/arrow_left_long.svg',
+                ).withPadding(left: 16),
+              ),
+              Spacer(),
+              Text(
+                "My Profile",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 20),
+              ),
+
+              Spacer(),
+              Icon(Icons.more_vert),
+            ],
+          ),
         ).withPadding(top: 16),
       ],
 
@@ -96,7 +93,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
 
                       SvgPicture.asset('lib/assets/svgs/edit_profile.svg'),
                     ],
-                  ).withPadding(bottom: 8, top: 8),
+                  ).withPadding(bottom: 16, top: 12),
 
                   Container(
                     padding: EdgeInsets.all(12),
@@ -107,11 +104,6 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                     ),
                     child: Column(
                       children: [
-                        // Row(
-                        //   mainAxisAlignment: MainAxisAlignment.center,
-                        //   crossAxisAlignment: CrossAxisAlignment.start,
-                        //   children: [],
-                        // ).withPadding(bottom: 8, top: 8),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -124,7 +116,8 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                               ),
                             ).withPadding(bottom: 8),
                             TextField(
-                              placeholder: Text('Enter your name'),
+                              enableInteractiveSelection: true,
+                              placeholder: Text('Andrew Kim'),
                               decoration: BoxDecoration(
                                 color: PaxColors.lightLilac,
                                 borderRadius: BorderRadius.circular(7),
@@ -146,6 +139,9 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                               ),
                             ).withPadding(bottom: 8),
                             TextField(
+                              enabled: false,
+                              keyboardType: TextInputType.emailAddress,
+
                               placeholder: Text(
                                 'andrewk@thecanvassing.com',
                                 style: TextStyle(
@@ -173,7 +169,6 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
 
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
                               "Phone Number",
@@ -192,12 +187,12 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                 child: PhoneInput(
                                   initialValue: PhoneNumber(
                                     Country.kenya,
-                                    '0722978938',
+                                    '722978938',
                                   ),
                                   initialCountry: Country.kenya,
                                   onChanged: (value) {
                                     setState(() {
-                                      _phoneNumber = value;
+                                      phoneNumber = value;
                                     });
                                   },
                                 ),
@@ -205,7 +200,97 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                             ),
                             // Text(_phoneNumber?.value ?? '(No value)'),
                           ],
+                        ).withPadding(bottom: 16),
+
+                        Container(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Gender",
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ).withPadding(bottom: 8),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: PaxColors.lightLilac,
+                                  borderRadius: BorderRadius.circular(7),
+                                ),
+                                width: double.infinity,
+                                child: Select<String>(
+                                  disableHoverEffect: true,
+                                  itemBuilder: (context, item) {
+                                    return Text(item);
+                                  },
+
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedValue = value;
+                                    });
+                                  },
+                                  value: selectedValue,
+                                  placeholder: const Text('Gender'),
+                                  popup: (context) {
+                                    return SelectPopup(
+                                      items: SelectItemList(
+                                        children: [
+                                          SelectItemButton(
+                                            value: 'Male',
+                                            child: Text('Male'),
+                                          ),
+                                          SelectItemButton(
+                                            value: 'Female',
+                                            child: Text('Female'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              // Text(_phoneNumber?.value ?? '(No value)'),
+                            ],
+                          ).withPadding(bottom: 16),
                         ),
+
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Birthdate",
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ).withPadding(bottom: 8),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: PaxColors.lightLilac,
+                                borderRadius: BorderRadius.circular(7),
+                              ),
+                              width: double.infinity,
+                              child: DatePicker(
+                                value: _value,
+                                mode: PromptMode.dialog,
+                                stateBuilder: (date) {
+                                  if (date.isAfter(DateTime.now())) {
+                                    return DateState.disabled;
+                                  }
+                                  return DateState.enabled;
+                                },
+                                onChanged: (value) {
+                                  setState(() {
+                                    _value = value;
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
+                        ).withPadding(bottom: 16),
                       ],
                     ),
                   ),
@@ -218,3 +303,10 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     );
   }
 }
+
+// String? selectedValue;
+// @override
+// Widget build(BuildContext context) {
+//   return 
+// }
+

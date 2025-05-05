@@ -1,20 +1,10 @@
-// ignore_for_file: unused_import
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
-import 'package:go_router/go_router.dart';
-import 'package:pax/features/account/view.dart';
-import 'package:pax/features/activity/view.dart';
-import 'package:pax/features/home/achievements/view.dart';
-import 'package:pax/features/home/dashboard/view.dart';
-import 'package:pax/features/home/task/view.dart';
-import 'package:pax/features/home/view.dart';
-import 'package:pax/features/onboarding/view_model.dart';
+import 'package:pax/exports/views.dart';
+
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../theming/colors.dart' show PaxColors;
-import '../../utils/clipper.dart';
 
 class RootView extends ConsumerStatefulWidget {
   const RootView({super.key});

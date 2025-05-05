@@ -1,6 +1,7 @@
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
+import 'package:go_router/go_router.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/dotted_border_painter.dart';
 import 'package:pax/widgets/achievement_earning_card.dart';
@@ -91,10 +92,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                               ],
                             );
                           },
-                          popupConstraints: const BoxConstraints(
-                            maxHeight: 300,
-                            maxWidth: 200,
-                          ),
+
                           onChanged: (value) {
                             setState(() {
                               selectedValue = value;
@@ -128,7 +126,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                             .withBorder(
                               border: Border.all(color: Colors.transparent),
                             ),
-                        onPressed: () {},
+                        onPressed: () {
+                          context.go('/wallet');
+                        },
                         child: Text(
                           'Wallet',
                           style: TextStyle(
@@ -272,8 +272,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
               ],
             ).withPadding(bottom: 8, top: 4),
 
-            for (var item in [1, 2, 3, 4, 5])
-              TaskCard().withPadding(bottom: 12),
+            for (var _ in [1, 2, 3, 4, 5]) TaskCard().withPadding(bottom: 12),
           ],
         ).withPadding(all: 8),
       ),

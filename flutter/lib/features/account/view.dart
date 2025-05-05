@@ -1,19 +1,10 @@
-// ignore_for_file: unused_import
-
 import 'package:flutter/material.dart' show Divider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
-import 'package:pax/features/home/achievements/view.dart';
-import 'package:pax/features/home/dashboard/view.dart';
-import 'package:pax/features/home/task/view.dart';
-import 'package:pax/features/onboarding/view_model.dart';
 import 'package:pax/widgets/account_option_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../theming/colors.dart' show PaxColors;
-import '../../utils/clipper.dart';
 
 class AccountView extends ConsumerStatefulWidget {
   const AccountView({super.key});
@@ -59,14 +50,9 @@ class _AccountViewState extends ConsumerState<AccountView> {
               padding: EdgeInsets.all(12),
               width: double.infinity,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: PaxColors.orangeToPinkGradient,
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                // color: PaxColors.white,
+                color: PaxColors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: PaxColors.deepPurple, width: 1),
+                border: Border.all(color: PaxColors.lightLilac, width: 1),
               ),
               child: Column(
                 children: [
@@ -84,7 +70,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
-                                  color: PaxColors.white,
+                                  color: PaxColors.black,
                                 ),
                               ).withPadding(bottom: 4),
                               Text(
@@ -109,7 +95,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
-                                  color: PaxColors.white,
+                                  color: PaxColors.black,
                                 ),
                               ).withPadding(bottom: 4),
                               Text(
@@ -196,7 +182,6 @@ class _AccountViewState extends ConsumerState<AccountView> {
                   // ).withPadding(bottom: 8),
                   GestureDetector(
                     onPanDown: (details) {
-                      print("profile tapped");
                       context.push("/profile");
                     },
                     child: AccountOptionCard(
@@ -204,15 +189,25 @@ class _AccountViewState extends ConsumerState<AccountView> {
                       true,
                     ).withPadding(bottom: 28),
                   ),
-                  AccountOptionCard('account', true).withPadding(bottom: 28),
-                  AccountOptionCard(
-                    'payment_methods',
-                    true,
-                  ).withPadding(bottom: 28),
-                  AccountOptionCard(
-                    'help_and_support',
-                    true,
-                  ).withPadding(bottom: 28),
+                  // AccountOptionCard('account', true).withPadding(bottom: 28),
+                  GestureDetector(
+                    onPanDown: (details) {
+                      context.push("/payment-methods");
+                    },
+                    child: AccountOptionCard(
+                      'payment_methods',
+                      true,
+                    ).withPadding(bottom: 28),
+                  ),
+                  GestureDetector(
+                    onPanDown: (details) {
+                      context.push("/help-and-support");
+                    },
+                    child: AccountOptionCard(
+                      'help_and_support',
+                      true,
+                    ).withPadding(bottom: 28),
+                  ),
 
                   GestureDetector(
                     onPanDown: (details) {
