@@ -102,37 +102,40 @@ class TaskCard extends ConsumerWidget {
             children: [
               Button(
                 enableFeedback: false,
-                style: const ButtonStyle.outline(density: ButtonDensity.normal)
-                    .withBackgroundColor(color: PaxColors.blue)
-                    .withBorder(border: Border.all(color: Colors.transparent))
-                    .withBorderRadius(borderRadius: BorderRadius.circular(7)),
+                style: const ButtonStyle.outline(density: ButtonDensity.dense)
+                    .withBackgroundColor(
+                      color: PaxColors.green.withValues(alpha: 0.2),
+                    )
+                    .withBorder(border: Border.all(color: Colors.green))
+                    .withBorderRadius(borderRadius: BorderRadius.circular(20)),
                 onPressed: () {},
                 child: Text(
                   'Retail',
                   style: TextStyle(
                     fontWeight: FontWeight.w900,
-                    fontSize: 14,
-                    color:
-                        PaxColors
-                            .deepPurple, // The purple color from your images
+                    fontSize: 12,
+                    color: PaxColors.green, // The purple color from your images
                   ),
                 ),
               ).withPadding(right: 8),
+
               Button(
                 enableFeedback: false,
-                style: const ButtonStyle.outline(density: ButtonDensity.normal)
-                    .withBackgroundColor(color: PaxColors.blue)
-                    .withBorder(border: Border.all(color: Colors.transparent))
-                    .withBorderRadius(borderRadius: BorderRadius.circular(7)),
+                style: const ButtonStyle.outline(density: ButtonDensity.dense)
+                    .withBackgroundColor(
+                      color: PaxColors.otherBlue.withValues(alpha: 0.2),
+                    )
+                    .withBorder(border: Border.all(color: PaxColors.otherBlue))
+                    .withBorderRadius(borderRadius: BorderRadius.circular(20)),
                 onPressed: () {},
                 child: Text(
                   'Shopping',
                   style: TextStyle(
                     fontWeight: FontWeight.w900,
-                    fontSize: 14,
+                    fontSize: 12,
                     color:
                         PaxColors
-                            .deepPurple, // The purple color from your images
+                            .otherBlue, // The purple color from your images
                   ),
                 ),
               ),

@@ -146,7 +146,7 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
                 ),
               ],
             ),
-          ),
+          ).withMargin(bottom: 32),
         ],
       ).withPadding(all: 8),
     );

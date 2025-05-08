@@ -134,6 +134,42 @@ class _AchievementsViewState extends ConsumerState<AchievementsView> {
                         )
                         .withBackgroundColor(
                           color:
+                              index == 2
+                                  ? PaxColors.deepPurple
+                                  : Colors.transparent,
+                        )
+                        .withBorder(
+                          border: Border.all(
+                            color:
+                                index == 2
+                                    ? PaxColors.deepPurple
+                                    : PaxColors.lilac,
+                            width: 2,
+                          ),
+                        )
+                        .withBorderRadius(
+                          borderRadius: BorderRadius.circular(7),
+                        ),
+                    onPressed: () {
+                      setState(() {
+                        screenName = 'Achievements';
+                        index = 2;
+                      });
+                    },
+
+                    child: Text(
+                      'In Progress',
+                      style: TextStyle(
+                        color: index == 2 ? PaxColors.white : PaxColors.black,
+                      ),
+                    ),
+                  ).withPadding(right: 8),
+                  Button(
+                    style: const ButtonStyle.primary(
+                          density: ButtonDensity.dense,
+                        )
+                        .withBackgroundColor(
+                          color:
                               index == 1
                                   ? PaxColors.deepPurple
                                   : Colors.transparent,
@@ -164,21 +200,20 @@ class _AchievementsViewState extends ConsumerState<AchievementsView> {
                       ),
                     ),
                   ).withPadding(right: 8),
-
                   Button(
                     style: const ButtonStyle.primary(
                           density: ButtonDensity.dense,
                         )
                         .withBackgroundColor(
                           color:
-                              index == 2
+                              index == 3
                                   ? PaxColors.deepPurple
                                   : Colors.transparent,
                         )
                         .withBorder(
                           border: Border.all(
                             color:
-                                index == 2
+                                index == 3
                                     ? PaxColors.deepPurple
                                     : PaxColors.lilac,
                             width: 2,
@@ -189,15 +224,15 @@ class _AchievementsViewState extends ConsumerState<AchievementsView> {
                         ),
                     onPressed: () {
                       setState(() {
-                        screenName = 'Achievements';
-                        index = 2;
+                        screenName = 'Survey';
+                        index = 3;
                       });
                     },
 
                     child: Text(
-                      'In Progress',
+                      'Claimed',
                       style: TextStyle(
-                        color: index == 2 ? PaxColors.white : PaxColors.black,
+                        color: index == 3 ? PaxColors.white : PaxColors.black,
                       ),
                     ),
                   ).withPadding(right: 8),

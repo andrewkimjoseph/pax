@@ -1,5 +1,6 @@
 export 'package:pax/features/account/view.dart';
 export 'package:pax/features/activity/view.dart';
+export 'package:pax/features/help_and_support/view.dart';
 export 'package:pax/features/help_and_support/contact_support/view.dart';
 export 'package:pax/features/help_and_support/faq/view.dart';
 export 'package:pax/features/home/achievements/view.dart';

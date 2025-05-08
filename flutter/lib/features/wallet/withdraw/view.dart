@@ -104,30 +104,33 @@ class _WithdrawViewState extends ConsumerState<WithdrawView> {
           Spacer(flex: 2),
 
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-
+            width: double.infinity,
+            padding: EdgeInsets.only(top: 16), // Add padding only at the top
             color: Colors.white,
-
             child: Column(
               children: [
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: PrimaryButton(
-                    onPressed: () {
-                      context.go('/wallet/withdraw/select-wallet');
-                    },
-
-                    child: Text(
-                      'Continue',
-                      style: Theme.of(context).typography.base.copyWith(
-                        fontWeight: FontWeight.normal,
-                        fontSize: 14,
-                        color: PaxColors.white,
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: PrimaryButton(
+                      onPressed: () {
+                        context.go('/wallet/withdraw/select-wallet');
+                      },
+                      child: Text(
+                        'Continue',
+                        style: Theme.of(context).typography.base.copyWith(
+                          fontWeight: FontWeight.normal,
+                          fontSize: 14,
+                          color: PaxColors.white,
+                        ),
                       ),
                     ),
                   ),
                 ),
+                // Add extra space at the bottom to ensure it pushes past safe area
+                SizedBox(height: 50),
               ],
             ),
           ),

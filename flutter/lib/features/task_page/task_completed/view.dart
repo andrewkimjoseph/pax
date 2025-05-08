@@ -13,6 +13,7 @@ import 'package:pax/widgets/help_and_support.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_confetti/flutter_confetti.dart';
 
 class TaskCompleteView extends ConsumerStatefulWidget {
   const TaskCompleteView({super.key});
@@ -26,6 +27,18 @@ class _TaskCompleteViewState extends ConsumerState<TaskCompleteView> {
   String? genderValue;
   @override
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Display dialog after UI has rerendered
+      Confetti.launch(
+        context,
+        options: const ConfettiOptions(
+          colors: PaxColors.orangeToPinkGradient,
+          particleCount: 100,
+          spread: 70,
+          y: 0.6,
+        ),
+      );
+    });
     super.initState();
   }
 
@@ -68,7 +81,7 @@ class _TaskCompleteViewState extends ConsumerState<TaskCompleteView> {
                         ),
                       ).withPadding(bottom: 16),
                       Text(
-                        "\$0.01",
+                        "G\$ 0.01",
                         textAlign: TextAlign.left,
                         style: TextStyle(
                           fontSize: 28,
@@ -97,6 +110,16 @@ class _TaskCompleteViewState extends ConsumerState<TaskCompleteView> {
                   child: PrimaryButton(
                     onPressed: () {
                       context.pushReplacement('/');
+
+                      // Confetti.launch(
+                      //   context,
+                      //   options: const ConfettiOptions(
+                      //     colors: PaxColors.orangeToPinkGradient,
+                      //     particleCount: 100,
+                      //     spread: 70,
+                      //     y: 0.6,
+                      //   ),
+                      // );
                     },
 
                     child: Text(

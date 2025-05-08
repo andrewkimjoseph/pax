@@ -284,7 +284,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                 ),
               ],
             ),
-          ),
+          ).withMargin(bottom: 32),
         ],
       ).withPadding(all: 8),
     );
