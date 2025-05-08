@@ -14,7 +14,7 @@ class WalletView extends ConsumerStatefulWidget {
 }
 
 class _WalletViewViewState extends ConsumerState<WalletView> {
-  String? selectedValue;
+  String selectedValue = 'good_dollar';
   String? genderValue;
   @override
   void initState() {
@@ -79,27 +79,16 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                   Row(
                     children: [
                       Text(
-                        '\$ 200',
+                        '17,000,000',
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 28,
                           color: PaxColors.black,
                         ),
                       ).withPadding(right: 8),
-                      PrimaryBadge(
-                        style: ButtonStyle.primary(density: ButtonDensity.dense)
-                            .withBackgroundColor(color: Colors.blue)
-                            .withBorderRadius(
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                        child: Text(
-                          selectedValue ?? 'USD',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            fontSize: 14,
-                            color: PaxColors.white,
-                          ),
-                        ),
+                      SvgPicture.asset(
+                        'lib/assets/svgs/currencies/$selectedValue.svg',
+                        height: 25,
                       ),
                     ],
                   ).withPadding(bottom: 16),
@@ -117,38 +106,91 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                           itemBuilder: (context, item) {
                             return Row(
                               children: [
-                                Icon(
-                                  Icons.circle,
-                                  size: 12,
-                                  color: PaxColors.blue,
-                                ).withPadding(right: 4),
+                                // Icon(
+                                //   Icons.circle,
+                                //   size: 12,
+                                //   color: PaxColors.blue,
+                                // ).withPadding(right: 4),
+                                SvgPicture.asset(
+                                  'lib/assets/svgs/currencies/$item.svg',
+
+                                  height: 20,
+                                ).withPadding(right: 8),
                                 Text(item),
                               ],
                             );
                           },
 
                           onChanged: (value) {
-                            setState(() {
-                              selectedValue = value;
-                            });
+                            if (value != null) {
+                              setState(() {
+                                selectedValue = value;
+                              });
+                            }
                           },
                           value: selectedValue,
+
                           placeholder: const Text('Change currency'),
                           popup:
-                              const SelectPopup(
+                              (context) => SelectPopup(
                                 items: SelectItemList(
                                   children: [
                                     SelectItemButton(
-                                      value: 'cUSD',
-                                      child: Text('Celo Dollar (cUSD)'),
+                                      value: 'good_dollar',
+                                      child: Row(
+                                        children: [
+                                          SvgPicture.asset(
+                                            'lib/assets/svgs/currencies/good_dollar.svg',
+
+                                            height: 25,
+                                          ).withPadding(right: 4),
+                                          Text('GoodDollar (G\$)'),
+                                        ],
+                                      ),
                                     ),
                                     SelectItemButton(
-                                      value: 'G\$',
-                                      child: Text('GoodDollar (G\$)'),
+                                      value: 'celo_dollar',
+                                      child: Row(
+                                        children: [
+                                          SvgPicture.asset(
+                                            'lib/assets/svgs/currencies/celo_dollar.svg',
+
+                                            height: 19,
+                                          ).withPadding(right: 6),
+                                          Text('Celo Dollar (cUSD)'),
+                                        ],
+                                      ).withPadding(left: 4),
                                     ),
+                                    SelectItemButton(
+                                      value: 'tether_usd',
+                                      child: Row(
+                                        children: [
+                                          SvgPicture.asset(
+                                            'lib/assets/svgs/currencies/tether_usd.svg',
+
+                                            height: 19,
+                                          ).withPadding(right: 6),
+                                          Text('Tether USD (USDT)'),
+                                        ],
+                                      ).withPadding(left: 4),
+                                    ),
+
+                                    SelectItemButton(
+                                      value: 'usd_coin',
+                                      child: Row(
+                                        children: [
+                                          SvgPicture.asset(
+                                            'lib/assets/svgs/currencies/usd_coin.svg',
+
+                                            height: 19,
+                                          ).withPadding(right: 6),
+                                          Text('USD Coin (USDC)'),
+                                        ],
+                                      ).withPadding(left: 4),
+                                    ).withPadding(bottom: 30),
                                   ],
                                 ),
-                              ).call,
+                              ),
                         ),
                       ).withPadding(right: 8),
 
@@ -170,7 +212,7 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                             fontSize: 14,
                             color:
                                 PaxColors
-                                    .deepPurple, // The purple color from your images
+                                    .black, // The purple color from your images
                           ),
                         ),
                       ),
@@ -191,7 +233,7 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                   //   ],
                   // ),
                 ],
-              ).withPadding(bottom: 8),
+              ).withPadding(all: 12),
             ).withPadding(bottom: 8),
             Container(
               padding: EdgeInsets.all(12),

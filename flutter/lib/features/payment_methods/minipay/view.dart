@@ -70,14 +70,14 @@ class _HelpAndSupportViewState extends ConsumerState<MiniPayConnectionView> {
                     borderRadius: BorderRadius.circular(10),
                     child: SvgPicture.asset(
                       'lib/assets/svgs/minipay.svg',
-                      height: 100,
+                      height: 150,
                     ),
                   ),
                   Text(
                     "Enter MiniPay Wallet Address",
                     textAlign: TextAlign.left,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-                  ).withPadding(vertical: 16), // Reduced padding
+                  ).withPadding(vertical: 32), // Reduced padding
 
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,10 +86,10 @@ class _HelpAndSupportViewState extends ConsumerState<MiniPayConnectionView> {
                         "Wallet address (0x..)",
                         textAlign: TextAlign.left,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 14,
                           fontWeight: FontWeight.normal,
                         ),
-                      ).withPadding(bottom: 8),
+                      ).withPadding(bottom: 16),
                       TextField(
                         scrollPhysics: ClampingScrollPhysics(),
                         enabled: true,
@@ -116,7 +116,7 @@ class _HelpAndSupportViewState extends ConsumerState<MiniPayConnectionView> {
                         ],
                       ),
                     ],
-                  ).withPadding(bottom: 12), // Reduced padding
+                  ).withPadding(bottom: 16), // Reduced padding
                   // Column(
                   //   crossAxisAlignment: CrossAxisAlignment.start,
                   //   children: [
@@ -282,7 +282,7 @@ class _HelpAndSupportViewState extends ConsumerState<MiniPayConnectionView> {
                 ),
               ],
             ),
-          ),
+          ).withPadding(bottom: 32),
         ],
       ),
     );

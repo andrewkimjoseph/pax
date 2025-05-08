@@ -35,6 +35,10 @@ class PaxColors {
   /// Blue accent - used for links and informational elements
   static const Color blue = Color(0xFF94B9FF);
 
+  static const Color otherBlue = Color(0xFF94B9FF);
+
+  static const Color green = Color(0xFF34A853);
+
   /// Neutral Colors
   /// Used for text, backgrounds, and borders
 
@@ -46,6 +50,9 @@ class PaxColors {
 
   /// Light grey - used for borders, dividers, and subtle UI elements
   static const Color lightGrey = Color(0xFFDDDDDD);
+
+  /// Light grey - used for borders, dividers, and subtle UI elements
+  static const Color darkGrey = Color(0xFF4C4C4C);
 
   /// Feedback Colors
   /// Used to communicate status and importance

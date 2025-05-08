@@ -165,7 +165,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                         ],
                       ),
                     ),
-                  )
+                  ).withPadding(bottom: 16)
                   : Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
@@ -223,7 +223,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                         ),
                       ),
                     ],
-                  ),
+                  ).withPadding(bottom: 16),
             ],
           ).withPadding(top: 32, bottom: 32),
         ],

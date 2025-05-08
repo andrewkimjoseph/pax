@@ -122,7 +122,7 @@ class _TaskPageViewState extends State<TaskPageView> {
               ),
               Spacer(),
               Text(
-                "MiniPay",
+                "Task",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 20),
               ).withPadding(right: 16),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' show Divider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pax/features/account_and_security/view.dart';
 import 'package:pax/widgets/account_option_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
 
@@ -189,7 +190,20 @@ class _AccountViewState extends ConsumerState<AccountView> {
                       true,
                     ).withPadding(bottom: 28),
                   ),
-                  // AccountOptionCard('account', true).withPadding(bottom: 28),
+                  GestureDetector(
+                    onPanDown: (details) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AccountAndSecurityView(),
+                        ),
+                      );
+                    },
+                    child: AccountOptionCard(
+                      'account',
+                      true,
+                    ).withPadding(bottom: 28),
+                  ),
                   GestureDetector(
                     onPanDown: (details) {
                       context.push("/payment-methods");

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:pax/exports/views.dart';
+import 'package:pax/features/notifications/view.dart';
 
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -30,7 +31,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
         AppBar(
           padding: EdgeInsets.all(8),
 
-          backgroundColor: PaxColors.lightGrey,
+          backgroundColor: PaxColors.white,
           header: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -43,7 +44,19 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 ),
               ),
 
-              SvgPicture.asset('lib/assets/svgs/active_notification.svg'),
+              GestureDetector(
+                onPanDown:
+                    (details) => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => NotificationsView(),
+                      ),
+                    ),
+
+                child: SvgPicture.asset(
+                  'lib/assets/svgs/active_notification.svg',
+                ),
+              ),
             ],
           ).withPadding(bottom: 8),
           subtitle: Row(
@@ -69,6 +82,35 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     screenName = 'Dashboard';
                     index = 0;
                   });
+
+                  // showToast(
+                  //   context: context,
+                  //   builder:
+                  //       (context, overlay) => Container(
+                  //         padding: EdgeInsets.all(12),
+                  //         decoration: BoxDecoration(
+                  //           gradient: LinearGradient(
+                  //             colors: PaxColors.orangeToPinkGradient,
+                  //           ),
+                  //           borderRadius: BorderRadius.circular(15),
+                  //         ),
+                  //         child: Basic(
+                  //           title: const Text('Event has been created'),
+                  //           subtitle: const Text(
+                  //             'Sunday, July 07, 2024 at 12:00 PM',
+                  //           ),
+                  //           trailing: PrimaryButton(
+                  //             size: ButtonSize.small,
+                  //             onPressed: () {
+                  //               overlay.close();
+                  //             },
+                  //             child: const Text('Undo'),
+                  //           ),
+                  //           trailingAlignment: Alignment.center,
+                  //         ),
+                  //       ),
+                  //   location: ToastLocation.bottomCenter,
+                  // );
                 },
 
                 child: Text(
@@ -150,4 +192,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
       ),
     );
   }
+
+  // Widget buildToast(BuildContext context, ToastOverlay overlay) {
+
+  // }
 }
