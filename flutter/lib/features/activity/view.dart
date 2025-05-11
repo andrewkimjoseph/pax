@@ -133,6 +133,7 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
             ],
           ),
         ),
+        Divider(color: PaxColors.lightGrey),
       ],
 
       child: SingleChildScrollView(

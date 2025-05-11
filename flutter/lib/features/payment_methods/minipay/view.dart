@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
 
 import 'package:pax/theming/colors.dart';
+import 'package:pax/widgets/gooddollar_verification_steps.dart';
 
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
 import 'package:url_launcher/url_launcher.dart';
@@ -18,6 +19,8 @@ class MiniPayConnectionView extends ConsumerStatefulWidget {
 
 class _HelpAndSupportViewState extends ConsumerState<MiniPayConnectionView> {
   String? genderValue;
+
+  final StepperController controller = StepperController(currentStep: 0);
   @override
   void initState() {
     super.initState();
@@ -26,6 +29,82 @@ class _HelpAndSupportViewState extends ConsumerState<MiniPayConnectionView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      footers: [
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+
+          child: Column(
+            children: [
+              Divider().withPadding(top: 10, bottom: 10),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: PrimaryButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          // title: const Text('Alert title'),
+                          content: Column(
+                            children: [
+                              SvgPicture.asset(
+                                'lib/assets/svgs/minipay_connected.svg',
+                              ).withPadding(bottom: 8),
+
+                              const Text(
+                                'Success!',
+                                style: TextStyle(
+                                  color: PaxColors.deepPurple,
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ).withPadding(bottom: 8),
+                              const Text(
+                                'MiniPay Wallet Connected Successfully',
+                                style: TextStyle(
+                                  color: PaxColors.deepPurple,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.normal,
+                                ),
+                              ).withPadding(bottom: 8),
+
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width / 2.5,
+                                    child: PrimaryButton(
+                                      child: const Text('OK'),
+                                      onPressed: () {
+                                        context.pop();
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ).withPadding(top: 8),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+
+                  child: Text(
+                    'Connect',
+                    style: Theme.of(context).typography.base.copyWith(
+                      fontWeight: FontWeight.normal,
+                      fontSize: 14,
+                      color: PaxColors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ).withPadding(bottom: 32),
+      ],
       resizeToAvoidBottomInset: false,
       headers: [
         AppBar(
@@ -39,9 +118,7 @@ class _HelpAndSupportViewState extends ConsumerState<MiniPayConnectionView> {
                 onPanDown: (details) {
                   context.pop();
                 },
-                child: SvgPicture.asset(
-                  'lib/assets/svgs/arrow_left_long.svg',
-                ).withPadding(left: 16),
+                child: SvgPicture.asset('lib/assets/svgs/arrow_left_long.svg'),
               ),
               Spacer(),
               Text(
@@ -53,14 +130,15 @@ class _HelpAndSupportViewState extends ConsumerState<MiniPayConnectionView> {
             ],
           ),
         ).withPadding(top: 16),
+        Divider(color: PaxColors.lightGrey),
       ],
 
       // Use Column as the main container
-      child: Column(
-        children: [
-          // Fixed-size content area (not scrollable)
-          Expanded(
-            child: Padding(
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Fixed-size content area (not scrollable)
+            Padding(
               padding: EdgeInsets.all(16),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -70,15 +148,74 @@ class _HelpAndSupportViewState extends ConsumerState<MiniPayConnectionView> {
                     borderRadius: BorderRadius.circular(10),
                     child: SvgPicture.asset(
                       'lib/assets/svgs/minipay.svg',
-                      height: 150,
+                      height: 50,
                     ),
                   ),
                   Text(
-                    "Enter MiniPay Wallet Address",
+                    "Paste MiniPay Wallet Address",
                     textAlign: TextAlign.left,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-                  ).withPadding(vertical: 32), // Reduced padding
+                  ).withPadding(vertical: 20), // Reduced padding
 
+                  Container(
+                    padding: EdgeInsets.all(12),
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                      color: PaxColors.otherOrange.withValues(alpha: 0.4),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: PaxColors.otherOrange,
+                        width: 2,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SvgPicture.asset(
+                              'lib/assets/svgs/verification_required.svg',
+                            ).withPadding(right: 8),
+                            Text(
+                              'GoodDollar',
+                              style: TextStyle(
+                                color: PaxColors.deepPurple,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SvgPicture.asset(
+                              'lib/assets/svgs/currencies/good_dollar.svg',
+                              height: 20,
+                            ),
+
+                            Text(
+                              ' Verification Required',
+                              style: TextStyle(
+                                color: PaxColors.deepPurple,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ).withPadding(bottom: 8),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'To connect successfully, your wallet should be GoodDollar verified. \n\nIf it is already verified, paste the address and connect.',
+                                style: TextStyle(
+                                  color: PaxColors.black,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ).withPadding(bottom: 8),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -95,7 +232,7 @@ class _HelpAndSupportViewState extends ConsumerState<MiniPayConnectionView> {
                         enabled: true,
                         keyboardType: TextInputType.emailAddress,
                         placeholder: Text(
-                          '0xd8224F2063685Cc9D8E11aAA8741aeE9A50',
+                          'Paste address here',
                           style: TextStyle(
                             color: PaxColors.black,
                             fontSize: 14,
@@ -185,6 +322,32 @@ class _HelpAndSupportViewState extends ConsumerState<MiniPayConnectionView> {
                         ),
                       ),
                     ],
+                  ).withPadding(bottom: 8),
+                  Divider().withPadding(vertical: 8),
+                  Row(
+                    children: [
+                      Text(
+                        "How to do GoodDollar",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+
+                      SvgPicture.asset(
+                        'lib/assets/svgs/currencies/good_dollar.svg',
+                        height: 20,
+                      ),
+                      Text(
+                        " verification:",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ],
                   ),
 
                   // Row(
@@ -201,89 +364,15 @@ class _HelpAndSupportViewState extends ConsumerState<MiniPayConnectionView> {
                   //     ),
                   //   ],
                   // ),
-                  Spacer(),
+                  // Spacer(),
+                  GoodDollarVerificationSteps().withPadding(vertical: 8),
                 ],
               ),
             ),
-          ),
 
-          // Fixed button at the bottom
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-
-            child: Column(
-              children: [
-                Divider().withPadding(top: 10, bottom: 10),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: PrimaryButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            // title: const Text('Alert title'),
-                            content: Column(
-                              children: [
-                                SvgPicture.asset(
-                                  'lib/assets/svgs/minipay_connected.svg',
-                                ).withPadding(bottom: 8),
-
-                                const Text(
-                                  'Success!',
-                                  style: TextStyle(
-                                    color: PaxColors.deepPurple,
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ).withPadding(bottom: 8),
-                                const Text(
-                                  'MiniPay Wallet Connected Successfully',
-                                  style: TextStyle(
-                                    color: PaxColors.deepPurple,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.normal,
-                                  ),
-                                ).withPadding(bottom: 8),
-
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    SizedBox(
-                                      width:
-                                          MediaQuery.of(context).size.width /
-                                          2.5,
-                                      child: PrimaryButton(
-                                        child: const Text('OK'),
-                                        onPressed: () {
-                                          context.pop();
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ).withPadding(top: 8),
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    },
-
-                    child: Text(
-                      'Connect',
-                      style: Theme.of(context).typography.base.copyWith(
-                        fontWeight: FontWeight.normal,
-                        fontSize: 14,
-                        color: PaxColors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ).withPadding(bottom: 32),
-        ],
+            // Fixed button at the bottom
+          ],
+        ),
       ),
     );
   }
@@ -301,4 +390,6 @@ class _HelpAndSupportViewState extends ConsumerState<MiniPayConnectionView> {
 // Widget build(BuildContext context) {
 //   return 
 // }
+
+
 

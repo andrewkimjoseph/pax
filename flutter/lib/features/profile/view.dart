@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
+import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import '../../theming/colors.dart' show PaxColors;
 
@@ -38,9 +38,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                 onPanDown: (details) {
                   context.pop();
                 },
-                child: SvgPicture.asset(
-                  'lib/assets/svgs/arrow_left_long.svg',
-                ).withPadding(left: 16),
+                child: SvgPicture.asset('lib/assets/svgs/arrow_left_long.svg'),
               ),
               Spacer(),
               Text(
@@ -50,10 +48,11 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
               ),
 
               Spacer(),
-              Icon(Icons.more_vert),
+              // Icon(Icons.more_vert),
             ],
           ),
         ).withPadding(top: 16),
+        Divider(color: PaxColors.lightGrey),
       ],
 
       child: Column(
@@ -276,6 +275,10 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                             // ),
                             width: double.infinity,
                             child: DatePicker(
+                              placeholder: Text(
+                                'Select date',
+                                style: TextStyle(color: Colors.black),
+                              ),
                               value: _value,
                               mode: PromptMode.dialog,
                               stateBuilder: (date) {

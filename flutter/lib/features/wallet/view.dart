@@ -1,10 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
+import 'package:pax/extensions/tooltip.dart';
 import 'package:pax/widgets/payment_method_card.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
+import 'package:pax/widgets/select_currency_button.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import '../../theming/colors.dart' show PaxColors;
+import '../../utils/gradient_border.dart' show GradientBorder;
 
 class WalletView extends ConsumerStatefulWidget {
   const WalletView({super.key});
@@ -36,9 +39,7 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                 onPanDown: (details) {
                   context.pop();
                 },
-                child: SvgPicture.asset(
-                  'lib/assets/svgs/arrow_left_long.svg',
-                ).withPadding(left: 0),
+                child: SvgPicture.asset('lib/assets/svgs/arrow_left_long.svg'),
               ),
               Spacer(),
               Text(
@@ -51,18 +52,30 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
             ],
           ),
         ).withPadding(top: 16),
+        Divider(color: PaxColors.lightGrey),
       ],
 
       child: SingleChildScrollView(
         child: Column(
           children: [
             Container(
-              padding: EdgeInsets.all(12),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: PaxColors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: PaxColors.lightLilac, width: 1),
+              // decoration: BoxDecoration(
+
+              //   color: PaxColors.lilac,
+              //   border: Border.all(color: PaxColors.mediumPurple),
+              //   borderRadius: BorderRadius.circular(12),
+              // ),
+              decoration: ShapeDecoration(
+                shape: GradientBorder(
+                  gradient: LinearGradient(
+                    colors: PaxColors.orangeToPinkGradient,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  width: 2,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                color: Colors.white,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,64 +142,18 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                             }
                           },
                           value: selectedValue,
-
                           placeholder: const Text('Change currency'),
                           popup:
                               (context) => SelectPopup(
                                 items: SelectItemList(
                                   children: [
-                                    SelectItemButton(
-                                      value: 'good_dollar',
-                                      child: Row(
-                                        children: [
-                                          SvgPicture.asset(
-                                            'lib/assets/svgs/currencies/good_dollar.svg',
+                                    SelectCurrencyButton('good_dollar'),
+                                    SelectCurrencyButton('celo_dollar'),
 
-                                            height: 25,
-                                          ).withPadding(right: 4),
-                                          Text('GoodDollar (G\$)'),
-                                        ],
-                                      ),
-                                    ),
-                                    SelectItemButton(
-                                      value: 'celo_dollar',
-                                      child: Row(
-                                        children: [
-                                          SvgPicture.asset(
-                                            'lib/assets/svgs/currencies/celo_dollar.svg',
+                                    SelectCurrencyButton('tether_usd'),
 
-                                            height: 19,
-                                          ).withPadding(right: 6),
-                                          Text('Celo Dollar (cUSD)'),
-                                        ],
-                                      ).withPadding(left: 4),
-                                    ),
-                                    SelectItemButton(
-                                      value: 'tether_usd',
-                                      child: Row(
-                                        children: [
-                                          SvgPicture.asset(
-                                            'lib/assets/svgs/currencies/tether_usd.svg',
-
-                                            height: 19,
-                                          ).withPadding(right: 6),
-                                          Text('Tether USD (USDT)'),
-                                        ],
-                                      ).withPadding(left: 4),
-                                    ),
-
-                                    SelectItemButton(
-                                      value: 'usd_coin',
-                                      child: Row(
-                                        children: [
-                                          SvgPicture.asset(
-                                            'lib/assets/svgs/currencies/usd_coin.svg',
-
-                                            height: 19,
-                                          ).withPadding(right: 6),
-                                          Text('USD Coin (USDC)'),
-                                        ],
-                                      ).withPadding(left: 4),
+                                    SelectCurrencyButton(
+                                      'usd_coin',
                                     ).withPadding(bottom: 30),
                                   ],
                                 ),
@@ -198,9 +165,9 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                         style: const ButtonStyle.outline(
                               density: ButtonDensity.normal,
                             )
-                            .withBackgroundColor(color: PaxColors.blue)
+                            .withBackgroundColor(color: PaxColors.deepPurple)
                             .withBorder(
-                              border: Border.all(color: Colors.transparent),
+                              // border: Border.all(color: PaxColors.deepPurple),
                             ),
                         onPressed: () {
                           context.go('/wallet/withdraw');
@@ -212,10 +179,10 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                             fontSize: 14,
                             color:
                                 PaxColors
-                                    .black, // The purple color from your images
+                                    .white, // The purple color from your images
                           ),
                         ),
-                      ),
+                      ).withToolTip('Check out your wallet.'),
                     ],
                   ),
 

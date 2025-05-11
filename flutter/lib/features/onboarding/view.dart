@@ -67,7 +67,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                       page.title,
                       style: Theme.of(context).typography.base.copyWith(
                         fontWeight: FontWeight.w900,
-                        fontSize: 30,
+                        fontSize: 28,
                         color:
                             PaxColors
                                 .deepPurple, // The purple color from your images
@@ -80,7 +80,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                       textAlign: TextAlign.center,
                       style: Theme.of(context).typography.base.copyWith(
                         fontWeight: FontWeight.normal,
-                        fontSize: 16,
+                        fontSize: 14,
                         color:
                             PaxColors
                                 .black, // The purple color from your images

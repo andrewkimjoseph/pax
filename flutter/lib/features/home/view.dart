@@ -59,131 +59,154 @@ class _HomeViewState extends ConsumerState<HomeView> {
               ),
             ],
           ).withPadding(bottom: 8),
-          subtitle: Row(
+          subtitle: Column(
             children: [
-              Button(
-                style: const ButtonStyle.primary(density: ButtonDensity.dense)
-                    .withBackgroundColor(
-                      color:
-                          index == 0
-                              ? PaxColors.deepPurple
-                              : Colors.transparent,
-                    )
-                    .withBorder(
-                      border: Border.all(
-                        color:
-                            index == 0 ? PaxColors.deepPurple : PaxColors.lilac,
-                        width: 2,
+              Row(
+                children: [
+                  Button(
+                    style: const ButtonStyle.primary(
+                          density: ButtonDensity.dense,
+                        )
+                        .withBackgroundColor(
+                          color:
+                              index == 0
+                                  ? PaxColors.deepPurple
+                                  : Colors.transparent,
+                        )
+                        .withBorder(
+                          border: Border.all(
+                            color:
+                                index == 0
+                                    ? PaxColors.deepPurple
+                                    : PaxColors.lilac,
+                            width: 2,
+                          ),
+                        )
+                        .withBorderRadius(
+                          borderRadius: BorderRadius.circular(7),
+                        ),
+                    onPressed: () {
+                      setState(() {
+                        screenName = 'Dashboard';
+                        index = 0;
+                      });
+
+                      // showToast(
+                      //   context: context,
+                      //   builder:
+                      //       (context, overlay) => Container(
+                      //         padding: EdgeInsets.all(12),
+                      //         decoration: BoxDecoration(
+                      //           gradient: LinearGradient(
+                      //             colors: PaxColors.orangeToPinkGradient,
+                      //           ),
+                      //           borderRadius: BorderRadius.circular(15),
+                      //         ),
+                      //         child: Basic(
+                      //           title: const Text('Event has been created'),
+                      //           subtitle: const Text(
+                      //             'Sunday, July 07, 2024 at 12:00 PM',
+                      //           ),
+                      //           trailing: PrimaryButton(
+                      //             size: ButtonSize.small,
+                      //             onPressed: () {
+                      //               overlay.close();
+                      //             },
+                      //             child: const Text('Undo'),
+                      //           ),
+                      //           trailingAlignment: Alignment.center,
+                      //         ),
+                      //       ),
+                      //   location: ToastLocation.bottomCenter,
+                      // );
+                    },
+
+                    child: Text(
+                      'Dashboard',
+                      style: TextStyle(
+                        color: index == 0 ? PaxColors.white : PaxColors.black,
                       ),
-                    )
-                    .withBorderRadius(borderRadius: BorderRadius.circular(7)),
-                onPressed: () {
-                  setState(() {
-                    screenName = 'Dashboard';
-                    index = 0;
-                  });
+                    ),
+                  ).withPadding(right: 8),
+                  Button(
+                    style: const ButtonStyle.primary(
+                          density: ButtonDensity.dense,
+                        )
+                        .withBackgroundColor(
+                          color:
+                              index == 1
+                                  ? PaxColors.deepPurple
+                                  : Colors.transparent,
+                        )
+                        .withBorder(
+                          border: Border.all(
+                            color:
+                                index == 1
+                                    ? PaxColors.deepPurple
+                                    : PaxColors.lilac,
+                            width: 2,
+                          ),
+                        )
+                        .withBorderRadius(
+                          borderRadius: BorderRadius.circular(7),
+                        ),
+                    onPressed: () {
+                      setState(() {
+                        screenName = 'Tasks';
+                        index = 1;
+                      });
+                    },
 
-                  // showToast(
-                  //   context: context,
-                  //   builder:
-                  //       (context, overlay) => Container(
-                  //         padding: EdgeInsets.all(12),
-                  //         decoration: BoxDecoration(
-                  //           gradient: LinearGradient(
-                  //             colors: PaxColors.orangeToPinkGradient,
-                  //           ),
-                  //           borderRadius: BorderRadius.circular(15),
-                  //         ),
-                  //         child: Basic(
-                  //           title: const Text('Event has been created'),
-                  //           subtitle: const Text(
-                  //             'Sunday, July 07, 2024 at 12:00 PM',
-                  //           ),
-                  //           trailing: PrimaryButton(
-                  //             size: ButtonSize.small,
-                  //             onPressed: () {
-                  //               overlay.close();
-                  //             },
-                  //             child: const Text('Undo'),
-                  //           ),
-                  //           trailingAlignment: Alignment.center,
-                  //         ),
-                  //       ),
-                  //   location: ToastLocation.bottomCenter,
-                  // );
-                },
-
-                child: Text(
-                  'Dashboard',
-                  style: TextStyle(
-                    color: index == 0 ? PaxColors.white : PaxColors.black,
-                  ),
-                ),
-              ).withPadding(right: 8),
-              Button(
-                style: const ButtonStyle.primary(density: ButtonDensity.dense)
-                    .withBackgroundColor(
-                      color:
-                          index == 1
-                              ? PaxColors.deepPurple
-                              : Colors.transparent,
-                    )
-                    .withBorder(
-                      border: Border.all(
-                        color:
-                            index == 1 ? PaxColors.deepPurple : PaxColors.lilac,
-                        width: 2,
+                    child: Text(
+                      'Tasks',
+                      style: TextStyle(
+                        color: index == 1 ? PaxColors.white : PaxColors.black,
                       ),
-                    )
-                    .withBorderRadius(borderRadius: BorderRadius.circular(7)),
-                onPressed: () {
-                  setState(() {
-                    screenName = 'Tasks';
-                    index = 1;
-                  });
-                },
+                    ),
+                  ).withPadding(right: 8),
 
-                child: Text(
-                  'Tasks',
-                  style: TextStyle(
-                    color: index == 1 ? PaxColors.white : PaxColors.black,
-                  ),
-                ),
-              ).withPadding(right: 8),
+                  Button(
+                    style: const ButtonStyle.primary(
+                          density: ButtonDensity.dense,
+                        )
+                        .withBackgroundColor(
+                          color:
+                              index == 2
+                                  ? PaxColors.deepPurple
+                                  : Colors.transparent,
+                        )
+                        .withBorder(
+                          border: Border.all(
+                            color:
+                                index == 2
+                                    ? PaxColors.deepPurple
+                                    : PaxColors.lilac,
+                            width: 2,
+                          ),
+                        )
+                        .withBorderRadius(
+                          borderRadius: BorderRadius.circular(7),
+                        ),
+                    onPressed: () {
+                      setState(() {
+                        screenName = 'Achievements';
+                        index = 2;
+                      });
+                    },
 
-              Button(
-                style: const ButtonStyle.primary(density: ButtonDensity.dense)
-                    .withBackgroundColor(
-                      color:
-                          index == 2
-                              ? PaxColors.deepPurple
-                              : Colors.transparent,
-                    )
-                    .withBorder(
-                      border: Border.all(
-                        color:
-                            index == 2 ? PaxColors.deepPurple : PaxColors.lilac,
-                        width: 2,
+                    child: Text(
+                      'Achievements',
+                      style: TextStyle(
+                        color: index == 2 ? PaxColors.white : PaxColors.black,
                       ),
-                    )
-                    .withBorderRadius(borderRadius: BorderRadius.circular(7)),
-                onPressed: () {
-                  setState(() {
-                    screenName = 'Achievements';
-                    index = 2;
-                  });
-                },
-
-                child: Text(
-                  'Achievements',
-                  style: TextStyle(
-                    color: index == 2 ? PaxColors.white : PaxColors.black,
-                  ),
-                ),
-              ).withPadding(right: 8),
+                    ),
+                  ).withPadding(right: 8),
+                ],
+              ),
             ],
           ),
         ),
+        Divider(color: PaxColors.lightGrey),
       ],
 
       child: IndexedStack(
