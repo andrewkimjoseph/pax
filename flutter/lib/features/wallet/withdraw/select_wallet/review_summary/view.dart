@@ -40,9 +40,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                 onPanDown: (details) {
                   context.pop();
                 },
-                child: SvgPicture.asset(
-                  'lib/assets/svgs/arrow_left_long.svg',
-                ).withPadding(left: 0),
+                child: SvgPicture.asset('lib/assets/svgs/arrow_left_long.svg'),
               ),
               Spacer(),
               Text(
@@ -55,6 +53,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
             ],
           ),
         ).withPadding(top: 16),
+        Divider(color: PaxColors.lightGrey),
       ],
 
       child: Column(
@@ -226,6 +225,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                           return AlertDialog(
                             // title: const Text('Alert title'),
                             content: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 SvgPicture.asset(
                                   'lib/assets/svgs/withdrawal_complete.svg',

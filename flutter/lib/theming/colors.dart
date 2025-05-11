@@ -18,6 +18,8 @@ class PaxColors {
   /// Accent orange - used for highlights, CTAs, and interactive elements
   static const Color orange = Color(0xFFFF9C4C);
 
+  static const Color otherOrange = Color(0xFFFF5F00);
+
   /// Accent pink - used for secondary highlights and gradients
   static const Color pink = Color(0xFFFF5C86);
 

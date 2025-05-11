@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:pax/theming/colors.dart';
 
-import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
+import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 class WithdrawView extends ConsumerStatefulWidget {
   const WithdrawView({super.key});
@@ -43,7 +43,7 @@ class _WithdrawViewState extends ConsumerState<WithdrawView> {
                     BlendMode.srcIn,
                   ),
                   'lib/assets/svgs/arrow_left_long.svg',
-                ).withPadding(left: 0),
+                ),
               ),
               Spacer(),
               Text(
@@ -56,6 +56,7 @@ class _WithdrawViewState extends ConsumerState<WithdrawView> {
             ],
           ),
         ).withPadding(top: 16),
+        // Divider(color: PaxColors.lightGrey),
       ],
 
       child: Column(

@@ -46,9 +46,7 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
                 onPanDown: (details) {
                   context.pop();
                 },
-                child: SvgPicture.asset(
-                  'lib/assets/svgs/arrow_left_long.svg',
-                ).withPadding(left: 16),
+                child: SvgPicture.asset('lib/assets/svgs/arrow_left_long.svg'),
               ),
               Spacer(),
               Text(
@@ -61,6 +59,7 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
             ],
           ),
         ).withPadding(top: 16),
+        Divider(color: PaxColors.lightGrey),
       ],
 
       child: SingleChildScrollView(

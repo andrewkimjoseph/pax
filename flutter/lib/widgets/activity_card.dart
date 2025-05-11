@@ -29,60 +29,62 @@ class ActivityCard extends ConsumerWidget {
             // height: 24,
           ).withPadding(right: 12),
 
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.75,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.75,
 
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '${toBeginningOfSentenceCase(acitivity.split('_')[0])} ',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                          color: PaxColors.black,
+                        ),
+                      ),
+
+                      Text(
+                        "G\$ 100",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ).withPadding(bottom: 8),
+                ),
+
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${toBeginningOfSentenceCase(acitivity.split('_')[0])} ',
+                      'Completed your first $acitivity',
                       style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 16,
+                        fontWeight: FontWeight.normal,
+                        fontSize: 12,
+                        color: PaxColors.black,
+                      ),
+                    ).withPadding(bottom: 8),
+
+                    Text(
+                      'Dec 22 2024, 2025 | 9.41 AM',
+                      style: TextStyle(
+                        fontWeight: FontWeight.normal,
+                        fontSize: 11,
                         color: PaxColors.black,
                       ),
                     ),
-
-                    Text(
-                      "G\$ 100",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 14,
-                        color: Colors.black,
-                      ),
-                    ),
                   ],
-                ).withPadding(bottom: 8),
-              ),
-
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Completed your first $acitivity',
-                    style: TextStyle(
-                      fontWeight: FontWeight.normal,
-                      fontSize: 12,
-                      color: PaxColors.black,
-                    ),
-                  ).withPadding(bottom: 8),
-
-                  Text(
-                    'Dec 22 2024, 2025 | 9.41 AM',
-                    style: TextStyle(
-                      fontWeight: FontWeight.normal,
-                      fontSize: 11,
-                      color: PaxColors.black,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ],
       ).withPadding(bottom: 8),

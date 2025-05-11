@@ -68,6 +68,7 @@ class _ReportPageViewState extends State<ReportPageView> {
             ],
           ),
         ).withPadding(top: 16),
+        Divider(color: PaxColors.lightGrey),
       ],
       child: Stack(
         children: [

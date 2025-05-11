@@ -42,6 +42,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
             ],
           ),
         ),
+        Divider(color: PaxColors.lightGrey),
       ],
 
       child: SingleChildScrollView(

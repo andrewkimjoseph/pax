@@ -47,9 +47,7 @@ class _HelpAndSupportViewState extends ConsumerState<HelpAndSupportView> {
                 onPanDown: (details) {
                   context.pop();
                 },
-                child: SvgPicture.asset(
-                  'lib/assets/svgs/arrow_left_long.svg',
-                ).withPadding(left: 16),
+                child: SvgPicture.asset('lib/assets/svgs/arrow_left_long.svg'),
               ),
               Spacer(),
               Text(
@@ -61,6 +59,7 @@ class _HelpAndSupportViewState extends ConsumerState<HelpAndSupportView> {
             ],
           ),
         ).withPadding(top: 16),
+        Divider(color: PaxColors.lightGrey),
       ],
 
       child: SingleChildScrollView(

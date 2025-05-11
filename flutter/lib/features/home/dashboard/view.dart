@@ -3,7 +3,9 @@ import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
 import 'package:pax/extensions/tooltip.dart';
 import 'package:pax/theming/colors.dart';
+import 'package:pax/utils/gradient_border.dart';
 import 'package:pax/widgets/published_reports_card.dart';
+import 'package:pax/widgets/select_currency_button.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -32,14 +34,23 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
         child: Column(
           children: [
             Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: PaxColors.orangeToPinkGradient,
-                ),
+              // decoration: BoxDecoration(
 
-                // color: PaxColors.mediumPurple,
-                border: Border.all(color: PaxColors.mediumPurple),
-                borderRadius: BorderRadius.circular(12),
+              //   color: PaxColors.lilac,
+              //   border: Border.all(color: PaxColors.mediumPurple),
+              //   borderRadius: BorderRadius.circular(12),
+              // ),
+              decoration: ShapeDecoration(
+                shape: GradientBorder(
+                  gradient: LinearGradient(
+                    colors: PaxColors.orangeToPinkGradient,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  width: 2,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                color: Colors.white,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,7 +60,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                     style: TextStyle(
                       fontWeight: FontWeight.normal,
                       fontSize: 20,
-                      color: PaxColors.white,
+                      color: PaxColors.black,
                     ),
                   ).withPadding(bottom: 8),
 
@@ -60,7 +71,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 28,
-                          color: PaxColors.white,
+                          color: PaxColors.black,
                         ),
                       ).withPadding(right: 8),
                       SvgPicture.asset(
@@ -106,64 +117,18 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                             }
                           },
                           value: selectedValue,
-
                           placeholder: const Text('Change currency'),
                           popup:
                               (context) => SelectPopup(
                                 items: SelectItemList(
                                   children: [
-                                    SelectItemButton(
-                                      value: 'good_dollar',
-                                      child: Row(
-                                        children: [
-                                          SvgPicture.asset(
-                                            'lib/assets/svgs/currencies/good_dollar.svg',
+                                    SelectCurrencyButton('good_dollar'),
+                                    SelectCurrencyButton('celo_dollar'),
 
-                                            height: 25,
-                                          ).withPadding(right: 4),
-                                          Text('GoodDollar (G\$)'),
-                                        ],
-                                      ),
-                                    ),
-                                    SelectItemButton(
-                                      value: 'celo_dollar',
-                                      child: Row(
-                                        children: [
-                                          SvgPicture.asset(
-                                            'lib/assets/svgs/currencies/celo_dollar.svg',
+                                    SelectCurrencyButton('tether_usd'),
 
-                                            height: 19,
-                                          ).withPadding(right: 6),
-                                          Text('Celo Dollar (cUSD)'),
-                                        ],
-                                      ).withPadding(left: 4),
-                                    ),
-                                    SelectItemButton(
-                                      value: 'tether_usd',
-                                      child: Row(
-                                        children: [
-                                          SvgPicture.asset(
-                                            'lib/assets/svgs/currencies/tether_usd.svg',
-
-                                            height: 19,
-                                          ).withPadding(right: 6),
-                                          Text('Tether USD (USDT)'),
-                                        ],
-                                      ).withPadding(left: 4),
-                                    ),
-
-                                    SelectItemButton(
-                                      value: 'usd_coin',
-                                      child: Row(
-                                        children: [
-                                          SvgPicture.asset(
-                                            'lib/assets/svgs/currencies/usd_coin.svg',
-
-                                            height: 19,
-                                          ).withPadding(right: 6),
-                                          Text('USD Coin (USDC)'),
-                                        ],
-                                      ).withPadding(left: 4),
+                                    SelectCurrencyButton(
+                                      'usd_coin',
                                     ).withPadding(bottom: 30),
                                   ],
                                 ),
@@ -175,9 +140,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                         style: const ButtonStyle.outline(
                               density: ButtonDensity.normal,
                             )
-                            .withBackgroundColor(color: PaxColors.blue)
+                            .withBackgroundColor(color: PaxColors.deepPurple)
                             .withBorder(
-                              border: Border.all(color: Colors.transparent),
+                              // border: Border.all(color: PaxColors.deepPurple),
                             ),
                         onPressed: () {
                           context.go('/wallet');
@@ -189,7 +154,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                             fontSize: 14,
                             color:
                                 PaxColors
-                                    .black, // The purple color from your images
+                                    .white, // The purple color from your images
                           ),
                         ),
                       ).withToolTip('Check out your wallet.'),
@@ -214,9 +179,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
             ).withPadding(bottom: 8),
 
             Container(
-              width: MediaQuery.of(context).size.width,
-              height: 75,
-              padding: EdgeInsets.all(10),
+              // width: double.infinity,
+              height: 120,
+              padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 // gradient: LinearGradient(
                 //   colors: PaxColors.orangeToPinkGradient,
@@ -254,12 +219,15 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                         ),
                       ).withPadding(bottom: 8),
 
-                      Text(
-                        "Our X followers get first-time updates!",
-                        style: TextStyle(
-                          fontWeight: FontWeight.normal,
-                          fontSize: 12,
-                          color: Colors.white,
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        child: Text(
+                          "Our X followers get early access to 30% more high-paying surveys.",
+                          style: TextStyle(
+                            fontWeight: FontWeight.normal,
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ],
@@ -341,96 +309,6 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                 duration: const Duration(seconds: 1),
               ),
             ),
-
-            // if (!viewYourProgress)
-            //   CustomPaint(
-            //     painter: DottedBorderPainter(
-            //       color: PaxColors.deepPurple,
-            //       strokeWidth: 2,
-            //       radius: 12,
-            //     ),
-            //     child: GestureDetector(
-            //       onTap: () {
-            //         setState(() {
-            //           viewYourProgress = !viewYourProgress;
-            //         });
-            //       },
-            //       child: Container(
-            //         width: double.infinity,
-            //         decoration: BoxDecoration(
-            //           color: PaxColors.white,
-            //           borderRadius: BorderRadius.circular(12),
-            //         ),
-            //         padding: const EdgeInsets.all(16),
-            //         child: Column(
-            //           crossAxisAlignment: CrossAxisAlignment.center,
-            //           children: [
-            //             Text(
-            //               'Welcome to Canvassing',
-            //               style: TextStyle(
-            //                 fontWeight: FontWeight.normal,
-            //                 fontSize: 20,
-            //                 color: PaxColors.black,
-            //               ),
-            //             ).withPadding(bottom: 8),
-
-            //             Text(
-            //               'Complete surveys to earn points and level up. Start your journey today!',
-            //               style: TextStyle(
-            //                 fontWeight: FontWeight.normal,
-            //                 fontSize: 16,
-            //                 color: PaxColors.black,
-            //               ),
-            //               textAlign: TextAlign.center,
-            //             ).withPadding(bottom: 16),
-
-            //             AchievementEarningCard(),
-            //           ],
-            //         ),
-            //       ),
-            //     ),
-            //   ).withPadding(bottom: 8).animate().fade(),
-
-            // if (viewYourProgress)
-            //   GestureDetector(
-            //     onTap: () {
-            //       setState(() {
-            //         viewYourProgress = !viewYourProgress;
-            //       });
-            //     },
-            //     child:
-            //         Container(
-            //           width: double.infinity,
-            //           decoration: BoxDecoration(
-            //             color: PaxColors.specialPink,
-            //             borderRadius: BorderRadius.circular(12),
-            //           ),
-            //           padding: const EdgeInsets.all(16),
-            //           child: Column(
-            //             crossAxisAlignment: CrossAxisAlignment.start,
-            //             children: [
-            //               Text(
-            //                 'Your Progress',
-            //                 style: TextStyle(
-            //                   fontWeight: FontWeight.normal,
-            //                   fontSize: 20,
-            //                   color: PaxColors.black,
-            //                 ),
-            //               ).withPadding(bottom: 8),
-
-            //               AchievementEarningCard().withPadding(bottom: 12),
-            //               Text(
-            //                 'View All Achievements',
-            //                 style: TextStyle(
-            //                   fontWeight: FontWeight.bold,
-            //                   fontSize: 14,
-            //                   color: PaxColors.deepPurple,
-            //                 ),
-            //               ).withPadding(bottom: 4),
-            //             ],
-            //           ),
-            //         ).withPadding(bottom: 8).animate().fade(),
-            //   ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

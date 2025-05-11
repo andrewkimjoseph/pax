@@ -48,13 +48,11 @@ class _HelpAndSupportViewState extends ConsumerState<AccountAndSecurityView> {
                 onPanDown: (details) {
                   context.pop();
                 },
-                child: SvgPicture.asset(
-                  'lib/assets/svgs/arrow_left_long.svg',
-                ).withPadding(left: 16),
+                child: SvgPicture.asset('lib/assets/svgs/arrow_left_long.svg'),
               ),
               Spacer(),
               Text(
-                "Help & Support",
+                "Account & Security",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 20),
               ).withPadding(right: 16),
@@ -62,6 +60,7 @@ class _HelpAndSupportViewState extends ConsumerState<AccountAndSecurityView> {
             ],
           ),
         ).withPadding(top: 16),
+        Divider(color: PaxColors.lightGrey),
       ],
 
       child: SingleChildScrollView(
@@ -225,7 +224,7 @@ class _HelpAndSupportViewState extends ConsumerState<AccountAndSecurityView> {
                   // HelpAndSupportCard('About Us'),
                 ],
               ),
-            ).withPadding(top: 32),
+            ),
           ],
         ),
       ).withPadding(all: 8),
