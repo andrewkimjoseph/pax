@@ -75,7 +75,7 @@ class NotificationCard extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        '9:41 AM',
+                        '9:41 AM | Sat 10 May',
 
                         style: TextStyle(
                           fontWeight: FontWeight.normal,
