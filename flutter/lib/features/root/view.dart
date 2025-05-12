@@ -28,22 +28,25 @@ class _RootViewState extends ConsumerState<RootView> {
     return Scaffold(
       footers: [
         const Divider(),
-        NavigationBar(
-          alignment: NavigationBarAlignment.spaceBetween,
-          labelType: NavigationLabelType.expanded,
-          expanded: true,
-          expands: false,
-          onSelected: (index) {
-            setState(() {
-              selected = index;
-            });
-          },
-          index: selected,
-          children: [
-            buildButton('Home', selected == 0),
-            buildButton('Activity', selected == 1),
-            buildButton('Account', selected == 2),
-          ],
+        SizedBox(
+          height: 93.75,
+          child: NavigationBar(
+            alignment: NavigationBarAlignment.spaceBetween,
+            labelType: NavigationLabelType.expanded,
+            expanded: true,
+            expands: false,
+            onSelected: (index) {
+              setState(() {
+                selected = index;
+              });
+            },
+            index: selected,
+            children: [
+              buildButton('Home', selected == 0),
+              buildButton('Activity', selected == 1),
+              buildButton('Account', selected == 2),
+            ],
+          ),
         ),
       ],
 
@@ -56,26 +59,22 @@ class _RootViewState extends ConsumerState<RootView> {
 
   NavigationItem buildButton(String label, bool isSelected) {
     return NavigationItem(
-      overflow: NavigationOverflow.none,
+      // overflow: NavigationOverflow.none,
       style: const ButtonStyle.muted(density: ButtonDensity.icon),
       selectedStyle: const ButtonStyle.fixed(density: ButtonDensity.icon),
-      child: Column(
-        children: [
-          SvgPicture.asset(
-            isSelected
-                ? 'lib/assets/svgs/${label.toLowerCase()}_selected.svg'
-                : 'lib/assets/svgs/${label.toLowerCase()}_unselected.svg',
-            height: 24,
-          ),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              color: isSelected ? PaxColors.deepPurple : PaxColors.lilac,
-              fontWeight: FontWeight.w900,
-            ),
-          ).withPadding(top: 4),
-        ],
+      label: Text(
+        label,
+        style: TextStyle(
+          fontSize: 14,
+          color: isSelected ? PaxColors.deepPurple : PaxColors.lilac,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+      child: SvgPicture.asset(
+        isSelected
+            ? 'lib/assets/svgs/${label.toLowerCase()}_selected.svg'
+            : 'lib/assets/svgs/${label.toLowerCase()}_unselected.svg',
+        height: 24,
       ),
     );
   }

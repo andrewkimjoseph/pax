@@ -1,9 +1,13 @@
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
-import 'package:go_router/go_router.dart';
 import 'package:pax/extensions/tooltip.dart';
+import 'package:pax/providers/db/pax_account_provider.dart';
 import 'package:pax/theming/colors.dart';
+import 'package:pax/utils/currency_symbol.dart';
 import 'package:pax/utils/gradient_border.dart';
+import 'package:pax/utils/token_balance_util.dart';
 import 'package:pax/widgets/published_reports_card.dart';
 import 'package:pax/widgets/select_currency_button.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -29,6 +33,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
 
   @override
   Widget build(BuildContext context) {
+    final paxAccount = ref.read(paxAccountProvider);
     return Scaffold(
       child: SingleChildScrollView(
         child: Column(
@@ -67,7 +72,10 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                   Row(
                     children: [
                       Text(
-                        '17,000,000',
+                        TokenBalanceUtil.getBalanceByCurrency(
+                          paxAccount.account?.balances,
+                          selectedValue,
+                        ).toString(),
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 28,
@@ -84,6 +92,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                   Row(
                     children: [
                       Container(
+                        width: MediaQuery.of(context).size.width * 0.375,
                         decoration: BoxDecoration(
                           color: PaxColors.white,
                           borderRadius: BorderRadius.circular(12),
@@ -104,7 +113,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
 
                                   height: 20,
                                 ).withPadding(right: 8),
-                                Text(item),
+                                Text(
+                                  CurrencySymbolUtil.getSymbolForCurrency(item),
+                                ),
                               ],
                             );
                           },
@@ -129,7 +140,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
 
                                     SelectCurrencyButton(
                                       'usd_coin',
-                                    ).withPadding(bottom: 30),
+                                    ).withPadding(bottom: kIsWeb ? 0 : 30),
                                   ],
                                 ),
                               ),
@@ -144,8 +155,12 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                             .withBorder(
                               // border: Border.all(color: PaxColors.deepPurple),
                             ),
-                        onPressed: () {
-                          context.go('/wallet');
+                        onPressed: () async {
+                          DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+                          AndroidDeviceInfo androidInfo =
+                              await deviceInfo.androidInfo;
+                          print('$androidInfo');
+                          // context.go('/wallet');
                         },
                         child: Text(
                           'Wallet',

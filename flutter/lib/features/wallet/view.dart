@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
 import 'package:pax/extensions/tooltip.dart';
+import 'package:pax/utils/currency_symbol.dart';
 import 'package:pax/widgets/payment_method_card.dart';
 import 'package:pax/widgets/select_currency_button.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -113,6 +115,8 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                           color: PaxColors.white,
                           borderRadius: BorderRadius.circular(12),
                         ),
+                        width: MediaQuery.of(context).size.width * 0.375,
+
                         child: Select<String>(
                           // filled: true,
                           // disableHoverEffect: true,
@@ -129,7 +133,9 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
 
                                   height: 20,
                                 ).withPadding(right: 8),
-                                Text(item),
+                                Text(
+                                  CurrencySymbolUtil.getSymbolForCurrency(item),
+                                ),
                               ],
                             );
                           },
@@ -154,7 +160,7 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
 
                                     SelectCurrencyButton(
                                       'usd_coin',
-                                    ).withPadding(bottom: 30),
+                                    ).withPadding(bottom: kIsWeb ? 0 : 30),
                                   ],
                                 ),
                               ),

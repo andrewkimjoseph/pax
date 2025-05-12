@@ -4,3 +4,9 @@
 hardhat/contracts/artifacts
 
 deployments/
+.DS_Store
+flutter/android/app/google-services.json
+flutter/firebase.json
+flutter/lib/firebase_options.dart
+flutter/ios/Runner/GoogleService-Info.plist
+flutter/.firebaserc

@@ -21,7 +21,7 @@ class _GoodDollarVerificationStepsState
       direction: Axis.vertical,
       steps: [
         Step(
-          title: const Text('Step 1: Open MiniPay > Apps (Mini Apps)'),
+          title: const Text('Step 1: MiniPay > Apps (Mini Apps)'),
           contentBuilder: (context) {
             return StepContainer(
               actions: [
@@ -38,7 +38,7 @@ class _GoodDollarVerificationStepsState
           },
         ),
         Step(
-          title: const Text("Step 2: 'Finance' tab > Universal basic income"),
+          title: const Text("Step 2: Finance > Universal basic income"),
           contentBuilder: (context) {
             return StepContainer(
               actions: [
@@ -60,7 +60,7 @@ class _GoodDollarVerificationStepsState
           },
         ),
         Step(
-          title: const Text("Step 3: Tap 'Claim Now' > 'Verify I'm Human'"),
+          title: const Text("Step 3: Claim Now > Verify I'm Human"),
           contentBuilder: (context) {
             return StepContainer(
               actions: [

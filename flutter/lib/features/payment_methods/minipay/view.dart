@@ -145,7 +145,7 @@ class _HelpAndSupportViewState extends ConsumerState<MiniPayConnectionView> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(8),
                     child: SvgPicture.asset(
                       'lib/assets/svgs/minipay.svg',
                       height: 50,
@@ -158,7 +158,7 @@ class _HelpAndSupportViewState extends ConsumerState<MiniPayConnectionView> {
                   ).withPadding(vertical: 20), // Reduced padding
 
                   Container(
-                    padding: EdgeInsets.all(12),
+                    padding: EdgeInsets.all(8),
                     width: MediaQuery.of(context).size.width,
                     decoration: BoxDecoration(
                       color: PaxColors.otherOrange.withValues(alpha: 0.4),
@@ -204,7 +204,7 @@ class _HelpAndSupportViewState extends ConsumerState<MiniPayConnectionView> {
                           children: [
                             Expanded(
                               child: Text(
-                                'To connect successfully, your wallet should be GoodDollar verified. \n\nIf it is already verified, paste the address and connect.',
+                                'To connect successfully, your wallet should be GoodDollar verified. \n\nIf verified, paste the address and connect.',
                                 style: TextStyle(
                                   color: PaxColors.black,
                                   fontSize: 14,
