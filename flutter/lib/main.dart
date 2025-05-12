@@ -18,6 +18,7 @@ class _AppState extends ConsumerState<App> {
   @override
   Widget build(BuildContext context) {
     return ShadcnApp.router(
+      debugShowCheckedModeBanner: false,
       routerConfig: routerConfig,
       title: 'My App',
       theme: ref.watch(themeProvider),
