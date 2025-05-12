@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pax/models/auth/user_model.dart';
 
@@ -47,7 +48,9 @@ class AuthRepository {
       }
       return null;
     } catch (e) {
-      print('Error signing in with Google: $e');
+      if (kDebugMode) {
+        print('Error signing in with Google: $e');
+      }
       rethrow; // Rethrow to let the notifier handle it
     }
   }
@@ -69,7 +72,9 @@ class AuthRepository {
       }
       return null;
     } catch (e) {
-      print('Error getting current user: $e');
+      if (kDebugMode) {
+        print('Error getting current user: $e');
+      }
       return null;
     }
   }
@@ -92,7 +97,9 @@ class AuthRepository {
       // print('Firebase auth validation error: ${e.code} - ${e.message}');
       return false;
     } catch (e) {
-      print('Error validating user: $e');
+      if (kDebugMode) {
+        print('Error validating user: $e');
+      }
       return false;
     }
   }
@@ -106,7 +113,9 @@ class AuthRepository {
         await user.getIdToken(true);
       }
     } catch (e) {
-      print('Error refreshing token: $e');
+      if (kDebugMode) {
+        print('Error refreshing token: $e');
+      }
       // Force sign out if token refresh fails
       await signOut();
     }
