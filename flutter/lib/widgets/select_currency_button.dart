@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:pax/utils/currency_symbol.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 class SelectCurrencyButton extends ConsumerStatefulWidget {
@@ -24,7 +25,7 @@ class _SelectCurrencyButtonState extends ConsumerState<SelectCurrencyButton> {
 
             height: 25,
           ).withPadding(right: 4),
-          Text(widget.value),
+          Text(CurrencySymbolUtil.getSymbolForCurrency(widget.value)),
         ],
       ),
     );

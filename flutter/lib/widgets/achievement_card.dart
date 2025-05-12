@@ -15,7 +15,7 @@ class AchievementCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
-      width: double.infinity,
+      width: MediaQuery.of(context).size.width,
 
       padding: EdgeInsets.all(8),
 
@@ -43,17 +43,21 @@ class AchievementCard extends ConsumerWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SvgPicture.asset(
-                'lib/assets/svgs/$achievement.svg',
+              Column(
+                children: [
+                  SvgPicture.asset(
+                    'lib/assets/svgs/$achievement.svg',
 
-                // height: 24,
-              ).withPadding(right: 12),
+                    // height: 24,
+                  ).withPadding(right: 12),
+                ],
+              ),
 
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.6,
+                    width: MediaQuery.of(context).size.width * 0.7,
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -66,7 +70,7 @@ class AchievementCard extends ConsumerWidget {
                             color: PaxColors.black,
                           ),
                         ),
-
+                        Spacer(),
                         Text(
                           isEarned ? 'Earned' : "G\$ 100",
                           style: TextStyle(
@@ -106,7 +110,7 @@ class AchievementCard extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.75,
+                              width: MediaQuery.of(context).size.width * 0.7,
                               height: 5,
                               child: ShaderMask(
                                 shaderCallback: (Rect bounds) {
@@ -127,12 +131,30 @@ class AchievementCard extends ConsumerWidget {
                               ),
                             ).withPadding(bottom: 4),
 
-                            Text(
-                              '5/10',
-                              style: TextStyle(
-                                fontWeight: FontWeight.normal,
-                                fontSize: 11,
-                                color: PaxColors.black,
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.7,
+
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    '5/10',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.normal,
+                                      fontSize: 11,
+                                      color: PaxColors.black,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Complete 5 more to earn',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.normal,
+                                      fontSize: 11,
+                                      color: PaxColors.black,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -144,7 +166,7 @@ class AchievementCard extends ConsumerWidget {
             ],
           ).withPadding(bottom: 8),
           SizedBox(
-            width: double.infinity,
+            width: MediaQuery.of(context).size.width,
             child: Button(
               onPressed: () {
                 // context.go('/task');
