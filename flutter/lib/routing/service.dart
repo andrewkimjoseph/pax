@@ -1,17 +1,43 @@
-// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pax/exports/views.dart';
+import 'package:pax/models/auth/auth_state_model.dart';
+import 'package:pax/providers/auth/auth_provider.dart';
+import 'package:pax/providers/route/route_notifier_provider.dart';
 import 'routes.dart';
 
-class RoutingService {
-  static final GoRouter routerConfig = GoRouter(
-    initialLocation: Routes.onboarding,
+final routerProvider = Provider((ref) {
+  final notifier = ref.watch(routerNotifierProvider);
+
+  return GoRouter(
+    refreshListenable: notifier,
+    initialLocation: Routes.root,
+
+    redirect: (context, state) {
+      final authState = ref.read(authStateForRouterProvider);
+
+      // If user is not authenticated and trying to access any route other than onboarding
+      if (authState != AuthState.authenticated &&
+          state.matchedLocation != Routes.onboarding) {
+        // Redirect unauthenticated users to onboarding
+        return Routes.onboarding;
+      }
+
+      // No redirection needed
+      return null;
+    },
     routes: [
       // Root
       GoRoute(
         path: Routes.root,
-        builder: (BuildContext context, GoRouterState state) => RootView(),
+        builder:
+            (BuildContext context, GoRouterState state) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: TextScaler.noScaling),
+              child: RootView(),
+            ),
 
         routes: [
           GoRoute(
@@ -111,6 +137,4 @@ class RoutingService {
       // Onboarding
     ],
   );
-}
-
-final routerConfig = RoutingService.routerConfig;
+});
