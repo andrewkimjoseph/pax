@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
+import 'package:pax/providers/auth_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import '../../theming/colors.dart' show PaxColors;
@@ -24,6 +25,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
 
   @override
   Widget build(BuildContext context) {
+    ;
     return Scaffold(
       resizeToAvoidBottomInset: false,
       headers: [
@@ -85,8 +87,8 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                         child: Avatar(
                           size: 70,
                           initials: Avatar.getInitials('sunarya-thito'),
-                          provider: const NetworkImage(
-                            'https://avatars.githubusercontent.com/u/64018564?v=4',
+                          provider: NetworkImage(
+                            ref.read(authProvider).user.photoURL!,
                           ),
                         ),
                       ),

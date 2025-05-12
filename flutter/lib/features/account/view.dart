@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' show Divider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pax/features/account_and_security/view.dart';
+import 'package:pax/providers/auth_provider.dart';
 import 'package:pax/widgets/account_option_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
 
@@ -326,6 +327,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
                     height: 48,
                     child: PrimaryButton(
                       onPressed: () {
+                        ref.read(authProvider.notifier).signOut();
                         context.pushReplacement('/onboarding');
                         // if (onboardingViewModel.isLastPage) {
                         //   // Handle completion
