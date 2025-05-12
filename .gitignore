@@ -4,3 +4,4 @@
 hardhat/contracts/artifacts
 
 deployments/
+.DS_Store
