@@ -25,7 +25,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
 
   @override
   Widget build(BuildContext context) {
-    ;
+    final user = ref.read(authProvider).user;
     return Scaffold(
       resizeToAvoidBottomInset: false,
       headers: [
@@ -87,9 +87,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                         child: Avatar(
                           size: 70,
                           initials: Avatar.getInitials('sunarya-thito'),
-                          provider: NetworkImage(
-                            ref.read(authProvider).user.photoURL!,
-                          ),
+                          provider: NetworkImage(user.photoURL!),
                         ),
                       ),
                     ],
@@ -118,7 +116,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                             TextField(
                               enableInteractiveSelection: true,
                               placeholder: Text(
-                                'Andrew Kim',
+                                user.displayName!,
                                 style: TextStyle(
                                   color: PaxColors.black,
                                   fontSize: 14,
@@ -146,7 +144,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                               keyboardType: TextInputType.emailAddress,
 
                               placeholder: Text(
-                                'andrewk@thecanvassing.com',
+                                user.email!,
                                 style: TextStyle(
                                   color: PaxColors.black,
                                   fontSize: 14,
