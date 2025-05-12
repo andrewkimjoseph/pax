@@ -113,12 +113,15 @@ class _HelpAndSupportViewState extends ConsumerState<AccountAndSecurityView> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        Text(
-                                          "Are you sure you want to delete your account?",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.normal,
+                                        Expanded(
+                                          child: Text(
+                                            "Are you sure you want to delete your account?",
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.normal,
+                                            ),
+                                            textAlign: TextAlign.center,
                                           ),
                                         ),
                                       ],

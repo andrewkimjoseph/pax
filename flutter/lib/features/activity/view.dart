@@ -129,7 +129,7 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
                     color: index == 2 ? PaxColors.white : PaxColors.black,
                   ),
                 ),
-              ).withPadding(right: 8),
+              ),
             ],
           ),
         ),
