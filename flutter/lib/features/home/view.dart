@@ -29,6 +29,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
     return Scaffold(
       headers: [
         AppBar(
+          height: 87.5,
           padding: EdgeInsets.all(8),
 
           backgroundColor: PaxColors.white,

@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pax/providers/auth_provider.dart';
+import 'package:pax/providers/db/participant_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import '../../theming/colors.dart' show PaxColors;
@@ -16,7 +17,7 @@ class ProfileView extends ConsumerStatefulWidget {
 class _ProfileViewState extends ConsumerState<ProfileView> {
   PhoneNumber? phoneNumber;
   String? selectedValue;
-  DateTime? _value;
+  DateTime? dateTime;
   String? genderValue;
   @override
   void initState() {
@@ -25,7 +26,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.read(authProvider).user;
+    final participant = ref.watch(participantProvider).participant;
     return Scaffold(
       resizeToAvoidBottomInset: false,
       headers: [
@@ -86,8 +87,12 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                         ),
                         child: Avatar(
                           size: 70,
-                          initials: Avatar.getInitials('sunarya-thito'),
-                          provider: NetworkImage(user.photoURL!),
+                          initials: Avatar.getInitials(
+                            participant!.profilePictureURI!,
+                          ),
+                          provider: NetworkImage(
+                            participant.profilePictureURI!,
+                          ),
                         ),
                       ),
                     ],
@@ -116,7 +121,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                             TextField(
                               enableInteractiveSelection: true,
                               placeholder: Text(
-                                user.displayName!,
+                                participant.displayName!,
                                 style: TextStyle(
                                   color: PaxColors.black,
                                   fontSize: 14,
@@ -144,7 +149,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                               keyboardType: TextInputType.emailAddress,
 
                               placeholder: Text(
-                                user.email!,
+                                participant.emailAddress!,
                                 style: TextStyle(
                                   color: PaxColors.black,
                                   fontSize: 14,
@@ -234,7 +239,8 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                       selectedValue = value;
                                     });
                                   },
-                                  value: selectedValue,
+                                  value: participant.gender,
+                                  enabled: participant.gender == null,
                                   placeholder: const Text('Gender'),
                                   popup: (context) {
                                     return SelectPopup(
@@ -277,11 +283,20 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                               // ),
                               width: double.infinity,
                               child: DatePicker(
+                                enabled: participant.dateOfBirth == null,
+
                                 placeholder: Text(
                                   'Select date',
                                   style: TextStyle(color: Colors.black),
                                 ),
-                                value: _value,
+                                value:
+                                    participant.dateOfBirth != null
+                                        ? DateTime.fromMillisecondsSinceEpoch(
+                                          participant
+                                              .dateOfBirth!
+                                              .millisecondsSinceEpoch,
+                                        )
+                                        : null,
                                 mode: PromptMode.dialog,
                                 stateBuilder: (date) {
                                   if (date.isAfter(DateTime.now())) {
@@ -291,7 +306,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                 },
                                 onChanged: (value) {
                                   setState(() {
-                                    _value = value;
+                                    dateTime = value;
                                   });
                                 },
                               ),
@@ -312,7 +327,94 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                           width: double.infinity,
                           height: 48,
                           child: PrimaryButton(
-                            onPressed: () {},
+                            onPressed: () async {
+                              if (phoneNumber == null) {
+                                showToast(
+                                  context: context,
+                                  location: ToastLocation.topCenter,
+                                  builder:
+                                      (context, overlay) => Container(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                            0.95,
+                                        padding: const EdgeInsets.all(15),
+                                        decoration: BoxDecoration(
+                                          // gradient: const LinearGradient(
+                                          //   begin: Alignment.topLeft,
+                                          //   end: Alignment.bottomRight,
+                                          //   colors: [
+                                          //     PaxColors.orange,
+                                          //     PaxColors.pink,
+                                          //   ],
+                                          //   stops: [0.0, 1.0],
+                                          // ),
+                                          color: PaxColors.pink,
+                                          borderRadius: BorderRadius.circular(
+                                            15,
+                                          ),
+                                        ),
+                                        child: Basic(
+                                          subtitle: const Text(
+                                            '[Phone number] not provided',
+                                            style: TextStyle(
+                                              color: PaxColors.white,
+                                            ),
+                                          ),
+                                          trailing: FaIcon(
+                                            FontAwesomeIcons.circleInfo,
+                                            color: PaxColors.white,
+                                          ),
+                                          trailingAlignment: Alignment.center,
+                                        ),
+                                      ),
+                                );
+                              }
+                              // showDialog(
+                              //   context: context,
+                              //   builder: (context) {
+                              //     return AlertDialog(
+                              //       title: const Text(
+                              //         'Confirm Profile Update',
+                              //         style: TextStyle(
+                              //           color: PaxColors.deepPurple,
+                              //           fontSize: 24,
+                              //           fontWeight: FontWeight.bold,
+                              //         ),
+                              //       ),
+                              //       content: Column(
+                              //         children: [
+                              //           const Text(
+                              //             'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                              //           ),
+                              //         ],
+                              //       ),
+                              //       actions: [
+                              //         OutlineButton(
+                              //           child: const Text('Cancel'),
+                              //           onPressed: () {
+                              //             Navigator.pop(context);
+                              //           },
+                              //         ),
+                              //         PrimaryButton(
+                              //           child: const Text('OK'),
+                              //           onPressed: () {
+                              //             Navigator.pop(context);
+                              //           },
+                              //         ),
+                              //       ],
+                              //     );
+                              //   },
+                              // );
+                              // await ref
+                              //     .read(participantProvider.notifier)
+                              //     .updateProfile({
+                              //       'gender': selectedValue,
+                              //       'dateOfBirth':
+                              //           _value != null
+                              //               ? Timestamp.fromDate(_value!)
+                              //               : null,
+                              //     });
+                            },
 
                             child: Text(
                               'Save',

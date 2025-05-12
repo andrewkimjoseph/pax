@@ -25,6 +25,7 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
     return Scaffold(
       headers: [
         AppBar(
+          height: 87.5,
           padding: EdgeInsets.all(8),
           backgroundColor: PaxColors.white,
           header: Row(

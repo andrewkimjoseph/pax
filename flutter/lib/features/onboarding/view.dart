@@ -3,7 +3,9 @@ import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
 import 'package:pax/features/onboarding/view_model.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
-import 'package:pax/providers/auth_provider.dart';
+import 'package:pax/providers/auth/auth_provider.dart';
+import 'package:pax/providers/db/participant_provider.dart';
+import 'package:pax/providers/db/pax_account_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -34,6 +36,16 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
     // Watch the auth state
     final authState = ref.watch(authProvider);
     final bool isAuthLoading = authState.state == AuthState.loading;
+
+    // Watch the participant state
+    final participantState = ref.watch(participantProvider);
+    final bool isParticipantLoading =
+        participantState.state == ParticipantState.loading;
+
+    // Combined loading state
+    final bool isLoading = isAuthLoading || isParticipantLoading;
+
+    ref.watch(paxAccountProvider);
 
     return Scaffold(
       child: Column(
@@ -145,7 +157,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                             border: Border.all(color: Colors.black),
                           ),
                           onPressed:
-                              isAuthLoading ||
+                              isLoading ||
                                       authState.state == AuthState.authenticated
                                   ? null
                                   : () {
@@ -158,31 +170,38 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                                           if (ref.read(authProvider).state ==
                                               AuthState.authenticated) {
                                             // Navigate after successful sign in
-                                            onboardingViewModel
-                                                .completeOnboarding();
+
+                                            Future.delayed(
+                                              const Duration(seconds: 1),
+                                              () {
+                                                // Check if participant is loaded
+                                                if (ref
+                                                        .read(
+                                                          participantProvider,
+                                                        )
+                                                        .state ==
+                                                    ParticipantState.loaded) {
+                                                  // Navigate after successful sign in and participant loading
+                                                  onboardingViewModel
+                                                      .completeOnboarding();
+
+                                                  if (context.mounted) {
+                                                    context.pushReplacement(
+                                                      '/',
+                                                    );
+                                                  }
+                                                }
+                                              },
+                                            );
 
                                             if (context.mounted) {
                                               context.pushReplacement('/');
                                             }
-                                          } else if (ref
-                                                  .read(authProvider)
-                                                  .state ==
-                                              AuthState.error) {
-                                            // Show error toast if there was an error
-                                            // OverlayToastManager().show(
-                                            //   context: context,
-                                            //   builder: (context, overlay) => buildErrorToast(
-                                            //     context,
-                                            //     overlay,
-                                            //     ref.read(authProvider).errorMessage ?? 'Sign in failed'
-                                            //   ),
-                                            //   position: ToastPosition.bottom,
-                                            // );
                                           }
                                         });
                                   },
                           child:
-                              isAuthLoading
+                              isLoading
                                   ? const CircularProgressIndicator()
                                       .withMargin(right: 8)
                                   : Row(
