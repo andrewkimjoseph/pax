@@ -1,7 +1,7 @@
 // app_lifecycle_handler.dart
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pax/providers/auth_provider.dart';
+import 'package:pax/providers/auth/auth_provider.dart';
 
 /// A widget that handles app lifecycle events to refresh auth state
 /// when the app is resumed from background
