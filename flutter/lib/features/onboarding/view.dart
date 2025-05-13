@@ -163,7 +163,9 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                                         .signInWithGoogle()
                                         .then((_) {
                                           if (ref.read(authProvider).state ==
-                                              AuthState.unauthenticated) {
+                                                  AuthState.unauthenticated ||
+                                              ref.read(authProvider).state ==
+                                                  AuthState.error) {
                                             if (context.mounted) {
                                               showErrorToast(context);
                                             }
@@ -304,7 +306,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
           (context, overlay) => Toast(
             leadingIcon: FontAwesomeIcons.google,
             toastColor: PaxColors.red,
-            text: 'Signin incomplete',
+            text: 'Sign-in failed',
             trailingIcon: FontAwesomeIcons.triangleExclamation,
           ),
     );
@@ -318,7 +320,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
           (context, overlay) => Toast(
             leadingIcon: FontAwesomeIcons.google,
             toastColor: PaxColors.green,
-            text: 'Signin complete',
+            text: 'Sign-in complete',
             trailingIcon: FontAwesomeIcons.solidCircleCheck,
           ),
     );
