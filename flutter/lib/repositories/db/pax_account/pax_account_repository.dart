@@ -1,5 +1,6 @@
 // repositories/pax_account_repository.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:pax/models/firestore/pax_account/pax_account_model.dart';
 
 class PaxAccountRepository {
@@ -14,7 +15,9 @@ class PaxAccountRepository {
 
       return docSnapshot.exists;
     } catch (e) {
-      print('Error checking if account exists: $e');
+      if (kDebugMode) {
+        print('Error checking if account exists: $e');
+      }
       rethrow;
     }
   }
@@ -31,7 +34,9 @@ class PaxAccountRepository {
 
       return null;
     } catch (e) {
-      print('Error getting account: $e');
+      if (kDebugMode) {
+        print('Error getting account: $e');
+      }
       rethrow;
     }
   }
@@ -57,7 +62,9 @@ class PaxAccountRepository {
 
       return newAccount;
     } catch (e) {
-      print('Error creating account: $e');
+      if (kDebugMode) {
+        print('Error creating account: $e');
+      }
       rethrow;
     }
   }
@@ -83,7 +90,9 @@ class PaxAccountRepository {
 
       return PaxAccountModel.fromMap(updatedDoc.data()!, id: updatedDoc.id);
     } catch (e) {
-      print('Error updating account: $e');
+      if (kDebugMode) {
+        print('Error updating account: $e');
+      }
       rethrow;
     }
   }
@@ -102,7 +111,9 @@ class PaxAccountRepository {
         return await createAccount(userId);
       }
     } catch (e) {
-      print('Error handling user signup: $e');
+      if (kDebugMode) {
+        print('Error handling user signup: $e');
+      }
       rethrow;
     }
   }
@@ -128,7 +139,9 @@ class PaxAccountRepository {
       // Update account with new balances
       return await updateAccount(userId, {'balances': updatedBalances});
     } catch (e) {
-      print('Error updating balance: $e');
+      if (kDebugMode) {
+        print('Error updating balance: $e');
+      }
       rethrow;
     }
   }
