@@ -2,7 +2,7 @@ import 'package:pax/utils/currency_symbol.dart';
 
 class TokenBalanceUtil {
   /// Maps token IDs to their corresponding currency names
-  static Map<String, String> _tokenToCurrency = {
+  static final Map<String, String> _tokenToCurrency = {
     '1': 'good_dollar',
     '2': 'celo_dollar',
     '3': 'tether_usd',
@@ -10,7 +10,7 @@ class TokenBalanceUtil {
   };
 
   /// Maps currency names to their corresponding token IDs
-  static Map<String, String> _currencyToToken = {
+  static final Map<String, String> _currencyToToken = {
     'good_dollar': '1',
     'celo_dollar': '2',
     'tether_usd': '3',
