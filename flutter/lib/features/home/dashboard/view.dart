@@ -159,7 +159,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                           DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
                           AndroidDeviceInfo androidInfo =
                               await deviceInfo.androidInfo;
-                          print('$androidInfo');
+                          if (kDebugMode) {
+                            print('$androidInfo');
+                          }
                           // context.go('/wallet');
                         },
                         child: Text(

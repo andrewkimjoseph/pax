@@ -1,11 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pax/features/onboarding/view_model.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/participant_provider.dart';
 import 'package:pax/providers/db/pax_account_provider.dart';
+import 'package:pax/widgets/toast.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -162,41 +164,60 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                                   ? null
                                   : () {
                                     // Handle Google sign in
+
                                     ref
                                         .read(authProvider.notifier)
                                         .signInWithGoogle()
                                         .then((_) {
-                                          // If sign in was successful
+                                          if (ref.read(authProvider).state ==
+                                              AuthState.unauthenticated) {
+                                            if (context.mounted) {
+                                              showErrorToast(context);
+                                            }
+                                          }
+
                                           if (ref.read(authProvider).state ==
                                               AuthState.authenticated) {
                                             // Navigate after successful sign in
 
-                                            Future.delayed(
-                                              const Duration(seconds: 1),
-                                              () {
-                                                // Check if participant is loaded
-                                                if (ref
-                                                        .read(
-                                                          participantProvider,
-                                                        )
-                                                        .state ==
-                                                    ParticipantState.loaded) {
-                                                  // Navigate after successful sign in and participant loading
-                                                  onboardingViewModel
-                                                      .completeOnboarding();
+                                            if (context.mounted) {
+                                              showSuccessToast(context);
+                                            }
 
-                                                  if (context.mounted) {
-                                                    context.pushReplacement(
-                                                      '/',
-                                                    );
-                                                  }
-                                                }
-                                              },
-                                            );
+                                            // if (ref
+                                            //         .read(participantProvider)
+                                            //         .state ==
+                                            //     ParticipantState.loaded) {
+                                            //   // Navigate after successful sign in and participant loading
+
+                                            // }
+
+                                            onboardingViewModel
+                                                .resetOnboarding();
 
                                             if (context.mounted) {
                                               context.pushReplacement('/');
                                             }
+                                          } else {}
+                                        })
+                                        .onError((error, stackTrace) {
+                                          // Handle the error here
+                                          if (context.mounted) {
+                                            showToast(
+                                              context: context,
+                                              location: ToastLocation.topCenter,
+                                              builder:
+                                                  (context, overlay) => Toast(
+                                                    leadingIcon:
+                                                        FontAwesomeIcons.google,
+                                                    toastColor: PaxColors.red,
+                                                    text:
+                                                        'Google signin incomplete',
+                                                    trailingIcon:
+                                                        FontAwesomeIcons
+                                                            .triangleExclamation,
+                                                  ),
+                                            );
                                           }
                                         });
                                   },
@@ -260,13 +281,8 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                         height: 48,
                         child: PrimaryButton(
                           onPressed: () {
-                            if (onboardingViewModel.isLastPage) {
-                              // Handle completion
-                              onboardingViewModel.completeOnboarding();
-                            } else {
-                              // Go to next page
-                              onboardingViewModel.goToNextPage();
-                            }
+                            // Go to next page
+                            onboardingViewModel.goToNextPage();
                           },
                           child: Text(
                             'Continue',
@@ -287,105 +303,31 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
     );
   }
 
-  // Widget to show user information after successful sign in
-  // Widget _buildUserInfo(BuildContext context, UserModel user) {
-  //   return Container(
-  //     margin: const EdgeInsets.only(top: 20),
-  //     padding: const EdgeInsets.all(16),
-  //     decoration: BoxDecoration(
-  //       color: PaxColors.lightGrey.withOpacity(0.3),
-  //       borderRadius: BorderRadius.circular(12),
-  //     ),
-  //     child: Column(
-  //       children: [
-  //         if (user.photoURL != null)
-  //           CircleAvatar(
-  //             radius: 24,
-  //             backgroundImage: NetworkImage(user.photoURL!),
-  //           ).withPadding(bottom: 8),
-  //         Text(
-  //           'Welcome, ${user.displayName ?? 'User'}!',
-  //           style: Theme.of(context).typography.base.copyWith(
-  //             fontWeight: FontWeight.w700,
-  //             fontSize: 16,
-  //             color: PaxColors.deepPurple,
-  //           ),
-  //         ),
-  //         if (user.email != null)
-  //           Text(
-  //             user.email!,
-  //             style: Theme.of(context).typography.base.copyWith(
-  //               fontWeight: FontWeight.normal,
-  //               fontSize: 12,
-  //               color: PaxColors.black,
-  //             ),
-  //           ).withPadding(top: 4),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  // Toast for successful sign in
-  Widget buildToast(BuildContext context, ToastOverlay overlay) {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.95,
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [PaxColors.orange, PaxColors.pink],
-          stops: [0.0, 1.0],
-        ),
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: const [
-          BoxShadow(spreadRadius: 1, blurRadius: 4, offset: Offset(0, 2)),
-        ],
-      ),
-      child: Basic(
-        subtitle: const Text(
-          'Event created!',
-          style: TextStyle(color: PaxColors.white),
-        ),
-        trailing: PrimaryButton(
-          size: ButtonSize.small,
-          onPressed: () {
-            overlay.close();
-          },
-          child: const Text('Undo'),
-        ),
-        trailingAlignment: Alignment.center,
-      ),
+  void showErrorToast(BuildContext toastContext) {
+    showToast(
+      context: toastContext,
+      location: ToastLocation.topCenter,
+      builder:
+          (context, overlay) => Toast(
+            leadingIcon: FontAwesomeIcons.google,
+            toastColor: PaxColors.red,
+            text: 'Signin incomplete',
+            trailingIcon: FontAwesomeIcons.triangleExclamation,
+          ),
     );
   }
 
-  // Error toast when sign in fails
-  Widget buildErrorToast(
-    BuildContext context,
-    ToastOverlay overlay,
-    String message,
-  ) {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.95,
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.red.shade600,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: const [
-          BoxShadow(spreadRadius: 1, blurRadius: 4, offset: Offset(0, 2)),
-        ],
-      ),
-      child: Basic(
-        subtitle: Text(message, style: const TextStyle(color: PaxColors.white)),
-        trailing: PrimaryButton(
-          size: ButtonSize.small,
-          onPressed: () {
-            overlay.close();
-          },
-          child: const Text('Close'),
-        ),
-        trailingAlignment: Alignment.center,
-      ),
+  void showSuccessToast(BuildContext toastContext) {
+    showToast(
+      context: context,
+      location: ToastLocation.topCenter,
+      builder:
+          (context, overlay) => Toast(
+            leadingIcon: FontAwesomeIcons.google,
+            toastColor: PaxColors.green,
+            text: 'Signin complete',
+            trailingIcon: FontAwesomeIcons.solidCircleCheck,
+          ),
     );
   }
 }
