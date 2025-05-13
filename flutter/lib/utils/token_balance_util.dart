@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 import 'package:pax/utils/currency_symbol.dart';
 
 class TokenBalanceUtil {
@@ -33,38 +35,85 @@ class TokenBalanceUtil {
   }
 
   /// Returns the formatted balance with symbol for a given currency name from a balances map
-  static String getFormattedBalanceByCurrency(
-    Map<String, num> balances,
-    String currencyName,
-  ) {
-    // Get the token ID for this currency
-    final tokenId = _currencyToToken[currencyName.toLowerCase()];
-    if (tokenId == null) {
-      return '${CurrencySymbolUtil.getSymbolForCurrency(currencyName)} 0';
-    }
+  // static String getFormattedBalanceByCurrency(
+  //   Map<String, num> balances,
+  //   String currencyName,
+  // ) {
+  //   // Get the token ID for this currency
+  //   final tokenId = _currencyToToken[currencyName.toLowerCase()];
+  //   if (tokenId == null) {
+  //     return '${CurrencySymbolUtil.getSymbolForCurrency(currencyName)} 0';
+  //   }
 
-    // Get the balance and format it
-    return getFormattedBalance(balances, tokenId);
-  }
+  //   // Get the balance and format it
+  //   return getFormattedBalance(balances, tokenId);
+  // }
 
   /// Returns the raw balance for a given token ID from a balances map
   static num getBalance(Map<String, num>? balances, String tokenId) {
     return balances?[tokenId] ?? 0;
   }
 
-  /// Returns the raw balance for a given currency name from a balances map
+  // Returns the raw balance for a given currency name from a balances map
+
   static num getBalanceByCurrency(
     Map<String, num>? balances,
-    String currencyName,
-  ) {
-    // Get the token ID for this currency
-    final tokenId = _currencyToToken[currencyName.toLowerCase()];
-    if (tokenId == null) {
+    String currencyName, {
+    bool formatAsInteger = false,
+  }) {
+    if (balances == null || currencyName.isEmpty) {
       return 0;
     }
 
-    // Return the balance
-    return getBalance(balances, tokenId);
+    // Get the token ID for this currency (handle case insensitivity)
+    final tokenId = _currencyToToken[currencyName.toLowerCase()];
+    if (tokenId == null) {
+      if (kDebugMode) {
+        print('Warning: Unknown currency name: $currencyName');
+      }
+      return 0;
+    }
+
+    // Get the raw balance from the map
+    final rawBalance = balances[tokenId] ?? 0;
+
+    // If formatting is requested, format as integer with thousands separators
+    if (formatAsInteger) {
+      return rawBalance.toInt();
+    }
+
+    // Return the raw balance
+    return rawBalance;
+  }
+
+  // Add a companion method for formatted output
+  static String getFormattedBalanceByCurrency(
+    Map<String, num>? balances,
+    String currencyName, {
+    bool includeSymbol = false,
+    bool includeDecimals = false,
+  }) {
+    // Get the raw balance
+    final rawBalance = getBalanceByCurrency(balances, currencyName);
+
+    final locale = Intl.getCurrentLocale();
+
+    // Create formatter based on whether to include decimals
+    final NumberFormat formatter =
+        includeDecimals
+            ? NumberFormat('#,##0.00', locale)
+            : NumberFormat('#,###', locale);
+
+    // Format the number
+    final formattedNumber = formatter.format(rawBalance);
+
+    // Add symbol if requested
+    if (includeSymbol) {
+      final symbol = CurrencySymbolUtil.getSymbolForCurrency(currencyName);
+      return '$symbol $formattedNumber';
+    }
+
+    return formattedNumber;
   }
 
   /// Returns the symbol for a given token ID
