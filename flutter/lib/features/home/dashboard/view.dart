@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pax/data/forum_reports.dart';
 import 'package:pax/extensions/tooltip.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
 import 'package:pax/theming/colors.dart';
@@ -359,7 +360,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
               ],
             ).withPadding(bottom: 8, top: 4),
 
-            PublishedReportCard('early_bird').withPadding(bottom: 12),
+            PublishedReportCard(forumReports).withPadding(bottom: 12),
           ],
         ).withPadding(all: 8),
       ),

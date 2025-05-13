@@ -90,6 +90,7 @@ flutter:
     - lib/assets/
     - lib/assets/images/   
     - lib/assets/images/gooddollar_verification_steps/
+    - lib/assets/images/reports/
     - lib/assets/svgs/
     - lib/assets/svgs/dashboard_carousel/
     - lib/assets/svgs/currencies/
