@@ -78,7 +78,7 @@ class _NotificationsViewState extends ConsumerState<NotificationsView> {
                 NotificationCard('New Survey Alert', 'NT'),
                 NotificationCard('New Survey Alert', 'NT'),
               ],
-            ).withPadding(top: 32),
+            ),
           ],
         ),
       ).withPadding(all: 8),

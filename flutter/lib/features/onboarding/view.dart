@@ -6,7 +6,7 @@ import 'package:pax/features/onboarding/view_model.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/participant_provider.dart';
-import 'package:pax/providers/db/pax_account_provider.dart';
+import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
 import 'package:pax/widgets/toast.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -22,18 +22,11 @@ class OnboardingView extends ConsumerStatefulWidget {
 }
 
 class _OnboardingViewState extends ConsumerState<OnboardingView> {
-  late OnboardingViewModel onboardingViewModel;
-
-  @override
-  void initState() {
-    onboardingViewModel = ref.read(onboardingViewModelProvider.notifier);
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
-    // Watch the onboarding state
-    ref.watch(onboardingViewModelProvider);
+    // Watch the onboarding state - now we directly use the state values
+    final onboardingState = ref.watch(onboardingViewModelProvider);
+    final onboardingViewModel = ref.read(onboardingViewModelProvider.notifier);
 
     // Watch the auth state
     final authState = ref.watch(authProvider);
@@ -61,7 +54,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
               width: double.infinity,
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage(onboardingViewModel.currentPage.imageAsset),
+                  image: AssetImage(onboardingState.currentPage.imageAsset),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -72,14 +65,14 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
           Expanded(
             flex: 3,
             child: PageView.builder(
-              controller: onboardingViewModel.pageController,
+              controller: onboardingState.pageController,
               onPageChanged: (index) {
                 // Update the view model when page changes
                 onboardingViewModel.onPageChanged(index);
               },
-              itemCount: onboardingViewModel.pageCount,
+              itemCount: onboardingState.pageCount,
               itemBuilder: (context, index) {
-                final page = onboardingViewModel.currentPage;
+                final page = onboardingState.currentPage;
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -109,7 +102,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
 
                     // Show user info if authenticated
                     // if (authState.state == AuthState.authenticated &&
-                    //     onboardingViewModel.isLastPage)
+                    //     onboardingState.isLastPage)
                     // _buildUserInfo(context, authState.user),
                   ],
                 ).withPadding(left: 16, right: 16);
@@ -120,11 +113,11 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
           // Page indicator
           Expanded(
             child: SmoothPageIndicator(
-              controller: onboardingViewModel.pageController,
-              count: onboardingViewModel.pageCount,
+              controller: onboardingState.pageController,
+              count: onboardingState.pageCount,
               onDotClicked: (index) {
-                if (onboardingViewModel.currentPageIndex - index == 1 ||
-                    onboardingViewModel.currentPageIndex - index == -1) {
+                if (onboardingState.currentPageIndex - index == 1 ||
+                    onboardingState.currentPageIndex - index == -1) {
                   onboardingViewModel.goToPage(index);
                 } else {
                   onboardingViewModel.jumpToPage(index);
@@ -147,7 +140,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                 child: Divider().withPadding(top: 10, bottom: 20),
               ),
 
-              onboardingViewModel.isLastPage
+              onboardingState.isLastPage
                   ? Column(
                     children: [
                       // Google Sign In Button
