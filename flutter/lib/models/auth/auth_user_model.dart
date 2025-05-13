@@ -1,15 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
-class UserModel {
+class AuthUser {
   final String uid;
   final String? email;
   final String? displayName;
   final String? photoURL;
 
-  UserModel({required this.uid, this.email, this.displayName, this.photoURL});
+  AuthUser({required this.uid, this.email, this.displayName, this.photoURL});
 
-  factory UserModel.fromFirebaseUser(User user) {
-    return UserModel(
+  factory AuthUser.fromFirebaseUser(User user) {
+    return AuthUser(
       uid: user.uid,
       email: user.email,
       displayName: user.displayName,
@@ -18,8 +18,8 @@ class UserModel {
   }
 
   // Empty user which represents an unauthenticated state
-  factory UserModel.empty() {
-    return UserModel(uid: '');
+  factory AuthUser.empty() {
+    return AuthUser(uid: '');
   }
 
   bool get isEmpty => uid.isEmpty;
