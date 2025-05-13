@@ -1,5 +1,6 @@
 // repositories/fcm_token_repository.dart - Updated version to prevent duplicates
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:pax/models/firestore/fcm_token/fcm_token_model.dart';
 
 class FcmTokenRepository {
@@ -18,7 +19,9 @@ class FcmTokenRepository {
 
       return null;
     } catch (e) {
-      print('Error getting FCM token by id: $e');
+      if (kDebugMode) {
+        print('Error getting FCM token by id: $e');
+      }
       rethrow;
     }
   }
@@ -36,9 +39,11 @@ class FcmTokenRepository {
       // Return the most recently updated one if multiple exist
       if (querySnapshot.docs.isNotEmpty) {
         if (querySnapshot.docs.length > 1) {
-          print(
-            'Warning: Found ${querySnapshot.docs.length} tokens for participant $participantId, using most recent',
-          );
+          if (kDebugMode) {
+            print(
+              'Warning: Found ${querySnapshot.docs.length} tokens for participant $participantId, using most recent',
+            );
+          }
 
           // Sort by timeUpdated (most recent first)
           final sortedDocs =
@@ -64,7 +69,9 @@ class FcmTokenRepository {
 
       return null;
     } catch (e) {
-      print('Error getting FCM token by participant id: $e');
+      if (kDebugMode) {
+        print('Error getting FCM token by participant id: $e');
+      }
       rethrow;
     }
   }
@@ -86,7 +93,9 @@ class FcmTokenRepository {
 
       return null;
     } catch (e) {
-      print('Error getting FCM token by value: $e');
+      if (kDebugMode) {
+        print('Error getting FCM token by value: $e');
+      }
       rethrow;
     }
   }
@@ -100,12 +109,16 @@ class FcmTokenRepository {
       if (existingTokenByValue != null) {
         // Check if it belongs to this participant
         if (existingTokenByValue.participantId == participantId) {
-          print('Token already exists for this participant');
+          if (kDebugMode) {
+            print('Token already exists for this participant');
+          }
           return existingTokenByValue;
         } else {
-          print(
-            'Token exists but for a different participant, updating ownership',
-          );
+          if (kDebugMode) {
+            print(
+              'Token exists but for a different participant, updating ownership',
+            );
+          }
           // Update the token to belong to this participant
           return await updateTokenOwnership(
             existingTokenByValue.id,
@@ -121,15 +134,21 @@ class FcmTokenRepository {
 
       if (existingTokenByParticipant != null) {
         // Update existing token with new value
-        print('Updating existing token for participant');
+        if (kDebugMode) {
+          print('Updating existing token for participant');
+        }
         return await updateTokenValue(existingTokenByParticipant.id, token);
       } else {
         // Create new token
-        print('Creating new token for participant');
+        if (kDebugMode) {
+          print('Creating new token for participant');
+        }
         return await createToken(participantId, token);
       }
     } catch (e) {
-      print('Error saving FCM token: $e');
+      if (kDebugMode) {
+        print('Error saving FCM token: $e');
+      }
       rethrow;
     }
   }
@@ -156,7 +175,9 @@ class FcmTokenRepository {
 
       return newToken;
     } catch (e) {
-      print('Error creating FCM token: $e');
+      if (kDebugMode) {
+        print('Error creating FCM token: $e');
+      }
       rethrow;
     }
   }
@@ -176,7 +197,9 @@ class FcmTokenRepository {
 
       return FcmTokenModel.fromMap(updatedDoc.data()!, id: updatedDoc.id);
     } catch (e) {
-      print('Error updating FCM token value: $e');
+      if (kDebugMode) {
+        print('Error updating FCM token value: $e');
+      }
       rethrow;
     }
   }
@@ -199,53 +222,9 @@ class FcmTokenRepository {
 
       return FcmTokenModel.fromMap(updatedDoc.data()!, id: updatedDoc.id);
     } catch (e) {
-      print('Error updating FCM token ownership: $e');
-      rethrow;
-    }
-  }
-
-  // Clean up duplicate tokens for a participant
-  Future<void> cleanupDuplicateTokens(String participantId) async {
-    try {
-      // Get all tokens for this participant
-      final querySnapshot =
-          await _firestore
-              .collection(collectionName)
-              .where('participantId', isEqualTo: participantId)
-              .get();
-
-      if (querySnapshot.docs.length <= 1) {
-        // No duplicates
-        return;
+      if (kDebugMode) {
+        print('Error updating FCM token ownership: $e');
       }
-
-      print(
-        'Found ${querySnapshot.docs.length} tokens for participant $participantId, cleaning up',
-      );
-
-      // Sort by timeUpdated (most recent first)
-      final sortedDocs =
-          querySnapshot.docs.toList()..sort((a, b) {
-            final timeA = a.data()['timeUpdated'] as Timestamp?;
-            final timeB = b.data()['timeUpdated'] as Timestamp?;
-
-            if (timeA == null) return 1;
-            if (timeB == null) return -1;
-
-            return timeB.compareTo(timeA);
-          });
-
-      // Keep the most recent one, delete the rest
-      for (int i = 1; i < sortedDocs.length; i++) {
-        await _firestore
-            .collection(collectionName)
-            .doc(sortedDocs[i].id)
-            .delete();
-
-        print('Deleted duplicate token ${sortedDocs[i].id}');
-      }
-    } catch (e) {
-      print('Error cleaning up duplicate tokens: $e');
       rethrow;
     }
   }
@@ -255,7 +234,9 @@ class FcmTokenRepository {
     try {
       await _firestore.collection(collectionName).doc(id).delete();
     } catch (e) {
-      print('Error deleting FCM token: $e');
+      if (kDebugMode) {
+        print('Error deleting FCM token: $e');
+      }
       rethrow;
     }
   }

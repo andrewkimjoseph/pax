@@ -1,5 +1,6 @@
 // services/fcm_service.dart - Updated version with duplicate cleanup
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:pax/repositories/db/fcm_token/fcm_token_repository.dart';
 
 class FcmService {
@@ -23,9 +24,13 @@ class FcmService {
             sound: true,
           );
 
-      print('FCM Permission status: ${settings.authorizationStatus}');
+      if (kDebugMode) {
+        print('FCM Permission status: ${settings.authorizationStatus}');
+      }
     } catch (e) {
-      print('Error initializing FCM: $e');
+      if (kDebugMode) {
+        print('Error initializing FCM: $e');
+      }
     }
   }
 
@@ -34,7 +39,9 @@ class FcmService {
     try {
       return await _firebaseMessaging.getToken();
     } catch (e) {
-      print('Error getting FCM token: $e');
+      if (kDebugMode) {
+        print('Error getting FCM token: $e');
+      }
       return null;
     }
   }
@@ -50,25 +57,32 @@ class FcmService {
         await _tokenRepository.saveToken(participantId, token);
 
         // Clean up any duplicate tokens
-        await _tokenRepository.cleanupDuplicateTokens(participantId);
+        // await _tokenRepository.cleanupDuplicateTokens(participantId);
 
-        print('FCM token saved for participant: $participantId');
+        if (kDebugMode) {
+          print('FCM token saved for participant: $participantId');
+        }
       } else {
-        print('Failed to get FCM token');
+        if (kDebugMode) {
+          print('Failed to get FCM token');
+        }
       }
     } catch (e) {
-      print('Error saving FCM token: $e');
+      if (kDebugMode) {
+        print('Error saving FCM token: $e');
+      }
     }
   }
 
   // Listen for token refreshes and save the new token
   void listenForTokenRefresh(String participantId) {
     _firebaseMessaging.onTokenRefresh.listen((newToken) async {
-      print('FCM token refreshed');
+      if (kDebugMode) {
+        print('FCM token refreshed');
+      }
       await _tokenRepository.saveToken(participantId, newToken);
 
       // Clean up any duplicate tokens
-      await _tokenRepository.cleanupDuplicateTokens(participantId);
     });
   }
 }

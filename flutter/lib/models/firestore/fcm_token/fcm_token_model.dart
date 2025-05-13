@@ -23,10 +23,10 @@ class FcmTokenModel {
     Timestamp? timeUpdated,
   }) {
     return FcmTokenModel(
-      id: this.id,
+      id: id,
       participantId: participantId ?? this.participantId,
       token: token ?? this.token,
-      timeCreated: this.timeCreated,
+      timeCreated: timeCreated,
       timeUpdated: timeUpdated ?? this.timeUpdated,
     );
   }
