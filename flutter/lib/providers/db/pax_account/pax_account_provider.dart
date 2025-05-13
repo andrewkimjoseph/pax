@@ -18,7 +18,7 @@ enum PaxAccountState {
 
 // Account state model
 class PaxAccountStateModel {
-  final PaxAccountModel? account;
+  final PaxAccount? account;
   final PaxAccountState state;
   final String? errorMessage;
   final bool
@@ -38,7 +38,7 @@ class PaxAccountStateModel {
 
   // Copy with method
   PaxAccountStateModel copyWith({
-    PaxAccountModel? account,
+    PaxAccount? account,
     PaxAccountState? state,
     String? errorMessage,
     bool? isBalanceSynced,

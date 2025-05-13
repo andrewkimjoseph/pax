@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class ParticipantModel {
+class Participant {
   final String id;
   final String? displayName;
   final String? emailAddress;
@@ -16,7 +16,7 @@ class ParticipantModel {
   final String? _createdBy;
   final String? _updatedBy;
 
-  ParticipantModel({
+  Participant({
     required this.id,
     this.displayName,
     this.emailAddress,
@@ -35,7 +35,7 @@ class ParticipantModel {
        _updatedBy = updatedBy;
 
   // Create a copy of this participant with modified fields
-  ParticipantModel copyWith({
+  Participant copyWith({
     String? displayName,
     String? emailAddress,
     String? phoneNumber,
@@ -48,7 +48,7 @@ class ParticipantModel {
     Timestamp? timeUpdated,
     String? updatedBy,
   }) {
-    return ParticipantModel(
+    return Participant(
       id: id,
       displayName: displayName ?? this.displayName,
       emailAddress: emailAddress ?? this.emailAddress,
@@ -89,11 +89,8 @@ class ParticipantModel {
   }
 
   // Create a model from a Firestore map
-  factory ParticipantModel.fromMap(
-    Map<String, dynamic> map, {
-    required String id,
-  }) {
-    return ParticipantModel(
+  factory Participant.fromMap(Map<String, dynamic> map, {required String id}) {
+    return Participant(
       id: id,
       displayName: map['displayName'],
       emailAddress: map['emailAddress'],
@@ -112,8 +109,8 @@ class ParticipantModel {
   }
 
   // Create an empty participant model
-  factory ParticipantModel.empty() {
-    return ParticipantModel(id: '');
+  factory Participant.empty() {
+    return Participant(id: '');
   }
 
   // Check if this is an empty participant

@@ -1,14 +1,14 @@
 // models/fcm/fcm_token_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class FcmTokenModel {
+class FCMToken {
   final String id;
   final String? participantId;
   final String? token;
   final Timestamp? timeCreated;
   final Timestamp? timeUpdated;
 
-  FcmTokenModel({
+  FCMToken({
     required this.id,
     this.participantId,
     this.token,
@@ -17,12 +17,12 @@ class FcmTokenModel {
   });
 
   // Create a copy with updates
-  FcmTokenModel copyWith({
+  FCMToken copyWith({
     String? participantId,
     String? token,
     Timestamp? timeUpdated,
   }) {
-    return FcmTokenModel(
+    return FCMToken(
       id: id,
       participantId: participantId ?? this.participantId,
       token: token ?? this.token,
@@ -43,11 +43,8 @@ class FcmTokenModel {
   }
 
   // Create from Firestore data
-  factory FcmTokenModel.fromMap(
-    Map<String, dynamic> map, {
-    required String id,
-  }) {
-    return FcmTokenModel(
+  factory FCMToken.fromMap(Map<String, dynamic> map, {required String id}) {
+    return FCMToken(
       id: id,
       participantId: map['participantId'],
       token: map['token'],
@@ -57,8 +54,8 @@ class FcmTokenModel {
   }
 
   // Create an empty token model
-  factory FcmTokenModel.empty() {
-    return FcmTokenModel(id: '');
+  factory FCMToken.empty() {
+    return FCMToken(id: '');
   }
 
   bool get isEmpty => id.isEmpty;

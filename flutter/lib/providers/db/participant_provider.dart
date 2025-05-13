@@ -10,7 +10,7 @@ enum ParticipantState { initial, loading, loaded, error }
 
 // Participant state model
 class ParticipantStateModel {
-  final ParticipantModel? participant;
+  final Participant? participant;
   final ParticipantState state;
   final String? errorMessage;
 
@@ -27,7 +27,7 @@ class ParticipantStateModel {
 
   // Copy with method
   ParticipantStateModel copyWith({
-    ParticipantModel? participant,
+    Participant? participant,
     ParticipantState? state,
     String? errorMessage,
   }) {

@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pax/data/forum_reports.dart';
 import 'package:pax/extensions/tooltip.dart';
@@ -67,16 +66,16 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                           color: PaxColors.black,
                         ),
                       ).withPadding(bottom: 8),
-                      Spacer(),
-                      IconButton.ghost(
-                        onPressed: () {
-                          ref
-                              .read(paxAccountProvider.notifier)
-                              .syncBalancesFromBlockchain();
-                        },
-                        density: ButtonDensity.icon,
-                        icon: const FaIcon(FontAwesomeIcons.arrowsRotate),
-                      ),
+                      // Spacer(),
+                      // IconButton.ghost(
+                      //   onPressed: () {
+                      //     ref
+                      //         .read(paxAccountProvider.notifier)
+                      //         .syncBalancesFromBlockchain();
+                      //   },
+                      //   density: ButtonDensity.icon,
+                      //   icon: const FaIcon(FontAwesomeIcons.arrowsRotate),
+                      // ),
                     ],
                   ),
 

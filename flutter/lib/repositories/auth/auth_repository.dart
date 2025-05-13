@@ -1,30 +1,30 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:pax/models/auth/user_model.dart';
+import 'package:pax/models/auth/auth_user_model.dart';
 
 class AuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   // Get the current user
-  UserModel? get currentUser {
+  AuthUser? get currentUser {
     final user = _auth.currentUser;
     if (user != null) {
-      return UserModel.fromFirebaseUser(user);
+      return AuthUser.fromFirebaseUser(user);
     }
     return null;
   }
 
   // Stream of auth state changes
-  Stream<UserModel?> get authStateChanges {
+  Stream<AuthUser?> get authStateChanges {
     return _auth.authStateChanges().map((user) {
-      return user != null ? UserModel.fromFirebaseUser(user) : null;
+      return user != null ? AuthUser.fromFirebaseUser(user) : null;
     });
   }
 
   // Sign in with Google
-  Future<UserModel?> signInWithGoogle() async {
+  Future<AuthUser?> signInWithGoogle() async {
     try {
       // Start the Google sign-in process
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
@@ -44,7 +44,7 @@ class AuthRepository {
       // Sign in to Firebase with the Google credential
       final userCredential = await _auth.signInWithCredential(credential);
       if (userCredential.user != null) {
-        return UserModel.fromFirebaseUser(userCredential.user!);
+        return AuthUser.fromFirebaseUser(userCredential.user!);
       }
       return null;
     } catch (e) {
@@ -61,14 +61,14 @@ class AuthRepository {
     await _auth.signOut();
   }
 
-  Future<UserModel?> getCurrentUser() async {
+  Future<AuthUser?> getCurrentUser() async {
     try {
       // Force token refresh to ensure we have the latest auth state
       await _auth.currentUser?.reload();
 
       final user = _auth.currentUser;
       if (user != null) {
-        return UserModel.fromFirebaseUser(user);
+        return AuthUser.fromFirebaseUser(user);
       }
       return null;
     } catch (e) {

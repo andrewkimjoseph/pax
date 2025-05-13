@@ -8,13 +8,13 @@ class FcmTokenRepository {
   final String collectionName = 'fcm_tokens';
 
   // Get token by id
-  Future<FcmTokenModel?> getTokenById(String id) async {
+  Future<FCMToken?> getTokenById(String id) async {
     try {
       final docSnapshot =
           await _firestore.collection(collectionName).doc(id).get();
 
       if (docSnapshot.exists) {
-        return FcmTokenModel.fromMap(docSnapshot.data()!, id: docSnapshot.id);
+        return FCMToken.fromMap(docSnapshot.data()!, id: docSnapshot.id);
       }
 
       return null;
@@ -27,7 +27,7 @@ class FcmTokenRepository {
   }
 
   // Get token by participant id
-  Future<FcmTokenModel?> getTokenByParticipantId(String participantId) async {
+  Future<FCMToken?> getTokenByParticipantId(String participantId) async {
     try {
       final querySnapshot =
           await _firestore
@@ -59,11 +59,11 @@ class FcmTokenRepository {
 
           // Return the most recent one
           final doc = sortedDocs.first;
-          return FcmTokenModel.fromMap(doc.data(), id: doc.id);
+          return FCMToken.fromMap(doc.data(), id: doc.id);
         } else {
           // Just one token found, return it
           final doc = querySnapshot.docs.first;
-          return FcmTokenModel.fromMap(doc.data(), id: doc.id);
+          return FCMToken.fromMap(doc.data(), id: doc.id);
         }
       }
 
@@ -77,7 +77,7 @@ class FcmTokenRepository {
   }
 
   // Get token by token value
-  Future<FcmTokenModel?> getTokenByValue(String token) async {
+  Future<FCMToken?> getTokenByValue(String token) async {
     try {
       final querySnapshot =
           await _firestore
@@ -88,7 +88,7 @@ class FcmTokenRepository {
 
       if (querySnapshot.docs.isNotEmpty) {
         final doc = querySnapshot.docs.first;
-        return FcmTokenModel.fromMap(doc.data(), id: doc.id);
+        return FCMToken.fromMap(doc.data(), id: doc.id);
       }
 
       return null;
@@ -101,7 +101,7 @@ class FcmTokenRepository {
   }
 
   // Save or update token with deduplication
-  Future<FcmTokenModel> saveToken(String participantId, String token) async {
+  Future<FCMToken> saveToken(String participantId, String token) async {
     try {
       // Check if this exact token already exists in the database
       final existingTokenByValue = await getTokenByValue(token);
@@ -154,7 +154,7 @@ class FcmTokenRepository {
   }
 
   // Create a new token
-  Future<FcmTokenModel> createToken(String participantId, String token) async {
+  Future<FCMToken> createToken(String participantId, String token) async {
     try {
       final now = Timestamp.now();
 
@@ -162,7 +162,7 @@ class FcmTokenRepository {
       final String id = _firestore.collection(collectionName).doc().id;
 
       // Create the token document
-      final newToken = FcmTokenModel(
+      final newToken = FCMToken(
         id: id,
         participantId: participantId,
         token: token,
@@ -183,7 +183,7 @@ class FcmTokenRepository {
   }
 
   // Update an existing token value
-  Future<FcmTokenModel> updateTokenValue(String id, String token) async {
+  Future<FCMToken> updateTokenValue(String id, String token) async {
     try {
       // Update in Firestore
       await _firestore.collection(collectionName).doc(id).update({
@@ -195,7 +195,7 @@ class FcmTokenRepository {
       final updatedDoc =
           await _firestore.collection(collectionName).doc(id).get();
 
-      return FcmTokenModel.fromMap(updatedDoc.data()!, id: updatedDoc.id);
+      return FCMToken.fromMap(updatedDoc.data()!, id: updatedDoc.id);
     } catch (e) {
       if (kDebugMode) {
         print('Error updating FCM token value: $e');
@@ -205,10 +205,7 @@ class FcmTokenRepository {
   }
 
   // Update token ownership (change participant ID)
-  Future<FcmTokenModel> updateTokenOwnership(
-    String id,
-    String participantId,
-  ) async {
+  Future<FCMToken> updateTokenOwnership(String id, String participantId) async {
     try {
       // Update in Firestore
       await _firestore.collection(collectionName).doc(id).update({
@@ -220,7 +217,7 @@ class FcmTokenRepository {
       final updatedDoc =
           await _firestore.collection(collectionName).doc(id).get();
 
-      return FcmTokenModel.fromMap(updatedDoc.data()!, id: updatedDoc.id);
+      return FCMToken.fromMap(updatedDoc.data()!, id: updatedDoc.id);
     } catch (e) {
       if (kDebugMode) {
         print('Error updating FCM token ownership: $e');

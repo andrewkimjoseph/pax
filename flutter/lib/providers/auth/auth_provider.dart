@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
-import 'package:pax/models/auth/user_model.dart';
+import 'package:pax/models/auth/auth_user_model.dart';
 import 'package:pax/repositories/auth/auth_repository.dart';
 
 class AuthNotifier extends Notifier<AuthStateModel> {
@@ -36,7 +36,7 @@ class AuthNotifier extends Notifier<AuthStateModel> {
         _startTokenValidation();
       } else {
         state = state.copyWith(
-          user: UserModel.empty(),
+          user: AuthUser.empty(),
           state: AuthState.unauthenticated,
         );
         // Cancel validation when user is signed out
@@ -75,7 +75,7 @@ class AuthNotifier extends Notifier<AuthStateModel> {
         // Force sign out locally
         await _repository.signOut();
         state = state.copyWith(
-          user: UserModel.empty(),
+          user: AuthUser.empty(),
           state: AuthState.unauthenticated,
           errorMessage:
               'Your account has been signed out. Please sign in again.',
@@ -107,21 +107,21 @@ class AuthNotifier extends Notifier<AuthStateModel> {
           // Token is invalid, sign out
           await _repository.signOut();
           state = state.copyWith(
-            user: UserModel.empty(),
+            user: AuthUser.empty(),
             state: AuthState.unauthenticated,
           );
         }
       } else {
         // No current user
         state = state.copyWith(
-          user: UserModel.empty(),
+          user: AuthUser.empty(),
           state: AuthState.unauthenticated,
         );
       }
     } catch (e) {
       // Error with validation, treat as unauthenticated
       state = state.copyWith(
-        user: UserModel.empty(),
+        user: AuthUser.empty(),
         state: AuthState.error,
         errorMessage: 'Unable to verify authentication status: ${e.toString()}',
       );
@@ -158,7 +158,7 @@ class AuthNotifier extends Notifier<AuthStateModel> {
     try {
       await _repository.signOut();
       state = state.copyWith(
-        user: UserModel.empty(),
+        user: AuthUser.empty(),
         state: AuthState.unauthenticated,
       );
     } catch (e) {

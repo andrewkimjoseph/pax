@@ -25,13 +25,13 @@ class PaxAccountRepository {
   }
 
   // Get account by user ID
-  Future<PaxAccountModel?> getAccount(String userId) async {
+  Future<PaxAccount?> getAccount(String userId) async {
     try {
       final docSnapshot =
           await _firestore.collection(collectionName).doc(userId).get();
 
       if (docSnapshot.exists) {
-        return PaxAccountModel.fromMap(docSnapshot.data()!, id: docSnapshot.id);
+        return PaxAccount.fromMap(docSnapshot.data()!, id: docSnapshot.id);
       }
 
       return null;
@@ -44,7 +44,7 @@ class PaxAccountRepository {
   }
 
   // Create a new account
-  Future<PaxAccountModel> createAccount(String userId) async {
+  Future<PaxAccount> createAccount(String userId) async {
     try {
       final now = Timestamp.now();
 
@@ -57,7 +57,7 @@ class PaxAccountRepository {
       };
 
       // Create basic account
-      final newAccount = PaxAccountModel(
+      final newAccount = PaxAccount(
         id: userId,
         timeCreated: now,
         timeUpdated: now,
@@ -80,7 +80,7 @@ class PaxAccountRepository {
   }
 
   // Update an account
-  Future<PaxAccountModel> updateAccount(
+  Future<PaxAccount> updateAccount(
     String userId,
     Map<String, dynamic> data,
   ) async {
@@ -98,7 +98,7 @@ class PaxAccountRepository {
       final updatedDoc =
           await _firestore.collection(collectionName).doc(userId).get();
 
-      return PaxAccountModel.fromMap(updatedDoc.data()!, id: updatedDoc.id);
+      return PaxAccount.fromMap(updatedDoc.data()!, id: updatedDoc.id);
     } catch (e) {
       if (kDebugMode) {
         print('Error updating account: $e');
@@ -108,7 +108,7 @@ class PaxAccountRepository {
   }
 
   // Handle user signup - create account if not exists
-  Future<PaxAccountModel> handleUserSignup(String userId) async {
+  Future<PaxAccount> handleUserSignup(String userId) async {
     try {
       final exists = await accountExists(userId);
 
@@ -129,7 +129,7 @@ class PaxAccountRepository {
   }
 
   // Update balance for a specific token
-  Future<PaxAccountModel> updateBalance(
+  Future<PaxAccount> updateBalance(
     String userId,
     String tokenId,
     num amount,
@@ -157,7 +157,7 @@ class PaxAccountRepository {
   }
 
   // Fetch and sync balances from blockchain
-  Future<PaxAccountModel> syncBalancesFromBlockchain(String userId) async {
+  Future<PaxAccount> syncBalancesFromBlockchain(String userId) async {
     try {
       // Get current account
       final account = await getAccount(userId);
