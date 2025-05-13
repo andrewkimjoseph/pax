@@ -39,26 +39,44 @@ class ParticipantStateModel {
   }
 }
 
-// Participant notifier
-class ParticipantNotifier extends StateNotifier<ParticipantStateModel> {
-  final ParticipantsRepository _repository;
-  final Ref _ref;
+// Updated Participant notifier using the new Notifier syntax
+class ParticipantNotifier extends Notifier<ParticipantStateModel> {
+  late final ParticipantsRepository _repository;
 
-  ParticipantNotifier(this._repository, this._ref)
-    : super(ParticipantStateModel.initial()) {
+  @override
+  ParticipantStateModel build() {
+    _repository = ref.watch(participantsRepositoryProvider);
+
+    // Set up auth state listener
+    ref.listen(authProvider, (previous, next) {
+      // When auth state changes
+      if (previous?.state != next.state) {
+        if (next.state == AuthState.authenticated) {
+          // User just signed in, sync participant data
+          syncWithAuthState(next);
+        } else if (next.state == AuthState.unauthenticated) {
+          // User signed out, clear participant data
+          clearParticipant();
+        }
+      }
+    });
+
     // Check initial auth state
-    final authState = _ref.read(authProvider);
+    final authState = ref.read(authProvider);
 
     // Automatically sync with auth state if user is authenticated
     if (authState.state == AuthState.authenticated) {
-      syncWithAuthState(authState);
+      // We need to use Future.microtask because we can't use async in build
+      Future.microtask(() => syncWithAuthState(authState));
     }
+
+    return ParticipantStateModel.initial();
   }
 
   // Sync participant data with current auth state
   Future<void> syncWithAuthState([AuthStateModel? authStateModel]) async {
     // Get auth state from provider if not provided
-    final authState = authStateModel ?? _ref.read(authProvider);
+    final authState = authStateModel ?? ref.read(authProvider);
 
     // Skip if not authenticated
     if (authState?.state != AuthState.authenticated) {
@@ -89,7 +107,7 @@ class ParticipantNotifier extends StateNotifier<ParticipantStateModel> {
 
   // Update participant profile fields
   Future<void> updateProfile(Map<String, dynamic> data) async {
-    final authState = _ref.read(authProvider);
+    final authState = ref.read(authProvider);
 
     try {
       // Ensure we have a participant and user is authenticated
@@ -123,7 +141,7 @@ class ParticipantNotifier extends StateNotifier<ParticipantStateModel> {
 
   // Manually refresh participant data from Firestore
   Future<void> refreshParticipant() async {
-    final authState = _ref.read(authProvider);
+    final authState = ref.read(authProvider);
 
     try {
       // Ensure user is authenticated
@@ -167,27 +185,8 @@ final participantsRepositoryProvider = Provider<ParticipantsRepository>((ref) {
   return ParticipantsRepository();
 });
 
-// StateNotifierProvider for participant state with explicit type annotation
+// NotifierProvider for participant state
 final participantProvider =
-    StateNotifierProvider<ParticipantNotifier, ParticipantStateModel>((ref) {
-      final repository = ref.watch(participantsRepositoryProvider);
-
-      // Create the notifier
-      final notifier = ParticipantNotifier(repository, ref);
-
-      // Set up auth state listener
-      ref.listen(authProvider, (previous, next) {
-        // When auth state changes
-        if (previous?.state != next.state) {
-          if (next.state == AuthState.authenticated) {
-            // User just signed in, sync participant data
-            notifier.syncWithAuthState(next);
-          } else if (next.state == AuthState.unauthenticated) {
-            // User signed out, clear participant data
-            notifier.clearParticipant();
-          }
-        }
-      });
-
-      return notifier;
+    NotifierProvider<ParticipantNotifier, ParticipantStateModel>(() {
+      return ParticipantNotifier();
     });

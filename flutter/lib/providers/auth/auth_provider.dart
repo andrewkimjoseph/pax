@@ -6,13 +6,25 @@ import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/models/auth/user_model.dart';
 import 'package:pax/repositories/auth/auth_repository.dart';
 
-class AuthNotifier extends StateNotifier<AuthStateModel> {
-  final AuthRepository _repository;
+class AuthNotifier extends Notifier<AuthStateModel> {
+  late final AuthRepository _repository;
   StreamSubscription? _authStateSubscription;
   Timer? _tokenRefreshTimer;
 
-  AuthNotifier(this._repository) : super(AuthStateModel.initial()) {
-    _startListeningToAuthChanges();
+  @override
+  AuthStateModel build() {
+    _repository = ref.watch(authRepositoryProvider);
+
+    // Start subscription in a microtask to avoid async operations during build
+    Future.microtask(() => _startListeningToAuthChanges());
+
+    // Handle disposal of resources when the provider is disposed
+    ref.onDispose(() {
+      _authStateSubscription?.cancel();
+      _cancelTokenValidation();
+    });
+
+    return AuthStateModel.initial();
   }
 
   // Start listening to Firebase auth state changes
@@ -116,13 +128,6 @@ class AuthNotifier extends StateNotifier<AuthStateModel> {
     }
   }
 
-  @override
-  void dispose() {
-    _authStateSubscription?.cancel();
-    _cancelTokenValidation();
-    super.dispose();
-  }
-
   // Sign in with Google
   Future<void> signInWithGoogle() async {
     try {
@@ -170,10 +175,9 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository();
 });
 
-// StateNotifierProvider for auth state
-final authProvider = StateNotifierProvider<AuthNotifier, AuthStateModel>((ref) {
-  final repository = ref.watch(authRepositoryProvider);
-  return AuthNotifier(repository);
+// NotifierProvider for auth state
+final authProvider = NotifierProvider<AuthNotifier, AuthStateModel>(() {
+  return AuthNotifier();
 });
 
 final authStateForRouterProvider = Provider<AuthState>((ref) {
