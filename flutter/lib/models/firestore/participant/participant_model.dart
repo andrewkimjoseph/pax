@@ -9,12 +9,9 @@ class Participant {
   final String? country;
   final Timestamp? dateOfBirth;
   final String? profilePictureURI;
-  final String? goodDollarWalletAddress;
-  final String? goodDollarIdentityExpiryData;
+  final Timestamp? goodDollarIdentityTimeLastAuthenticated;
   final Timestamp? timeCreated;
   final Timestamp? timeUpdated;
-  final String? _createdBy;
-  final String? _updatedBy;
 
   Participant({
     required this.id,
@@ -25,14 +22,12 @@ class Participant {
     this.country,
     this.dateOfBirth,
     this.profilePictureURI,
-    this.goodDollarWalletAddress,
-    this.goodDollarIdentityExpiryData,
+    this.goodDollarIdentityTimeLastAuthenticated,
     this.timeCreated,
     this.timeUpdated,
     String? createdBy,
     String? updatedBy,
-  }) : _createdBy = createdBy,
-       _updatedBy = updatedBy;
+  });
 
   // Create a copy of this participant with modified fields
   Participant copyWith({
@@ -43,10 +38,8 @@ class Participant {
     String? country,
     Timestamp? dateOfBirth,
     String? profilePictureURI,
-    String? goodDollarWalletAddress,
-    String? goodDollarIdentityExpiryData,
+    Timestamp? goodDollarIdentityTimeLastAuthenticated,
     Timestamp? timeUpdated,
-    String? updatedBy,
   }) {
     return Participant(
       id: id,
@@ -57,14 +50,11 @@ class Participant {
       country: country ?? this.country,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       profilePictureURI: profilePictureURI ?? this.profilePictureURI,
-      goodDollarWalletAddress:
-          goodDollarWalletAddress ?? this.goodDollarWalletAddress,
-      goodDollarIdentityExpiryData:
-          goodDollarIdentityExpiryData ?? this.goodDollarIdentityExpiryData,
+      goodDollarIdentityTimeLastAuthenticated:
+          goodDollarIdentityTimeLastAuthenticated ??
+          this.goodDollarIdentityTimeLastAuthenticated,
       timeCreated: timeCreated,
       timeUpdated: timeUpdated ?? this.timeUpdated,
-      createdBy: _createdBy,
-      updatedBy: updatedBy ?? _updatedBy,
     );
   }
 
@@ -79,12 +69,10 @@ class Participant {
       'country': country,
       'dateOfBirth': dateOfBirth,
       'profilePictureURI': profilePictureURI,
-      'goodDollarWalletAddress': goodDollarWalletAddress,
-      'goodDollarIdentityExpiryData': goodDollarIdentityExpiryData,
+      'goodDollarIdentityTimeLastAuthenticated':
+          goodDollarIdentityTimeLastAuthenticated,
       'timeCreated': timeCreated,
       'timeUpdated': timeUpdated,
-      '_createdBy': _createdBy,
-      '_updatedBy': _updatedBy,
     };
   }
 
@@ -99,8 +87,8 @@ class Participant {
       country: map['country'],
       dateOfBirth: map['dateOfBirth'],
       profilePictureURI: map['profilePictureURI'],
-      goodDollarWalletAddress: map['goodDollarWalletAddress'],
-      goodDollarIdentityExpiryData: map['goodDollarIdentityExpiryData'],
+      goodDollarIdentityTimeLastAuthenticated:
+          map['goodDollarIdentityTimeLastAuthenticated'],
       timeCreated: map['timeCreated'],
       timeUpdated: map['timeUpdated'],
       createdBy: map['_createdBy'],
