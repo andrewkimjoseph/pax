@@ -27,7 +27,7 @@ List<ForumReport> forumReports = [
     title:
         "MiniPay in Africa: Financial Inclusion Across Kenya, Nigeria, and South Africa",
     subtitle:
-        "The digital payment revolution in Africa is unfolding at different paces and in different ways across the continent. A recent study comparing payment behaviors in Nigeria and Kenya reveals fascinating insights into how these two influential markets are embracing digital transformation while maintaining their unique characteristics.",
+        "The digital financial landscape across Africa is evolving at different paces and with varying patterns, driven by unique regional needs and existing infrastructure. A recent survey examining MiniPay usage across Kenya, Nigeria, and South Africa reveals fascinating insights into how these markets approach digital financial services while maintaining their distinct regional characteristics.",
     timePublished: DateTime.parse("2025-03-24"),
     coverImageURI: "lib/assets/images/reports/rzs_6_1.png",
     postURI:
@@ -35,9 +35,10 @@ List<ForumReport> forumReports = [
   ),
   ForumReport(
     id: "rzs_15_2",
-    title: "Cultural and Regional Perspectives from Nigeria and Kenya",
+    title:
+        "Banking and Mobile Money Adoption: Cultural and Regional Perspectives from Nigeria and Kenya",
     subtitle:
-        "The digital payment revolution in Africa is unfolding at different paces and in different ways across the continent. A recent study comparing payment behaviors in Nigeria and Kenya reveals fascinating insights into how these two influential markets are embracing digital transformation while maintaining their unique characteristics.",
+        "The banking and mobile money landscape in Africa is unfolding at different paces and with varying adoption patterns across the continent. A recent study comparing financial behaviors among users in Nigeria and Kenya reveals fascinating insights into how these two influential markets are approaching financial services while maintaining their unique regional characteristics.",
     timePublished: DateTime.parse("2025-04-01"),
     coverImageURI: "lib/assets/images/reports/rzs_15_2.png",
     postURI:
