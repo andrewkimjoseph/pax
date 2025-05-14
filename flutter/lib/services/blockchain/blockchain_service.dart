@@ -23,23 +23,23 @@ class BlockchainService {
   static final String _apiUrl = 'https://lb.drpc.org/ogrpc?network=celo&dkey=';
 
   // Token configurations
-  static final Map<String, TokenInfo> supportedTokens = {
-    "1": TokenInfo(
+  static final Map<int, TokenInfo> supportedTokens = {
+    1: TokenInfo(
       address: "0x62B8B11039FcfE5aB0C56E502b1C372A3d2a9c7A",
       decimals: 18,
       name: "good_dollar",
     ),
-    "2": TokenInfo(
+    2: TokenInfo(
       address: "0x765DE816845861e75A25fCA122bb6898B8B1282a",
       decimals: 18,
       name: "celo_dollar",
     ),
-    "3": TokenInfo(
+    3: TokenInfo(
       address: "0x48065fbBE25f71C9282ddf5e1cD6D6A887483D5e",
       decimals: 6,
       name: "tether_usd",
     ),
-    "4": TokenInfo(
+    4: TokenInfo(
       address: "0xcebA9300f2b948710d2653dD7B07f33A8B32118C",
       decimals: 6,
       name: "usd_coin",
@@ -50,7 +50,7 @@ class BlockchainService {
   String get _fullApiUrl => '$_apiUrl$_apiKey';
 
   // Fetch balance for a single token
-  Future<double> fetchTokenBalance(String walletAddress, String tokenId) async {
+  Future<double> fetchTokenBalance(String walletAddress, int tokenId) async {
     if (!supportedTokens.containsKey(tokenId)) {
       throw Exception("Unsupported token ID: $tokenId");
     }
@@ -64,10 +64,8 @@ class BlockchainService {
   }
 
   // Fetch balances for all supported tokens
-  Future<Map<String, double>> fetchAllTokenBalances(
-    String walletAddress,
-  ) async {
-    final Map<String, double> balances = {};
+  Future<Map<int, double>> fetchAllTokenBalances(String walletAddress) async {
+    final Map<int, double> balances = {};
 
     for (final entry in supportedTokens.entries) {
       try {
@@ -154,7 +152,7 @@ class BlockchainService {
   }
 
   // Format balance for display
-  static String formatBalance(double balance, String tokenId) {
+  static String formatBalance(double balance, int tokenId) {
     if (!supportedTokens.containsKey(tokenId)) {
       return "$balance";
     }

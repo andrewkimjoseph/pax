@@ -49,11 +49,11 @@ class PaxAccountRepository {
       final now = Timestamp.now();
 
       // Create basic account with default balances
-      final Map<String, num> defaultBalances = {
-        "1": 0, // GoodDollar
-        "2": 0, // Celo Dollar
-        "3": 0, // Tether USD
-        "4": 0, // USD Coin
+      final Map<int, num> defaultBalances = {
+        1: 0, // GoodDollar
+        2: 0, // Celo Dollar
+        3: 0, // Tether USD
+        4: 0, // USD Coin
       };
 
       // Create basic account
@@ -198,7 +198,7 @@ class PaxAccountRepository {
   }
 
   // Fetch single token balance from blockchain
-  Future<double> fetchTokenBalance(String userId, String tokenId) async {
+  Future<double> fetchTokenBalance(String userId, int tokenId) async {
     try {
       // Get current account
       final account = await getAccount(userId);

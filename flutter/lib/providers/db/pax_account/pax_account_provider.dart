@@ -223,7 +223,7 @@ class PaxAccountNotifier extends Notifier<PaxAccountStateModel> {
   }
 
   // Fetch a specific token balance from blockchain (doesn't update Firestore)
-  Future<double> fetchTokenBalance(String tokenId) async {
+  Future<double> fetchTokenBalance(int tokenId) async {
     final authState = ref.read(authProvider);
 
     try {
@@ -243,7 +243,7 @@ class PaxAccountNotifier extends Notifier<PaxAccountStateModel> {
   }
 
   // Get formatted balance for a token
-  String getFormattedBalance(String tokenId) {
+  String getFormattedBalance(int tokenId) {
     if (state.account == null) {
       return BlockchainService.formatBalance(0, tokenId);
     }
