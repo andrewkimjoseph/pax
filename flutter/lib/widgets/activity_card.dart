@@ -25,7 +25,7 @@ class ActivityCard extends ConsumerWidget {
         border: Border.all(color: PaxColors.lightLilac, width: 1),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           FaIcon(
             activity.getIcon(),
@@ -54,13 +54,16 @@ class ActivityCard extends ConsumerWidget {
                       Spacer(),
 
                       Visibility(
-                        visible: activity.getAmount() != null,
+                        visible:
+                            activity.reward != null ||
+                            activity.withdrawal != null,
                         child: Row(
                           children: [
-                            SvgPicture.asset(
-                              'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(activity.getCurrencyId()!)}.svg',
-                              height: 20,
-                            ).withPadding(right: 4),
+                            if (activity.getCurrencyId() != null)
+                              SvgPicture.asset(
+                                'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(activity.getCurrencyId())}.svg',
+                                height: 20,
+                              ).withPadding(right: 4),
 
                             Text(
                               activity.getAmount() ?? '0',
@@ -81,7 +84,11 @@ class ActivityCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'You have completed a ${activity.type.asString}',
+                      activity.taskCompletion != null
+                          ? 'You have completed a task'
+                          : activity.reward != null
+                          ? 'You have earned a reward'
+                          : 'You have made a withdrawal',
                       style: TextStyle(
                         fontWeight: FontWeight.normal,
                         fontSize: 12,

@@ -175,3 +175,37 @@ final filteredActivitiesProvider = Provider<AsyncValue<List<Activity>>>((ref) {
       return ref.watch(allActivitiesProvider(userId));
   }
 });
+
+// Provider for total number of Task Completions
+final totalTaskCompletionsProvider = Provider<AsyncValue<int>>((ref) {
+  final userId = ref.watch(authProvider).user.uid;
+  final tasksAsync = ref.watch(taskCompletionActivitiesProvider(userId));
+
+  return tasksAsync.when(
+    data: (tasks) => AsyncValue.data(tasks.length),
+    loading: () => const AsyncValue.loading(),
+    error: (error, stackTrace) => AsyncValue.error(error, stackTrace),
+  );
+});
+
+// Provider for total G$ tokens earned
+final totalGoodDollarTokensEarnedProvider = Provider<AsyncValue<double>>((ref) {
+  final userId = ref.watch(authProvider).user.uid;
+  final rewardsAsync = ref.watch(rewardActivitiesProvider(userId));
+
+  return rewardsAsync.when(
+    data: (rewards) {
+      double total = 0.0;
+      for (final activity in rewards) {
+        if (activity.type == ActivityType.reward &&
+            activity.reward?.rewardCurrencyId == 1 &&
+            activity.reward?.amountReceived != null) {
+          total += activity.reward!.amountReceived!.toDouble();
+        }
+      }
+      return AsyncValue.data(total);
+    },
+    loading: () => const AsyncValue.loading(),
+    error: (error, stackTrace) => AsyncValue.error(error, stackTrace),
+  );
+});
