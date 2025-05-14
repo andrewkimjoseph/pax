@@ -9,24 +9,6 @@ import 'package:pax/widgets/app_lifecycle_handler.dart';
 import 'theming/theme_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
-// This function is called when a message is received while the app is in the background
-// It must be a top-level function (not a class method)
-@pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Initialize Firebase if needed (when in background)
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  // Log the message
-  if (kDebugMode) {
-    print('Background message received: ${message.messageId}');
-    print('Background message notification: ${message.notification?.title}');
-    print('Background message data: ${message.data}');
-  }
-
-  // Implement any background message handling logic here
-  // Note: This should be kept minimal as it runs in a background isolate
-}
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -176,4 +158,22 @@ Future<void> _initializeFirebaseMessaging() async {
 
   // Subscribe to topics if needed
   // await FirebaseMessaging.instance.subscribeToTopic('all_users');
+}
+
+// This function is called when a message is received while the app is in the background
+// It must be a top-level function (not a class method)
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // Initialize Firebase if needed (when in background)
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Log the message
+  if (kDebugMode) {
+    print('Background message received: ${message.messageId}');
+    print('Background message notification: ${message.notification?.title}');
+    print('Background message data: ${message.data}');
+  }
+
+  // Implement any background message handling logic here
+  // Note: This should be kept minimal as it runs in a background isolate
 }
