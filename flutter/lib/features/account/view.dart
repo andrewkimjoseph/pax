@@ -103,7 +103,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
                                 ),
                               ).withPadding(bottom: 4),
                               Text(
-                                'Lifetime Earnings',
+                                'Lifetime G\$ Earnings',
                                 style: TextStyle(
                                   fontWeight: FontWeight.normal,
                                   fontSize: 12,
