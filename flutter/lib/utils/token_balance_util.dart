@@ -101,6 +101,22 @@ class TokenBalanceUtil {
     return formattedNumber;
   }
 
+  static String getLocaleFormattedAmount(num amount) {
+    // Get the raw balance
+
+    final locale = Intl.getCurrentLocale();
+
+    // Create formatter based on whether to include decimals
+    final NumberFormat formatter = NumberFormat('#,###', locale);
+
+    // Format the number
+    final formattedNumber = formatter.format(amount);
+
+    // Add symbol if requested
+
+    return formattedNumber;
+  }
+
   /// Returns the symbol for a given token ID
   static String getSymbolForTokenId(int tokenId) {
     final currencyName = _tokenToCurrency[tokenId] ?? 'unknown';
