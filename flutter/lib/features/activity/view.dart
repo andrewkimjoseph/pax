@@ -156,13 +156,10 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
             child: Column(
               children: [
                 if (activities.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Center(
-                      child: Text(
-                        'No activities found',
-                        style: TextStyle(color: PaxColors.darkGrey),
-                      ),
+                  Center(
+                    child: Text(
+                      'No activities found',
+                      style: TextStyle(color: PaxColors.darkGrey),
                     ),
                   )
                 else

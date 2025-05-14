@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart' show Divider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pax/features/account_and_security/view.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
+import 'package:pax/providers/db/participant/participant_provider.dart';
+import 'package:pax/providers/local/activity_provider.dart';
+import 'package:pax/utils/token_balance_util.dart';
 import 'package:pax/widgets/account_option_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
 
@@ -23,6 +27,12 @@ class _AccountViewState extends ConsumerState<AccountView> {
 
   @override
   Widget build(BuildContext context) {
+    final participant = ref.watch(participantProvider).participant;
+    final tasksCount = ref.watch(totalTaskCompletionsProvider);
+    // Use with: tasksCount.when(data: (count) => Text('$count'), ...)
+
+    // Access total G$ earned
+    final totalGoodDollars = ref.watch(totalGoodDollarTokensEarnedProvider);
     return Scaffold(
       headers: [
         AppBar(
@@ -69,16 +79,39 @@ class _AccountViewState extends ConsumerState<AccountView> {
                         children: [
                           Column(
                             children: [
+                              tasksCount
+                                  .when(
+                                    data:
+                                        (count) => Text(
+                                          count.toString(),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: PaxColors.black,
+                                          ),
+                                        ),
+                                    loading:
+                                        () => Text(
+                                          '...',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: PaxColors.black,
+                                          ),
+                                        ),
+                                    error:
+                                        (_, __) => Text(
+                                          '0',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: PaxColors.black,
+                                          ),
+                                        ),
+                                  )
+                                  .withPadding(bottom: 4),
                               Text(
-                                '854',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: PaxColors.black,
-                                ),
-                              ).withPadding(bottom: 4),
-                              Text(
-                                'Completed Surveys',
+                                'Completed Tasks',
                                 style: TextStyle(
                                   fontWeight: FontWeight.normal,
                                   fontSize: 12,
@@ -94,14 +127,47 @@ class _AccountViewState extends ConsumerState<AccountView> {
                         children: [
                           Column(
                             children: [
-                              Text(
-                                "G\$ 100",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: PaxColors.black,
-                                ),
-                              ).withPadding(bottom: 4),
+                              totalGoodDollars
+                                  .when(
+                                    data:
+                                        (amount) => Row(
+                                          children: [
+                                            SvgPicture.asset(
+                                              'lib/assets/svgs/currencies/good_dollar.svg',
+                                              height: 20,
+                                            ).withPadding(right: 8),
+                                            Text(
+                                              TokenBalanceUtil.getLocaleFormattedAmount(
+                                                amount,
+                                              ),
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                                color: PaxColors.black,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                    loading:
+                                        () => Text(
+                                          "G\$ ...",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: PaxColors.black,
+                                          ),
+                                        ),
+                                    error:
+                                        (_, __) => Text(
+                                          "G\$ 0.00",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: PaxColors.black,
+                                          ),
+                                        ),
+                                  )
+                                  .withPadding(bottom: 4),
                               Text(
                                 'Lifetime G\$ Earnings',
                                 style: TextStyle(
@@ -133,17 +199,31 @@ class _AccountViewState extends ConsumerState<AccountView> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Avatar(
-                        initials: Avatar.getInitials('sunarya-thito'),
-                        provider: const NetworkImage(
-                          'https://avatars.githubusercontent.com/u/64018564?v=4',
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color:
+                                PaxColors.deepPurple, // Change color as needed
+                            width: 2.5, // Adjust border thickness as needed
+                          ),
+                        ),
+                        child: Avatar(
+                          initials: Avatar.getInitials(
+                            participant?.displayName?.split(" ").first ??
+                                "Participant",
+                          ),
+                          provider:
+                              participant != null
+                                  ? NetworkImage(participant.profilePictureURI!)
+                                  : null,
                         ),
                       ).withPadding(right: 8),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Andrew Kim',
+                            participant?.displayName ?? "",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -151,7 +231,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
                             ),
                           ).withPadding(bottom: 4),
                           Text(
-                            'andrewk@thecanvassing@xyz',
+                            participant?.emailAddress ?? "",
                             style: TextStyle(
                               fontWeight: FontWeight.normal,
                               fontSize: 12,
@@ -168,9 +248,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
                   //   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   //   crossAxisAlignment: CrossAxisAlignment.start,
                   //   children: [
-                  //     SvgPicture.asset(
-                  //       'lib/assets/svgs/clock_icon.svg',
-                  //     ).withPadding(right: 8),
+
                   //     Expanded(
                   //       child: Text(
                   //         'My Profile',

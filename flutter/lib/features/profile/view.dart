@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pax/providers/db/participant_provider.dart';
+import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import '../../theming/colors.dart' show PaxColors;
@@ -118,18 +118,25 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                 fontWeight: FontWeight.w900,
                               ),
                             ).withPadding(bottom: 8),
-                            TextField(
-                              enableInteractiveSelection: true,
-                              placeholder: Text(
-                                participant.displayName!,
-                                style: TextStyle(
-                                  color: PaxColors.black,
-                                  fontSize: 14,
-                                ),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: PaxColors.lightLilac,
                               ),
+                              child: TextField(
+                                enabled: false,
+                                enableInteractiveSelection: true,
+                                placeholder: Text(
+                                  participant.displayName!,
+                                  style: TextStyle(
+                                    color: PaxColors.black,
+                                    fontSize: 14,
+                                  ),
+                                ),
 
-                              features: [],
-                              // enabled: false,
+                                features: [],
+                                // enabled: false,
+                              ),
                             ),
                           ],
                         ).withPadding(bottom: 16),
@@ -144,31 +151,37 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                 fontWeight: FontWeight.w900,
                               ),
                             ).withPadding(bottom: 8),
-                            TextField(
-                              enabled: false,
-                              keyboardType: TextInputType.emailAddress,
-
-                              placeholder: Text(
-                                participant.emailAddress!,
-                                style: TextStyle(
-                                  color: PaxColors.black,
-                                  fontSize: 14,
-                                ),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: PaxColors.lightLilac,
                               ),
-                              // decoration: BoxDecoration(
-                              //   color: PaxColors.lightLilac,
-                              //   borderRadius: BorderRadius.circular(7),
-                              // ),
-                              features: [
-                                InputFeature.leading(
-                                  SvgPicture.asset(
-                                    'lib/assets/svgs/email.svg',
-                                    height: 20,
-                                    width: 20,
+                              child: TextField(
+                                enabled: false,
+                                keyboardType: TextInputType.emailAddress,
+
+                                placeholder: Text(
+                                  participant.emailAddress!,
+                                  style: TextStyle(
+                                    color: PaxColors.black,
+                                    fontSize: 14,
                                   ),
                                 ),
-                              ],
-                              // enabled: false,
+                                // decoration: BoxDecoration(
+                                //   color: PaxColors.lightLilac,
+                                //   borderRadius: BorderRadius.circular(7),
+                                // ),
+                                features: [
+                                  InputFeature.leading(
+                                    SvgPicture.asset(
+                                      'lib/assets/svgs/email.svg',
+                                      height: 20,
+                                      width: 20,
+                                    ),
+                                  ),
+                                ],
+                                // enabled: false,
+                              ),
                             ),
                           ],
                         ).withPadding(bottom: 16),
@@ -329,7 +342,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                           child: PrimaryButton(
                             onPressed: () async {
                               if (phoneNumber == null ||
-                                  phoneNumber?.value?.isEmpty == true) {
+                                  phoneNumber?.number != null) {
                                 showToast(
                                   context: context,
                                   location: ToastLocation.topCenter,
@@ -340,7 +353,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                             0.95,
                                         padding: const EdgeInsets.all(15),
                                         decoration: BoxDecoration(
-                                          color: PaxColors.pink,
+                                          color: Colors.amber,
                                           borderRadius: BorderRadius.circular(
                                             15,
                                           ),
