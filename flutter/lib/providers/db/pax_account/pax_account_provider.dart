@@ -1,20 +1,35 @@
-// providers/db/pax_account_provider.dart
+// providers/db/pax_account_provider.dart - Updated with balance sync
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/models/firestore/pax_account/pax_account_model.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/repositories/db/pax_account/pax_account_repository.dart';
+import 'package:pax/services/blockchain/blockchain_service.dart';
 
 // State for the pax account provider
-enum PaxAccountState { initial, loading, loaded, error }
+enum PaxAccountState {
+  initial,
+  loading,
+  loaded,
+  syncing, // New state for blockchain sync
+  error,
+}
 
 // Account state model
 class PaxAccountStateModel {
-  final PaxAccountModel? account;
+  final PaxAccount? account;
   final PaxAccountState state;
   final String? errorMessage;
+  final bool
+  isBalanceSynced; // Flag to indicate if balances are synced from blockchain
 
-  PaxAccountStateModel({this.account, required this.state, this.errorMessage});
+  PaxAccountStateModel({
+    this.account,
+    required this.state,
+    this.errorMessage,
+    this.isBalanceSynced = false,
+  });
 
   // Initial state factory
   factory PaxAccountStateModel.initial() {
@@ -23,38 +38,58 @@ class PaxAccountStateModel {
 
   // Copy with method
   PaxAccountStateModel copyWith({
-    PaxAccountModel? account,
+    PaxAccount? account,
     PaxAccountState? state,
     String? errorMessage,
+    bool? isBalanceSynced,
   }) {
     return PaxAccountStateModel(
       account: account ?? this.account,
       state: state ?? this.state,
       errorMessage: errorMessage ?? this.errorMessage,
+      isBalanceSynced: isBalanceSynced ?? this.isBalanceSynced,
     );
   }
 }
 
-// Pax Account notifier
-class PaxAccountNotifier extends StateNotifier<PaxAccountStateModel> {
-  final PaxAccountRepository _repository;
-  final Ref _ref;
+// Pax Account notifier with new Notifier syntax
+class PaxAccountNotifier extends Notifier<PaxAccountStateModel> {
+  late final PaxAccountRepository _repository;
 
-  PaxAccountNotifier(this._repository, this._ref)
-    : super(PaxAccountStateModel.initial()) {
+  @override
+  PaxAccountStateModel build() {
+    _repository = ref.watch(paxAccountRepositoryProvider);
+
+    // Set up auth state listener
+    ref.listen(authProvider, (previous, next) {
+      // When auth state changes
+      if (previous?.state != next.state) {
+        if (next.state == AuthState.authenticated) {
+          // User just signed in, sync account data
+          syncWithAuthState(next);
+        } else if (next.state == AuthState.unauthenticated) {
+          // User signed out, clear account data
+          clearAccount();
+        }
+      }
+    });
+
     // Check initial auth state
-    final authState = _ref.read(authProvider);
+    final authState = ref.read(authProvider);
 
     // Automatically sync with auth state if user is authenticated
     if (authState.state == AuthState.authenticated) {
-      syncWithAuthState(authState);
+      // We need to use Future.microtask because we can't use async in build
+      Future.microtask(() => syncWithAuthState(authState));
     }
+
+    return PaxAccountStateModel.initial();
   }
 
   // Sync account data with auth state
   Future<void> syncWithAuthState([AuthStateModel? authStateModel]) async {
     // Get auth state from provider if not provided
-    final authState = authStateModel ?? _ref.read(authProvider);
+    final authState = authStateModel ?? ref.read(authProvider);
 
     // Skip if not authenticated
     if (authState?.state != AuthState.authenticated) {
@@ -71,6 +106,13 @@ class PaxAccountNotifier extends StateNotifier<PaxAccountStateModel> {
 
       // Update state with loaded account
       state = state.copyWith(account: account, state: PaxAccountState.loaded);
+
+      // Try to fetch balances from blockchain if contract address exists
+      if (account.contractAddress != null &&
+          account.contractAddress!.isNotEmpty) {
+        // Don't await this to avoid blocking the UI
+        syncBalancesFromBlockchain();
+      }
     } catch (e) {
       // Handle error
       state = state.copyWith(
@@ -82,7 +124,7 @@ class PaxAccountNotifier extends StateNotifier<PaxAccountStateModel> {
 
   // Update balance for a token
   Future<void> updateBalance(String tokenId, num amount) async {
-    final authState = _ref.read(authProvider);
+    final authState = ref.read(authProvider);
 
     try {
       // Ensure user is authenticated and we have an account
@@ -116,7 +158,7 @@ class PaxAccountNotifier extends StateNotifier<PaxAccountStateModel> {
 
   // Update account fields
   Future<void> updateAccount(Map<String, dynamic> data) async {
-    final authState = _ref.read(authProvider);
+    final authState = ref.read(authProvider);
 
     try {
       // Ensure user is authenticated and we have an account
@@ -147,9 +189,72 @@ class PaxAccountNotifier extends StateNotifier<PaxAccountStateModel> {
     }
   }
 
+  // Fetch and sync balances from blockchain
+  Future<void> syncBalancesFromBlockchain() async {
+    final authState = ref.read(authProvider);
+
+    try {
+      // Ensure user is authenticated and we have an account
+      if (authState.state != AuthState.authenticated || state.account == null) {
+        throw Exception('User must be authenticated to sync balances');
+      }
+
+      // Set syncing state
+      state = state.copyWith(state: PaxAccountState.syncing);
+
+      // Sync balances in repository
+      final updatedAccount = await _repository.syncBalancesFromBlockchain(
+        authState.user.uid,
+      );
+
+      // Update state with updated account
+      state = state.copyWith(
+        account: updatedAccount,
+        state: PaxAccountState.loaded,
+        isBalanceSynced: true,
+      );
+    } catch (e) {
+      // Handle error
+      state = state.copyWith(
+        state: PaxAccountState.error,
+        errorMessage: e.toString(),
+      );
+    }
+  }
+
+  // Fetch a specific token balance from blockchain (doesn't update Firestore)
+  Future<double> fetchTokenBalance(String tokenId) async {
+    final authState = ref.read(authProvider);
+
+    try {
+      // Ensure user is authenticated and we have an account
+      if (authState.state != AuthState.authenticated || state.account == null) {
+        throw Exception('User must be authenticated to fetch token balance');
+      }
+
+      // Fetch token balance from repository
+      return await _repository.fetchTokenBalance(authState.user.uid, tokenId);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching token balance: $e');
+      }
+      return 0.0;
+    }
+  }
+
+  // Get formatted balance for a token
+  String getFormattedBalance(String tokenId) {
+    if (state.account == null) {
+      return BlockchainService.formatBalance(0, tokenId);
+    }
+
+    final balance = state.account!.balances[tokenId]?.toDouble() ?? 0.0;
+    return BlockchainService.formatBalance(balance, tokenId);
+  }
+
   // Refresh account data from Firestore
   Future<void> refreshAccount() async {
-    final authState = _ref.read(authProvider);
+    final authState = ref.read(authProvider);
 
     try {
       // Ensure user is authenticated
@@ -190,27 +295,13 @@ final paxAccountRepositoryProvider = Provider<PaxAccountRepository>((ref) {
   return PaxAccountRepository();
 });
 
-// StateNotifierProvider for pax account state
+// NotifierProvider for pax account state
 final paxAccountProvider =
-    StateNotifierProvider<PaxAccountNotifier, PaxAccountStateModel>((ref) {
-      final repository = ref.watch(paxAccountRepositoryProvider);
-
-      // Create the notifier
-      final notifier = PaxAccountNotifier(repository, ref);
-
-      // Set up auth state listener
-      ref.listen(authProvider, (previous, next) {
-        // When auth state changes
-        if (previous?.state != next.state) {
-          if (next.state == AuthState.authenticated) {
-            // User just signed in, sync account data
-            notifier.syncWithAuthState(next);
-          } else if (next.state == AuthState.unauthenticated) {
-            // User signed out, clear account data
-            notifier.clearAccount();
-          }
-        }
-      });
-
-      return notifier;
+    NotifierProvider<PaxAccountNotifier, PaxAccountStateModel>(() {
+      return PaxAccountNotifier();
     });
+
+// Provider for blockchain service
+final blockchainServiceProvider = Provider<BlockchainService>((ref) {
+  return BlockchainService();
+});

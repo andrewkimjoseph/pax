@@ -3,16 +3,28 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
-import 'package:pax/models/auth/user_model.dart';
+import 'package:pax/models/auth/auth_user_model.dart';
 import 'package:pax/repositories/auth/auth_repository.dart';
 
-class AuthNotifier extends StateNotifier<AuthStateModel> {
-  final AuthRepository _repository;
+class AuthNotifier extends Notifier<AuthStateModel> {
+  late final AuthRepository _repository;
   StreamSubscription? _authStateSubscription;
   Timer? _tokenRefreshTimer;
 
-  AuthNotifier(this._repository) : super(AuthStateModel.initial()) {
-    _startListeningToAuthChanges();
+  @override
+  AuthStateModel build() {
+    _repository = ref.watch(authRepositoryProvider);
+
+    // Start subscription in a microtask to avoid async operations during build
+    Future.microtask(() => _startListeningToAuthChanges());
+
+    // Handle disposal of resources when the provider is disposed
+    ref.onDispose(() {
+      _authStateSubscription?.cancel();
+      _cancelTokenValidation();
+    });
+
+    return AuthStateModel.initial();
   }
 
   // Start listening to Firebase auth state changes
@@ -24,7 +36,7 @@ class AuthNotifier extends StateNotifier<AuthStateModel> {
         _startTokenValidation();
       } else {
         state = state.copyWith(
-          user: UserModel.empty(),
+          user: AuthUser.empty(),
           state: AuthState.unauthenticated,
         );
         // Cancel validation when user is signed out
@@ -63,7 +75,7 @@ class AuthNotifier extends StateNotifier<AuthStateModel> {
         // Force sign out locally
         await _repository.signOut();
         state = state.copyWith(
-          user: UserModel.empty(),
+          user: AuthUser.empty(),
           state: AuthState.unauthenticated,
           errorMessage:
               'Your account has been signed out. Please sign in again.',
@@ -95,32 +107,25 @@ class AuthNotifier extends StateNotifier<AuthStateModel> {
           // Token is invalid, sign out
           await _repository.signOut();
           state = state.copyWith(
-            user: UserModel.empty(),
+            user: AuthUser.empty(),
             state: AuthState.unauthenticated,
           );
         }
       } else {
         // No current user
         state = state.copyWith(
-          user: UserModel.empty(),
+          user: AuthUser.empty(),
           state: AuthState.unauthenticated,
         );
       }
     } catch (e) {
       // Error with validation, treat as unauthenticated
       state = state.copyWith(
-        user: UserModel.empty(),
+        user: AuthUser.empty(),
         state: AuthState.error,
         errorMessage: 'Unable to verify authentication status: ${e.toString()}',
       );
     }
-  }
-
-  @override
-  void dispose() {
-    _authStateSubscription?.cancel();
-    _cancelTokenValidation();
-    super.dispose();
   }
 
   // Sign in with Google
@@ -153,7 +158,7 @@ class AuthNotifier extends StateNotifier<AuthStateModel> {
     try {
       await _repository.signOut();
       state = state.copyWith(
-        user: UserModel.empty(),
+        user: AuthUser.empty(),
         state: AuthState.unauthenticated,
       );
     } catch (e) {
@@ -170,10 +175,9 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository();
 });
 
-// StateNotifierProvider for auth state
-final authProvider = StateNotifierProvider<AuthNotifier, AuthStateModel>((ref) {
-  final repository = ref.watch(authRepositoryProvider);
-  return AuthNotifier(repository);
+// NotifierProvider for auth state
+final authProvider = NotifierProvider<AuthNotifier, AuthStateModel>(() {
+  return AuthNotifier();
 });
 
 final authStateForRouterProvider = Provider<AuthState>((ref) {

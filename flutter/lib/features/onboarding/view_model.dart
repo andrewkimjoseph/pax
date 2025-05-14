@@ -17,30 +17,31 @@ class OnboardingModel {
   final List<OnboardingPage> pages;
   final int currentPageIndex;
   final bool isLastPage;
+  final bool isFirstPage;
   final PageController pageController;
+  final OnboardingPage currentPage;
+  final int pageCount;
 
   OnboardingModel({
     required this.pages,
-    this.currentPageIndex = 0,
-    this.isLastPage = false,
+    required this.currentPageIndex,
     required this.pageController,
-  });
+  }) : isLastPage = currentPageIndex == pages.length - 1,
+       isFirstPage = currentPageIndex == 0,
+       currentPage = pages[currentPageIndex],
+       pageCount = pages.length;
 
   OnboardingModel copyWith({
     List<OnboardingPage>? pages,
     int? currentPageIndex,
-    bool? isLastPage,
     PageController? pageController,
   }) {
     return OnboardingModel(
       pages: pages ?? this.pages,
       currentPageIndex: currentPageIndex ?? this.currentPageIndex,
-      isLastPage: isLastPage ?? this.isLastPage,
       pageController: pageController ?? this.pageController,
     );
   }
-
-  OnboardingPage get currentPage => pages[currentPageIndex];
 }
 
 /// Houses onboarding state and handles page navigation.
@@ -59,6 +60,7 @@ class OnboardingViewModel extends Notifier<OnboardingModel> {
 
     return OnboardingModel(
       pageController: controller,
+      currentPageIndex: 0,
       pages: [
         OnboardingPage(
           imageAsset: 'lib/assets/images/onboarding_1.jpg',
@@ -82,33 +84,6 @@ class OnboardingViewModel extends Notifier<OnboardingModel> {
     );
   }
 
-  // Getter for the current page
-  OnboardingPage get currentPage => state.pages[state.currentPageIndex];
-
-  // Getter for the current image asset
-  String get currentImageAsset => currentPage.imageAsset;
-
-  // Getter for the current title
-  String get currentTitle => currentPage.title;
-
-  // Getter for the current description
-  String get currentDescription => currentPage.description;
-
-  // Getter for checking if we're on the first page
-  bool get isFirstPage => state.currentPageIndex == 0;
-
-  // Getter for checking if we're on the last page
-  bool get isLastPage => state.currentPageIndex == state.pages.length - 1;
-
-  // Getter for the current page index
-  int get currentPageIndex => state.currentPageIndex;
-
-  // Getter for total page count
-  int get pageCount => state.pages.length;
-
-  // Getter for the page controller
-  PageController get pageController => state.pageController;
-
   // Navigate to the next page
   void goToNextPage() {
     if (state.currentPageIndex < state.pages.length - 1) {
@@ -121,10 +96,7 @@ class OnboardingViewModel extends Notifier<OnboardingModel> {
       );
 
       // Then update the state
-      state = state.copyWith(
-        currentPageIndex: nextIndex,
-        isLastPage: nextIndex == state.pages.length - 1,
-      );
+      state = state.copyWith(currentPageIndex: nextIndex);
     }
   }
 
@@ -140,7 +112,7 @@ class OnboardingViewModel extends Notifier<OnboardingModel> {
       );
 
       // Then update the state
-      state = state.copyWith(currentPageIndex: prevIndex, isLastPage: false);
+      state = state.copyWith(currentPageIndex: prevIndex);
     }
   }
 
@@ -155,20 +127,14 @@ class OnboardingViewModel extends Notifier<OnboardingModel> {
       );
 
       // Then update the state
-      state = state.copyWith(
-        currentPageIndex: index,
-        isLastPage: index == state.pages.length - 1,
-      );
+      state = state.copyWith(currentPageIndex: index);
     }
   }
 
   // Handle page changes from the PageView widget
   void onPageChanged(int index) {
     if (index != state.currentPageIndex) {
-      state = state.copyWith(
-        currentPageIndex: index,
-        isLastPage: index == state.pages.length - 1,
-      );
+      state = state.copyWith(currentPageIndex: index);
     }
   }
 
@@ -178,23 +144,8 @@ class OnboardingViewModel extends Notifier<OnboardingModel> {
       state.pageController.jumpToPage(index);
 
       // Update the state
-      state = state.copyWith(
-        currentPageIndex: index,
-        isLastPage: index == state.pages.length - 1,
-      );
+      state = state.copyWith(currentPageIndex: index);
     }
-  }
-
-  void skipOnboarding() {
-    // Implementation for skipping onboarding
-    // This might involve setting a flag in shared preferences
-    // and navigating to the main app screen
-  }
-
-  void completeOnboarding() {
-    // Implementation for completing onboarding
-    // This might involve setting a flag in shared preferences
-    // and navigating to the sign-in or main app screen
   }
 
   void resetOnboarding() {
@@ -202,7 +153,7 @@ class OnboardingViewModel extends Notifier<OnboardingModel> {
     state.pageController.jumpToPage(0);
 
     // Update the state
-    state = state.copyWith(currentPageIndex: 0, isLastPage: false);
+    state = state.copyWith(currentPageIndex: 0);
   }
 }
 
@@ -215,10 +166,11 @@ final onboardingViewModelProvider =
 // Usage in your widget:
 // @override
 // Widget build(BuildContext context) {
-//   // First watch the state to ensure rebuilds
-//   ref.watch(onboardingViewModelProvider);
-//   // Then get the viewModel for all methods
+//   // Access the state directly, which now contains all necessary data
+//   final onboardingState = ref.watch(onboardingViewModelProvider);
+//   // Then get the viewModel for methods only
 //   final viewModel = ref.read(onboardingViewModelProvider.notifier);
 //   
-//   // Use viewModel for everything...
+//   // Access state properties: onboardingState.currentPage.title
+//   // Call methods: viewModel.goToNextPage()
 // }

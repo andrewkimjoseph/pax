@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
 import 'package:pax/extensions/tooltip.dart';
+import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
 import 'package:pax/utils/currency_symbol.dart';
+import 'package:pax/utils/token_balance_util.dart';
 import 'package:pax/widgets/payment_method_card.dart';
 import 'package:pax/widgets/select_currency_button.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -28,6 +30,8 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
 
   @override
   Widget build(BuildContext context) {
+    final paxAccount = ref.read(paxAccountProvider);
+
     return Scaffold(
       headers: [
         AppBar(
@@ -94,7 +98,10 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                   Row(
                     children: [
                       Text(
-                        '17,000,000',
+                        TokenBalanceUtil.getFormattedBalanceByCurrency(
+                          paxAccount.account?.balances,
+                          selectedValue,
+                        ).toString(),
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 28,

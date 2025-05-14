@@ -120,7 +120,7 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
                   // HelpAndSupportCard('About Us'),
                 ],
               ),
-            ).withPadding(top: 32),
+            ),
           ],
         ),
       ).withPadding(all: 8),

@@ -1,10 +1,10 @@
-import 'package:pax/models/auth/user_model.dart';
+import 'package:pax/models/auth/auth_user_model.dart';
 
 enum AuthState { initial, loading, authenticated, unauthenticated, error }
 
 // Auth state with user model and current state
 class AuthStateModel {
-  final UserModel user;
+  final AuthUser user;
   final AuthState state;
   final String? errorMessage;
 
@@ -12,12 +12,12 @@ class AuthStateModel {
 
   // Factory constructor to create initial state
   factory AuthStateModel.initial() {
-    return AuthStateModel(user: UserModel.empty(), state: AuthState.initial);
+    return AuthStateModel(user: AuthUser.empty(), state: AuthState.initial);
   }
 
   // Copy with method to easily create new state instances
   AuthStateModel copyWith({
-    UserModel? user,
+    AuthUser? user,
     AuthState? state,
     String? errorMessage,
   }) {

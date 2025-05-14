@@ -1,14 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pax/features/report_page/view.dart' show ReportPageView;
+import 'package:pax/models/forum_report.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/gradient_border.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 class PublishedReportCard extends ConsumerStatefulWidget {
-  const PublishedReportCard(this.achievement, {super.key});
+  const PublishedReportCard(this.forumReports, {super.key});
 
-  final String achievement;
+  final List<ForumReport> forumReports;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -43,31 +44,11 @@ class _PublishedReportCardState extends ConsumerState<PublishedReportCard> {
               shrinkWrap: true,
               padding: const EdgeInsets.all(8),
               children: <Widget>[
-                ForumReportCard().withPadding(right: 8),
-                ForumReportCard().withPadding(right: 8),
-                ForumReportCard()..withPadding(right: 8),
+                for (final report in widget.forumReports)
+                  ForumReportCard(report).withPadding(right: 8),
               ],
             ),
           ),
-          // FittedBox(
-          //   child: Row(
-          //     mainAxisAlignment: MainAxisAlignment.center,
-          //     children: [
-          //       SmoothPageIndicator(
-          //         controller: pageController,
-          //         count: 5,
-          //         onDotClicked: (index) {
-          //           pageController.jumpTo(index.toDouble());
-          //         },
-          //         effect: const ExpandingDotsEffect(
-          //           activeDotColor: PaxColors.deepPurple,
-          //           dotHeight: 16,
-          //           dotWidth: 16,
-          //         ),
-          //       ),
-          //     ],
-          //   ),
-          // ),
         ],
       ),
     );
@@ -75,7 +56,9 @@ class _PublishedReportCardState extends ConsumerState<PublishedReportCard> {
 }
 
 class ForumReportCard extends ConsumerStatefulWidget {
-  const ForumReportCard({super.key});
+  const ForumReportCard(this.report, {super.key});
+
+  final ForumReport report;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -89,7 +72,9 @@ class _ForumReportCardState extends ConsumerState<ForumReportCard> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ReportPageView()),
+          MaterialPageRoute(
+            builder: (context) => ReportPageView(widget.report.postURI!),
+          ),
         );
       },
       child: Container(
@@ -110,7 +95,7 @@ class _ForumReportCardState extends ConsumerState<ForumReportCard> {
                     children: [
                       Expanded(
                         child: Text(
-                          "[REPORT] How Africa's Digital Payment Landscape is Evolving",
+                          widget.report.title!,
                           style: TextStyle(
                             fontWeight: FontWeight.w900,
                             fontSize: 14,
@@ -124,7 +109,7 @@ class _ForumReportCardState extends ConsumerState<ForumReportCard> {
                     children: [
                       Expanded(
                         child: Text(
-                          "A recent study comparing financial behaviors among users in Nigeria and Kenya reveals fascinating insights",
+                          widget.report.subtitle!,
                           style: TextStyle(
                             fontWeight: FontWeight.normal,
                             fontSize: 12,
@@ -145,7 +130,7 @@ class _ForumReportCardState extends ConsumerState<ForumReportCard> {
 
                       Expanded(
                         child: Text(
-                          "1st April 2025",
+                          widget.report.timePublished!.toIso8601String(),
                           style: TextStyle(
                             fontWeight: FontWeight.normal,
                             fontSize: 10,
@@ -165,7 +150,7 @@ class _ForumReportCardState extends ConsumerState<ForumReportCard> {
                 child: Container(
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: AssetImage('lib/assets/images/cover.png'),
+                      image: AssetImage(widget.report.coverImageURI!),
                       fit: BoxFit.fitHeight,
                     ),
                   ),

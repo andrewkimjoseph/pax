@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:pax/models/auth/user_model.dart';
+import 'package:pax/models/auth/auth_user_model.dart';
 import 'package:pax/models/firestore/participant/participant_model.dart';
 
 class ParticipantsRepository {
@@ -23,16 +23,13 @@ class ParticipantsRepository {
   }
 
   // Get a participant record by user ID
-  Future<ParticipantModel?> getParticipant(String userId) async {
+  Future<Participant?> getParticipant(String userId) async {
     try {
       final docSnapshot =
           await _firestore.collection(collectionName).doc(userId).get();
 
       if (docSnapshot.exists) {
-        return ParticipantModel.fromMap(
-          docSnapshot.data()!,
-          id: docSnapshot.id,
-        );
+        return Participant.fromMap(docSnapshot.data()!, id: docSnapshot.id);
       }
 
       return null;
@@ -45,12 +42,12 @@ class ParticipantsRepository {
   }
 
   // Create a new participant record from user auth data
-  Future<ParticipantModel> createParticipant(UserModel user) async {
+  Future<Participant> createParticipant(AuthUser user) async {
     try {
       final now = Timestamp.now();
 
       // Create a basic participant from auth data
-      final newParticipant = ParticipantModel(
+      final newParticipant = Participant(
         id: user.uid,
         displayName: user.displayName,
         emailAddress: user.email,
@@ -75,7 +72,7 @@ class ParticipantsRepository {
   }
 
   // Update an existing participant record
-  Future<ParticipantModel> updateParticipant(
+  Future<Participant> updateParticipant(
     String userId,
     Map<String, dynamic> data,
   ) async {
@@ -93,7 +90,7 @@ class ParticipantsRepository {
       final updatedDoc =
           await _firestore.collection(collectionName).doc(userId).get();
 
-      return ParticipantModel.fromMap(updatedDoc.data()!, id: updatedDoc.id);
+      return Participant.fromMap(updatedDoc.data()!, id: updatedDoc.id);
     } catch (e) {
       if (kDebugMode) {
         print('Error updating participant: $e');
@@ -103,7 +100,7 @@ class ParticipantsRepository {
   }
 
   // Handle a user sign-in - check if participant exists, create if not
-  Future<ParticipantModel> handleUserSignIn(UserModel user) async {
+  Future<Participant> handleUserSignIn(AuthUser user) async {
     try {
       final exists = await participantExists(user.uid);
 
@@ -136,7 +133,7 @@ class ParticipantsRepository {
   }
 
   // Check if auth data has changed and participant needs update
-  bool _checkIfAuthDataChanged(ParticipantModel participant, UserModel user) {
+  bool _checkIfAuthDataChanged(Participant participant, AuthUser user) {
     return participant.displayName != user.displayName ||
         participant.emailAddress != user.email ||
         participant.profilePictureURI != user.photoURL;

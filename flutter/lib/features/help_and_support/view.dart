@@ -94,7 +94,7 @@ class _HelpAndSupportViewState extends ConsumerState<HelpAndSupportView> {
                   HelpAndSupportCard('About Us'),
                 ],
               ),
-            ).withPadding(top: 32),
+            ),
           ],
         ),
       ).withPadding(all: 8),

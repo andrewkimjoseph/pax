@@ -5,7 +5,9 @@ import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:pax/theming/colors.dart';
 
 class ReportPageView extends StatefulWidget {
-  const ReportPageView({super.key});
+  const ReportPageView(this.reportLink, {super.key});
+
+  final String reportLink;
 
   @override
   State<ReportPageView> createState() => _ReportPageViewState();
@@ -36,11 +38,7 @@ class _ReportPageViewState extends State<ReportPageView> {
               },
             ),
           )
-          ..loadRequest(
-            Uri.parse(
-              'https://forum.celo.org/t/report-blockchain-knowledge-assessment-cultural-and-regional-perspectives-from-nigeria-and-kenya/10579',
-            ),
-          );
+          ..loadRequest(Uri.parse(widget.reportLink));
   }
 
   // Method to launch URLs in external apps

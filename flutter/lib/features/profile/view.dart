@@ -328,7 +328,8 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                           height: 48,
                           child: PrimaryButton(
                             onPressed: () async {
-                              if (phoneNumber == null) {
+                              if (phoneNumber == null ||
+                                  phoneNumber?.value?.isEmpty == true) {
                                 showToast(
                                   context: context,
                                   location: ToastLocation.topCenter,
@@ -339,15 +340,6 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                             0.95,
                                         padding: const EdgeInsets.all(15),
                                         decoration: BoxDecoration(
-                                          // gradient: const LinearGradient(
-                                          //   begin: Alignment.topLeft,
-                                          //   end: Alignment.bottomRight,
-                                          //   colors: [
-                                          //     PaxColors.orange,
-                                          //     PaxColors.pink,
-                                          //   ],
-                                          //   stops: [0.0, 1.0],
-                                          // ),
                                           color: PaxColors.pink,
                                           borderRadius: BorderRadius.circular(
                                             15,

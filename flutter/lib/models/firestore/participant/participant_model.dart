@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class ParticipantModel {
+class Participant {
   final String id;
   final String? displayName;
   final String? emailAddress;
@@ -9,14 +9,11 @@ class ParticipantModel {
   final String? country;
   final Timestamp? dateOfBirth;
   final String? profilePictureURI;
-  final String? goodDollarWalletAddress;
-  final String? goodDollarIdentityExpiryData;
+  final Timestamp? goodDollarIdentityTimeLastAuthenticated;
   final Timestamp? timeCreated;
   final Timestamp? timeUpdated;
-  final String? _createdBy;
-  final String? _updatedBy;
 
-  ParticipantModel({
+  Participant({
     required this.id,
     this.displayName,
     this.emailAddress,
@@ -25,17 +22,15 @@ class ParticipantModel {
     this.country,
     this.dateOfBirth,
     this.profilePictureURI,
-    this.goodDollarWalletAddress,
-    this.goodDollarIdentityExpiryData,
+    this.goodDollarIdentityTimeLastAuthenticated,
     this.timeCreated,
     this.timeUpdated,
     String? createdBy,
     String? updatedBy,
-  }) : _createdBy = createdBy,
-       _updatedBy = updatedBy;
+  });
 
   // Create a copy of this participant with modified fields
-  ParticipantModel copyWith({
+  Participant copyWith({
     String? displayName,
     String? emailAddress,
     String? phoneNumber,
@@ -43,12 +38,10 @@ class ParticipantModel {
     String? country,
     Timestamp? dateOfBirth,
     String? profilePictureURI,
-    String? goodDollarWalletAddress,
-    String? goodDollarIdentityExpiryData,
+    Timestamp? goodDollarIdentityTimeLastAuthenticated,
     Timestamp? timeUpdated,
-    String? updatedBy,
   }) {
-    return ParticipantModel(
+    return Participant(
       id: id,
       displayName: displayName ?? this.displayName,
       emailAddress: emailAddress ?? this.emailAddress,
@@ -57,14 +50,11 @@ class ParticipantModel {
       country: country ?? this.country,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       profilePictureURI: profilePictureURI ?? this.profilePictureURI,
-      goodDollarWalletAddress:
-          goodDollarWalletAddress ?? this.goodDollarWalletAddress,
-      goodDollarIdentityExpiryData:
-          goodDollarIdentityExpiryData ?? this.goodDollarIdentityExpiryData,
+      goodDollarIdentityTimeLastAuthenticated:
+          goodDollarIdentityTimeLastAuthenticated ??
+          this.goodDollarIdentityTimeLastAuthenticated,
       timeCreated: timeCreated,
       timeUpdated: timeUpdated ?? this.timeUpdated,
-      createdBy: _createdBy,
-      updatedBy: updatedBy ?? _updatedBy,
     );
   }
 
@@ -79,21 +69,16 @@ class ParticipantModel {
       'country': country,
       'dateOfBirth': dateOfBirth,
       'profilePictureURI': profilePictureURI,
-      'goodDollarWalletAddress': goodDollarWalletAddress,
-      'goodDollarIdentityExpiryData': goodDollarIdentityExpiryData,
+      'goodDollarIdentityTimeLastAuthenticated':
+          goodDollarIdentityTimeLastAuthenticated,
       'timeCreated': timeCreated,
       'timeUpdated': timeUpdated,
-      '_createdBy': _createdBy,
-      '_updatedBy': _updatedBy,
     };
   }
 
   // Create a model from a Firestore map
-  factory ParticipantModel.fromMap(
-    Map<String, dynamic> map, {
-    required String id,
-  }) {
-    return ParticipantModel(
+  factory Participant.fromMap(Map<String, dynamic> map, {required String id}) {
+    return Participant(
       id: id,
       displayName: map['displayName'],
       emailAddress: map['emailAddress'],
@@ -102,8 +87,8 @@ class ParticipantModel {
       country: map['country'],
       dateOfBirth: map['dateOfBirth'],
       profilePictureURI: map['profilePictureURI'],
-      goodDollarWalletAddress: map['goodDollarWalletAddress'],
-      goodDollarIdentityExpiryData: map['goodDollarIdentityExpiryData'],
+      goodDollarIdentityTimeLastAuthenticated:
+          map['goodDollarIdentityTimeLastAuthenticated'],
       timeCreated: map['timeCreated'],
       timeUpdated: map['timeUpdated'],
       createdBy: map['_createdBy'],
@@ -112,8 +97,8 @@ class ParticipantModel {
   }
 
   // Create an empty participant model
-  factory ParticipantModel.empty() {
-    return ParticipantModel(id: '');
+  factory Participant.empty() {
+    return Participant(id: '');
   }
 
   // Check if this is an empty participant

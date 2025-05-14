@@ -1,5 +1,5 @@
-// repositories/fcm_token_repository.dart - Updated version to prevent duplicates
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:pax/models/firestore/fcm_token/fcm_token_model.dart';
 
 class FcmTokenRepository {
@@ -7,24 +7,28 @@ class FcmTokenRepository {
   final String collectionName = 'fcm_tokens';
 
   // Get token by id
-  Future<FcmTokenModel?> getTokenById(String id) async {
+  Future<FCMToken?> getTokenById(String id) async {
     try {
       final docSnapshot =
           await _firestore.collection(collectionName).doc(id).get();
 
       if (docSnapshot.exists) {
-        return FcmTokenModel.fromMap(docSnapshot.data()!, id: docSnapshot.id);
+        return FCMToken.fromMap(docSnapshot.data()!, id: docSnapshot.id);
       }
 
       return null;
     } catch (e) {
-      print('Error getting FCM token by id: $e');
+      if (kDebugMode) {
+        print('Error getting FCM token by id: $e');
+      }
       rethrow;
     }
   }
 
   // Get token by participant id
-  Future<FcmTokenModel?> getTokenByParticipantId(String participantId) async {
+  Future<List<FCMToken>> getAllTokensByParticipantId(
+    String participantId,
+  ) async {
     try {
       final querySnapshot =
           await _firestore
@@ -32,230 +36,229 @@ class FcmTokenRepository {
               .where('participantId', isEqualTo: participantId)
               .get();
 
-      // There might be multiple tokens for the same participant due to the bug
-      // Return the most recently updated one if multiple exist
-      if (querySnapshot.docs.isNotEmpty) {
-        if (querySnapshot.docs.length > 1) {
-          print(
-            'Warning: Found ${querySnapshot.docs.length} tokens for participant $participantId, using most recent',
-          );
-
-          // Sort by timeUpdated (most recent first)
-          final sortedDocs =
-              querySnapshot.docs.toList()..sort((a, b) {
-                final timeA = a.data()['timeUpdated'] as Timestamp?;
-                final timeB = b.data()['timeUpdated'] as Timestamp?;
-
-                if (timeA == null) return 1;
-                if (timeB == null) return -1;
-
-                return timeB.compareTo(timeA);
-              });
-
-          // Return the most recent one
-          final doc = sortedDocs.first;
-          return FcmTokenModel.fromMap(doc.data(), id: doc.id);
-        } else {
-          // Just one token found, return it
-          final doc = querySnapshot.docs.first;
-          return FcmTokenModel.fromMap(doc.data(), id: doc.id);
-        }
-      }
-
-      return null;
+      return querySnapshot.docs
+          .map((doc) => FCMToken.fromMap(doc.data(), id: doc.id))
+          .toList();
     } catch (e) {
-      print('Error getting FCM token by participant id: $e');
+      if (kDebugMode) {
+        print('Error getting all FCM tokens by participant id: $e');
+      }
       rethrow;
     }
   }
 
-  // Get token by token value
-  Future<FcmTokenModel?> getTokenByValue(String token) async {
+  // Get most recent token by participant id
+  Future<FCMToken?> getTokenByParticipantId(String participantId) async {
+    try {
+      final tokens = await getAllTokensByParticipantId(participantId);
+
+      if (tokens.isEmpty) {
+        return null;
+      }
+
+      if (tokens.length > 1) {
+        if (kDebugMode) {
+          print(
+            'Warning: Found ${tokens.length} tokens for participant $participantId, using most recent',
+          );
+        }
+
+        // Sort by timeUpdated (most recent first)
+        tokens.sort((a, b) {
+          if (a.timeUpdated == null) return 1;
+          if (b.timeUpdated == null) return -1;
+          return b.timeUpdated!.compareTo(a.timeUpdated!);
+        });
+      }
+
+      return tokens.first;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting FCM token by participant id: $e');
+      }
+      rethrow;
+    }
+  }
+
+  // Get all tokens with a specific token value
+  Future<List<FCMToken>> getAllTokensByValue(String token) async {
     try {
       final querySnapshot =
           await _firestore
               .collection(collectionName)
               .where('token', isEqualTo: token)
-              .limit(1)
               .get();
 
-      if (querySnapshot.docs.isNotEmpty) {
-        final doc = querySnapshot.docs.first;
-        return FcmTokenModel.fromMap(doc.data(), id: doc.id);
-      }
-
-      return null;
+      return querySnapshot.docs
+          .map((doc) => FCMToken.fromMap(doc.data(), id: doc.id))
+          .toList();
     } catch (e) {
-      print('Error getting FCM token by value: $e');
+      if (kDebugMode) {
+        print('Error getting all FCM tokens by value: $e');
+      }
       rethrow;
     }
   }
 
-  // Save or update token with deduplication
-  Future<FcmTokenModel> saveToken(String participantId, String token) async {
+  // Get the most recent token with the given value
+  Future<FCMToken?> getTokenByValue(String token) async {
     try {
-      // Check if this exact token already exists in the database
-      final existingTokenByValue = await getTokenByValue(token);
+      final tokens = await getAllTokensByValue(token);
 
-      if (existingTokenByValue != null) {
-        // Check if it belongs to this participant
-        if (existingTokenByValue.participantId == participantId) {
-          print('Token already exists for this participant');
-          return existingTokenByValue;
-        } else {
-          print(
-            'Token exists but for a different participant, updating ownership',
-          );
-          // Update the token to belong to this participant
-          return await updateTokenOwnership(
-            existingTokenByValue.id,
-            participantId,
-          );
-        }
+      if (tokens.isEmpty) {
+        return null;
       }
 
-      // Check if participant already has any token(s)
-      final existingTokenByParticipant = await getTokenByParticipantId(
+      if (tokens.length > 1) {
+        if (kDebugMode) {
+          print(
+            'Warning: Found ${tokens.length} documents with the same token value, using most recent',
+          );
+        }
+
+        // Sort by timeUpdated (most recent first)
+        tokens.sort((a, b) {
+          if (a.timeUpdated == null) return 1;
+          if (b.timeUpdated == null) return -1;
+          return b.timeUpdated!.compareTo(a.timeUpdated!);
+        });
+      }
+
+      return tokens.first;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting FCM token by value: $e');
+      }
+      rethrow;
+    }
+  }
+
+  // Save or update token using a two-phase approach to prevent duplicates
+  Future<FCMToken> saveToken(String participantId, String token) async {
+    try {
+      // PHASE 1: Query operations - Find and analyze existing tokens
+      if (kDebugMode) {
+        print(
+          'FCM Token Repository: Starting saveToken for participant $participantId',
+        );
+      }
+
+      // Get tokens with the exact same value
+      final tokensWithSameValue = await getAllTokensByValue(token);
+
+      // Get tokens belonging to this participant
+      final participantTokens = await getAllTokensByParticipantId(
         participantId,
       );
 
-      if (existingTokenByParticipant != null) {
-        // Update existing token with new value
-        print('Updating existing token for participant');
-        return await updateTokenValue(existingTokenByParticipant.id, token);
-      } else {
-        // Create new token
-        print('Creating new token for participant');
-        return await createToken(participantId, token);
+      // PHASE 2: Write operations - Apply the appropriate action based on what we found
+
+      // CASE 1: This exact token already exists for this participant
+      for (var existingToken in tokensWithSameValue) {
+        if (existingToken.participantId == participantId) {
+          if (kDebugMode) {
+            print(
+              'Found exact token match for participant $participantId, no changes needed',
+            );
+          }
+          return existingToken;
+        }
       }
-    } catch (e) {
-      print('Error saving FCM token: $e');
-      rethrow;
-    }
-  }
 
-  // Create a new token
-  Future<FcmTokenModel> createToken(String participantId, String token) async {
-    try {
+      // CASE 2: Token exists but belongs to another participant
+      if (tokensWithSameValue.isNotEmpty) {
+        final tokenToUpdate = tokensWithSameValue.first;
+        if (kDebugMode) {
+          print(
+            'Token exists for participant ${tokenToUpdate.participantId}, updating ownership to $participantId',
+          );
+        }
+
+        // Update ownership
+        await _firestore
+            .collection(collectionName)
+            .doc(tokenToUpdate.id)
+            .update({
+              'participantId': participantId,
+              'timeUpdated': FieldValue.serverTimestamp(),
+            });
+
+        // Return updated token
+        return FCMToken(
+          id: tokenToUpdate.id,
+          participantId: participantId,
+          token: token,
+          timeCreated: tokenToUpdate.timeCreated,
+          timeUpdated: Timestamp.now(),
+        );
+      }
+
+      // CASE 3: Participant already has token(s), update the most recent one
+      if (participantTokens.isNotEmpty) {
+        // Sort by time (most recent first)
+        participantTokens.sort((a, b) {
+          if (a.timeUpdated == null) return 1;
+          if (b.timeUpdated == null) return -1;
+          return b.timeUpdated!.compareTo(a.timeUpdated!);
+        });
+
+        final mostRecentToken = participantTokens.first;
+        if (kDebugMode) {
+          print(
+            'Participant has existing token(s), updating most recent one with new value',
+          );
+        }
+
+        // Update token value
+        await _firestore
+            .collection(collectionName)
+            .doc(mostRecentToken.id)
+            .update({
+              'token': token,
+              'timeUpdated': FieldValue.serverTimestamp(),
+            });
+
+        // Return updated token
+        return FCMToken(
+          id: mostRecentToken.id,
+          participantId: participantId,
+          token: token,
+          timeCreated: mostRecentToken.timeCreated,
+          timeUpdated: Timestamp.now(),
+        );
+      }
+
+      // CASE 4: No matching tokens, create a new one
+      if (kDebugMode) {
+        print(
+          'Creating new token for participant $participantId (no existing tokens found)',
+        );
+      }
+
       final now = Timestamp.now();
+      final newTokenRef = _firestore.collection(collectionName).doc();
 
-      // Generate a unique ID
-      final String id = _firestore.collection(collectionName).doc().id;
-
-      // Create the token document
-      final newToken = FcmTokenModel(
-        id: id,
+      final newToken = FCMToken(
+        id: newTokenRef.id,
         participantId: participantId,
         token: token,
         timeCreated: now,
         timeUpdated: now,
       );
 
-      // Save to Firestore
-      await _firestore.collection(collectionName).doc(id).set(newToken.toMap());
+      await newTokenRef.set(newToken.toMap());
+
+      if (kDebugMode) {
+        print(
+          'FCM token saved for participant: $participantId with ID: ${newToken.id}',
+        );
+      }
 
       return newToken;
     } catch (e) {
-      print('Error creating FCM token: $e');
-      rethrow;
-    }
-  }
-
-  // Update an existing token value
-  Future<FcmTokenModel> updateTokenValue(String id, String token) async {
-    try {
-      // Update in Firestore
-      await _firestore.collection(collectionName).doc(id).update({
-        'token': token,
-        'timeUpdated': FieldValue.serverTimestamp(),
-      });
-
-      // Get the updated record
-      final updatedDoc =
-          await _firestore.collection(collectionName).doc(id).get();
-
-      return FcmTokenModel.fromMap(updatedDoc.data()!, id: updatedDoc.id);
-    } catch (e) {
-      print('Error updating FCM token value: $e');
-      rethrow;
-    }
-  }
-
-  // Update token ownership (change participant ID)
-  Future<FcmTokenModel> updateTokenOwnership(
-    String id,
-    String participantId,
-  ) async {
-    try {
-      // Update in Firestore
-      await _firestore.collection(collectionName).doc(id).update({
-        'participantId': participantId,
-        'timeUpdated': FieldValue.serverTimestamp(),
-      });
-
-      // Get the updated record
-      final updatedDoc =
-          await _firestore.collection(collectionName).doc(id).get();
-
-      return FcmTokenModel.fromMap(updatedDoc.data()!, id: updatedDoc.id);
-    } catch (e) {
-      print('Error updating FCM token ownership: $e');
-      rethrow;
-    }
-  }
-
-  // Clean up duplicate tokens for a participant
-  Future<void> cleanupDuplicateTokens(String participantId) async {
-    try {
-      // Get all tokens for this participant
-      final querySnapshot =
-          await _firestore
-              .collection(collectionName)
-              .where('participantId', isEqualTo: participantId)
-              .get();
-
-      if (querySnapshot.docs.length <= 1) {
-        // No duplicates
-        return;
+      if (kDebugMode) {
+        print('Error saving FCM token: $e');
       }
-
-      print(
-        'Found ${querySnapshot.docs.length} tokens for participant $participantId, cleaning up',
-      );
-
-      // Sort by timeUpdated (most recent first)
-      final sortedDocs =
-          querySnapshot.docs.toList()..sort((a, b) {
-            final timeA = a.data()['timeUpdated'] as Timestamp?;
-            final timeB = b.data()['timeUpdated'] as Timestamp?;
-
-            if (timeA == null) return 1;
-            if (timeB == null) return -1;
-
-            return timeB.compareTo(timeA);
-          });
-
-      // Keep the most recent one, delete the rest
-      for (int i = 1; i < sortedDocs.length; i++) {
-        await _firestore
-            .collection(collectionName)
-            .doc(sortedDocs[i].id)
-            .delete();
-
-        print('Deleted duplicate token ${sortedDocs[i].id}');
-      }
-    } catch (e) {
-      print('Error cleaning up duplicate tokens: $e');
-      rethrow;
-    }
-  }
-
-  // Delete a token
-  Future<void> deleteToken(String id) async {
-    try {
-      await _firestore.collection(collectionName).doc(id).delete();
-    } catch (e) {
-      print('Error deleting FCM token: $e');
       rethrow;
     }
   }

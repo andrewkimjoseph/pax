@@ -1,14 +1,41 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pax/models/firestore/task/task_model.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 class TaskCard extends ConsumerWidget {
-  const TaskCard({super.key});
+  const TaskCard(this.task, {super.key});
+
+  final Task task;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Calculate days remaining if deadline exists
+    String daysRemaining = '-- days';
+    if (task.deadline != null) {
+      final difference = task.deadline!.toDate().difference(DateTime.now());
+      final days = difference.inDays;
+      daysRemaining = days > 0 ? '$days days' : 'Expired';
+    }
+
+    // Format reward amount
+    String rewardAmount = '\$--';
+    if (task.rewardAmountPerParticipant != null) {
+      // Using NumberFormat for proper currency formatting
+      rewardAmount = '\$${task.rewardAmountPerParticipant!.toStringAsFixed(2)}';
+    }
+
+    // Format estimated time
+    String estimatedTime = '-- min';
+    if (task.estimatedTimeOfCompletionInMinutes != null) {
+      estimatedTime = '${task.estimatedTimeOfCompletionInMinutes} min';
+    }
+
+    // Get difficulty level with fallback
+    String difficultyLevel = task.levelOfDifficulty ?? 'Not specified';
+
     return Container(
       padding: EdgeInsets.all(10),
       width: double.infinity,
@@ -31,7 +58,7 @@ class TaskCard extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Consumer Shopping Habits',
+                task.title ?? 'Untitled Task',
                 style: TextStyle(
                   fontWeight: FontWeight.normal,
                   fontSize: 20,
@@ -40,7 +67,7 @@ class TaskCard extends ConsumerWidget {
               ).withPadding(bottom: 8),
 
               Text(
-                '\$5.00',
+                rewardAmount,
                 style: TextStyle(fontSize: 20, color: Colors.green),
               ),
             ],
@@ -55,7 +82,7 @@ class TaskCard extends ConsumerWidget {
                     'lib/assets/svgs/clock_icon.svg',
                   ).withPadding(right: 8),
                   Text(
-                    '15 min',
+                    estimatedTime,
                     style: TextStyle(
                       fontWeight: FontWeight.normal,
                       fontSize: 16,
@@ -70,7 +97,7 @@ class TaskCard extends ConsumerWidget {
                     'lib/assets/svgs/difficulty_level_icon.svg',
                   ).withPadding(right: 8),
                   Text(
-                    'Easy',
+                    difficultyLevel,
                     style: TextStyle(
                       fontWeight: FontWeight.normal,
                       fontSize: 16,
@@ -86,7 +113,7 @@ class TaskCard extends ConsumerWidget {
                     'lib/assets/svgs/days_available_icon.svg',
                   ).withPadding(right: 8),
                   Text(
-                    '2 days',
+                    daysRemaining,
                     style: TextStyle(
                       fontWeight: FontWeight.normal,
                       fontSize: 16,
@@ -110,11 +137,11 @@ class TaskCard extends ConsumerWidget {
                     .withBorderRadius(borderRadius: BorderRadius.circular(20)),
                 onPressed: () {},
                 child: Text(
-                  'Retail',
+                  task.type ?? 'General',
                   style: TextStyle(
                     fontWeight: FontWeight.w900,
                     fontSize: 12,
-                    color: PaxColors.green, // The purple color from your images
+                    color: PaxColors.green,
                   ),
                 ),
               ).withPadding(right: 8),
@@ -129,13 +156,11 @@ class TaskCard extends ConsumerWidget {
                     .withBorderRadius(borderRadius: BorderRadius.circular(20)),
                 onPressed: () {},
                 child: Text(
-                  'Shopping',
+                  task.category ?? 'General',
                   style: TextStyle(
                     fontWeight: FontWeight.w900,
                     fontSize: 12,
-                    color:
-                        PaxColors
-                            .otherBlue, // The purple color from your images
+                    color: PaxColors.otherBlue,
                   ),
                 ),
               ),
@@ -146,7 +171,8 @@ class TaskCard extends ConsumerWidget {
             width: double.infinity,
             child: Button(
               onPressed: () {
-                context.go('/task');
+                // Navigate to task detail with the task ID
+                context.go('/task/${task.id}');
               },
               style: const ButtonStyle.primary(
                 density: ButtonDensity.normal,
@@ -157,7 +183,7 @@ class TaskCard extends ConsumerWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 14,
-                  color: PaxColors.white, // The purple color from your images
+                  color: PaxColors.white,
                 ),
               ),
             ),

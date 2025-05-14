@@ -1,7 +1,7 @@
 // models/pax_account/pax_account_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class PaxAccountModel {
+class PaxAccount {
   final String id; // Same as participant ID
   final String? contractAddress;
   final String? contractCreationTxnHash;
@@ -13,7 +13,7 @@ class PaxAccountModel {
   final String? safeSmartAccountWalletAddress;
   final Map<String, num> balances;
 
-  PaxAccountModel({
+  PaxAccount({
     required this.id,
     this.contractAddress,
     this.contractCreationTxnHash,
@@ -27,7 +27,7 @@ class PaxAccountModel {
   }) : balances = balances ?? {'0': 0};
 
   // Create a copy with updates
-  PaxAccountModel copyWith({
+  PaxAccount copyWith({
     String? contractAddress,
     String? contractCreationTxnHash,
     Timestamp? timeUpdated,
@@ -37,7 +37,7 @@ class PaxAccountModel {
     String? safeSmartAccountWalletAddress,
     Map<String, num>? balances,
   }) {
-    return PaxAccountModel(
+    return PaxAccount(
       id: id,
       contractAddress: contractAddress ?? this.contractAddress,
       contractCreationTxnHash:
@@ -71,11 +71,8 @@ class PaxAccountModel {
   }
 
   // Create from Firestore data
-  factory PaxAccountModel.fromMap(
-    Map<String, dynamic> map, {
-    required String id,
-  }) {
-    return PaxAccountModel(
+  factory PaxAccount.fromMap(Map<String, dynamic> map, {required String id}) {
+    return PaxAccount(
       id: id,
       contractAddress: map['contractAddress'],
       contractCreationTxnHash: map['contractCreationTxnHash'],
@@ -93,8 +90,8 @@ class PaxAccountModel {
   }
 
   // Create empty account
-  factory PaxAccountModel.empty() {
-    return PaxAccountModel(id: '', balances: {'0': 0});
+  factory PaxAccount.empty() {
+    return PaxAccount(id: '', balances: {'0': 0});
   }
 
   bool get isEmpty => id.isEmpty;

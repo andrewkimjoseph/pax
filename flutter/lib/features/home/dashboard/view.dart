@@ -1,9 +1,10 @@
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
+import 'package:go_router/go_router.dart';
+import 'package:pax/data/forum_reports.dart';
 import 'package:pax/extensions/tooltip.dart';
-import 'package:pax/providers/db/pax_account_provider.dart';
+import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/currency_symbol.dart';
 import 'package:pax/utils/gradient_border.dart';
@@ -34,17 +35,12 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
   @override
   Widget build(BuildContext context) {
     final paxAccount = ref.read(paxAccountProvider);
+
     return Scaffold(
       child: SingleChildScrollView(
         child: Column(
           children: [
             Container(
-              // decoration: BoxDecoration(
-
-              //   color: PaxColors.lilac,
-              //   border: Border.all(color: PaxColors.mediumPurple),
-              //   borderRadius: BorderRadius.circular(12),
-              // ),
               decoration: ShapeDecoration(
                 shape: GradientBorder(
                   gradient: LinearGradient(
@@ -60,22 +56,36 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Current Balance',
-                    style: TextStyle(
-                      fontWeight: FontWeight.normal,
-                      fontSize: 20,
-                      color: PaxColors.black,
-                    ),
-                  ).withPadding(bottom: 8),
+                  Row(
+                    children: [
+                      Text(
+                        'Current Balance',
+                        style: TextStyle(
+                          fontWeight: FontWeight.normal,
+                          fontSize: 20,
+                          color: PaxColors.black,
+                        ),
+                      ).withPadding(bottom: 8),
+                      // Spacer(),
+                      // IconButton.ghost(
+                      //   onPressed: () {
+                      //     ref
+                      //         .read(paxAccountProvider.notifier)
+                      //         .syncBalancesFromBlockchain();
+                      //   },
+                      //   density: ButtonDensity.icon,
+                      //   icon: const FaIcon(FontAwesomeIcons.arrowsRotate),
+                      // ),
+                    ],
+                  ),
 
                   Row(
                     children: [
                       Text(
-                        TokenBalanceUtil.getBalanceByCurrency(
+                        TokenBalanceUtil.getFormattedBalanceByCurrency(
                           paxAccount.account?.balances,
                           selectedValue,
-                        ).toString(),
+                        ),
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 28,
@@ -156,11 +166,13 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                               // border: Border.all(color: PaxColors.deepPurple),
                             ),
                         onPressed: () async {
-                          DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-                          AndroidDeviceInfo androidInfo =
-                              await deviceInfo.androidInfo;
-                          print('$androidInfo');
-                          // context.go('/wallet');
+                          // DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+                          // AndroidDeviceInfo androidInfo =
+                          //     await deviceInfo.androidInfo;
+                          // if (kDebugMode) {
+                          //   print('$androidInfo');
+                          // }
+                          context.go('/wallet');
                         },
                         child: Text(
                           'Wallet',
@@ -347,7 +359,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
               ],
             ).withPadding(bottom: 8, top: 4),
 
-            PublishedReportCard('early_bird').withPadding(bottom: 12),
+            PublishedReportCard(forumReports).withPadding(bottom: 12),
           ],
         ).withPadding(all: 8),
       ),
