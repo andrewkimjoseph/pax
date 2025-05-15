@@ -166,42 +166,42 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     ),
                   ).withPadding(right: 8),
 
-                  Button(
-                    style: const ButtonStyle.primary(
-                          density: ButtonDensity.dense,
-                        )
-                        .withBackgroundColor(
-                          color:
-                              index == 2
-                                  ? PaxColors.deepPurple
-                                  : Colors.transparent,
-                        )
-                        .withBorder(
-                          border: Border.all(
-                            color:
-                                index == 2
-                                    ? PaxColors.deepPurple
-                                    : PaxColors.lilac,
-                            width: 2,
-                          ),
-                        )
-                        .withBorderRadius(
-                          borderRadius: BorderRadius.circular(7),
-                        ),
-                    onPressed: () {
-                      setState(() {
-                        screenName = 'Achievements';
-                        index = 2;
-                      });
-                    },
+                  // Button(
+                  //   style: const ButtonStyle.primary(
+                  //         density: ButtonDensity.dense,
+                  //       )
+                  //       .withBackgroundColor(
+                  //         color:
+                  //             index == 2
+                  //                 ? PaxColors.deepPurple
+                  //                 : Colors.transparent,
+                  //       )
+                  //       .withBorder(
+                  //         border: Border.all(
+                  //           color:
+                  //               index == 2
+                  //                   ? PaxColors.deepPurple
+                  //                   : PaxColors.lilac,
+                  //           width: 2,
+                  //         ),
+                  //       )
+                  //       .withBorderRadius(
+                  //         borderRadius: BorderRadius.circular(7),
+                  //       ),
+                  //   onPressed: () {
+                  //     setState(() {
+                  //       screenName = 'Achievements';
+                  //       index = 2;
+                  //     });
+                  //   },
 
-                    child: Text(
-                      'Achievements',
-                      style: TextStyle(
-                        color: index == 2 ? PaxColors.white : PaxColors.black,
-                      ),
-                    ),
-                  ).withPadding(right: 8),
+                  //   child: Text(
+                  //     'Achievements',
+                  //     style: TextStyle(
+                  //       color: index == 2 ? PaxColors.white : PaxColors.black,
+                  //     ),
+                  //   ),
+                  // ).withPadding(right: 8),
                 ],
               ),
             ],

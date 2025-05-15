@@ -1,13 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pax/models/local/activity_model.dart';
 import 'package:pax/theming/colors.dart';
+import 'package:pax/utils/activity_type.dart';
+import 'package:pax/utils/currency_symbol.dart';
+import 'package:pax/utils/time_formatter.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:intl/intl.dart' show toBeginningOfSentenceCase;
 
 class ActivityCard extends ConsumerWidget {
-  const ActivityCard(this.acitivity, {super.key});
+  const ActivityCard(this.activity, {super.key});
 
-  final String acitivity;
+  final Activity activity;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,12 +27,10 @@ class ActivityCard extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SvgPicture.asset(
-            'lib/assets/svgs/$acitivity.svg',
-
-            // height: 24,
-          ).withPadding(right: 12),
-
+          FaIcon(
+            activity.getIcon(),
+            color: PaxColors.lilac,
+          ).withPadding(left: 4, right: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,7 +43,7 @@ class ActivityCard extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '${toBeginningOfSentenceCase(acitivity.split('_')[0])} ',
+                        '${activity.type.singularName} ',
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 16,
@@ -49,12 +51,29 @@ class ActivityCard extends ConsumerWidget {
                         ),
                       ),
 
-                      Text(
-                        "G\$ 100",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 14,
-                          color: Colors.black,
+                      Spacer(),
+
+                      Visibility(
+                        visible:
+                            activity.reward != null ||
+                            activity.withdrawal != null,
+                        child: Row(
+                          children: [
+                            if (activity.getCurrencyId() != null)
+                              SvgPicture.asset(
+                                'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(activity.getCurrencyId())}.svg',
+                                height: 20,
+                              ).withPadding(right: 4),
+
+                            Text(
+                              activity.getAmount() ?? '0',
+                              style: TextStyle(
+                                fontWeight: FontWeight.normal,
+                                fontSize: 14,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -65,7 +84,11 @@ class ActivityCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Completed your first $acitivity',
+                      activity.taskCompletion != null
+                          ? 'You have completed a task'
+                          : activity.reward != null
+                          ? 'You have earned a reward'
+                          : 'You have made a withdrawal',
                       style: TextStyle(
                         fontWeight: FontWeight.normal,
                         fontSize: 12,
@@ -74,7 +97,7 @@ class ActivityCard extends ConsumerWidget {
                     ).withPadding(bottom: 8),
 
                     Text(
-                      'Dec 22 2024, 2025 | 9.41 AM',
+                      activity.formattedTimestamp,
                       style: TextStyle(
                         fontWeight: FontWeight.normal,
                         fontSize: 11,

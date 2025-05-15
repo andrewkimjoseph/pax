@@ -14,4 +14,19 @@ class CurrencySymbolUtil {
         return currencyLabel;
     }
   }
+
+  static String getNameForCurrency(int? tokenId) {
+    switch (tokenId) {
+      case 1:
+        return "good_dollar";
+      case 2:
+        return 'celo_dollar';
+      case 3:
+        return 'tether_usd';
+      case 4:
+        return 'usd_coin';
+      default:
+        return "good_dollar";
+    }
+  }
 }

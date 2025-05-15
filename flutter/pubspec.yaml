@@ -56,6 +56,9 @@ dependencies:
   http: ^1.4.0
   envied: ^1.1.1
   flutter_local_notifications: ^19.2.0
+  connectivity_plus: ^6.1.4
+  cloud_functions: ^5.5.0
+  pointycastle: ^4.0.0
 
 dev_dependencies:
   flutter_test:
@@ -93,8 +96,9 @@ flutter:
     - lib/assets/images/gooddollar_verification_steps/
     - lib/assets/images/reports/
     - lib/assets/svgs/
-    - lib/assets/svgs/dashboard_carousel/
+    - lib/assets/svgs/activities/
     - lib/assets/svgs/currencies/
+    - lib/assets/svgs/dashboard_carousel/
     
 
   # An image asset can refer to one or more resolution-specific "variants", see

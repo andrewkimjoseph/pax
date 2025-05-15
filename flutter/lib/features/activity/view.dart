@@ -1,4 +1,8 @@
+// lib/views/activity/activity_view.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pax/models/local/activity_model.dart';
+
+import 'package:pax/providers/local/activity_provider.dart';
 import 'package:pax/widgets/activity_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import '../../theming/colors.dart' show PaxColors;
@@ -18,10 +22,19 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
   @override
   void initState() {
     super.initState();
+    // Initialize activities on startup
   }
 
   @override
   Widget build(BuildContext context) {
+    // Get the current user ID
+
+    // Get the activity notifier to set filters
+    final activityNotifier = ref.read(activityNotifierProvider.notifier);
+
+    // Watch for activities based on the current filter
+    final activitiesAsync = ref.watch(filteredActivitiesProvider);
+
     return Scaffold(
       headers: [
         AppBar(
@@ -35,7 +48,7 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
                 style: Theme.of(context).typography.base.copyWith(
                   fontWeight: FontWeight.w900,
                   fontSize: 32,
-                  color: PaxColors.black, // The purple color from your images
+                  color: PaxColors.black,
                 ),
               ),
             ],
@@ -62,8 +75,8 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
                   setState(() {
                     index = 0;
                   });
+                  activityNotifier.setFilterType(ActivityType.taskCompletion);
                 },
-
                 child: Text(
                   'Task Completions',
                   style: TextStyle(
@@ -92,8 +105,8 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
                   setState(() {
                     index = 1;
                   });
+                  activityNotifier.setFilterType(ActivityType.reward);
                 },
-
                 child: Text(
                   'Rewards',
                   style: TextStyle(
@@ -122,8 +135,8 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
                   setState(() {
                     index = 2;
                   });
+                  activityNotifier.setFilterType(ActivityType.withdrawal);
                 },
-
                 child: Text(
                   'Withdrawals',
                   style: TextStyle(
@@ -137,21 +150,39 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
         Divider(color: PaxColors.lightGrey),
       ],
 
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            // for (var item in [1, 2, 3, 4, 5, 6, 7])
-            ActivityCard('payout').withPadding(all: 8),
-            ActivityCard('task_completion').withPadding(all: 8),
-            ActivityCard('reward').withPadding(all: 8),
-            ActivityCard('payout').withPadding(all: 8),
-            ActivityCard('task_completion').withPadding(all: 8),
-            ActivityCard('reward').withPadding(all: 8),
-            ActivityCard('payout').withPadding(all: 8),
-            ActivityCard('task_completion').withPadding(all: 8),
-            ActivityCard('reward').withPadding(all: 8),
-          ],
-        ),
+      child: activitiesAsync.when(
+        data: (activities) {
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                if (activities.isEmpty)
+                  Center(
+                    child: Text(
+                      'No activities found',
+                      style: TextStyle(color: PaxColors.darkGrey),
+                    ),
+                  )
+                else
+                  for (var activity in activities)
+                    ActivityCard(activity).withPadding(all: 8),
+              ],
+            ),
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error:
+            (error, stackTrace) => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Error loading activities',
+                    style: TextStyle(color: PaxColors.darkGrey),
+                  ),
+                  SizedBox(height: 8),
+                ],
+              ),
+            ),
       ),
     );
   }
