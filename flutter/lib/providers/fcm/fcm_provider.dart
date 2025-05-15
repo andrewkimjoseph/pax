@@ -2,7 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
-import 'package:pax/repositories/db/fcm_token/fcm_token_repository.dart';
+import 'package:pax/repositories/firestore/fcm_token/fcm_token_repository.dart';
 import 'package:pax/services/fcm_service.dart';
 import 'package:flutter/foundation.dart';
 

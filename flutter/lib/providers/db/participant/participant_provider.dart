@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/models/firestore/participant/participant_model.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
-import 'package:pax/repositories/db/participant/participants_repository.dart';
+import 'package:pax/repositories/firestore/participant/participants_repository.dart';
 
 // State for the participant provider
 enum ParticipantState { initial, loading, loaded, error }

@@ -2,9 +2,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/models/local/activity_model.dart';
-import 'package:pax/repositories/db/reward/reward_repository.dart';
-import 'package:pax/repositories/db/task_completion/task_completion_repository.dart';
-import 'package:pax/repositories/db/withdrawal/withdrawal_repository.dart';
+import 'package:pax/repositories/firestore/reward/reward_repository.dart';
+import 'package:pax/repositories/firestore/task_completion/task_completion_repository.dart';
+import 'package:pax/repositories/firestore/withdrawal/withdrawal_repository.dart';
 import 'package:pax/repositories/local/activity_repository.dart';
 
 import '../auth/auth_provider.dart';

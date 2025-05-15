@@ -2,7 +2,7 @@
 import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
-import 'package:pax/repositories/db/fcm_token/fcm_token_repository.dart';
+import 'package:pax/repositories/firestore/fcm_token/fcm_token_repository.dart';
 
 class FcmService {
   final FcmTokenRepository _repository;

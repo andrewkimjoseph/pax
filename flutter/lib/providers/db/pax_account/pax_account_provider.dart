@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/models/firestore/pax_account/pax_account_model.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
-import 'package:pax/repositories/db/pax_account/pax_account_repository.dart';
+import 'package:pax/repositories/firestore/pax_account/pax_account_repository.dart';
 import 'package:pax/services/blockchain/blockchain_service.dart';
 
 // State for the pax account provider
