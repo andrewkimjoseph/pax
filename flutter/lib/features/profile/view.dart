@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -16,23 +17,147 @@ class ProfileView extends ConsumerStatefulWidget {
 
 class _ProfileViewState extends ConsumerState<ProfileView> {
   PhoneNumber? phoneNumber;
-  String? selectedValue;
   DateTime? dateTime;
   String? genderValue;
+  bool isProcessing = false;
+
   @override
   void initState() {
     super.initState();
   }
 
+  // Helper method to show toast notifications
+  void _showToast({
+    required String message,
+    required Color backgroundColor,
+    required IconData icon,
+  }) {
+    showToast(
+      context: context,
+      location: ToastLocation.topCenter,
+      builder:
+          (context, overlay) => Container(
+            width: MediaQuery.of(context).size.width * 0.95,
+            padding: const EdgeInsets.all(15),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Basic(
+              subtitle: Text(
+                message,
+                style: const TextStyle(color: PaxColors.white),
+              ),
+              trailing: FaIcon(icon, color: PaxColors.white),
+              trailingAlignment: Alignment.center,
+            ),
+          ),
+    );
+  }
+
+  // Validate phone number
+  bool _validatePhoneNumber() {
+    if (phoneNumber == null || phoneNumber!.number.isEmpty) {
+      _showToast(
+        message: 'Phone number is required',
+        backgroundColor: Colors.amber,
+        icon: FontAwesomeIcons.circleInfo,
+      );
+      return false;
+    }
+
+    // Additional validation could be added here
+    // For example, checking minimum length based on country
+    if (phoneNumber!.number.length < 6) {
+      _showToast(
+        message: 'Phone number is too short',
+        backgroundColor: Colors.amber,
+        icon: FontAwesomeIcons.circleInfo,
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  // Validate gender selection
+  bool _validateGender() {
+    if (genderValue == null) {
+      _showToast(
+        message: 'Gender selection is required',
+        backgroundColor: Colors.amber,
+        icon: FontAwesomeIcons.circleInfo,
+      );
+      return false;
+    }
+    return true;
+  }
+
+  // Validate birthdate
+  bool _validateBirthdate() {
+    if (dateTime == null) {
+      _showToast(
+        message: 'Birthdate is required',
+        backgroundColor: Colors.amber,
+        icon: FontAwesomeIcons.circleInfo,
+      );
+      return false;
+    }
+
+    // Check if user is at least 18 years old
+    final DateTime now = DateTime.now();
+    final DateTime minimumDate = DateTime(now.year - 18, now.month, now.day);
+
+    if (dateTime!.isAfter(minimumDate)) {
+      _showToast(
+        message: 'You must be at least 18 years old',
+        backgroundColor: Colors.amber,
+        icon: FontAwesomeIcons.circleInfo,
+      );
+      return false;
+    }
+
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     final participant = ref.watch(participantProvider).participant;
+    final participantState = ref.watch(participantProvider).state;
+    final isLoading = participantState == ParticipantState.loading;
+
+    // Initialize phone number from participant if available
+    if (participant != null && participant.phoneNumber != null) {
+      try {
+        // Parse existing phone number if available (format: "+254 712345678")
+        final parts = participant.phoneNumber!.split(' ');
+        if (parts.length == 2) {
+          final countryCode = parts[0];
+          final number = parts[1];
+          // Find country by dial code
+          final country = Country.values.firstWhere(
+            (c) => c.dialCode == countryCode,
+            orElse: () => Country.kenya,
+          );
+
+          // Always set phone number from participant data to ensure it's properly displayed
+          if (phoneNumber == null || phoneNumber!.number.isEmpty) {
+            phoneNumber = PhoneNumber(country, number);
+          }
+        }
+      } catch (e) {
+        // Fallback for parsing errors if this is the first time loading
+        phoneNumber ??= PhoneNumber(Country.kenya, '');
+      }
+    } else {
+      phoneNumber ??= PhoneNumber(Country.kenya, '');
+    }
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       headers: [
         AppBar(
           padding: EdgeInsets.all(8),
-
           backgroundColor: PaxColors.white,
           child: Row(
             children: [
@@ -49,9 +174,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 20),
               ),
-
               Spacer(),
-              // Icon(Icons.more_vert),
             ],
           ),
         ).withPadding(top: 16),
@@ -76,13 +199,11 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Container(
-                        // padding: EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color:
-                                PaxColors.deepPurple, // Change color as needed
-                            width: 2.5, // Adjust border thickness as needed
+                            color: PaxColors.deepPurple,
+                            width: 2.5,
                           ),
                         ),
                         child: Avatar(
@@ -107,6 +228,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                     ),
                     child: Column(
                       children: [
+                        // Display Name Field
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -118,28 +240,22 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                 fontWeight: FontWeight.w900,
                               ),
                             ).withPadding(bottom: 8),
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                color: PaxColors.lightLilac,
-                              ),
-                              child: TextField(
-                                enabled: false,
-                                enableInteractiveSelection: true,
-                                placeholder: Text(
-                                  participant.displayName!,
-                                  style: TextStyle(
-                                    color: PaxColors.black,
-                                    fontSize: 14,
-                                  ),
+                            TextField(
+                              enabled: false,
+                              enableInteractiveSelection: true,
+                              placeholder: Text(
+                                participant.displayName!,
+                                style: TextStyle(
+                                  color: PaxColors.mediumPurple,
+                                  fontSize: 14,
                                 ),
-
-                                features: [],
-                                // enabled: false,
                               ),
+                              features: [],
                             ),
                           ],
                         ).withPadding(bottom: 16),
+
+                        // Email Field
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -151,41 +267,30 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                 fontWeight: FontWeight.w900,
                               ),
                             ).withPadding(bottom: 8),
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                color: PaxColors.lightLilac,
+                            TextField(
+                              enabled: false,
+                              keyboardType: TextInputType.emailAddress,
+                              placeholder: Text(
+                                participant.emailAddress!,
+                                style: TextStyle(
+                                  color: PaxColors.mediumPurple,
+                                  fontSize: 14,
+                                ),
                               ),
-                              child: TextField(
-                                enabled: false,
-                                keyboardType: TextInputType.emailAddress,
-
-                                placeholder: Text(
-                                  participant.emailAddress!,
-                                  style: TextStyle(
-                                    color: PaxColors.black,
-                                    fontSize: 14,
+                              features: [
+                                InputFeature.leading(
+                                  SvgPicture.asset(
+                                    'lib/assets/svgs/email.svg',
+                                    height: 20,
+                                    width: 20,
                                   ),
                                 ),
-                                // decoration: BoxDecoration(
-                                //   color: PaxColors.lightLilac,
-                                //   borderRadius: BorderRadius.circular(7),
-                                // ),
-                                features: [
-                                  InputFeature.leading(
-                                    SvgPicture.asset(
-                                      'lib/assets/svgs/email.svg',
-                                      height: 20,
-                                      width: 20,
-                                    ),
-                                  ),
-                                ],
-                                // enabled: false,
-                              ),
+                              ],
                             ),
                           ],
                         ).withPadding(bottom: 16),
 
+                        // Phone Number Field
                         SizedBox(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,31 +303,45 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                   fontWeight: FontWeight.w900,
                                 ),
                               ).withPadding(bottom: 8),
-                              FittedBox(
-                                fit: BoxFit.fill,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    PhoneInput(
-                                      initialValue: PhoneNumber(
-                                        Country.kenya,
-                                        '722978938',
+
+                              if (participant.phoneNumber != null)
+                                TextField(
+                                  enabled: false,
+                                  placeholder: Text(phoneNumber.toString()),
+                                ),
+
+                              Visibility(
+                                visible: participant.phoneNumber == null,
+                                child: FittedBox(
+                                  fit: BoxFit.fill,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      PhoneInput(
+                                        initialValue:
+                                            phoneNumber?.country != null &&
+                                                    phoneNumber?.number != null
+                                                ? PhoneNumber(
+                                                  phoneNumber!.country,
+                                                  phoneNumber!.number,
+                                                )
+                                                : null,
+
+                                        onChanged: (value) {
+                                          setState(() {
+                                            phoneNumber = value;
+                                          });
+                                        },
                                       ),
-                                      initialCountry: Country.kenya,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          phoneNumber = value;
-                                        });
-                                      },
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
-                              // Text(_phoneNumber?.value ?? '(No value)'),
                             ],
                           ).withPadding(bottom: 16),
                         ),
 
+                        // Gender Field
                         Container(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,23 +355,19 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                 ),
                               ).withPadding(bottom: 8),
                               SizedBox(
-                                // decoration: BoxDecoration(
-                                //   color: PaxColors.lightLilac,
-                                //   borderRadius: BorderRadius.circular(7),
-                                // ),
                                 width: double.infinity,
                                 child: Select<String>(
                                   disableHoverEffect: true,
                                   itemBuilder: (context, item) {
                                     return Text(item);
                                   },
-
                                   onChanged: (value) {
                                     setState(() {
-                                      selectedValue = value;
+                                      genderValue = value;
                                     });
                                   },
-                                  value: participant.gender,
+                                  value: genderValue ?? participant.gender,
+                                  // Only allow editing if gender hasn't been set
                                   enabled: participant.gender == null,
                                   placeholder: const Text('Gender'),
                                   popup: (context) {
@@ -273,11 +388,11 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                   },
                                 ),
                               ),
-                              // Text(_phoneNumber?.value ?? '(No value)'),
                             ],
                           ).withPadding(bottom: 16),
                         ),
 
+                        // Birthdate Field
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -290,26 +405,23 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                               ),
                             ).withPadding(bottom: 8),
                             SizedBox(
-                              // decoration: BoxDecoration(
-                              //   color: PaxColors.lightLilac,
-                              //   borderRadius: BorderRadius.circular(7),
-                              // ),
                               width: double.infinity,
                               child: DatePicker(
+                                // Only allow editing if birthdate hasn't been set
                                 enabled: participant.dateOfBirth == null,
-
                                 placeholder: Text(
                                   'Select date',
                                   style: TextStyle(color: Colors.black),
                                 ),
                                 value:
-                                    participant.dateOfBirth != null
+                                    dateTime ??
+                                    (participant.dateOfBirth != null
                                         ? DateTime.fromMillisecondsSinceEpoch(
                                           participant
                                               .dateOfBirth!
                                               .millisecondsSinceEpoch,
                                         )
-                                        : null,
+                                        : null),
                                 mode: PromptMode.dialog,
                                 stateBuilder: (date) {
                                   if (date.isAfter(DateTime.now())) {
@@ -330,105 +442,126 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                     ),
                   ),
 
+                  // Save Button
                   Container(
-                    // padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     color: Colors.white,
-
                     child: Column(
                       children: [
                         SizedBox(
                           width: double.infinity,
                           height: 48,
                           child: PrimaryButton(
-                            onPressed: () async {
-                              if (phoneNumber == null ||
-                                  phoneNumber?.number != null) {
-                                showToast(
-                                  context: context,
-                                  location: ToastLocation.topCenter,
-                                  builder:
-                                      (context, overlay) => Container(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                            0.95,
-                                        padding: const EdgeInsets.all(15),
-                                        decoration: BoxDecoration(
-                                          color: Colors.amber,
-                                          borderRadius: BorderRadius.circular(
-                                            15,
-                                          ),
-                                        ),
-                                        child: Basic(
-                                          subtitle: const Text(
-                                            '[Phone number] not provided',
-                                            style: TextStyle(
-                                              color: PaxColors.white,
-                                            ),
-                                          ),
-                                          trailing: FaIcon(
-                                            FontAwesomeIcons.circleInfo,
-                                            color: PaxColors.white,
-                                          ),
-                                          trailingAlignment: Alignment.center,
-                                        ),
-                                      ),
-                                );
-                              }
-                              // showDialog(
-                              //   context: context,
-                              //   builder: (context) {
-                              //     return AlertDialog(
-                              //       title: const Text(
-                              //         'Confirm Profile Update',
-                              //         style: TextStyle(
-                              //           color: PaxColors.deepPurple,
-                              //           fontSize: 24,
-                              //           fontWeight: FontWeight.bold,
-                              //         ),
-                              //       ),
-                              //       content: Column(
-                              //         children: [
-                              //           const Text(
-                              //             'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-                              //           ),
-                              //         ],
-                              //       ),
-                              //       actions: [
-                              //         OutlineButton(
-                              //           child: const Text('Cancel'),
-                              //           onPressed: () {
-                              //             Navigator.pop(context);
-                              //           },
-                              //         ),
-                              //         PrimaryButton(
-                              //           child: const Text('OK'),
-                              //           onPressed: () {
-                              //             Navigator.pop(context);
-                              //           },
-                              //         ),
-                              //       ],
-                              //     );
-                              //   },
-                              // );
-                              // await ref
-                              //     .read(participantProvider.notifier)
-                              //     .updateProfile({
-                              //       'gender': selectedValue,
-                              //       'dateOfBirth':
-                              //           _value != null
-                              //               ? Timestamp.fromDate(_value!)
-                              //               : null,
-                              //     });
-                            },
+                            onPressed:
+                                (isLoading || isProcessing)
+                                    ? null
+                                    : () async {
+                                      // Prevent double-pressing
+                                      setState(() {
+                                        isProcessing = true;
+                                      });
 
-                            child: Text(
-                              'Save',
-                              style: Theme.of(context).typography.base.copyWith(
-                                fontWeight: FontWeight.normal,
-                                fontSize: 14,
-                                color: PaxColors.white,
-                              ),
-                            ),
+                                      try {
+                                        // Validate phone number if not already set
+                                        if (participant.phoneNumber == null &&
+                                            !_validatePhoneNumber()) {
+                                          setState(() {
+                                            isProcessing = false;
+                                          });
+                                          return;
+                                        }
+
+                                        if (participant.gender == null &&
+                                            !_validateGender()) {
+                                          setState(() {
+                                            isProcessing = false;
+                                          });
+                                          return;
+                                        }
+
+                                        // Validate birthdate if not already set
+                                        if (participant.dateOfBirth == null &&
+                                            !_validateBirthdate()) {
+                                          setState(() {
+                                            isProcessing = false;
+                                          });
+                                          return;
+                                        }
+                                        // Create update data map
+                                        final Map<String, dynamic> updateData =
+                                            {};
+
+                                        // Only add gender if it's not already set
+                                        if (participant.gender == null &&
+                                            genderValue != null) {
+                                          updateData['gender'] = genderValue;
+                                        }
+
+                                        // Only add birthdate if it's not already set
+                                        if (participant.dateOfBirth == null &&
+                                            dateTime != null) {
+                                          updateData['dateOfBirth'] =
+                                              Timestamp.fromDate(dateTime!);
+                                        }
+
+                                        // Add phone number and country if not already set
+                                        if (participant.phoneNumber == null &&
+                                            phoneNumber != null) {
+                                          final formattedPhoneNumber =
+                                              '${phoneNumber!.country.dialCode} ${phoneNumber!.number}';
+                                          updateData['phoneNumber'] =
+                                              formattedPhoneNumber;
+                                          updateData['country'] =
+                                              phoneNumber!.country.toString();
+                                        }
+
+                                        // Only proceed if there are changes to save
+                                        if (updateData.isNotEmpty) {
+                                          await ref
+                                              .read(
+                                                participantProvider.notifier,
+                                              )
+                                              .updateProfile(updateData);
+                                          _showToast(
+                                            message:
+                                                'Profile updated successfully',
+                                            backgroundColor: Colors.green,
+                                            icon: FontAwesomeIcons.circleCheck,
+                                          );
+                                        } else {
+                                          _showToast(
+                                            message: 'No changes to save',
+                                            backgroundColor: Colors.blue,
+                                            icon: FontAwesomeIcons.circleInfo,
+                                          );
+                                        }
+                                      } catch (e) {
+                                        _showToast(
+                                          message:
+                                              'Error updating profile: ${e.toString()}',
+                                          backgroundColor: Colors.red,
+                                          icon:
+                                              FontAwesomeIcons
+                                                  .circleExclamation,
+                                        );
+                                      } finally {
+                                        setState(() {
+                                          isProcessing = false;
+                                        });
+                                      }
+                                    },
+                            child:
+                                (isLoading || isProcessing)
+                                    ? CircularProgressIndicator(onSurface: true)
+                                    : Text(
+                                      'Save',
+                                      style: Theme.of(
+                                        context,
+                                      ).typography.base.copyWith(
+                                        fontWeight: FontWeight.normal,
+                                        fontSize: 14,
+                                        color: PaxColors.white,
+                                      ),
+                                    ),
                           ),
                         ),
                       ],
@@ -443,10 +576,3 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     );
   }
 }
-
-// String? selectedValue;
-// @override
-// Widget build(BuildContext context) {
-//   return 
-// }
-

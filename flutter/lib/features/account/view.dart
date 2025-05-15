@@ -135,7 +135,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
                                             SvgPicture.asset(
                                               'lib/assets/svgs/currencies/good_dollar.svg',
                                               height: 20,
-                                            ).withPadding(right: 8),
+                                            ).withPadding(right: 2),
                                             Text(
                                               TokenBalanceUtil.getLocaleFormattedAmount(
                                                 amount,
