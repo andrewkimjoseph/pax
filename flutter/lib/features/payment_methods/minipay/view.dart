@@ -14,10 +14,10 @@ class MiniPayConnectionView extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
-      _HelpAndSupportViewState();
+      _MiniPayConnectionViewState();
 }
 
-class _HelpAndSupportViewState extends ConsumerState<MiniPayConnectionView> {
+class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
   String? genderValue;
 
   final StepperController controller = StepperController(currentStep: 0);
