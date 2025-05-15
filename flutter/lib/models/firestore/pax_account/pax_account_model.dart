@@ -10,7 +10,6 @@ class PaxAccount {
   final Timestamp? timeUpdated;
   final String? serverWalletId;
   final String? serverWalletAddress;
-  final String? safeSmartAccountWalletId;
   final String? safeSmartAccountWalletAddress;
   final Map<int, num> balances; // Keeping original type
 
@@ -22,10 +21,9 @@ class PaxAccount {
     this.timeUpdated,
     this.serverWalletId,
     this.serverWalletAddress,
-    this.safeSmartAccountWalletId,
     this.safeSmartAccountWalletAddress,
     Map<int, num>? balances,
-  }) : balances = balances ?? {0: 0};
+  }) : balances = balances ?? {1: 0, 2: 0, 3: 0, 4: 0};
 
   // Create a copy with updates
   PaxAccount copyWith({
@@ -47,8 +45,6 @@ class PaxAccount {
       timeUpdated: timeUpdated ?? this.timeUpdated,
       serverWalletId: serverWalletId ?? this.serverWalletId,
       serverWalletAddress: serverWalletAddress ?? this.serverWalletAddress,
-      safeSmartAccountWalletId:
-          safeSmartAccountWalletId ?? this.safeSmartAccountWalletId,
       safeSmartAccountWalletAddress:
           safeSmartAccountWalletAddress ?? this.safeSmartAccountWalletAddress,
       balances: balances ?? this.balances,
@@ -71,7 +67,6 @@ class PaxAccount {
       'timeUpdated': timeUpdated,
       'serverWalletId': serverWalletId,
       'serverWalletAddress': serverWalletAddress,
-      'safeSmartAccountWalletId': safeSmartAccountWalletId,
       'safeSmartAccountWalletAddress': safeSmartAccountWalletAddress,
       'balances': balancesForFirestore, // Store with string keys
     };
@@ -114,7 +109,6 @@ class PaxAccount {
       timeUpdated: map['timeUpdated'],
       serverWalletId: map['serverWalletId'],
       serverWalletAddress: map['serverWalletAddress'],
-      safeSmartAccountWalletId: map['safeSmartAccountWalletId'],
       safeSmartAccountWalletAddress: map['safeSmartAccountWalletAddress'],
       balances: parsedBalances, // Use the converted map with int keys
     );
@@ -122,7 +116,7 @@ class PaxAccount {
 
   // Create empty account
   factory PaxAccount.empty() {
-    return PaxAccount(id: '', balances: {0: 0});
+    return PaxAccount(id: '', balances: {1: 0, 2: 0, 3: 0, 4: 0});
   }
 
   bool get isEmpty => id.isEmpty;
