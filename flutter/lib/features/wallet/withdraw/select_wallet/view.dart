@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
 import 'package:pax/providers/db/payment_method/payment_method_provider.dart';
 import 'package:pax/providers/local/select_payment_method_provider.dart';
+import 'package:pax/providers/local/withdraw_context_provider.dart';
 import 'package:pax/widgets/withdrawal_option_card.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
@@ -104,6 +105,13 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
                     onPressed:
                         isContinueEnabled
                             ? () {
+                              ref
+                                  .watch(withdrawContextProvider.notifier)
+                                  .setSelectedPaymentMethod(
+                                    paymentMethods.firstWhere(
+                                      (method) => method.id == selectedMethodId,
+                                    ),
+                                  );
                               context.go(
                                 '/wallet/withdraw/select-wallet/review-summary',
                               );

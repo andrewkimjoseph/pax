@@ -257,8 +257,8 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ).withPadding(bottom: 8),
-                                const Text(
-                                  '\$30 has been successfully transferred to your MiniPay account.',
+                                Text(
+                                  '$amountToWithdraw has been successfully transferred to your MiniPay account.',
                                   style: TextStyle(
                                     color: PaxColors.black,
                                     fontSize: 16,

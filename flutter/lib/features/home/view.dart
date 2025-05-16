@@ -1,7 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:pax/exports/views.dart';
-import 'package:pax/features/notifications/view.dart';
 
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -45,19 +43,19 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 ),
               ),
 
-              GestureDetector(
-                onPanDown:
-                    (details) => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => NotificationsView(),
-                      ),
-                    ),
+              // GestureDetector(
+              //   onPanDown:
+              //       (details) => Navigator.push(
+              //         context,
+              //         MaterialPageRoute(
+              //           builder: (context) => NotificationsView(),
+              //         ),
+              //       ),
 
-                child: SvgPicture.asset(
-                  'lib/assets/svgs/active_notification.svg',
-                ),
-              ),
+              //   child: SvgPicture.asset(
+              //     'lib/assets/svgs/active_notification.svg',
+              //   ),
+              // ),
             ],
           ).withPadding(bottom: 8),
           subtitle: Column(
