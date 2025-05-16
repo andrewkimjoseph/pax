@@ -7,7 +7,7 @@ import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/local/activity_provider.dart';
 import 'package:pax/utils/token_balance_util.dart';
-import 'package:pax/widgets/account_option_card.dart';
+import 'package:pax/widgets/account/account_option_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
 
 import '../../theming/colors.dart' show PaxColors;

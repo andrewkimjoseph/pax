@@ -48,7 +48,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
     // Connect wallet using the provider
     ref
         .read(miniPayConnectionProvider.notifier)
-        .connectWallet(authState.user.uid, walletAddress);
+        .connectPrimaryPaymentMethod(authState.user.uid, walletAddress);
   }
 
   // Show success dialog when connection is successful
@@ -202,50 +202,69 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                             width: 2,
                           ),
                         ),
-                        child: Column(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            Column(
                               children: [
-                                SvgPicture.asset(
-                                  'lib/assets/svgs/verification_required.svg',
+                                FaIcon(
+                                  FontAwesomeIcons.triangleExclamation,
+                                  color: PaxColors.otherOrange,
+                                  size: 25,
                                 ).withPadding(right: 8),
-                                const Text(
-                                  'GoodDollar',
-                                  style: TextStyle(
-                                    color: PaxColors.deepPurple,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                SvgPicture.asset(
-                                  'lib/assets/svgs/currencies/good_dollar.svg',
-                                  height: 20,
-                                ),
+                                // SvgPicture.asset(
+                                //   'lib/assets/svgs/verification_required.svg',
+                                // ).withPadding(right: 8),
+                              ],
+                            ),
 
-                                const Text(
-                                  ' Verification Required',
-                                  style: TextStyle(
-                                    color: PaxColors.deepPurple,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'GoodDollar',
+                                        style: TextStyle(
+                                          color: PaxColors.deepPurple,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      SvgPicture.asset(
+                                        'lib/assets/svgs/currencies/good_dollar.svg',
+                                        height: 20,
+                                      ),
+
+                                      const Text(
+                                        ' Verification Required',
+                                        style: TextStyle(
+                                          color: PaxColors.deepPurple,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ).withPadding(bottom: 8),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: const Text(
+                                          'To connect successfully, your wallet should be GoodDollar verified. \n\nIf verified, paste the address and connect.',
+                                          style: TextStyle(
+                                            color: PaxColors.black,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
-                            ).withPadding(bottom: 8),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: const Text(
-                                    'To connect successfully, your wallet should be GoodDollar verified. \n\nIf verified, paste the address and connect.',
-                                    style: TextStyle(
-                                      color: PaxColors.black,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -507,11 +526,12 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
           border: Border.all(color: PaxColors.red, width: 2),
         ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             FaIcon(
               FontAwesomeIcons.xmark,
               color: PaxColors.red,
+              size: 25,
             ).withPadding(right: 8),
             // SvgPicture.asset(
             //   'lib/assets/svgs/error.svg',

@@ -6,7 +6,7 @@ import 'package:pax/extensions/tooltip.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
 import 'package:pax/utils/currency_symbol.dart';
 import 'package:pax/utils/token_balance_util.dart';
-import 'package:pax/widgets/payment_method_card.dart';
+import 'package:pax/widgets/payment_method_cards/minipay_payment_method_card.dart';
 import 'package:pax/widgets/select_currency_button.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -239,7 +239,7 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                     ),
                     child: Column(
                       children: [
-                        PaymentMethodCard(
+                        MiniPayPaymentMethodCard(
                           'minipay',
                           "MiniPay Wallet",
                           () => context.push(

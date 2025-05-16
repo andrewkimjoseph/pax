@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/theming/colors.dart';
-import 'package:pax/widgets/achievement_card.dart';
+import 'package:pax/widgets/achievement/achievement_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 class AchievementsView extends ConsumerStatefulWidget {
