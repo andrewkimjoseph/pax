@@ -31,10 +31,10 @@ class _WalletOptionCardState extends ConsumerState<WalletOptionCard> {
         setState(() {
           _state = CheckboxState.checked;
         });
-        // Update the selected payment method ID provider
-        // ref.read(selectedPaymentMethodIdProvider) = widget.paymentMethod.id;
 
-        // ref.read(selectedPaymentMethodIdProvider) = widget.paymentMethod.id;
+        ref
+            .read(selectedPaymentMethodIdProvider.notifier)
+            .select(widget.paymentMethod.id);
       }
     });
   }
