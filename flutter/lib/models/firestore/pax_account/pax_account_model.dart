@@ -10,7 +10,7 @@ class PaxAccount {
   final Timestamp? timeUpdated;
   final String? serverWalletId;
   final String? serverWalletAddress;
-  final String? safeSmartAccountWalletAddress;
+  final String? smartAccountWalletAddress;
   final Map<int, num> balances; // Keeping original type
 
   PaxAccount({
@@ -21,7 +21,7 @@ class PaxAccount {
     this.timeUpdated,
     this.serverWalletId,
     this.serverWalletAddress,
-    this.safeSmartAccountWalletAddress,
+    this.smartAccountWalletAddress,
     Map<int, num>? balances,
   }) : balances = balances ?? {1: 0, 2: 0, 3: 0, 4: 0};
 
@@ -33,7 +33,7 @@ class PaxAccount {
     String? serverWalletId,
     String? serverWalletAddress,
     String? safeSmartAccountWalletId,
-    String? safeSmartAccountWalletAddress,
+    String? smartAccountWalletAddress,
     Map<int, num>? balances,
   }) {
     return PaxAccount(
@@ -45,8 +45,8 @@ class PaxAccount {
       timeUpdated: timeUpdated ?? this.timeUpdated,
       serverWalletId: serverWalletId ?? this.serverWalletId,
       serverWalletAddress: serverWalletAddress ?? this.serverWalletAddress,
-      safeSmartAccountWalletAddress:
-          safeSmartAccountWalletAddress ?? this.safeSmartAccountWalletAddress,
+      smartAccountWalletAddress:
+          smartAccountWalletAddress ?? this.smartAccountWalletAddress,
       balances: balances ?? this.balances,
     );
   }
@@ -67,7 +67,7 @@ class PaxAccount {
       'timeUpdated': timeUpdated,
       'serverWalletId': serverWalletId,
       'serverWalletAddress': serverWalletAddress,
-      'safeSmartAccountWalletAddress': safeSmartAccountWalletAddress,
+      'smartAccountWalletAddress': smartAccountWalletAddress,
       'balances': balancesForFirestore, // Store with string keys
     };
   }
@@ -98,7 +98,7 @@ class PaxAccount {
 
     // If no balances found or all parsing failed, use default
     if (parsedBalances.isEmpty) {
-      parsedBalances = {0: 0};
+      parsedBalances = {1: 0, 2: 0, 3: 0, 4: 0};
     }
 
     return PaxAccount(
@@ -109,7 +109,7 @@ class PaxAccount {
       timeUpdated: map['timeUpdated'],
       serverWalletId: map['serverWalletId'],
       serverWalletAddress: map['serverWalletAddress'],
-      safeSmartAccountWalletAddress: map['safeSmartAccountWalletAddress'],
+      smartAccountWalletAddress: map['safeSmartAccountWalletAddress'],
       balances: parsedBalances, // Use the converted map with int keys
     );
   }

@@ -1,4 +1,4 @@
-// repositories/payment_method_repository.dart
+// repositories/firestore/payment_method/payment_method_repository.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pax/models/firestore/payment_method/payment_method.dart';
@@ -33,9 +33,15 @@ class PaymentMethodRepository {
     required String walletAddress,
     int predefinedId = 1,
     String name = 'minipay',
+    bool isDefault = false,
   }) async {
     try {
       final now = Timestamp.now();
+
+      // If this is set as default, remove default status from other payment methods
+      if (isDefault) {
+        await _removeDefaultStatus(participantId);
+      }
 
       // Create payment method
       final newPaymentMethod = PaymentMethod(
@@ -64,6 +70,69 @@ class PaymentMethodRepository {
     }
   }
 
+  // Update a payment method
+  Future<PaymentMethod> updatePaymentMethod(
+    String paymentMethodId,
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      // Add timestamp
+      final updateData = {...data, 'timeUpdated': FieldValue.serverTimestamp()};
+
+      // If setting as default, remove default status from other payment methods
+      if (data['isDefault'] == true) {
+        // Get the payment method to find the participant ID
+        final paymentMethodDoc =
+            await _firestore
+                .collection(collectionName)
+                .doc(paymentMethodId)
+                .get();
+
+        if (paymentMethodDoc.exists) {
+          final participantId = paymentMethodDoc.data()?['participantId'];
+          if (participantId != null) {
+            await _removeDefaultStatus(
+              participantId,
+              exceptId: paymentMethodId,
+            );
+          }
+        }
+      }
+
+      // Update in Firestore
+      await _firestore
+          .collection(collectionName)
+          .doc(paymentMethodId)
+          .update(updateData);
+
+      // Get the updated record
+      final updatedDoc =
+          await _firestore
+              .collection(collectionName)
+              .doc(paymentMethodId)
+              .get();
+
+      return PaymentMethod.fromMap(updatedDoc.data()!, id: updatedDoc.id);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error updating payment method: $e');
+      }
+      rethrow;
+    }
+  }
+
+  // Delete a payment method
+  Future<void> deletePaymentMethod(String paymentMethodId) async {
+    try {
+      await _firestore.collection(collectionName).doc(paymentMethodId).delete();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error deleting payment method: $e');
+      }
+      rethrow;
+    }
+  }
+
   // Get all payment methods for a participant
   Future<List<PaymentMethod>> getPaymentMethodsForParticipant(
     String participantId,
@@ -81,6 +150,71 @@ class PaymentMethodRepository {
     } catch (e) {
       if (kDebugMode) {
         print('Error getting payment methods: $e');
+      }
+      rethrow;
+    }
+  }
+
+  // Get payment method by wallet address
+  Future<PaymentMethod?> getPaymentMethodByWalletAddress(
+    String walletAddress,
+  ) async {
+    try {
+      final querySnapshot =
+          await _firestore
+              .collection(collectionName)
+              .where('walletAddress', isEqualTo: walletAddress)
+              .limit(1)
+              .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        return null;
+      }
+
+      return PaymentMethod.fromMap(
+        querySnapshot.docs.first.data(),
+        id: querySnapshot.docs.first.id,
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting payment method by wallet address: $e');
+      }
+      rethrow;
+    }
+  }
+
+  // Helper method to remove default status from all payment methods for a participant
+  Future<void> _removeDefaultStatus(
+    String participantId, {
+    String? exceptId,
+  }) async {
+    try {
+      // Get all default payment methods
+      final querySnapshot =
+          await _firestore
+              .collection(collectionName)
+              .where('participantId', isEqualTo: participantId)
+              .where('isDefault', isEqualTo: true)
+              .get();
+
+      // Batch update to remove default status
+      final batch = _firestore.batch();
+      for (final doc in querySnapshot.docs) {
+        // Skip the exception if provided
+        if (exceptId != null && doc.id == exceptId) {
+          continue;
+        }
+        batch.update(doc.reference, {
+          'isDefault': false,
+          'timeUpdated': FieldValue.serverTimestamp(),
+        });
+      }
+
+      // Commit batch
+      await batch.commit();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error removing default status: $e');
       }
       rethrow;
     }

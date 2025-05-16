@@ -137,29 +137,20 @@ class MiniPayService {
   }
 
   // Call Firebase Function to deploy smart contract
-  Future<Map<String, dynamic>> deployPaxAccountContractAddress(
-    String walletAddress,
+  Future<Map<String, dynamic>> deployPaxAccountV1ProxyContractAddress(
+    String primaryPaymentMethod,
     String serverWalletId,
   ) async {
     try {
-      // Ensure the user is authenticated
-      final User? currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser == null) {
-        throw Exception('User must be authenticated to deploy contract');
-      }
-
-      // Force token refresh
-      await currentUser.getIdToken(true);
-
       // Create callable function
       final callable = _functions.httpsCallable(
-        'createPaxAccountProxy',
+        'createPaxAccountV1Proxy',
         options: HttpsCallableOptions(timeout: const Duration(seconds: 300)),
       );
 
       // Call the function with parameters
       final result = await callable.call({
-        'walletAddress': walletAddress,
+        '_primaryPaymentMethod': primaryPaymentMethod,
         'serverWalletId': serverWalletId,
       });
 
@@ -194,14 +185,13 @@ class MiniPayService {
           paxAccount.serverWalletId!.isNotEmpty &&
           paxAccount.serverWalletAddress != null &&
           paxAccount.serverWalletAddress!.isNotEmpty &&
-          paxAccount.safeSmartAccountWalletAddress != null &&
-          paxAccount.safeSmartAccountWalletAddress!.isNotEmpty) {
+          paxAccount.smartAccountWalletAddress != null &&
+          paxAccount.smartAccountWalletAddress!.isNotEmpty) {
         // Use existing server wallet
         serverWalletData = {
           'serverWalletId': paxAccount.serverWalletId,
           'serverWalletAddress': paxAccount.serverWalletAddress,
-          'safeSmartAccountWalletAddress':
-              paxAccount.safeSmartAccountWalletAddress,
+          'safeSmartAccountWalletAddress': paxAccount.smartAccountWalletAddress,
         };
       } else {
         // Create a new server wallet
@@ -230,7 +220,7 @@ class MiniPayService {
         };
       } else {
         // Deploy a new contract
-        contractData = await deployPaxAccountContractAddress(
+        contractData = await deployPaxAccountV1ProxyContractAddress(
           walletAddress,
           serverWalletData['serverWalletId'],
         );
