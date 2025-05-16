@@ -6,7 +6,7 @@ import {
 import { logger } from "firebase-functions/v2";
 import { PrivyClient } from "@privy-io/server-auth";
 import { createViemAccount } from "@privy-io/server-auth/viem";
-import { toSafeSmartAccount } from "permissionless/accounts";
+import { toSimpleSmartAccount } from "permissionless/accounts";
 import { createPublicClient, http, Address } from "viem";
 import { celo } from "viem/chains";
 import { entryPoint07Address } from "viem/account-abstraction";
@@ -69,25 +69,24 @@ export const createPrivyServerWallet = onCall(FUNCTION_RUNTIME_OPTS, async (requ
     });
 
     // Create Safe Smart Account
-    const safeSmartAccount = await toSafeSmartAccount({
+    const smartAccount = await toSimpleSmartAccount({
       client: publicClient,
-      owners: [serverWalletAccount],
+      owner: serverWalletAccount,
       entryPoint: {
         address: entryPoint07Address,
         version: "0.7",
       },
-      version: "1.4.1",
     });
 
     logger.info("Created Safe Smart Account", {
-      safeAddress: safeSmartAccount.address,
+      safeAddress: smartAccount.address,
     });
 
     // Return wallet details
     return {
       serverWalletId: wallet.id,
       serverWalletAddress: wallet.address,
-      safeSmartAccountWalletAddress: safeSmartAccount.address,
+      smartAccountWalletAddress: smartAccount.address,
     };
   } catch (error) {
     logger.error("Error creating server wallet", { error });
