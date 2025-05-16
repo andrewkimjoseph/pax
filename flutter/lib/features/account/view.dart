@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' show Divider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pax/features/account_and_security/view.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
@@ -8,6 +9,7 @@ import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/local/activity_provider.dart';
 import 'package:pax/utils/token_balance_util.dart';
 import 'package:pax/widgets/account/account_option_card.dart';
+import 'package:pax/widgets/toast.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
 
 import '../../theming/colors.dart' show PaxColors;
@@ -406,8 +408,11 @@ class _AccountViewState extends ConsumerState<AccountView> {
                     height: 48,
                     child: PrimaryButton(
                       onPressed: () {
+                        closeDrawer(context);
+                        showSuccessToast(context);
                         ref.read(authProvider.notifier).signOut();
                         context.pushReplacement('/onboarding');
+
                         // if (onboardingViewModel.isLastPage) {
                         //   // Handle completion
                         //   onboardingViewModel.completeOnboarding();
@@ -435,6 +440,20 @@ class _AccountViewState extends ConsumerState<AccountView> {
         ).withPadding(bottom: 32);
       },
       position: OverlayPosition.bottom,
+    );
+  }
+
+  void showSuccessToast(BuildContext toastContext) {
+    showToast(
+      context: context,
+      location: ToastLocation.topCenter,
+      builder:
+          (context, overlay) => Toast(
+            leadingIcon: FontAwesomeIcons.google,
+            toastColor: PaxColors.green,
+            text: 'Sign-out complete',
+            trailingIcon: FontAwesomeIcons.solidCircleCheck,
+          ),
     );
   }
 }

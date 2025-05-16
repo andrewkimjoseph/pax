@@ -2,8 +2,11 @@ import 'package:flutter/material.dart' show Divider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
+import 'package:pax/providers/local/withdraw_context_provider.dart';
 
 import 'package:pax/theming/colors.dart';
+import 'package:pax/utils/currency_symbol.dart';
+import 'package:pax/utils/token_balance_util.dart';
 import 'package:pax/widgets/change_withdrawal_method_card.dart';
 
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
@@ -17,8 +20,6 @@ class ReviewSummaryView extends ConsumerStatefulWidget {
 }
 
 class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
-  String? selectedValue;
-  String? genderValue;
   @override
   void initState() {
     super.initState();
@@ -26,6 +27,11 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
 
   @override
   Widget build(BuildContext context) {
+    final withdrawContext = ref.watch(withdrawContextProvider);
+    final amountToWithdraw = withdrawContext?.amountToWithdraw ?? 1;
+    final tokenId = withdrawContext?.tokenId ?? 0;
+    final paymentMethod = withdrawContext?.selectedPaymentMethod;
+
     return Scaffold(
       backgroundColor: PaxColors.white,
       headers: [
@@ -90,13 +96,23 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
+                          Spacer(),
+
                           Text(
-                            '\$30.00',
-                            style: TextStyle(
+                            TokenBalanceUtil.getLocaleFormattedAmount(
+                              amountToWithdraw,
+                            ),
+                            style: const TextStyle(
                               fontSize: 16,
+                              color: PaxColors.black,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
+
+                          SvgPicture.asset(
+                            'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(tokenId)}.svg',
+                            height: 25,
+                          ).withPadding(left: 4),
                         ],
                       ).withPadding(bottom: 12),
                       Row(
@@ -131,13 +147,22 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
+                          Spacer(),
                           Text(
-                            '\$30.00',
-                            style: TextStyle(
+                            TokenBalanceUtil.getLocaleFormattedAmount(
+                              amountToWithdraw,
+                            ),
+                            style: const TextStyle(
                               fontSize: 16,
+                              color: PaxColors.black,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
+
+                          SvgPicture.asset(
+                            'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(tokenId)}.svg',
+                            height: 25,
+                          ).withPadding(left: 4),
                         ],
                       ).withPadding(vertical: 16),
                       // Row(
@@ -191,14 +216,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                     border: Border.all(color: PaxColors.lightLilac, width: 1),
                   ),
                   child: Column(
-                    children: [
-                      ChangeWithdrawalMethodCard(
-                        'minipay',
-                        "MiniPay",
-                        () =>
-                            context.push("/payment-methods/minipay-connection"),
-                      ),
-                    ],
+                    children: [ChangeWithdrawalMethodCard(paymentMethod!)],
                   ),
                 ),
               ],

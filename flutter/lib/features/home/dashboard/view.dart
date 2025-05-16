@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:pax/data/forum_reports.dart';
 import 'package:pax/extensions/tooltip.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
+import 'package:pax/providers/local/reward_currency_context.dart';
+import 'package:pax/providers/local/withdraw_context_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/currency_symbol.dart';
 import 'package:pax/utils/gradient_border.dart';
@@ -22,7 +24,6 @@ class DashboardView extends ConsumerStatefulWidget {
 }
 
 class _DashboardViewState extends ConsumerState<DashboardView> {
-  String selectedValue = 'good_dollar';
   int index = 0;
 
   final CarouselController controller = CarouselController();
@@ -34,7 +35,13 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
 
   @override
   Widget build(BuildContext context) {
-    final paxAccount = ref.read(paxAccountProvider);
+    final paxAccount = ref.watch(paxAccountProvider);
+
+    final selectedCurrency =
+        ref.watch(rewardCurrencyContextProvider).selectedCurrency;
+
+    final tokenId = TokenBalanceUtil.getTokenIdForCurrency(selectedCurrency);
+    final currentBalance = paxAccount.account?.balances[tokenId];
 
     return Scaffold(
       child: SingleChildScrollView(
@@ -84,7 +91,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                       Text(
                         TokenBalanceUtil.getFormattedBalanceByCurrency(
                           paxAccount.account?.balances,
-                          selectedValue,
+                          selectedCurrency,
                         ),
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
@@ -93,7 +100,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                         ),
                       ).withPadding(right: 8),
                       SvgPicture.asset(
-                        'lib/assets/svgs/currencies/$selectedValue.svg',
+                        'lib/assets/svgs/currencies/$selectedCurrency.svg',
                         height: 25,
                       ),
                     ],
@@ -132,12 +139,19 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
 
                           onChanged: (value) {
                             if (value != null) {
-                              setState(() {
-                                selectedValue = value;
-                              });
+                              ref
+                                  .read(rewardCurrencyContextProvider.notifier)
+                                  .setSelectedCurrency(value);
+
+                              ref
+                                  .read(withdrawContextProvider.notifier)
+                                  .setWithdrawContext(
+                                    tokenId ?? 1,
+                                    currentBalance ?? 0,
+                                  );
                             }
                           },
-                          value: selectedValue,
+                          value: selectedCurrency,
                           placeholder: const Text('Change currency'),
                           popup:
                               (context) => SelectPopup(

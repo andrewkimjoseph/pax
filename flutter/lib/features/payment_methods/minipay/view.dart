@@ -458,36 +458,17 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
           ),
         );
 
-      case MiniPayConnectionState.creatingServerWallet ||
-          MiniPayConnectionState.deployingContract ||
-          MiniPayConnectionState.creatingPaymentMethod:
-        return SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: PrimaryButton(
-            enabled: false,
-            onPressed: null,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(onSurface: true),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Connecting wallet...',
-                  style: Theme.of(context).typography.base.copyWith(
-                    fontWeight: FontWeight.normal,
-                    fontSize: 14,
-                    color: PaxColors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
+      case MiniPayConnectionState.creatingServerWallet:
+        return _buildConnectingButton('Creating secure wallet...');
+
+      case MiniPayConnectionState.deployingContract:
+        return _buildConnectingButton('Deploying smart contract...');
+
+      case MiniPayConnectionState.creatingPaymentMethod:
+        return _buildConnectingButton('Setting up payment method...');
+
+      case MiniPayConnectionState.updatingParticipant:
+        return _buildConnectingButton('Syncing account data...');
 
       default:
         // Normal connect button
@@ -548,6 +529,36 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
       ).animate().fadeIn().shader();
     }
     return const SizedBox.shrink();
+  }
+
+  Widget _buildConnectingButton(String message) {
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: PrimaryButton(
+        enabled: false,
+        onPressed: null,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(onSurface: true),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              message,
+              style: Theme.of(context).typography.base.copyWith(
+                fontWeight: FontWeight.normal,
+                fontSize: 14,
+                color: PaxColors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _launchExternalUrl(String url) async {

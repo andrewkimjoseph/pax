@@ -2,9 +2,10 @@ import 'package:flutter/material.dart' show Divider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
-
-import 'package:pax/theming/colors.dart';
+import 'package:pax/providers/db/payment_method/payment_method_provider.dart';
+import 'package:pax/providers/local/select_payment_method_provider.dart';
 import 'package:pax/widgets/withdrawal_option_card.dart';
+import 'package:pax/theming/colors.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
 
 class SelectWalletView extends ConsumerStatefulWidget {
@@ -16,20 +17,21 @@ class SelectWalletView extends ConsumerStatefulWidget {
 }
 
 class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
-  String? selectedValue;
-  String? genderValue;
-  @override
-  void initState() {
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
+    // Get available payment methods
+    final paymentMethods = ref.watch(paymentMethodsProvider).paymentMethods;
+
+    // Watch the selected payment method ID (to enable/disable Continue button)
+    final selectedMethodId = ref.watch(selectedPaymentMethodIdProvider);
+
+    // Button is enabled only when a payment method is selected
+    final isContinueEnabled = selectedMethodId != null;
+
     return Scaffold(
       headers: [
         AppBar(
-          padding: EdgeInsets.all(8),
-
+          padding: const EdgeInsets.all(8),
           backgroundColor: PaxColors.white,
           child: Row(
             children: [
@@ -40,25 +42,23 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
                 },
                 child: SvgPicture.asset('lib/assets/svgs/arrow_left_long.svg'),
               ),
-              Spacer(),
-              Text(
-                "Wallets",
+              const Spacer(),
+              const Text(
+                "Select Wallet",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 20),
               ),
-
-              Spacer(),
-              // Icon(Icons.more_vert),
+              const Spacer(),
             ],
           ),
         ).withPadding(top: 16),
-        Divider(color: PaxColors.lightGrey),
+        const Divider(color: PaxColors.lightGrey),
       ],
 
       child: Column(
         children: [
           Container(
-            padding: EdgeInsets.all(12),
+            padding: const EdgeInsets.all(12),
             width: double.infinity,
             decoration: BoxDecoration(
               color: PaxColors.white,
@@ -67,34 +67,8 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
             ),
             child: Column(
               children: [
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.center,
-                //   crossAxisAlignment: CrossAxisAlignment.end,
-                //   children: [
-                //     Container(
-                //       // padding: EdgeInsets.all(8),
-                //       decoration: BoxDecoration(
-                //         shape: BoxShape.circle,
-                //         border: Border.all(
-                //           color:
-                //               PaxColors.deepPurple, // Change color as needed
-                //           width: 2.5, // Adjust border thickness as needed
-                //         ),
-                //       ),
-                //       child: Avatar(
-                //         size: 70,
-                //         initials: Avatar.getInitials('sunarya-thito'),
-                //         provider: const NetworkImage(
-                //           'https://avatars.githubusercontent.com/u/64018564?v=4',
-                //         ),
-                //       ),
-                //     ),
-
-                //     SvgPicture.asset('lib/assets/svgs/edit_profile.svg'),
-                //   ],
-                // ).withPadding(bottom: 16, top: 12),
                 Container(
-                  padding: EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: PaxColors.white,
                     borderRadius: BorderRadius.circular(12),
@@ -102,12 +76,12 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
                   ),
                   child: Column(
                     children: [
-                      WithdrawalOptionCard(
-                        'minipay',
-                        "MiniPay",
-                        () =>
-                            context.push("/payment-methods/minipay-connection"),
-                      ),
+                      // Show payment methods if available
+                      if (paymentMethods.isNotEmpty)
+                        WalletOptionCard(
+                          paymentMethods[0],
+                          // Assuming iconName is derived from payment method type
+                        ),
                     ],
                   ),
                 ),
@@ -115,24 +89,26 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
             ),
           ),
 
-          Spacer(),
+          const Spacer(),
 
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             child: Column(
               children: [
-                Divider().withPadding(top: 10, bottom: 10),
+                const Divider().withPadding(top: 10, bottom: 10),
                 SizedBox(
                   width: double.infinity,
                   height: 48,
                   child: PrimaryButton(
-                    onPressed: () {
-                      context.go(
-                        '/wallet/withdraw/select-wallet/review-summary',
-                      );
-                    },
-
+                    // Enable button only when a payment method is selected
+                    onPressed:
+                        isContinueEnabled
+                            ? () {
+                              context.go(
+                                '/wallet/withdraw/select-wallet/review-summary',
+                              );
+                            }
+                            : null,
                     child: Text(
                       'Continue',
                       style: Theme.of(context).typography.base.copyWith(
@@ -151,10 +127,3 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
     );
   }
 }
-
-// String? selectedValue;
-// @override
-// Widget build(BuildContext context) {
-//   return 
-// }
-
