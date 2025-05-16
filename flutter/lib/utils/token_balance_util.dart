@@ -107,7 +107,7 @@ class TokenBalanceUtil {
     final locale = Intl.getCurrentLocale();
 
     // Create formatter based on whether to include decimals
-    final NumberFormat formatter = NumberFormat('#,###', locale);
+    final NumberFormat formatter = NumberFormat('#,###.######', locale);
 
     // Format the number
     final formattedNumber = formatter.format(amount);
