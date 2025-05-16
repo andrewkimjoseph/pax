@@ -123,7 +123,7 @@ class PaxAccountNotifier extends Notifier<PaxAccountStateModel> {
   }
 
   // Update balance for a token
-  Future<void> updateBalance(String tokenId, num amount) async {
+  Future<void> updateBalance(int tokenId, num amount) async {
     final authState = ref.read(authProvider);
 
     try {

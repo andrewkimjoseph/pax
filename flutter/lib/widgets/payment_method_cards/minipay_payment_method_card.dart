@@ -20,7 +20,7 @@ class MiniPayPaymentMethodCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final minipay = ref.read(primaryPaymentMethodProvider);
+    final minipay = ref.watch(primaryPaymentMethodProvider);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,

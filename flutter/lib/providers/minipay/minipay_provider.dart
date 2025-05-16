@@ -1,7 +1,10 @@
 // providers/minipay_provider.dart
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
+import 'package:pax/providers/db/payment_method/payment_method_provider.dart';
 import 'package:pax/repositories/firestore/payment_method/payment_method_repository.dart';
 import 'package:pax/services/minipay/minipay_service.dart';
 
@@ -26,6 +29,7 @@ enum MiniPayConnectionState {
   creatingServerWallet,
   deployingContract,
   creatingPaymentMethod,
+  updatingParticipant,
   success,
   error,
 }
@@ -261,7 +265,7 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
         }
       }
 
-      // 7. Create payment method
+      // 7. Create payment method and update participant
       state = state.copyWith(
         state: MiniPayConnectionState.creatingPaymentMethod,
       );
@@ -273,17 +277,61 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
           walletAddress: primaryPaymentMethod,
         );
 
+        // Update state to show we're updating participant related data
+        state = state.copyWith(
+          state: MiniPayConnectionState.updatingParticipant,
+        );
+
+        // Get the last authentication time and expiry date from GoodDollar
+        int goodDollarIdentityTimeLastAuthenticated = await _miniPayService
+            .getLastAuthenticated(primaryPaymentMethod);
+
+        // Get GoodDollar identity expiry date
+        Timestamp? goodDollarIdentityExpiryDate = await _miniPayService
+            .getGoodDollarIdentityExpiryDate(primaryPaymentMethod);
+
+        // Refresh payment methods in state
+        await ref.read(paymentMethodsProvider.notifier).refresh(userId);
+
+        // Sync blockchain balances with Firestore
+        await ref
+            .read(paxAccountProvider.notifier)
+            .syncBalancesFromBlockchain();
+
+        // Update participant profile with authentication timestamp and expiry date
+        Map<String, dynamic> participantUpdateData = {
+          "goodDollarIdentityTimeLastAuthenticated":
+              Timestamp.fromMillisecondsSinceEpoch(
+                goodDollarIdentityTimeLastAuthenticated * 1000,
+              ),
+        };
+
+        // Only add expiry date if it exists
+        if (goodDollarIdentityExpiryDate != null) {
+          participantUpdateData["goodDollarIdentityExpiryDate"] =
+              goodDollarIdentityExpiryDate;
+        }
+
+        // Update the participant profile
+        await ref
+            .read(participantProvider.notifier)
+            .updateProfile(participantUpdateData);
+
+        // Refresh participant data in state
+        await ref.read(participantProvider.notifier).refreshParticipant();
+
+        // Set state to success once everything is complete
         state = state.copyWith(
           state: MiniPayConnectionState.success,
           isConnecting: false,
         );
       } catch (e) {
         if (kDebugMode) {
-          print('Error creating payment method: $e');
+          print('Error creating payment method or updating participant: $e');
         }
         state = state.copyWith(
           state: MiniPayConnectionState.error,
-          errorMessage: 'Failed to create payment method: ${e.toString()}',
+          errorMessage: 'Failed to complete wallet connection: ${e.toString()}',
           isConnecting: false,
         );
       }
