@@ -5,4 +5,4 @@ initializeApp();
 
 
 export { createPrivyServerWallet } from './createPrivyServerWallet';
-export { createPaxAccountProxy } from './createPaxAccountProxy';
+export { createPaxAccountV1Proxy } from './createPaxAccountV1Proxy';
