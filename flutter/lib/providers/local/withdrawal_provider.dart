@@ -1,0 +1,95 @@
+// lib/providers/withdraw/withdraw_provider.dart
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pax/models/local/withdrawal_state_model.dart';
+import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
+import 'package:pax/providers/local/activity_provider.dart';
+import 'package:pax/providers/local/withdrawal_service_provider.dart';
+import 'package:pax/providers/auth/auth_provider.dart';
+import 'package:pax/services/withdrawal_service.dart';
+
+class WithdrawNotifier extends Notifier<WithdrawStateModel> {
+  late final WithdrawalService _withdrawalService;
+
+  @override
+  WithdrawStateModel build() {
+    _withdrawalService = ref.watch(withdrawalServiceProvider);
+    return WithdrawStateModel();
+  }
+
+  Future<void> withdrawToPaymentMethod({
+    required String paymentMethodId,
+    required double amountToWithdraw,
+    required int tokenId,
+    required String currencyAddress,
+    int decimals = 18,
+  }) async {
+    if (state.isSubmitting) return; // Prevent multiple submissions
+
+    state = state.copyWith(
+      state: WithdrawState.submitting,
+      isSubmitting: true,
+      errorMessage: null,
+    );
+
+    try {
+      final auth = ref.read(authProvider);
+      final userId = auth.user.uid;
+
+      if (kDebugMode) {
+        print(
+          'Withdrawing: $amountToWithdraw tokens to payment method $paymentMethodId',
+        );
+        print(
+          'Using currency address: $currencyAddress with $decimals decimals',
+        );
+      }
+
+      // Call the withdrawal service
+      final result = await _withdrawalService.withdrawToPaymentMethod(
+        userId: userId,
+        paymentMethodId: paymentMethodId,
+        amountToWithdraw: amountToWithdraw,
+        tokenId: tokenId,
+        currencyAddress: currencyAddress,
+        decimals: decimals,
+      );
+
+      if (kDebugMode) {
+        print('Withdrawal transaction successful: ${result['txnHash']}');
+      }
+
+      // Update state to success
+      state = state.copyWith(
+        state: WithdrawState.success,
+        isSubmitting: false,
+        txnHash: result['txnHash'],
+        withdrawalId: result['withdrawalId'],
+      );
+
+      // Refresh activities to show the new withdrawal
+      await ref.read(activityNotifierProvider.notifier).loadActivities(userId);
+      await ref.read(paxAccountProvider.notifier).syncBalancesFromBlockchain();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error withdrawing tokens: $e');
+      }
+
+      state = state.copyWith(
+        state: WithdrawState.error,
+        errorMessage: e.toString(),
+        isSubmitting: false,
+      );
+    }
+  }
+
+  void resetState() {
+    state = WithdrawStateModel();
+  }
+}
+
+final withdrawProvider = NotifierProvider<WithdrawNotifier, WithdrawStateModel>(
+  () {
+    return WithdrawNotifier();
+  },
+);
