@@ -172,22 +172,19 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                       ).withPadding(right: 8),
 
                       Button(
-                        style: const ButtonStyle.outline(
+                        style: const ButtonStyle.primary(
                               density: ButtonDensity.normal,
                             )
                             .withBackgroundColor(color: PaxColors.deepPurple)
                             .withBorder(
                               // border: Border.all(color: PaxColors.deepPurple),
                             ),
-                        onPressed: () async {
-                          // DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-                          // AndroidDeviceInfo androidInfo =
-                          //     await deviceInfo.androidInfo;
-                          // if (kDebugMode) {
-                          //   print('$androidInfo');
-                          // }
-                          context.go('/wallet');
-                        },
+                        onPressed:
+                            currentBalance != null && currentBalance > 0
+                                ? () async {
+                                  context.go('/wallet');
+                                }
+                                : null,
                         child: Text(
                           'Wallet',
                           style: TextStyle(

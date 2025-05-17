@@ -2,14 +2,17 @@ import 'package:flutter/material.dart' show Divider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:pax/models/local/withdrawal_state_model.dart';
 import 'package:pax/providers/local/withdraw_context_provider.dart';
-
+import 'package:pax/providers/local/withdrawal_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/currency_symbol.dart';
+import 'package:pax/utils/token_address_util.dart';
 import 'package:pax/utils/token_balance_util.dart';
 import 'package:pax/widgets/change_withdrawal_method_card.dart';
 
-import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
+import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider, Consumer;
 
 class ReviewSummaryView extends ConsumerStatefulWidget {
   const ReviewSummaryView({super.key});
@@ -20,9 +23,214 @@ class ReviewSummaryView extends ConsumerStatefulWidget {
 }
 
 class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
+  bool _isProcessing = false;
+
   @override
   void initState() {
     super.initState();
+    // Reset withdraw provider state after the first frame is rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(withdrawProvider.notifier).resetState();
+    });
+  }
+
+  // Handle withdrawal process
+  Future<void> _processWithdrawal() async {
+    final withdrawContext = ref.read(withdrawContextProvider);
+    if (withdrawContext == null) {
+      _showErrorDialog('Withdrawal details not found');
+      return;
+    }
+
+    final amountToWithdraw = withdrawContext.amountToWithdraw;
+    final tokenId = withdrawContext.tokenId;
+    final paymentMethod = withdrawContext.selectedPaymentMethod;
+
+    if (paymentMethod == null) {
+      _showErrorDialog('No payment method selected');
+      return;
+    }
+
+    // Get currency address and decimals for the tokenId
+    final currencyAddress = TokenAddressUtil.getAddressForCurrency(tokenId);
+    final decimals = TokenAddressUtil.getDecimalsForCurrency(tokenId);
+
+    setState(() {
+      _isProcessing = true;
+    });
+
+    // Call withdraw provider to process the withdrawal
+    ref
+        .read(withdrawProvider.notifier)
+        .withdrawToPaymentMethod(
+          paymentMethodId: paymentMethod.id,
+          amountToWithdraw: amountToWithdraw!.toDouble(),
+          tokenId: tokenId,
+          currencyAddress: currencyAddress,
+          decimals: decimals,
+        );
+
+    // Show processing dialog
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => _buildProcessingDialog(),
+    );
+
+    setState(() {
+      _isProcessing = false;
+    });
+  }
+
+  // Dialog showing processing state
+  Widget _buildProcessingDialog() {
+    return Consumer(
+      builder: (context, ref, _) {
+        final withdrawState = ref.watch(withdrawProvider);
+
+        // Handle different withdrawal states
+        if (withdrawState.state == WithdrawState.success) {
+          // Dismiss the dialog after a short delay
+          Future.delayed(Duration(milliseconds: 500), () {
+            if (context.mounted) {
+              context.pop();
+            }
+
+            _showSuccessDialog();
+          });
+        } else if (withdrawState.state == WithdrawState.error) {
+          // Dismiss the dialog after a short delay
+          Future.delayed(Duration(milliseconds: 500), () {
+            if (context.mounted) {
+              context.pop();
+            }
+            _showErrorDialog(
+              withdrawState.errorMessage ?? 'An unknown error occurred',
+            );
+          });
+        }
+
+        // Show loading indicator
+        return AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Processing your withdrawal...'),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Success dialog
+  void _showSuccessDialog() {
+    final withdrawContext = ref.read(withdrawContextProvider);
+    final amountToWithdraw = withdrawContext?.amountToWithdraw ?? 0;
+
+    final paymentMethod = withdrawContext?.selectedPaymentMethod;
+
+    final tokenId = withdrawContext?.tokenId;
+
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SvgPicture.asset(
+                'lib/assets/svgs/withdrawal_complete.svg',
+              ).withPadding(bottom: 8),
+
+              const Text(
+                'Withdrawal Complete!',
+                style: TextStyle(
+                  color: PaxColors.deepPurple,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ).withPadding(bottom: 8),
+
+              Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        TokenBalanceUtil.getLocaleFormattedAmount(
+                          amountToWithdraw,
+                        ),
+                        style: TextStyle(
+                          color: PaxColors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SvgPicture.asset(
+                        'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(tokenId)}.svg',
+                        height: 25,
+                      ),
+                    ],
+                  ).withPadding(vertical: 4),
+                  Text(
+                    'sent to your ${toBeginningOfSentenceCase(paymentMethod?.name)} account!',
+                    style: TextStyle(
+                      color: PaxColors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.normal,
+                    ),
+                    textAlign: TextAlign.center,
+                  ).withPadding(vertical: 8),
+                ],
+              ),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width / 2.5,
+                    child: PrimaryButton(
+                      child: const Text('OK'),
+                      onPressed: () {
+                        (context).pop();
+                        context.pushReplacement(
+                          "/",
+                        ); // Go back to previous screen
+                      },
+                    ),
+                  ),
+                ],
+              ).withPadding(top: 8),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Error dialog
+  void _showErrorDialog(String errorMessage) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Withdrawal Failed'),
+          content: Text(errorMessage),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -37,7 +245,6 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
       headers: [
         AppBar(
           padding: EdgeInsets.all(8),
-
           backgroundColor: PaxColors.white,
           child: Row(
             children: [
@@ -54,16 +261,13 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 20, color: PaxColors.black),
               ),
-
               Spacer(),
             ],
           ),
         ).withPadding(top: 16),
         Divider(color: PaxColors.lightGrey),
       ],
-
       child: Column(
-        // mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
@@ -97,7 +301,6 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                             ),
                           ),
                           Spacer(),
-
                           Text(
                             TokenBalanceUtil.getLocaleFormattedAmount(
                               amountToWithdraw,
@@ -108,7 +311,6 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-
                           SvgPicture.asset(
                             'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(tokenId)}.svg',
                             height: 25,
@@ -134,9 +336,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                           ),
                         ],
                       ).withPadding(bottom: 16),
-
                       Divider(),
-
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -158,43 +358,15 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-
                           SvgPicture.asset(
                             'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(tokenId)}.svg',
                             height: 25,
                           ).withPadding(left: 4),
                         ],
                       ).withPadding(vertical: 16),
-                      // Row(
-                      //   mainAxisAlignment: MainAxisAlignment.center,
-                      //   crossAxisAlignment: CrossAxisAlignment.end,
-                      //   children: [
-                      //     Container(
-                      //       // padding: EdgeInsets.all(8),
-                      //       decoration: BoxDecoration(
-                      //         shape: BoxShape.circle,
-                      //         border: Border.all(
-                      //           color:
-                      //               PaxColors.deepPurple, // Change color as needed
-                      //           width: 2.5, // Adjust border thickness as needed
-                      //         ),
-                      //       ),
-                      //       child: Avatar(
-                      //         size: 70,
-                      //         initials: Avatar.getInitials('sunarya-thito'),
-                      //         provider: const NetworkImage(
-                      //           'https://avatars.githubusercontent.com/u/64018564?v=4',
-                      //         ),
-                      //       ),
-                      //     ),
-
-                      //     SvgPicture.asset('lib/assets/svgs/edit_profile.svg'),
-                      //   ],
-                      // ).withPadding(bottom: 16, top: 12),
                     ],
                   ),
                 ).withPadding(bottom: 8),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -207,7 +379,6 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                     ),
                   ],
                 ).withPadding(vertical: 16),
-
                 Container(
                   padding: EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -216,19 +387,19 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                     border: Border.all(color: PaxColors.lightLilac, width: 1),
                   ),
                   child: Column(
-                    children: [ChangeWithdrawalMethodCard(paymentMethod!)],
+                    children:
+                        paymentMethod != null
+                            ? [ChangeWithdrawalMethodCard(paymentMethod)]
+                            : [Text('No payment method selected')],
                   ),
                 ),
               ],
             ),
           ),
           Spacer(flex: 2),
-
           Container(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-
             color: Colors.white,
-
             child: Column(
               children: [
                 Divider().withPadding(vertical: 8),
@@ -236,68 +407,23 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                   width: double.infinity,
                   height: 48,
                   child: PrimaryButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            // title: const Text('Alert title'),
-                            content: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                SvgPicture.asset(
-                                  'lib/assets/svgs/withdrawal_complete.svg',
-                                ).withPadding(bottom: 8),
-
-                                const Text(
-                                  'Withdrawal Complete!',
-                                  style: TextStyle(
-                                    color: PaxColors.deepPurple,
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ).withPadding(bottom: 8),
-                                Text(
-                                  '$amountToWithdraw has been successfully transferred to your MiniPay account.',
-                                  style: TextStyle(
-                                    color: PaxColors.black,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.normal,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ).withPadding(bottom: 8),
-
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    SizedBox(
-                                      width:
-                                          MediaQuery.of(context).size.width /
-                                          2.5,
-                                      child: PrimaryButton(
-                                        child: const Text('OK'),
-                                        onPressed: () {
-                                          context.pop();
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ).withPadding(top: 8),
-                              ],
+                    // Disable button during processing
+                    onPressed: _isProcessing ? null : _processWithdrawal,
+                    child:
+                        _isProcessing
+                            ? SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(onSurface: true),
+                            )
+                            : Text(
+                              'Withdraw',
+                              style: Theme.of(context).typography.base.copyWith(
+                                fontWeight: FontWeight.normal,
+                                fontSize: 14,
+                                color: PaxColors.white,
+                              ),
                             ),
-                          );
-                        },
-                      );
-                    },
-
-                    child: Text(
-                      'Continue',
-                      style: Theme.of(context).typography.base.copyWith(
-                        fontWeight: FontWeight.normal,
-                        fontSize: 14,
-                        color: PaxColors.white,
-                      ),
-                    ),
                   ),
                 ),
               ],
@@ -308,10 +434,3 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
     );
   }
 }
-
-// String? selectedValue;
-// @override
-// Widget build(BuildContext context) {
-//   return 
-// }
-
