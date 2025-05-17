@@ -1,7 +1,6 @@
 import { Account, Address, LocalAccount } from "viem";
 import {
   createSmartAccountClientFromPrivyWalletId,
-  createSmartAccountForTaskMaster,
 } from "./clients";
 import { SmartAccountClient } from "permissionless";
 import { ToSafeSmartAccountReturnType } from "permissionless/accounts";
@@ -34,7 +33,6 @@ const walletCache = new Map<string, WalletInfo>();
 export async function getWalletInfo(
   walletId: string,
   isTaskMaster: boolean = false,
-  passedAccount: LocalAccount | null = null 
 ): Promise<WalletInfo> {
   // Return from cache if available
   if (walletCache.has(walletId)) {
@@ -45,27 +43,13 @@ export async function getWalletInfo(
 
   let walletInfo: WalletInfo;
 
-  if (isTaskMaster) {
-    const {
-      smartAccountClient,
-      smartAccountAddress,
-      safeSmartAccount,
-      localAccount,
-    } = await createSmartAccountForTaskMaster();
-    walletInfo = {
-      walletId,
-      address: smartAccountAddress,
-      client: smartAccountClient,
-      safeSmartAccount,
-      serverWalletAccount: localAccount,
-    };
-  } else {
+
     const {
       smartAccountClient,
       smartAccountAddress,
       safeSmartAccount,
       serverWalletAccount,
-    } = await createSmartAccountClientFromPrivyWalletId(walletId, passedAccount);
+    } = await createSmartAccountClientFromPrivyWalletId(walletId);
     walletInfo = {
       walletId,
       address: smartAccountAddress,
@@ -73,7 +57,7 @@ export async function getWalletInfo(
       safeSmartAccount,
       serverWalletAccount: serverWalletAccount,
     };
-  }
+  
   // Store in cache
   walletCache.set(walletId, walletInfo);
 

@@ -1,32 +1,37 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pax/models/firestore/payment_method/payment_method.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:intl/intl.dart';
 
-class ChangeWithdrawalMethodCard extends ConsumerWidget {
-  const ChangeWithdrawalMethodCard(
-    this.option,
-    this.paymentMethodName,
-    this.callBack, {
-    super.key,
-  });
+// Create a state provider to track the selected payment method I
+class ChangeWithdrawalMethodCard extends ConsumerStatefulWidget {
+  const ChangeWithdrawalMethodCard(this.paymentMethod, {super.key});
 
-  final String option;
-
-  final String paymentMethodName;
-
-  final VoidCallback callBack;
+  final PaymentMethod paymentMethod;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ChangeWithdrawalMethodCard> createState() =>
+      _ChangeWithdrawalMethodCardState();
+}
+
+class _ChangeWithdrawalMethodCardState
+    extends ConsumerState<ChangeWithdrawalMethodCard> {
+  @override
+  Widget build(BuildContext context) {
+    // Update checkbox state if this is the selected method
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(7),
-
-          child: SvgPicture.asset('lib/assets/svgs/$option.svg', height: 48),
+          child: SvgPicture.asset(
+            'lib/assets/svgs/${widget.paymentMethod.name}.svg',
+            height: 48,
+          ),
         ).withPadding(right: 16),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,9 +41,8 @@ class ChangeWithdrawalMethodCard extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Text(
-                  paymentMethodName,
-
-                  style: TextStyle(
+                  toBeginningOfSentenceCase(widget.paymentMethod.name),
+                  style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 18,
                     color: PaxColors.black,
@@ -52,9 +56,9 @@ class ChangeWithdrawalMethodCard extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Text(
-                  'Dollar stablecoin wallet',
+                  '${widget.paymentMethod.walletAddress.substring(0, 20)}...',
 
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 12,
                     color: PaxColors.lilac,
@@ -64,15 +68,17 @@ class ChangeWithdrawalMethodCard extends ConsumerWidget {
             ).withPadding(bottom: 8),
           ],
         ),
-        Spacer(),
-        // Spacer(flex: 1),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              child: Row(children: [Text('Change')]).withPadding(bottom: 8),
-            ),
-          ],
+        const Spacer(),
+        GestureDetector(
+          onTap: () => context.pop(),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                child: Row(children: [Text('Change')]).withPadding(bottom: 8),
+              ),
+            ],
+          ),
         ),
       ],
     );

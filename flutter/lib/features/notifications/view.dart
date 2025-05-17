@@ -8,7 +8,7 @@ import 'package:pax/features/home/achievements/view.dart';
 import 'package:pax/features/home/dashboard/view.dart';
 import 'package:pax/features/home/tasks/view.dart';
 import 'package:pax/features/onboarding/view_model.dart';
-import 'package:pax/widgets/account_option_card.dart';
+import 'package:pax/widgets/account/account_option_card.dart';
 import 'package:pax/widgets/help_and_support.dart';
 import 'package:pax/widgets/notification_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;

@@ -4,9 +4,11 @@ import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
 import 'package:pax/extensions/tooltip.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
+import 'package:pax/providers/local/reward_currency_context.dart';
+import 'package:pax/providers/local/withdraw_context_provider.dart';
 import 'package:pax/utils/currency_symbol.dart';
 import 'package:pax/utils/token_balance_util.dart';
-import 'package:pax/widgets/payment_method_card.dart';
+import 'package:pax/widgets/payment_method_cards/minipay_payment_method_card.dart';
 import 'package:pax/widgets/select_currency_button.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -21,8 +23,6 @@ class WalletView extends ConsumerStatefulWidget {
 }
 
 class _WalletViewViewState extends ConsumerState<WalletView> {
-  String selectedValue = 'good_dollar';
-  String? genderValue;
   @override
   void initState() {
     super.initState();
@@ -30,7 +30,15 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
 
   @override
   Widget build(BuildContext context) {
-    final paxAccount = ref.read(paxAccountProvider);
+    final paxAccount = ref.watch(paxAccountProvider);
+
+    final selectedCurrency =
+        ref.watch(rewardCurrencyContextProvider).selectedCurrency;
+
+    final tokenId =
+        TokenBalanceUtil.getTokenIdForCurrency(selectedCurrency) ?? 1;
+
+    final currentBalance = paxAccount.account?.balances[tokenId];
 
     return Scaffold(
       headers: [
@@ -100,7 +108,7 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                       Text(
                         TokenBalanceUtil.getFormattedBalanceByCurrency(
                           paxAccount.account?.balances,
-                          selectedValue,
+                          selectedCurrency,
                         ).toString(),
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
@@ -109,7 +117,7 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                         ),
                       ).withPadding(right: 8),
                       SvgPicture.asset(
-                        'lib/assets/svgs/currencies/$selectedValue.svg',
+                        'lib/assets/svgs/currencies/$selectedCurrency.svg',
                         height: 25,
                       ),
                     ],
@@ -149,12 +157,19 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
 
                           onChanged: (value) {
                             if (value != null) {
-                              setState(() {
-                                selectedValue = value;
-                              });
+                              ref
+                                  .read(rewardCurrencyContextProvider.notifier)
+                                  .setSelectedCurrency(value);
+
+                              ref
+                                  .read(withdrawContextProvider.notifier)
+                                  .setWithdrawContext(
+                                    tokenId,
+                                    currentBalance ?? 0,
+                                  );
                             }
                           },
-                          value: selectedValue,
+                          value: selectedCurrency,
                           placeholder: const Text('Change currency'),
                           popup:
                               (context) => SelectPopup(
@@ -175,16 +190,27 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                       ).withPadding(right: 8),
 
                       Button(
-                        style: const ButtonStyle.outline(
-                              density: ButtonDensity.normal,
-                            )
-                            .withBackgroundColor(color: PaxColors.deepPurple)
-                            .withBorder(
-                              // border: Border.all(color: PaxColors.deepPurple),
-                            ),
-                        onPressed: () {
-                          context.go('/wallet/withdraw');
-                        },
+                        style: const ButtonStyle.primary(
+                          density: ButtonDensity.normal,
+                        ),
+                        onPressed:
+                            currentBalance != null && currentBalance > 0
+                                ? () {
+                                  ref
+                                      .read(
+                                        rewardCurrencyContextProvider.notifier,
+                                      )
+                                      .setSelectedCurrency(selectedCurrency);
+
+                                  ref
+                                      .read(withdrawContextProvider.notifier)
+                                      .setWithdrawContext(
+                                        tokenId,
+                                        currentBalance,
+                                      );
+                                  context.go('/wallet/withdraw');
+                                }
+                                : null,
                         child: Text(
                           'Withdraw',
                           style: TextStyle(
@@ -239,7 +265,7 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                     ),
                     child: Column(
                       children: [
-                        PaymentMethodCard(
+                        MiniPayPaymentMethodCard(
                           'minipay',
                           "MiniPay Wallet",
                           () => context.push(

@@ -10,7 +10,7 @@ import { entryPoint07Address } from "viem/account-abstraction";
 import { celo, celoAlfajores } from "viem/chains";
 import { createPimlicoClient } from "permissionless/clients/pimlico";
 import { createSmartAccountClient, SmartAccountClient } from "permissionless";
-import { toSafeSmartAccount } from "permissionless/accounts";
+import { toSafeSmartAccount, toSimpleSmartAccount } from "permissionless/accounts";
 import { PrivyClient } from "@privy-io/server-auth";
 import { createViemAccount } from "@privy-io/server-auth/viem";
 import { config } from "dotenv";
@@ -41,21 +41,21 @@ const PK_THREE = `0x${process.env.PK_THREE}` as Address;
 
 // Initialize clients
 
-export const masterOwner = privateKeyToAccount(PK);
-export const participantOne = privateKeyToAccount(PK_ONE);
+// export const masterOwner = privateKeyToAccount(PK);
+// export const participantOne = privateKeyToAccount(PK_ONE);
 
-export const participantTwo = privateKeyToAccount(PK_TWO);
+// export const participantTwo = privateKeyToAccount(PK_TWO);
 
-export const participantThree = privateKeyToAccount(PK_THREE);
+// export const participantThree = privateKeyToAccount(PK_THREE);
 
 
 
 export const publicClient = createPublicClient({
-  chain: celoAlfajores,
+  chain: celo,
   transport: http(),
 });
 
-const pimlicoUrl = `https://api.pimlico.io/v2/44787/rpc?apikey=${PIMLICO_API_KEY}`;
+const pimlicoUrl = `https://api.pimlico.io/v2/42220/rpc?apikey=${PIMLICO_API_KEY}`;
 
 export const pimlicoClient = createPimlicoClient({
   transport: http(pimlicoUrl),
@@ -78,7 +78,6 @@ export const create2Factory: Address =
 // Helper function to create a smart account client from a Privy wallet ID
 export async function createSmartAccountClientFromPrivyWalletId(
   walletId: string,
-  passedAccount: LocalAccount | null = null
 ) {
   const wallet = await privy.walletApi.getWallet({ id: walletId });
 
@@ -88,20 +87,18 @@ export async function createSmartAccountClientFromPrivyWalletId(
     privy,
   });
 
-  const safeSmartAccount = await toSafeSmartAccount({
+  const safeSmartAccount = await toSimpleSmartAccount({
     client: publicClient,
-    owners: [passedAccount != null ? passedAccount : serverWalletAccount],
+    owner: serverWalletAccount,
     entryPoint: {
       address: entryPoint07Address,
       version: "0.7",
-    },
-    version: "1.4.1",
-    
+    },    
   });
 
   const smartAccountClient = createSmartAccountClient({
     account: safeSmartAccount,
-    chain: celoAlfajores,
+    chain: celo,
     bundlerTransport: http(pimlicoUrl),
     paymaster: pimlicoClient,
     userOperation: {
@@ -112,41 +109,7 @@ export async function createSmartAccountClientFromPrivyWalletId(
   });
 
   return {
-   serverWalletAccount: passedAccount != null ? passedAccount : serverWalletAccount,
-    smartAccountClient,
-    smartAccountAddress: safeSmartAccount.address,
-    safeSmartAccount,
-  };
-}
-
-export async function createSmartAccountForTaskMaster() {
-
-
-  const safeSmartAccount = await toSafeSmartAccount({
-    client: publicClient,
-    owners: [masterOwner],
-    entryPoint: {
-      address: entryPoint07Address,
-      version: "0.7",
-    },
-    version: "1.4.1",
-    threshold: BigInt(1),
-  });
-
-  const smartAccountClient = createSmartAccountClient({
-    account: safeSmartAccount,
-    chain: celoAlfajores,
-    bundlerTransport: http(pimlicoUrl),
-    paymaster: pimlicoClient,
-    userOperation: {
-      estimateFeesPerGas: async () => {
-        return (await pimlicoClient.getUserOperationGasPrice()).fast;
-      },
-    },
-  });
-
-  return {
-    localAccount:masterOwner,
+   serverWalletAccount: serverWalletAccount,
     smartAccountClient,
     smartAccountAddress: safeSmartAccount.address,
     safeSmartAccount,

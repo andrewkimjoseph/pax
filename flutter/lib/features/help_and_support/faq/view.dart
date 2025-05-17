@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pax/exports/shadcn.dart';
 import 'package:pax/features/onboarding/view_model.dart';
 import 'package:pax/theming/colors.dart';
-import 'package:pax/widgets/account_option_card.dart';
+import 'package:pax/widgets/account/account_option_card.dart';
 import 'package:pax/widgets/help_and_support.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/models/local/activity_model.dart';
 
 import 'package:pax/providers/local/activity_provider.dart';
-import 'package:pax/widgets/activity_card.dart';
+import 'package:pax/widgets/activity/activity_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import '../../theming/colors.dart' show PaxColors;
 

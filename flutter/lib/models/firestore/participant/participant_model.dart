@@ -10,6 +10,8 @@ class Participant {
   final Timestamp? dateOfBirth;
   final String? profilePictureURI;
   final Timestamp? goodDollarIdentityTimeLastAuthenticated;
+  final Timestamp? goodDollarIdentityExpiryDate;
+
   final Timestamp? timeCreated;
   final Timestamp? timeUpdated;
 
@@ -23,6 +25,8 @@ class Participant {
     this.dateOfBirth,
     this.profilePictureURI,
     this.goodDollarIdentityTimeLastAuthenticated,
+    this.goodDollarIdentityExpiryDate,
+
     this.timeCreated,
     this.timeUpdated,
     String? createdBy,
@@ -39,6 +43,8 @@ class Participant {
     Timestamp? dateOfBirth,
     String? profilePictureURI,
     Timestamp? goodDollarIdentityTimeLastAuthenticated,
+    Timestamp? goodDollarIdentityExpiryDate,
+
     Timestamp? timeUpdated,
   }) {
     return Participant(
@@ -53,6 +59,8 @@ class Participant {
       goodDollarIdentityTimeLastAuthenticated:
           goodDollarIdentityTimeLastAuthenticated ??
           this.goodDollarIdentityTimeLastAuthenticated,
+      goodDollarIdentityExpiryDate:
+          goodDollarIdentityExpiryDate ?? this.goodDollarIdentityExpiryDate,
       timeCreated: timeCreated,
       timeUpdated: timeUpdated ?? this.timeUpdated,
     );
@@ -71,6 +79,7 @@ class Participant {
       'profilePictureURI': profilePictureURI,
       'goodDollarIdentityTimeLastAuthenticated':
           goodDollarIdentityTimeLastAuthenticated,
+      'goodDollarIdentityExpiryDate': goodDollarIdentityExpiryDate,
       'timeCreated': timeCreated,
       'timeUpdated': timeUpdated,
     };
@@ -89,6 +98,7 @@ class Participant {
       profilePictureURI: map['profilePictureURI'],
       goodDollarIdentityTimeLastAuthenticated:
           map['goodDollarIdentityTimeLastAuthenticated'],
+      goodDollarIdentityExpiryDate: map['goodDollarIdentityExpiryDate'],
       timeCreated: map['timeCreated'],
       timeUpdated: map['timeUpdated'],
       createdBy: map['_createdBy'],

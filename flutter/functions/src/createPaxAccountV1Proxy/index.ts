@@ -18,7 +18,7 @@ import { entryPoint07Address } from "viem/account-abstraction";
 import { celo } from "viem/chains";
 import { createPimlicoClient } from "permissionless/clients/pimlico";
 import { createSmartAccountClient } from "permissionless";
-import { toSafeSmartAccount } from "permissionless/accounts";
+import { toSimpleSmartAccount} from "permissionless/accounts";
 import { PrivyClient } from "@privy-io/server-auth";
 import { createViemAccount } from "@privy-io/server-auth/viem";
 import { randomBytes } from "crypto";
@@ -62,7 +62,7 @@ const privy = new PrivyClient(PRIVY_APP_ID, PRIVY_APP_SECRET, {
 /**
  * Cloud function to create a PaxAccount proxy contract
  */
-export const createPaxAccountProxy = onCall(FUNCTION_RUNTIME_OPTS, async (request) => {
+export const createPaxAccountV1Proxy = onCall(FUNCTION_RUNTIME_OPTS, async (request) => {
   try {
     // Ensure the user is authenticated
     if (!request.auth) {
@@ -74,12 +74,12 @@ export const createPaxAccountProxy = onCall(FUNCTION_RUNTIME_OPTS, async (reques
 
 
     const userId = request.auth.uid;
-    const { walletAddress, serverWalletId } = request.data as {
-      walletAddress: string;
+    const { _primaryPaymentMethod, serverWalletId } = request.data as {
+      _primaryPaymentMethod: string;
       serverWalletId: string;
     };
 
-    if (!walletAddress) {
+    if (!_primaryPaymentMethod) {
       throw new HttpsError(
         "invalid-argument",
         "Missing required parameter: walletAddress"
@@ -95,7 +95,7 @@ export const createPaxAccountProxy = onCall(FUNCTION_RUNTIME_OPTS, async (reques
 
     logger.info("Deploying PaxAccount proxy", {
       userId,
-      walletAddress,
+      _primaryPaymentMethod,
       serverWalletId,
     });
 
@@ -118,24 +118,24 @@ export const createPaxAccountProxy = onCall(FUNCTION_RUNTIME_OPTS, async (reques
       privy,
     });
 
-    // Create the Safe smart account
-    const safeSmartAccount = await toSafeSmartAccount({
+    // Create the Simple smart account
+    const smartAccount = await toSimpleSmartAccount({
       client: publicClient,
-      owners: [serverWalletAccount],
+      owner: serverWalletAccount,
       entryPoint: {
         address: entryPoint07Address,
         version: "0.7",
       },
-      version: "1.4.1",
+      // version: "1.4.1",
     });
 
-    logger.info("Using Safe Smart Account", {
-      address: safeSmartAccount.address,
+    logger.info("Using Smart Account", {
+      address: smartAccount.address,
     });
 
     // Create the smart account client
     const smartAccountClient = createSmartAccountClient({
-      account: safeSmartAccount,
+      account: smartAccount,
       chain: celo,
       bundlerTransport: http(pimlicoUrl),
       paymaster: pimlicoClient,
@@ -146,11 +146,13 @@ export const createPaxAccountProxy = onCall(FUNCTION_RUNTIME_OPTS, async (reques
       },
     });
 
+    const _owner = smartAccount.address;
+
     // Get deployment data with salt for CREATE2
     const { deployData } = getProxyDeployDataAndSalt(
       PAXACCOUNT_IMPLEMENTATION_ADDRESS,
-      safeSmartAccount.address,
-      walletAddress as Address // Use the provided wallet address as primary payment method
+      _owner,
+      _primaryPaymentMethod as Address // Use the provided wallet address as primary payment method
     );
 
     // Deploy using CREATE2 factory via account abstraction
@@ -158,11 +160,10 @@ export const createPaxAccountProxy = onCall(FUNCTION_RUNTIME_OPTS, async (reques
       calls: [
         {
           to: CREATE2_FACTORY,
+          value: BigInt(0),
           data: deployData,
         },
       ],
-
-      
     });
 
     logger.info("User operation submitted", { userOpTxnHash });

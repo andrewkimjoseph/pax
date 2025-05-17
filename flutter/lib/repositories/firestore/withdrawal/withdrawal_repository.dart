@@ -10,6 +10,20 @@ class WithdrawalRepository {
   WithdrawalRepository({FirebaseFirestore? firestore})
     : _firestore = firestore ?? FirebaseFirestore.instance;
 
+  // Create a new withdrawal
+  Future<Withdrawal> createWithdrawal(Withdrawal withdrawal) async {
+    try {
+      final docRef = _firestore.collection(collectionName).doc(withdrawal.id);
+      await docRef.set(withdrawal.toMap());
+      return withdrawal;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error creating withdrawal: $e');
+      }
+      throw Exception('Failed to create withdrawal: $e');
+    }
+  }
+
   // Get withdrawals for a participant
   Future<List<Withdrawal>> getWithdrawalsForParticipant(
     String participantId,

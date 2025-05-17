@@ -1,4 +1,4 @@
-// repositories/pax_account_repository.dart - Updated with balance sync
+// repositories/pax_account_repository.dart - Fixed type casting issues
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pax/models/firestore/pax_account/pax_account_model.dart';
@@ -131,7 +131,7 @@ class PaxAccountRepository {
   // Update balance for a specific token
   Future<PaxAccount> updateBalance(
     String userId,
-    String tokenId,
+    int tokenId, // Changed from String to int to match model
     num amount,
   ) async {
     try {
@@ -143,11 +143,17 @@ class PaxAccountRepository {
       }
 
       // Update balance for the token
-      final updatedBalances = Map<String, num>.from(account.balances);
+      final updatedBalances = Map<int, num>.from(account.balances);
       updatedBalances[tokenId] = amount;
 
+      // Convert Map<int, num> to Map<String, num> for Firestore
+      final firestoreBalances = <String, num>{};
+      updatedBalances.forEach((key, value) {
+        firestoreBalances[key.toString()] = value;
+      });
+
       // Update account with new balances
-      return await updateAccount(userId, {'balances': updatedBalances});
+      return await updateAccount(userId, {'balances': firestoreBalances});
     } catch (e) {
       if (kDebugMode) {
         print('Error updating balance: $e');
@@ -175,15 +181,16 @@ class PaxAccountRepository {
       }
 
       // Fetch balances from blockchain for all tokens
-      final walletAddress = account.contractAddress!;
+      final paxAccountContractAddress = account.contractAddress!;
       final updatedBalances = await _blockchainService.fetchAllTokenBalances(
-        walletAddress,
+        paxAccountContractAddress,
       );
 
-      // Convert double values to num for Firestore
-      final firestoreBalances = updatedBalances.map(
-        (key, value) => MapEntry(key, value as num),
-      );
+      // Convert to Firestore format (string keys)
+      final firestoreBalances = <String, num>{};
+      updatedBalances.forEach((key, value) {
+        firestoreBalances[key.toString()] = value as num;
+      });
 
       // Update account with new balances
       return await updateAccount(userId, {'balances': firestoreBalances});

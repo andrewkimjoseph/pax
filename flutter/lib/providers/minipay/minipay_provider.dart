@@ -1,8 +1,10 @@
 // providers/minipay_provider.dart
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pax/models/firestore/pax_account/pax_account_model.dart';
+import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
+import 'package:pax/providers/db/payment_method/payment_method_provider.dart';
 import 'package:pax/repositories/firestore/payment_method/payment_method_repository.dart';
 import 'package:pax/services/minipay/minipay_service.dart';
 
@@ -27,6 +29,7 @@ enum MiniPayConnectionState {
   creatingServerWallet,
   deployingContract,
   creatingPaymentMethod,
+  updatingParticipant,
   success,
   error,
 }
@@ -84,7 +87,10 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
   }
 
   // Validate and connect wallet
-  Future<void> connectWallet(String userId, String walletAddress) async {
+  Future<void> connectPrimaryPaymentMethod(
+    String userId,
+    String primaryPaymentMethod,
+  ) async {
     if (state.isConnecting) return; // Prevent multiple connection attempts
 
     // Reset state
@@ -95,7 +101,7 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
 
     try {
       // 1. Validate wallet address format
-      if (!_miniPayService.isValidEthereumAddress(walletAddress)) {
+      if (!_miniPayService.isValidEthereumAddress(primaryPaymentMethod)) {
         state = state.copyWith(
           state: MiniPayConnectionState.error,
           errorMessage:
@@ -106,7 +112,9 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
       }
 
       // 2. Check if wallet address is already used
-      final isUsed = await _miniPayService.isWalletAddressUsed(walletAddress);
+      final isUsed = await _miniPayService.isWalletAddressUsed(
+        primaryPaymentMethod,
+      );
       if (isUsed) {
         state = state.copyWith(
           state: MiniPayConnectionState.error,
@@ -121,7 +129,7 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
       state = state.copyWith(state: MiniPayConnectionState.checkingWhitelist);
 
       final isVerified = await _miniPayService.isGoodDollarVerified(
-        walletAddress,
+        primaryPaymentMethod,
       );
       if (!isVerified) {
         state = state.copyWith(
@@ -150,18 +158,17 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
           paxAccount.serverWalletId!.isNotEmpty &&
           paxAccount.serverWalletAddress != null &&
           paxAccount.serverWalletAddress!.isNotEmpty &&
-          paxAccount.safeSmartAccountWalletAddress != null &&
-          paxAccount.safeSmartAccountWalletAddress!.isNotEmpty) {
+          paxAccount.smartAccountWalletAddress != null &&
+          paxAccount.smartAccountWalletAddress!.isNotEmpty) {
         // Use existing server wallet
         if (kDebugMode) {
-          print('Using existing server wallet: ${paxAccount.serverWalletId}');
+          print('Using existing PaxAccount details: ${paxAccount.toMap()}');
         }
 
         serverWalletData = {
           'serverWalletId': paxAccount.serverWalletId,
           'serverWalletAddress': paxAccount.serverWalletAddress,
-          'safeSmartAccountWalletAddress':
-              paxAccount.safeSmartAccountWalletAddress,
+          'smartAccountWalletAddress': paxAccount.smartAccountWalletAddress,
         };
 
         state = state.copyWith(
@@ -181,8 +188,8 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
           await _miniPayService.updatePaxAccount(userId, {
             'serverWalletId': serverWalletData['serverWalletId'],
             'serverWalletAddress': serverWalletData['serverWalletAddress'],
-            'safeSmartAccountWalletAddress':
-                serverWalletData['safeSmartAccountWalletAddress'],
+            'smartAccountWalletAddress':
+                serverWalletData['smartAccountWalletAddress'],
           });
 
           state = state.copyWith(
@@ -227,10 +234,11 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
         state = state.copyWith(state: MiniPayConnectionState.deployingContract);
 
         try {
-          contractData = await _miniPayService.deployPaxAccountContractAddress(
-            walletAddress,
-            serverWalletData['serverWalletId'],
-          );
+          contractData = await _miniPayService
+              .deployPaxAccountV1ProxyContractAddress(
+                primaryPaymentMethod,
+                serverWalletData['serverWalletId'],
+              );
 
           // Update PaxAccount with contract data immediately
           await _miniPayService.updatePaxAccount(userId, {
@@ -257,7 +265,7 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
         }
       }
 
-      // 7. Create payment method
+      // 7. Create payment method and update participant
       state = state.copyWith(
         state: MiniPayConnectionState.creatingPaymentMethod,
       );
@@ -266,20 +274,64 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
         await _miniPayService.createPaymentMethod(
           userId: userId,
           paxAccountId: paxAccount.id,
-          walletAddress: walletAddress,
+          walletAddress: primaryPaymentMethod,
         );
 
+        // Update state to show we're updating participant related data
+        state = state.copyWith(
+          state: MiniPayConnectionState.updatingParticipant,
+        );
+
+        // Get the last authentication time and expiry date from GoodDollar
+        int goodDollarIdentityTimeLastAuthenticated = await _miniPayService
+            .getLastAuthenticated(primaryPaymentMethod);
+
+        // Get GoodDollar identity expiry date
+        Timestamp? goodDollarIdentityExpiryDate = await _miniPayService
+            .getGoodDollarIdentityExpiryDate(primaryPaymentMethod);
+
+        // Refresh payment methods in state
+        await ref.read(paymentMethodsProvider.notifier).refresh(userId);
+
+        // Sync blockchain balances with Firestore
+        await ref
+            .read(paxAccountProvider.notifier)
+            .syncBalancesFromBlockchain();
+
+        // Update participant profile with authentication timestamp and expiry date
+        Map<String, dynamic> participantUpdateData = {
+          "goodDollarIdentityTimeLastAuthenticated":
+              Timestamp.fromMillisecondsSinceEpoch(
+                goodDollarIdentityTimeLastAuthenticated * 1000,
+              ),
+        };
+
+        // Only add expiry date if it exists
+        if (goodDollarIdentityExpiryDate != null) {
+          participantUpdateData["goodDollarIdentityExpiryDate"] =
+              goodDollarIdentityExpiryDate;
+        }
+
+        // Update the participant profile
+        await ref
+            .read(participantProvider.notifier)
+            .updateProfile(participantUpdateData);
+
+        // Refresh participant data in state
+        await ref.read(participantProvider.notifier).refreshParticipant();
+
+        // Set state to success once everything is complete
         state = state.copyWith(
           state: MiniPayConnectionState.success,
           isConnecting: false,
         );
       } catch (e) {
         if (kDebugMode) {
-          print('Error creating payment method: $e');
+          print('Error creating payment method or updating participant: $e');
         }
         state = state.copyWith(
           state: MiniPayConnectionState.error,
-          errorMessage: 'Failed to create payment method: ${e.toString()}',
+          errorMessage: 'Failed to complete wallet connection: ${e.toString()}',
           isConnecting: false,
         );
       }

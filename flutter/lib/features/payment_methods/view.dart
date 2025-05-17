@@ -8,8 +8,8 @@ import 'package:pax/features/home/achievements/view.dart';
 import 'package:pax/features/home/dashboard/view.dart';
 import 'package:pax/features/home/tasks/view.dart';
 import 'package:pax/features/onboarding/view_model.dart';
-import 'package:pax/widgets/account_option_card.dart';
-import 'package:pax/widgets/payment_method_card.dart';
+import 'package:pax/widgets/account/account_option_card.dart';
+import 'package:pax/widgets/payment_method_cards/minipay_payment_method_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -25,8 +25,6 @@ class PaymentMethodsView extends ConsumerStatefulWidget {
 }
 
 class _PaymentMethodsViewState extends ConsumerState<PaymentMethodsView> {
-  String? selectedValue;
-  String? genderValue;
   @override
   void initState() {
     super.initState();
@@ -112,7 +110,7 @@ class _PaymentMethodsViewState extends ConsumerState<PaymentMethodsView> {
                     ),
                     child: Column(
                       children: [
-                        PaymentMethodCard(
+                        MiniPayPaymentMethodCard(
                           'minipay',
                           "MiniPay",
                           () => context.push(

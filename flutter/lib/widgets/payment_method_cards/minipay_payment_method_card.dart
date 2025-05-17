@@ -1,10 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:pax/providers/db/payment_method/payment_method_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
-class PaymentMethodCard extends ConsumerWidget {
-  const PaymentMethodCard(
+class MiniPayPaymentMethodCard extends ConsumerWidget {
+  const MiniPayPaymentMethodCard(
     this.option,
     this.paymentMethodName,
     this.callBack, {
@@ -19,6 +20,8 @@ class PaymentMethodCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final minipay = ref.watch(primaryPaymentMethodProvider);
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.start,
@@ -52,7 +55,9 @@ class PaymentMethodCard extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Text(
-                  'Dollar stablecoin wallet',
+                  minipay?.walletAddress != null
+                      ? '${minipay!.walletAddress.substring(0, 20)}...'
+                      : 'Dollar stablecoin wallet',
 
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
@@ -74,8 +79,10 @@ class PaymentMethodCard extends ConsumerWidget {
                 children: [
                   PrimaryButton(
                     density: ButtonDensity.dense,
-                    onPressed: callBack,
-                    child: const Text("Connect"),
+                    onPressed: minipay?.walletAddress != null ? null : callBack,
+                    child: Text(
+                      minipay?.walletAddress != null ? "Connected" : "Connect",
+                    ),
                   ),
                 ],
               ).withPadding(bottom: 8),

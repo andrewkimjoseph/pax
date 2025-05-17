@@ -48,7 +48,7 @@ type TaskManagerDomain = {
 const createDomain = (contractAddress: Address): TaskManagerDomain => ({
   name: 'TaskManager',
   version: '1',
-  chainId: BigInt(celoAlfajores.id),
+  chainId: BigInt(celo.id),
   verifyingContract: contractAddress
 });
 

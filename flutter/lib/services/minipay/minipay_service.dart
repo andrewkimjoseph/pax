@@ -1,5 +1,6 @@
 // services/minipay/minipay_service.dart
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -8,7 +9,6 @@ import 'package:pax/models/firestore/pax_account/pax_account_model.dart';
 import 'package:pax/repositories/firestore/pax_account/pax_account_repository.dart';
 import 'package:pax/repositories/firestore/payment_method/payment_method_repository.dart';
 import 'package:pointycastle/digests/keccak.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class MiniPayService {
   final FirebaseFunctions _functions = FirebaseFunctions.instance;
@@ -78,7 +78,7 @@ class MiniPayService {
       }
 
       // Get last authentication timestamp
-      final lastAuthTimestamp = await _getLastAuthenticated(rootAddress);
+      final lastAuthTimestamp = await getLastAuthenticated(rootAddress);
 
       // Get authentication period
       final authPeriod = await _getAuthenticationPeriod();
@@ -105,15 +105,6 @@ class MiniPayService {
   // Call Firebase Function to create server wallet
   Future<Map<String, dynamic>> createServerWallet() async {
     try {
-      // Ensure the user is authenticated
-      final User? currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser == null) {
-        throw Exception('User must be authenticated to create server wallet');
-      }
-
-      // Force token refresh
-      await currentUser.getIdToken(true);
-
       // Create callable function
       final callable = _functions.httpsCallable(
         'createPrivyServerWallet',
@@ -137,29 +128,20 @@ class MiniPayService {
   }
 
   // Call Firebase Function to deploy smart contract
-  Future<Map<String, dynamic>> deployPaxAccountContractAddress(
-    String walletAddress,
+  Future<Map<String, dynamic>> deployPaxAccountV1ProxyContractAddress(
+    String primaryPaymentMethod,
     String serverWalletId,
   ) async {
     try {
-      // Ensure the user is authenticated
-      final User? currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser == null) {
-        throw Exception('User must be authenticated to deploy contract');
-      }
-
-      // Force token refresh
-      await currentUser.getIdToken(true);
-
       // Create callable function
       final callable = _functions.httpsCallable(
-        'createPaxAccountProxy',
+        'createPaxAccountV1Proxy',
         options: HttpsCallableOptions(timeout: const Duration(seconds: 300)),
       );
 
       // Call the function with parameters
       final result = await callable.call({
-        'walletAddress': walletAddress,
+        '_primaryPaymentMethod': primaryPaymentMethod,
         'serverWalletId': serverWalletId,
       });
 
@@ -194,14 +176,13 @@ class MiniPayService {
           paxAccount.serverWalletId!.isNotEmpty &&
           paxAccount.serverWalletAddress != null &&
           paxAccount.serverWalletAddress!.isNotEmpty &&
-          paxAccount.safeSmartAccountWalletAddress != null &&
-          paxAccount.safeSmartAccountWalletAddress!.isNotEmpty) {
+          paxAccount.smartAccountWalletAddress != null &&
+          paxAccount.smartAccountWalletAddress!.isNotEmpty) {
         // Use existing server wallet
         serverWalletData = {
           'serverWalletId': paxAccount.serverWalletId,
           'serverWalletAddress': paxAccount.serverWalletAddress,
-          'safeSmartAccountWalletAddress':
-              paxAccount.safeSmartAccountWalletAddress,
+          'safeSmartAccountWalletAddress': paxAccount.smartAccountWalletAddress,
         };
       } else {
         // Create a new server wallet
@@ -230,7 +211,7 @@ class MiniPayService {
         };
       } else {
         // Deploy a new contract
-        contractData = await deployPaxAccountContractAddress(
+        contractData = await deployPaxAccountV1ProxyContractAddress(
           walletAddress,
           serverWalletData['serverWalletId'],
         );
@@ -283,8 +264,46 @@ class MiniPayService {
     return _parseAddressResult(result);
   }
 
+  // New method to add to the MiniPayService class
+
+  // Get GoodDollar identity expiry date as a Timestamp
+  Future<Timestamp?> getGoodDollarIdentityExpiryDate(
+    String walletAddress,
+  ) async {
+    try {
+      // Get the root whitelisted address
+      final rootAddress = await _getWhitelistedRoot(walletAddress);
+
+      if (rootAddress == "0x0000000000000000000000000000000000000000") {
+        return null; // Not whitelisted
+      }
+
+      // Get last authentication timestamp
+      final lastAuthTimestamp = await getLastAuthenticated(rootAddress);
+
+      // Get authentication period
+      final authPeriod = await _getAuthenticationPeriod();
+
+      // Calculate expiry timestamp if authenticated
+      if (lastAuthTimestamp > 0) {
+        // Convert days to seconds and add to last authentication time
+        final expiryTimestamp = lastAuthTimestamp + (authPeriod * 24 * 60 * 60);
+
+        // Convert Unix timestamp (seconds) to Firestore Timestamp
+        return Timestamp.fromMillisecondsSinceEpoch(expiryTimestamp * 1000);
+      }
+
+      return null; // No authentication timestamp found
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting GoodDollar identity expiry date: $e');
+      }
+      return null;
+    }
+  }
+
   // Helper method to get last authenticated timestamp (from whitelist_status.dart)
-  Future<int> _getLastAuthenticated(String address) async {
+  Future<int> getLastAuthenticated(String address) async {
     // Function signature for lastAuthenticated(address)
     var functionSignature = "lastAuthenticated(address)";
     var functionSelector = _bytesToHex(
