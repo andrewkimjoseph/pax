@@ -6,48 +6,23 @@ import {
 import { logger } from "firebase-functions/v2";
 import {
   Address,
-  createPublicClient,
   encodeFunctionData,
   http,
 } from "viem";
 import { entryPoint07Address } from "viem/account-abstraction";
 import { celo } from "viem/chains";
-import { createPimlicoClient } from "permissionless/clients/pimlico";
 import { createSmartAccountClient } from "permissionless";
 import { toSimpleSmartAccount } from "permissionless/accounts";
-import { PrivyClient } from "@privy-io/server-auth";
 import { createViemAccount } from "@privy-io/server-auth/viem";
 
 import { paxAccountV1ABI } from "../../shared/abis/paxAccountV1ABI";
 import {
-  PIMLICO_API_KEY,
-  PRIVY_APP_ID,
-  PRIVY_APP_SECRET,
-  PRIVY_WALLET_AUTH_PRIVATE_KEY,
   FUNCTION_RUNTIME_OPTS,
+  PRIVY_CLIENT,
+  PUBLIC_CLIENT,
+  PIMLICO_CLIENT,
+  PIMLICO_URL,
 } from "../../shared/config";
-
-// Initialize clients
-const publicClient = createPublicClient({
-  chain: celo,
-  transport: http(),
-});
-
-const pimlicoUrl = `https://api.pimlico.io/v2/42220/rpc?apikey=${PIMLICO_API_KEY}`;
-
-const pimlicoClient = createPimlicoClient({
-  transport: http(pimlicoUrl),
-  entryPoint: {
-    address: entryPoint07Address,
-    version: "0.7",
-  },
-});
-
-const privy = new PrivyClient(PRIVY_APP_ID, PRIVY_APP_SECRET, {
-  walletApi: {
-    authorizationPrivateKey: PRIVY_WALLET_AUTH_PRIVATE_KEY,
-  },
-});
 
 /**
  * Cloud function to withdraw tokens to a payment method
@@ -139,7 +114,7 @@ export const withdrawToPaymentMethod = onCall(FUNCTION_RUNTIME_OPTS, async (requ
     });
 
     // Get the server wallet from Privy
-    const wallet = await privy.walletApi.getWallet({
+    const wallet = await PRIVY_CLIENT.walletApi.getWallet({
       id: serverWalletId,
     });
 
@@ -154,12 +129,12 @@ export const withdrawToPaymentMethod = onCall(FUNCTION_RUNTIME_OPTS, async (requ
     const serverWalletAccount = await createViemAccount({
       walletId: wallet.id,
       address: wallet.address as Address,
-      privy,
+      privy: PRIVY_CLIENT,
     });
 
     // Create the Simple smart account
     const smartAccount = await toSimpleSmartAccount({
-      client: publicClient,
+      client: PUBLIC_CLIENT,
       owner: serverWalletAccount,
       entryPoint: {
         address: entryPoint07Address,
@@ -175,11 +150,11 @@ export const withdrawToPaymentMethod = onCall(FUNCTION_RUNTIME_OPTS, async (requ
     const smartAccountClient = createSmartAccountClient({
       account: smartAccount,
       chain: celo,
-      bundlerTransport: http(pimlicoUrl),
-      paymaster: pimlicoClient,
+      bundlerTransport: http(PIMLICO_URL),
+      paymaster: PIMLICO_CLIENT,
       userOperation: {
         estimateFeesPerGas: async () => {
-          return (await pimlicoClient.getUserOperationGasPrice()).fast;
+          return (await PIMLICO_CLIENT.getUserOperationGasPrice()).fast;
         },
       },
     });

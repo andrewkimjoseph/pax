@@ -4,34 +4,16 @@ import {
   HttpsError,
 } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
-import { PrivyClient } from "@privy-io/server-auth";
 import { createViemAccount } from "@privy-io/server-auth/viem";
 import { toSimpleSmartAccount } from "permissionless/accounts";
-import { createPublicClient, http, Address } from "viem";
-import { celo } from "viem/chains";
 import { entryPoint07Address } from "viem/account-abstraction";
 
 import {
-  PRIVY_APP_ID,
-  PRIVY_APP_SECRET,
-  PRIVY_WALLET_AUTH_PRIVATE_KEY,
-  FUNCTION_RUNTIME_OPTS
+  FUNCTION_RUNTIME_OPTS,
+  PRIVY_CLIENT,
+  PUBLIC_CLIENT
 } from "../../shared/config";
-
-
-
-// Initialize Privy client
-const privy = new PrivyClient(PRIVY_APP_ID, PRIVY_APP_SECRET, {
-  walletApi: {
-    authorizationPrivateKey: PRIVY_WALLET_AUTH_PRIVATE_KEY,
-  },
-});
-
-// Initialize public client
-const publicClient = createPublicClient({
-  chain: celo,
-  transport: http(),
-});
+import { Address } from "viem";
 
 /**
  * Cloud function to create a Privy server wallet and Safe Smart Account
@@ -52,7 +34,7 @@ export const createPrivyServerWallet = onCall(FUNCTION_RUNTIME_OPTS, async (requ
     logger.info("Creating Privy server wallet", { userId });
 
     // Create a new wallet using Privy wallet API
-    const wallet = await privy.walletApi.createWallet({
+    const wallet = await PRIVY_CLIENT.walletApi.createWallet({
       chainType: "ethereum",
     });
 
@@ -65,12 +47,12 @@ export const createPrivyServerWallet = onCall(FUNCTION_RUNTIME_OPTS, async (requ
     const serverWalletAccount = await createViemAccount({
       walletId: wallet.id,
       address: wallet.address as Address,
-      privy,
+      privy: PRIVY_CLIENT,
     });
 
     // Create Safe Smart Account
     const smartAccount = await toSimpleSmartAccount({
-      client: publicClient,
+      client: PUBLIC_CLIENT,
       owner: serverWalletAccount,
       entryPoint: {
         address: entryPoint07Address,
