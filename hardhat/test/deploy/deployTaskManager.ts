@@ -1,5 +1,5 @@
 import { Address, parseEther } from "viem";
-import { create2Factory, masterOwner, waitForUserOperationReceipt } from "../utils/clients";
+import { create2Factory, waitForUserOperationReceipt } from "../utils/clients";
 import { getTaskManagerDeployDataAndSalt, findContractAddressFromLogs, REWARD_TOKEN_ADDRESS } from "../utils/helpers";
 import { WalletInfo } from "../utils/wallets";
 
