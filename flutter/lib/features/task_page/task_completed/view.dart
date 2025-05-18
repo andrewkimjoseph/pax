@@ -24,7 +24,6 @@ class TaskCompleteView extends ConsumerStatefulWidget {
 }
 
 class _TaskCompleteViewState extends ConsumerState<TaskCompleteView> {
-  String? genderValue;
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
