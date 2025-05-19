@@ -1,5 +1,6 @@
 // lib/repositories/tasks/tasks_repository.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:pax/models/firestore/task/task_model.dart';
 
 class TasksRepository {
@@ -68,5 +69,36 @@ class TasksRepository {
         return null;
       }
     });
+  }
+
+  // Get the server wallet ID for a task master
+  Future<String?> getTaskMasterServerWalletId(String taskId) async {
+    try {
+      // First, get the task to retrieve the taskMasterId
+      DocumentSnapshot taskDoc = await _tasksCollection.doc(taskId).get();
+
+      if (!taskDoc.exists) {
+        return null;
+      }
+
+      Task task = Task.fromFirestore(taskDoc);
+      String? taskMasterId = task.taskMasterId;
+
+      // Now query the pax_accounts collection using the taskMasterId
+      DocumentSnapshot accountDoc =
+          await _firestore.collection('pax_accounts').doc(taskMasterId).get();
+
+      if (!accountDoc.exists) {
+        return null;
+      }
+
+      final data = accountDoc.data() as Map<String, dynamic>?;
+      return data?['serverWalletId'] as String?;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error retrieving task master server wallet ID: $e');
+      }
+      return null;
+    }
   }
 }
