@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pax/exports/views.dart';
+import 'package:pax/features/task/task_webview/view.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/route/route_notifier_provider.dart';
@@ -102,11 +103,16 @@ final routerProvider = Provider((ref) {
 
           GoRoute(
             path: "task",
-            builder:
-                (BuildContext context, GoRouterState state) => TaskPageView(),
+            builder: (BuildContext context, GoRouterState state) => TaskView(),
             routes: [
               GoRoute(
-                path: "task-complete",
+                path: "webview",
+                builder:
+                    (BuildContext context, GoRouterState state) =>
+                        TaskWebView(),
+              ),
+              GoRoute(
+                path: "complete",
                 builder:
                     (BuildContext context, GoRouterState state) =>
                         TaskCompleteView(),
