@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/providers/local/task_context/main_task_context_provider.dart';
-import 'package:pax/providers/local/task_master_provider.dart';
 import 'package:pax/providers/local/task_master_server_id_provider.dart';
 import 'package:pax/widgets/other_task_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
