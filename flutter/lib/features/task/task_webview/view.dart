@@ -4,14 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:pax/theming/colors.dart';
 
-class TaskPageView extends StatefulWidget {
-  const TaskPageView({super.key});
+class TaskWebView extends StatefulWidget {
+  const TaskWebView({super.key});
 
   @override
-  State<TaskPageView> createState() => _TaskPageViewState();
+  State<TaskWebView> createState() => _TaskWebViewState();
 }
 
-class _TaskPageViewState extends State<TaskPageView> {
+class _TaskWebViewState extends State<TaskWebView> {
   late final WebViewController controller;
   bool isLoading = true;
 
