@@ -1,16 +1,16 @@
-# PAX - Decentralized Task Management Platform
+# Pax - Decentralized Task Management Platform
 
-PAX is a comprehensive platform that combines mobile application development with blockchain technology to create a secure and efficient task management system. The platform enables organizations to create tasks, screen participants, and distribute rewards through a decentralized infrastructure.
+Pax is a comprehensive platform that combines mobile application development with blockchain technology to create a secure and efficient task management system. The platform enables organizations to create tasks, screen participants, and distribute rewards through a decentralized infrastructure.
 
 ## Project Overview
 
-PAX consists of two main components:
+Pax consists of two main components:
 1. **Mobile Application** (Flutter)
 2. **Smart Contracts** (Solidity/Hardhat)
 
 ## System Architecture
 
-The following diagram illustrates the complete flow of the PAX platform:
+The following diagram illustrates the complete flow of the Pax platform:
 
 ```mermaid
 flowchart TD

@@ -1,6 +1,6 @@
-# PAX Smart Contracts
+# Pax Smart Contracts
 
-This directory contains the smart contracts that power the PAX platform's blockchain functionality. The contracts are built using Hardhat and Solidity, implementing the core business logic for task management, rewards, and withdrawals.
+This directory contains the smart contracts that power the Pax platform's blockchain functionality. The contracts are built using Hardhat and Solidity, implementing the core business logic for task management, rewards, and withdrawals.
 
 ## Core Contracts
 
