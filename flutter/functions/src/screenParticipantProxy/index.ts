@@ -1,4 +1,4 @@
-// src/screenParticipant/index.ts
+// src/screenParticipantProxy/index.ts
 import {
   onCall,
   HttpsError,
@@ -14,6 +14,7 @@ import { celo } from "viem/chains";
 import { createSmartAccountClient } from "permissionless";
 import { toSimpleSmartAccount } from "permissionless/accounts";
 import { createViemAccount } from "@privy-io/server-auth/viem";
+import { FieldValue } from "firebase-admin/firestore";
 
 import { taskManagerV1ABI } from "../../shared/abis/taskManagerV1ABI";
 import {
@@ -22,6 +23,7 @@ import {
   PUBLIC_CLIENT,
   PIMLICO_CLIENT,
   PIMLICO_URL,
+  DB
 } from "../../shared/config";
 import { 
   createScreeningSignaturePackage, 
@@ -35,9 +37,10 @@ import { createScreeningRecord } from "../../shared/utils/createScreening";
  * 1. Generates a signature for screening
  * 2. Submits the transaction to the blockchain
  * 3. Creates a screening record with the transaction hash
+ * 4. Creates a task completion record associated with the screening
  * 
  * Returns all relevant data including the participant proxy address, 
- * signature, nonce, transaction hash, and screening record ID.
+ * signature, nonce, transaction hash, screening record ID, and task completion ID.
  */
 export const screenParticipantProxy = onCall(FUNCTION_RUNTIME_OPTS, async (request) => {
   try {
@@ -193,6 +196,32 @@ export const screenParticipantProxy = onCall(FUNCTION_RUNTIME_OPTS, async (reque
     
     logger.info("Screening record created", { screeningId });
 
+    // Step 5: Create task completion record directly
+    const firestore = DB();
+    const taskCompletionsCollection = firestore.collection('task_completions');
+    
+    // Generate a unique ID for the task completion
+    const taskCompletionDocRef = taskCompletionsCollection.doc();
+    const taskCompletionId = taskCompletionDocRef.id;
+    
+    // Create the task completion record
+    await taskCompletionDocRef.set({
+      id: taskCompletionId,
+      taskId,
+      screeningId,
+      participantId,
+      timeCompleted: null, // Task is not yet completed
+      timeCreated: FieldValue.serverTimestamp(),
+      timeUpdated: FieldValue.serverTimestamp()
+    });
+    
+    logger.info("Task completion created successfully", {
+      taskCompletionId,
+      screeningId,
+      taskId,
+      participantId
+    });
+
     // Return complete response with all relevant data
     return {
       success: true,
@@ -202,6 +231,7 @@ export const screenParticipantProxy = onCall(FUNCTION_RUNTIME_OPTS, async (reque
       nonce: nonceString,
       txnHash,
       screeningId,
+      taskCompletionId, // Added task completion ID to the response
     };
   } catch (error) {
     logger.error("Comprehensive screening process failed", { error });

@@ -13,8 +13,8 @@ interface RewardParams {
   signature: Hex;
   nonce: string;
   txnHash?: string | null;
-  amount: string;
-  currency: string;
+  amount: number;
+  rewardCurrencyId: number;
 }
 
 /**
@@ -30,7 +30,7 @@ export async function createRewardRecord(params: RewardParams): Promise<string> 
       nonce, 
       txnHash = null,
       amount,
-      currency
+      rewardCurrencyId
     } = params;
     
     logger.info("Creating reward record", {
@@ -56,11 +56,10 @@ export async function createRewardRecord(params: RewardParams): Promise<string> 
       signature,
       nonce,
       txnHash,
-      amount,
-      currency,
+      amountReceived: amount,
+      rewardCurrencyId,
       timeCreated: FieldValue.serverTimestamp(),
       timeUpdated: FieldValue.serverTimestamp(),
-      status: txnHash ? 'completed' : 'pending'
     });
     
     logger.info("Reward record created successfully", {
@@ -97,7 +96,8 @@ export async function updateRewardWithTxnHash(
     // Update the document with server timestamp
     await rewardDocRef.update({
       txnHash,
-      status: 'completed',
+      isPaidOutToPaxAccount: true,
+      timePaidOut: FieldValue.serverTimestamp(),
       timeUpdated: FieldValue.serverTimestamp()
     });
     
