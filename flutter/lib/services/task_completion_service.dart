@@ -2,6 +2,7 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/providers/local/task_completion_state_provider.dart';
 
 class TaskCompletionService {
@@ -41,6 +42,8 @@ class TaskCompletionService {
       ref
           .read(taskCompletionProvider.notifier)
           .completeTask(taskCompletionResult);
+
+      ref.invalidate(activityRepositoryProvider);
     } catch (e) {
       // Update state to error with error message
       ref.read(taskCompletionProvider.notifier).setError(e.toString());
