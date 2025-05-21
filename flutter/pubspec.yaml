@@ -59,6 +59,7 @@ dependencies:
   connectivity_plus: ^6.1.4
   cloud_functions: ^5.5.0
   pointycastle: ^4.0.0
+  rxdart: ^0.28.0
 
 dev_dependencies:
   flutter_test:

@@ -16,8 +16,6 @@ class ActivityView extends ConsumerStatefulWidget {
 
 class _ActivityViewState extends ConsumerState<ActivityView> {
   int index = 0;
-  int selected = 0;
-  String? screenName;
 
   @override
   void initState() {
@@ -27,10 +25,8 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
 
   @override
   Widget build(BuildContext context) {
-    // Get the current user ID
-
     // Get the activity notifier to set filters
-    final activityNotifier = ref.read(activityNotifierProvider.notifier);
+    final activityNotifier = ref.watch(activityNotifierProvider.notifier);
 
     // Watch for activities based on the current filter
     final activitiesAsync = ref.watch(filteredActivitiesProvider);
@@ -152,21 +148,23 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
 
       child: activitiesAsync.when(
         data: (activities) {
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                if (activities.isEmpty)
-                  Center(
-                    child: Text(
-                      'No activities found',
-                      style: TextStyle(color: PaxColors.darkGrey),
-                    ),
-                  )
-                else
-                  for (var activity in activities)
-                    ActivityCard(activity).withPadding(all: 8),
-              ],
-            ),
+          return Column(
+            mainAxisAlignment:
+                activities.isEmpty
+                    ? MainAxisAlignment.center
+                    : MainAxisAlignment.start,
+            children: [
+              if (activities.isEmpty)
+                Center(
+                  child: Text(
+                    'No activities found',
+                    style: TextStyle(color: PaxColors.darkGrey),
+                  ),
+                )
+              else
+                for (var activity in activities)
+                  ActivityCard(activity).withPadding(all: 8),
+            ],
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),

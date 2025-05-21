@@ -16,7 +16,6 @@ class RootView extends ConsumerStatefulWidget {
 class _RootViewState extends ConsumerState<RootView> {
   int index = 0;
   int selected = 0;
-  String? screenName;
 
   @override
   void initState() {
@@ -29,23 +28,24 @@ class _RootViewState extends ConsumerState<RootView> {
       footers: [
         const Divider(),
         SizedBox(
-          height: 93.75,
-          child: NavigationBar(
-            alignment: NavigationBarAlignment.spaceBetween,
-            labelType: NavigationLabelType.expanded,
-            expanded: true,
-            expands: false,
-            onSelected: (index) {
-              setState(() {
-                selected = index;
-              });
-            },
-            index: selected,
-            children: [
-              buildButton('Home', selected == 0),
-              buildButton('Activity', selected == 1),
-              buildButton('Account', selected == 2),
-            ],
+          child: IntrinsicHeight(
+            child: NavigationBar(
+              alignment: NavigationBarAlignment.spaceBetween,
+              labelType: NavigationLabelType.expanded,
+              expanded: true,
+              expands: false,
+              onSelected: (index) {
+                setState(() {
+                  selected = index;
+                });
+              },
+              index: selected,
+              children: [
+                buildButton('Home', selected == 0),
+                buildButton('Activity', selected == 1),
+                buildButton('Account', selected == 2),
+              ],
+            ),
           ),
         ),
       ],
@@ -59,7 +59,6 @@ class _RootViewState extends ConsumerState<RootView> {
 
   NavigationItem buildButton(String label, bool isSelected) {
     return NavigationItem(
-      // overflow: NavigationOverflow.none,
       style: const ButtonStyle.muted(density: ButtonDensity.icon),
       selectedStyle: const ButtonStyle.fixed(density: ButtonDensity.icon),
       label: Text(

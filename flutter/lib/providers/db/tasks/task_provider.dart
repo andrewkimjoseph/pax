@@ -15,7 +15,9 @@ final tasksStreamProvider = StreamProvider<List<Task>>((ref) {
 });
 
 // Stream provider for available tasks only
-final availableTasksStreamProvider = StreamProvider<List<Task>>((ref) {
-  final repository = ref.watch(tasksRepositoryProvider);
-  return repository.getAvailableTasks();
-});
+final availableTasksStreamProvider = StreamProvider.family<List<Task>, String?>(
+  (ref, participantId) {
+    final repository = ref.watch(tasksRepositoryProvider);
+    return repository.getAvailableTasks(participantId);
+  },
+);

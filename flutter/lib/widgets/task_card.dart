@@ -1,14 +1,23 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pax/models/firestore/screening/screening_model.dart';
 import 'package:pax/models/firestore/task/task_model.dart';
+import 'package:pax/providers/local/task_context/main_task_context_provider.dart';
+import 'package:pax/providers/local/task_context/screening_context_provider.dart';
+import 'package:pax/providers/local/task_master_provider.dart';
+import 'package:pax/providers/local/task_master_server_id_provider.dart';
 import 'package:pax/theming/colors.dart';
+import 'package:pax/utils/currency_symbol.dart';
+import 'package:pax/utils/token_balance_util.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 class TaskCard extends ConsumerWidget {
-  const TaskCard(this.task, {super.key});
+  const TaskCard(this.task, {this.screening, super.key});
 
   final Task task;
+
+  final Screening? screening;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -21,10 +30,10 @@ class TaskCard extends ConsumerWidget {
     }
 
     // Format reward amount
-    String rewardAmount = '\$--';
+    String rewardAmount = '--';
     if (task.rewardAmountPerParticipant != null) {
       // Using NumberFormat for proper currency formatting
-      rewardAmount = '\$${task.rewardAmountPerParticipant!.toStringAsFixed(2)}';
+      rewardAmount = task.rewardAmountPerParticipant!.toStringAsFixed(2);
     }
 
     // Format estimated time
@@ -66,9 +75,20 @@ class TaskCard extends ConsumerWidget {
                 ),
               ).withPadding(bottom: 8),
 
+              Spacer(),
               Text(
-                rewardAmount,
-                style: TextStyle(fontSize: 20, color: Colors.green),
+                TokenBalanceUtil.getLocaleFormattedAmount(
+                  num.parse(rewardAmount),
+                ),
+                style: TextStyle(
+                  fontSize: 20,
+                  color: PaxColors.green,
+                  fontWeight: FontWeight.bold,
+                ),
+              ).withPadding(right: 4),
+              SvgPicture.asset(
+                'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(task.rewardCurrencyId)}.svg',
+                height: 25,
               ),
             ],
           ).withPadding(bottom: 8),
@@ -170,16 +190,41 @@ class TaskCard extends ConsumerWidget {
           SizedBox(
             width: double.infinity,
             child: Button(
-              onPressed: () {
-                // Navigate to task detail with the task ID
-                context.go('/task/${task.id}');
+              onPressed: () async {
+                ref
+                    .read(taskContextProvider.notifier)
+                    .setTaskContext(task.id, task);
+
+                final serverWalletId = await ref
+                    .read(taskMasterRepositoryProvider)
+                    .fetchServerWalletId(task.id);
+
+                ref
+                    .read(taskMasterServerIdProvider.notifier)
+                    .setServerId(serverWalletId);
+
+                if (screening?.txnHash != null) {
+                  ref
+                      .read(screeningContextProvider.notifier)
+                      .setScreening(screening!);
+                }
+
+                if (screening?.txnHash != null) {
+                  if (context.mounted) {
+                    context.go("/task-itself");
+                  }
+                } else {
+                  if (context.mounted) {
+                    context.go('/task-summary');
+                  }
+                }
               },
               style: const ButtonStyle.primary(
                 density: ButtonDensity.normal,
               ).withBorderRadius(borderRadius: BorderRadius.circular(7)),
 
               child: Text(
-                'Check it out',
+                screening != null ? 'Go to task' : 'Check it out',
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 14,

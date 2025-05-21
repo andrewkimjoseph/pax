@@ -1,5 +1,5 @@
 import { Address, parseEther } from "viem";
-import { create2Factory, masterOwner, waitForUserOperationReceipt } from "../utils/clients";
+import { create2Factory, waitForUserOperationReceipt } from "../utils/clients";
 import { getTaskManagerDeployDataAndSalt, findContractAddressFromLogs, REWARD_TOKEN_ADDRESS } from "../utils/helpers";
 import { WalletInfo } from "../utils/wallets";
 
@@ -13,8 +13,8 @@ import { WalletInfo } from "../utils/wallets";
  */
 export async function deployTaskManager(
   taskManagerWallet: WalletInfo,
-  rewardAmount: bigint = parseEther("0.01"),
-  targetParticipants: bigint = 5n,
+  rewardAmount: bigint = parseEther("10"),
+  targetParticipants: bigint = 1n,
   rewardTokenAddress: Address = REWARD_TOKEN_ADDRESS
 ): Promise<Address> {
   console.log(`Deploying TaskManager for signer: ${taskManagerWallet.serverWalletAccount.address}`);

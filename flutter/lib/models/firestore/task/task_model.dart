@@ -14,7 +14,7 @@ class Task {
   final String? levelOfDifficulty;
   final String? managerContractAddress;
   final num? rewardAmountPerParticipant;
-  final String? rewardCurrencyId;
+  final int? rewardCurrencyId;
   final bool? isAvailable;
   final Timestamp? timeCreated;
   final Timestamp? timeUpdated;
@@ -24,8 +24,8 @@ class Task {
     required this.id,
     this.taskMasterId,
     this.title,
-    this.type = "general",
-    this.category = "general",
+    this.type = "General",
+    this.category = "General",
     this.estimatedTimeOfCompletionInMinutes,
     this.deadline,
     this.targetNumberOfParticipants,

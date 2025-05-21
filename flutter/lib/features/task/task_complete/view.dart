@@ -7,7 +7,12 @@ import 'package:go_router/go_router.dart';
 import 'package:pax/features/home/dashboard/view.dart';
 import 'package:pax/features/home/tasks/view.dart';
 import 'package:pax/features/onboarding/view_model.dart';
+import 'package:pax/providers/db/participant/participant_provider.dart';
+import 'package:pax/providers/local/activity_provider.dart';
 import 'package:pax/theming/colors.dart';
+import 'package:pax/providers/local/task_context/main_task_context_provider.dart';
+import 'package:pax/providers/local/task_completion_state_provider.dart';
+import 'package:pax/utils/currency_symbol.dart';
 import 'package:pax/widgets/account/account_option_card.dart';
 import 'package:pax/widgets/help_and_support.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
@@ -24,11 +29,10 @@ class TaskCompleteView extends ConsumerStatefulWidget {
 }
 
 class _TaskCompleteViewState extends ConsumerState<TaskCompleteView> {
-  String? genderValue;
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Display dialog after UI has rerendered
+      // Display confetti animation after UI has rendered
       Confetti.launch(
         context,
         options: const ConfettiOptions(
@@ -38,12 +42,27 @@ class _TaskCompleteViewState extends ConsumerState<TaskCompleteView> {
           y: 0.6,
         ),
       );
+
+      // Clear states after a delay
+      Future.delayed(Duration(seconds: 3), () {
+        ref.read(taskContextProvider.notifier).clear();
+        ref.read(taskCompletionProvider.notifier).reset();
+      });
     });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Get task and completion information
+    final taskContext = ref.read(taskContextProvider);
+    final currentTask = taskContext?.task;
+    final taskCompletion = ref.read(taskCompletionProvider);
+
+    // Determine reward amount to display
+    final String rewardAmount =
+        "${currentTask?.rewardAmountPerParticipant}"; // Default fallback
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       headers: [
@@ -80,16 +99,32 @@ class _TaskCompleteViewState extends ConsumerState<TaskCompleteView> {
                           fontWeight: FontWeight.normal,
                         ),
                       ).withPadding(bottom: 16),
-                      Text(
-                        "G\$ 0.01",
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.normal,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+
+                        children: [
+                          Text(
+                            rewardAmount,
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ).withPadding(right: 4),
+                          SvgPicture.asset(
+                            'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(currentTask?.rewardCurrencyId ?? 1)}.svg',
+                            height: 25,
+                          ),
+                        ],
                       ),
                     ],
                   ).withPadding(bottom: 12), // Reduced padding
+                  // Display task completion ID if available (optional)
+                  if (taskCompletion.result?.taskCompletionId != null)
+                    Text(
+                      "Completion ID: ${taskCompletion.result!.taskCompletionId.substring(0, 8)}...",
+                      style: TextStyle(fontSize: 12, color: PaxColors.darkGrey),
+                    ).withPadding(top: 16),
 
                   Spacer(),
                 ],
@@ -100,7 +135,6 @@ class _TaskCompleteViewState extends ConsumerState<TaskCompleteView> {
           // Fixed button at the bottom
           Container(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-
             child: Column(
               children: [
                 Divider().withPadding(top: 10, bottom: 10),
@@ -110,18 +144,7 @@ class _TaskCompleteViewState extends ConsumerState<TaskCompleteView> {
                   child: PrimaryButton(
                     onPressed: () {
                       context.pushReplacement('/');
-
-                      // Confetti.launch(
-                      //   context,
-                      //   options: const ConfettiOptions(
-                      //     colors: PaxColors.orangeToPinkGradient,
-                      //     particleCount: 100,
-                      //     spread: 70,
-                      //     y: 0.6,
-                      //   ),
-                      // );
                     },
-
                     child: Text(
                       'OK',
                       style: Theme.of(context).typography.base.copyWith(
@@ -140,10 +163,3 @@ class _TaskCompleteViewState extends ConsumerState<TaskCompleteView> {
     );
   }
 }
-
-// String? selectedValue;
-// @override
-// Widget build(BuildContext context) {
-//   return 
-// }
-
