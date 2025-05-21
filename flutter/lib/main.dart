@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,27 +11,22 @@ import 'package:pax/routing/service.dart';
 import 'package:pax/widgets/app_lifecycle_handler.dart';
 import 'theming/theme_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-// Add these imports
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
-// Create a top-level variable for the local notifications plugin
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
-
-// Define notification channel for Android
-const AndroidNotificationChannel channel = AndroidNotificationChannel(
-  'high_importance_channel', // id
-  'High Importance Notifications', // title
-  description:
-      'This channel is used for important notifications.', // description
-  importance: Importance.high,
-);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  FlutterError.onError = (errorDetails) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+  };
+  // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
 
   // Initialize local notifications
   await _initializeLocalNotifications();
@@ -111,6 +107,26 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
     super.dispose();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    final router = ref.watch(routerProvider);
+    ref.watch(fcmInitProvider);
+    return ShadcnApp.router(
+      debugShowCheckedModeBanner: false,
+      routerConfig: router,
+      title: 'Pax',
+      theme: ref.watch(themeProvider),
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.noScaling),
+          child: child ?? CircularProgressIndicator(),
+        );
+      },
+    );
+  }
+
   // Handle foreground messages
   void _setupForegroundMessageHandling() {
     // Handle messages when the app is in the foreground
@@ -186,28 +202,6 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
       // Use context.go(route) or similar navigation method based on your routing setup
     }
   }
-
-  // Method to show a local notification (you can call this from anywhere in your app)
-
-  @override
-  Widget build(BuildContext context) {
-    final router = ref.watch(routerProvider);
-    ref.watch(fcmInitProvider);
-    return ShadcnApp.router(
-      debugShowCheckedModeBanner: false,
-      routerConfig: router,
-      title: 'Pax',
-      theme: ref.watch(themeProvider),
-      builder: (context, child) {
-        return MediaQuery(
-          data: MediaQuery.of(
-            context,
-          ).copyWith(textScaler: TextScaler.noScaling),
-          child: child ?? CircularProgressIndicator(),
-        );
-      },
-    );
-  }
 }
 
 // Initialize Firebase Messaging for foreground notifications
@@ -262,6 +256,19 @@ Future<void> _initializeFirebaseMessaging() async {
   // Subscribe to topics if needed
   // await FirebaseMessaging.instance.subscribeToTopic('all_users');
 }
+
+// Create a top-level variable for the local notifications plugin
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+// Define notification channel for Android
+const AndroidNotificationChannel channel = AndroidNotificationChannel(
+  'high_importance_channel', // id
+  'High Importance Notifications', // title
+  description:
+      'This channel is used for important notifications.', // description
+  importance: Importance.high,
+);
 
 // This function is called when a message is received while the app is in the background
 // It must be a top-level function (not a class method)
