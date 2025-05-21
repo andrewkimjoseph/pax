@@ -132,11 +132,13 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
                         items: SelectItemList(
                           children: [
                             SelectCurrencyButton('good_dollar'),
-                            SelectCurrencyButton('celo_dollar'),
-                            SelectCurrencyButton('tether_usd'),
                             SelectCurrencyButton(
-                              'usd_coin',
+                              'celo_dollar',
                             ).withPadding(bottom: kIsWeb ? 0 : 30),
+                            // SelectCurrencyButton('tether_usd'),
+                            // SelectCurrencyButton(
+                            //   'usd_coin',
+                            // ),
                           ],
                         ),
                       ),
