@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/models/local/withdrawal_state_model.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
-import 'package:pax/providers/local/activity_provider.dart';
+import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/providers/local/withdrawal_service_provider.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/services/withdrawal_service.dart';
@@ -68,7 +68,7 @@ class WithdrawNotifier extends Notifier<WithdrawStateModel> {
       );
 
       // Refresh activities to show the new withdrawal
-      await ref.read(activityNotifierProvider.notifier).loadActivities(userId);
+      ref.invalidate(activityRepositoryProvider);
       await ref.read(paxAccountProvider.notifier).syncBalancesFromBlockchain();
     } catch (e) {
       if (kDebugMode) {
