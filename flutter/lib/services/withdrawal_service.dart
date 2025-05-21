@@ -1,3 +1,10 @@
+// This service manages the withdrawal process for participants:
+// - Handles withdrawals to payment methods through Firebase Functions
+// - Validates PaxAccount and server wallet information
+// - Creates withdrawal records in Firestore
+// - Provides methods to query withdrawal history
+// - Includes comprehensive error handling and validation
+
 // lib/services/withdrawal/withdrawal_service.dart
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

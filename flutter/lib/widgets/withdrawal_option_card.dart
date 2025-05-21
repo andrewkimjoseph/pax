@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pax/models/firestore/payment_method/payment_method.dart';
-import 'package:pax/providers/local/select_payment_method_provider.dart';
 import 'package:pax/providers/local/withdraw_context_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -31,17 +30,14 @@ class _WalletOptionCardState extends ConsumerState<WalletOptionCard> {
         setState(() {
           _state = CheckboxState.checked;
         });
-
-        ref
-            .read(selectedPaymentMethodIdProvider.notifier)
-            .select(widget.paymentMethod.id);
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final selectedMethodId = ref.watch(selectedPaymentMethodIdProvider);
+    final withdrawContext = ref.watch(withdrawContextProvider);
+    final selectedMethodId = withdrawContext?.selectedPaymentMethod?.id;
 
     // Update checkbox state if this is the selected method
     if (selectedMethodId == widget.paymentMethod.id &&
@@ -87,7 +83,6 @@ class _WalletOptionCardState extends ConsumerState<WalletOptionCard> {
               children: [
                 Text(
                   '${widget.paymentMethod.walletAddress.substring(0, 20)}...',
-
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 12,
@@ -112,14 +107,9 @@ class _WalletOptionCardState extends ConsumerState<WalletOptionCard> {
               ref
                   .read(withdrawContextProvider.notifier)
                   .setSelectedPaymentMethod(widget.paymentMethod);
-
-              // Update the selected payment method ID
-              ref
-                  .read(selectedPaymentMethodIdProvider.notifier)
-                  .select(widget.paymentMethod.id);
             } else if (selectedMethodId == widget.paymentMethod.id) {
               // Clear selection
-              ref.read(selectedPaymentMethodIdProvider.notifier).clear();
+              ref.read(withdrawContextProvider.notifier).clear();
             }
           },
         ),

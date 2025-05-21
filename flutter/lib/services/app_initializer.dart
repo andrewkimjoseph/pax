@@ -1,3 +1,9 @@
+// This service handles the initialization of core app functionality:
+// - Firebase initialization with platform-specific options
+// - Error handling setup with Crashlytics integration
+// - Push notification setup with background message handling
+// Uses a singleton pattern to ensure initialization happens only once
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';

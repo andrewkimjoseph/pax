@@ -1,3 +1,9 @@
+// This service manages the task completion workflow:
+// - Handles marking tasks as complete through Firebase Functions
+// - Manages task completion state through Riverpod providers
+// - Updates activity feed after task completion
+// - Provides error handling and state management for the completion process
+
 // lib/services/task_completion_service.dart
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';

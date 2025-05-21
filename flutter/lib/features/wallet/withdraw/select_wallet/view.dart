@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
 import 'package:pax/providers/db/payment_method/payment_method_provider.dart';
-import 'package:pax/providers/local/select_payment_method_provider.dart';
 import 'package:pax/providers/local/withdraw_context_provider.dart';
 import 'package:pax/widgets/withdrawal_option_card.dart';
 import 'package:pax/theming/colors.dart';
@@ -23,11 +22,11 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
     // Get available payment methods
     final paymentMethods = ref.watch(paymentMethodsProvider).paymentMethods;
 
-    // Watch the selected payment method ID (to enable/disable Continue button)
-    final selectedMethodId = ref.watch(selectedPaymentMethodIdProvider);
+    // Watch the withdraw context
+    final withdrawContext = ref.watch(withdrawContextProvider);
 
     // Button is enabled only when a payment method is selected
-    final isContinueEnabled = selectedMethodId != null;
+    final isContinueEnabled = withdrawContext?.selectedPaymentMethod != null;
 
     return Scaffold(
       headers: [
@@ -105,13 +104,6 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
                     onPressed:
                         isContinueEnabled
                             ? () {
-                              ref
-                                  .watch(withdrawContextProvider.notifier)
-                                  .setSelectedPaymentMethod(
-                                    paymentMethods.firstWhere(
-                                      (method) => method.id == selectedMethodId,
-                                    ),
-                                  );
                               context.go(
                                 '/wallet/withdraw/select-wallet/review-summary',
                               );

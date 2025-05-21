@@ -1,3 +1,10 @@
+// This service manages Firebase Cloud Messaging (FCM) functionality:
+// - Handles FCM token generation and refresh
+// - Manages notification permissions
+// - Saves FCM tokens to Firestore for each participant
+// - Provides token refresh handling and cleanup
+// - Includes robust error handling and debug logging
+
 // services/fcm_service.dart - Enhanced version
 import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
