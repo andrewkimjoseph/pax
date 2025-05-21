@@ -5,6 +5,15 @@
         android:icon="@mipmap/launcher_icon"
         android:enableOnBackInvokedCallback="true"
         >
+        <!-- Move FCM metadata tags HERE, as direct children of the application tag -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/main_notif" />
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="high_importance_channel" />
+            
         <activity
             android:name=".MainActivity"
             android:exported="true"
