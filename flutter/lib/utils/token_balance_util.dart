@@ -149,10 +149,7 @@ class TokenBalanceUtil {
     final locale = Intl.getCurrentLocale();
 
     // Create formatter based on whether to include decimals
-    final NumberFormat formatter =
-        includeDecimals
-            ? NumberFormat('#,##0.00', locale)
-            : NumberFormat('#,###', locale);
+    final NumberFormat formatter = NumberFormat('#,##0.00', locale);
 
     // Format the number
     final formattedNumber = formatter.format(rawBalance);

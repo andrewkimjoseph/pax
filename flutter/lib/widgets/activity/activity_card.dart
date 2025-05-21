@@ -85,7 +85,9 @@ class ActivityCard extends ConsumerWidget {
                   children: [
                     Text(
                       activity.taskCompletion != null
-                          ? 'You have completed a task'
+                          ? activity.isComplete
+                              ? 'You have completed a task'
+                              : 'You have an incomplete task'
                           : activity.reward != null
                           ? 'You have earned a reward'
                           : 'You have made a withdrawal',

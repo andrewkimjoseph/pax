@@ -61,6 +61,8 @@ class WithdrawalService {
         'decimals': decimals,
       });
 
+      Timestamp timeRequested = Timestamp.now();
+
       if (result.data == null) {
         throw Exception('Withdrawal failed - empty response');
       }
@@ -74,6 +76,7 @@ class WithdrawalService {
         rewardCurrencyId: tokenId,
         txnHash: result.data['txnHash'],
         timeCreated: Timestamp.now(),
+        timeRequested: timeRequested,
         timeUpdated: Timestamp.now(),
       );
 

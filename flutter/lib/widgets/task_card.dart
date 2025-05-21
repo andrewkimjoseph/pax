@@ -1,9 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pax/models/firestore/screening/screening_model.dart';
 import 'package:pax/models/firestore/task/task_model.dart';
 import 'package:pax/providers/local/task_context/main_task_context_provider.dart';
+import 'package:pax/providers/local/task_context/screening_context_provider.dart';
 import 'package:pax/providers/local/task_master_provider.dart';
 import 'package:pax/providers/local/task_master_server_id_provider.dart';
 import 'package:pax/theming/colors.dart';
@@ -12,9 +13,11 @@ import 'package:pax/utils/token_balance_util.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 class TaskCard extends ConsumerWidget {
-  const TaskCard(this.task, {super.key});
+  const TaskCard(this.task, {this.screening, super.key});
 
   final Task task;
+
+  final Screening? screening;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -188,7 +191,6 @@ class TaskCard extends ConsumerWidget {
             width: double.infinity,
             child: Button(
               onPressed: () async {
-                // Navigate to task detail with the task ID]
                 ref
                     .read(taskContextProvider.notifier)
                     .setTaskContext(task.id, task);
@@ -201,11 +203,20 @@ class TaskCard extends ConsumerWidget {
                     .read(taskMasterServerIdProvider.notifier)
                     .setServerId(serverWalletId);
 
-                if (context.mounted) {
-                  if (kDebugMode) {
-                    print(serverWalletId);
+                if (screening?.txnHash != null) {
+                  ref
+                      .read(screeningContextProvider.notifier)
+                      .setScreening(screening!);
+                }
+
+                if (screening?.txnHash != null) {
+                  if (context.mounted) {
+                    context.go("/task-itself");
                   }
-                  context.go('/task');
+                } else {
+                  if (context.mounted) {
+                    context.go('/task-summary');
+                  }
                 }
               },
               style: const ButtonStyle.primary(
@@ -213,7 +224,7 @@ class TaskCard extends ConsumerWidget {
               ).withBorderRadius(borderRadius: BorderRadius.circular(7)),
 
               child: Text(
-                'Check it out',
+                screening != null ? 'Go to task' : 'Check it out',
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 14,
