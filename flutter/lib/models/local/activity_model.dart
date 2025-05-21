@@ -160,3 +160,16 @@ class Activity {
     );
   }
 }
+
+extension ActivityExtensions on Activity {
+  bool get isComplete {
+    switch (type) {
+      case ActivityType.taskCompletion:
+        return taskCompletion?.timeCompleted != null;
+      case ActivityType.reward:
+        return reward?.timePaidOut != null;
+      case ActivityType.withdrawal:
+        return withdrawal?.timeRequested != null;
+    }
+  }
+}

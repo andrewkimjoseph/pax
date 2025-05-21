@@ -8,7 +8,7 @@ class Withdrawal {
   final num? amountTakenOut;
   final int? rewardCurrencyId;
   final String? txnHash;
-
+  final Timestamp? timeRequested;
   final Timestamp? timeCreated;
   final Timestamp? timeUpdated;
 
@@ -19,6 +19,7 @@ class Withdrawal {
     this.amountTakenOut,
     this.rewardCurrencyId,
     this.txnHash,
+    this.timeRequested,
     this.timeCreated,
     this.timeUpdated,
   });
@@ -37,6 +38,7 @@ class Withdrawal {
       amountTakenOut: data['amountRequested'],
       rewardCurrencyId: data['rewardCurrencyId'],
       txnHash: data['txnHash'],
+      timeRequested: data['timeRequested'],
       timeCreated: data['timeCreated'],
       timeUpdated: data['timeUpdated'],
     );
@@ -49,6 +51,7 @@ class Withdrawal {
       'amountRequested': amountTakenOut,
       'rewardCurrencyId': rewardCurrencyId,
       'txnHash': txnHash,
+      'timeRequested': timeRequested,
       'timeCreated': timeCreated,
       'timeUpdated': timeUpdated,
     };
