@@ -7,7 +7,7 @@ import { ToSafeSmartAccountReturnType } from "permissionless/accounts";
 
 // Privy wallet IDs as specified in the requirements
 export const WALLET_IDS = {
-  TASK_MANAGER: "tei6qbrww1uhcvxmz297k14p",
+  TASK_MANAGER: "p8112k3m1eyz9u71h085ek44",
   PARTICIPANT_2: "gbg7lsei9hxebof223plfazr",
   PARTICIPANT_3: "kid3rhgmxtj0abjdv8qy741z",
   PARTICIPANT_4: "vy1qys3y4hvypn8z1zo1n0r3",
