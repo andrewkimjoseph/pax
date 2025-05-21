@@ -1,6 +1,6 @@
-# PAX - Task Management and Reward Platform
+# Pax - Task Management and Reward Platform
 
-PAX is a Flutter-based mobile application that facilitates task management, participant screening, and reward distribution. The platform enables organizations to create tasks, screen participants, and distribute rewards through a secure and efficient system.
+Pax is a Flutter-based mobile application that facilitates task management, participant screening, and reward distribution. The platform enables organizations to create tasks, screen participants, and distribute rewards through a secure and efficient system.
 
 ## Core Features
 
