@@ -22,6 +22,8 @@ flowchart TD
     classDef decision fill:#fff9c4,stroke:#fbc02d,stroke-width:1px,color:#f57f17
     classDef notification fill:#ffe0b2,stroke:#f57c00,stroke-width:1px,color:#e65100
     classDef error fill:#ffcdd2,stroke:#d32f2f,stroke-width:1px,color:#b71c1c
+    classDef service fill:#e1f5fe,stroke:#0288d1,stroke-width:1px,color:#01579b
+    classDef function fill:#f3e5f5,stroke:#7b1fa2,stroke-width:1px,color:#4a148c
     
     %% Main entry point
     START([User opens Pax App]) --> F1
@@ -30,18 +32,19 @@ flowchart TD
     subgraph F1[FLOW 1: REGISTRATION]
         A1[User logs in with Google]:::userAction --> A2{Auth success?}:::decision
         A2 -->|No| A3[Show error]:::error --> A1
-        A2 -->|Yes| A4[Create participant record]:::databaseAction
-        A4 --> A5[Trigger wallet creation]:::systemProcess
+        A2 -->|Yes| A4[AppInitializer Service]:::service
+        A4 --> A5[createPrivyServerWallet Function]:::function
         A5 --> A6[Create Ethereum server wallet]:::systemProcess
-        A6 --> A7[Deploy PaxAccount contract]:::blockchainAction
-        A7 --> A8[Store contract & wallet info]:::systemProcess
-        A8 --> A9[Create pax_accounts record]:::databaseAction
-        A9 --> A10[Update participant with paxAccountId]:::databaseAction
+        A6 --> A7[createPaxAccountV1Proxy Function]:::function
+        A7 --> A8[Deploy PaxAccount contract]:::blockchainAction
+        A8 --> A9[Store contract & wallet info]:::systemProcess
+        A9 --> A10[Create pax_accounts record]:::databaseAction
+        A10 --> A11[Update participant with paxAccountId]:::databaseAction
     end
 
     %% FLOW 2: Payment Method Connection
     subgraph F2[FLOW 2: PAYMENT METHOD]
-        B1[User enters payment details]:::userAction --> B2[Validate details]:::systemProcess
+        B1[User enters payment details]:::userAction --> B2[WithdrawalService]:::service
         B2 --> B3{Valid?}:::decision
         B3 -->|No| B4[Show error]:::error --> B1
         B3 -->|Yes| B5[Create payment method request]:::systemProcess
@@ -50,7 +53,7 @@ flowchart TD
         B7 --> B8[Get transaction hash]:::blockchainAction
         B8 --> B9[Create payment_methods record]:::databaseAction
         B9 --> B10[Store linkingTxnHash]:::databaseAction
-        B10 --> B11[Send success notification]:::notification
+        B10 --> B11[FCMService Notification]:::notification
     end
 
     %% FLOW 3: TaskMaster Creating a Task
@@ -72,36 +75,49 @@ flowchart TD
         D1[User browses available tasks]:::userAction
         D1 --> D2[User selects task]:::userAction
         D2 --> D3[Book/screen task]:::userAction
-        D3 --> D4[Trigger screening function]:::systemProcess
-        D4 --> D5[Fetch server wallet]:::systemProcess
+        D3 --> D4[ScreeningService]:::service
+        D4 --> D5[screenParticipantProxy Function]:::function
         D5 --> D6[Call TaskManager.screenParticipant]:::blockchainAction
         D6 --> D7[Create screenings record]:::databaseAction
         D7 --> D8[User completes task/survey]:::userAction
-        D8 --> D9[Submit completion]:::userAction
-        D9 --> D10[Create task_completions record]:::databaseAction
-        D10 --> D11[Create rewards record]:::databaseAction
-        D11 --> D12[Trigger reward transfer function]:::systemProcess
-        D12 --> D13[Fetch pax_account]:::systemProcess
+        D8 --> D9[TaskCompletionService]:::service
+        D9 --> D10[markTaskCompletionAsComplete Function]:::function
+        D10 --> D11[Create task_completions record]:::databaseAction
+        D11 --> D12[RewardService]:::service
+        D12 --> D13[rewardParticipantProxy Function]:::function
         D13 --> D14[Call transferRewardToPaxAccount]:::blockchainAction
         D14 --> D15[Update reward as paid out]:::databaseAction
-        D15 --> D16[Send reward notification]:::notification
+        D15 --> D16[FCMService Notification]:::notification
     end
 
     %% FLOW 5: Participant Makes a Withdrawal
     subgraph F5[FLOW 5: WITHDRAWAL]
-        E1[User initiates withdrawal]:::userAction --> E2[Check balance]:::systemProcess
+        E1[User initiates withdrawal]:::userAction --> E2[WithdrawalService]:::service
         E2 --> E3{Balance > 0?}:::decision
         E3 -->|No| E4[Show insufficient funds]:::error
         E3 -->|Yes| E5[Select amount & payment method]:::userAction
         E5 --> E6{Valid?}:::decision
         E6 -->|No| E7[Show error]:::error --> E5
         E6 -->|Yes| E8[Confirm withdrawal]:::userAction
-        E8 --> E9[Trigger withdrawal function]:::systemProcess
-        E9 --> E10[Fetch server wallet]:::systemProcess
-        E10 --> E11[Call PaxAccount.withdraw]:::blockchainAction
-        E11 --> E12[Transfer funds to payment method]:::blockchainAction
-        E12 --> E13[Create withdrawals record]:::databaseAction
-        E13 --> E14[Send confirmation]:::notification
+        E8 --> E9[withdrawToPaymentMethod Function]:::function
+        E9 --> E10[Call PaxAccount.withdraw]:::blockchainAction
+        E10 --> E11[Transfer funds to payment method]:::blockchainAction
+        E11 --> E12[Create withdrawals record]:::databaseAction
+        E12 --> E13[FCMService Notification]:::notification
+    end
+
+    %% FLOW 6: Account Deletion
+    subgraph F6[FLOW 6: ACCOUNT DELETION]
+        F1[User requests account deletion]:::userAction --> F2[deleteParticipantOnRequest Function]:::function
+        F2 --> F3[Delete participant data]:::databaseAction
+        F3 --> F4[Delete PaxAccount record]:::databaseAction
+        F4 --> F5[Delete task completions]:::databaseAction
+        F5 --> F6[Delete rewards]:::databaseAction
+        F6 --> F7[Delete withdrawals]:::databaseAction
+        F7 --> F8[Delete FCM tokens]:::databaseAction
+        F8 --> F9[Delete payment methods]:::databaseAction
+        F9 --> F10[Delete screenings]:::databaseAction
+        F10 --> F11[Delete auth record]:::databaseAction
     end
 
     %% Smart Contracts (placed on the side)
@@ -117,6 +133,7 @@ flowchart TD
     F1 --> F5
     F3 --> F4
     F4 --> F5
+    F1 --> F6
 
     %% Contract connections - simplified
     A7 -.-> SC1
@@ -124,12 +141,14 @@ flowchart TD
     C6 -.-> SC2
     D6 -.-> SC2
     D14 -.-> SC1
-    E11 -.-> SC1
+    E10 -.-> SC1
 
     %% Legend - simplified
     subgraph LEGEND[LEGEND]
         direction LR
         LEGEND_USER[User Action]:::userAction
+        LEGEND_SERVICE[Service]:::service
+        LEGEND_FUNCTION[Function]:::function
         LEGEND_SYSTEM[System Process]:::systemProcess
         LEGEND_BLOCKCHAIN[Blockchain Action]:::blockchainAction
         LEGEND_DATABASE[Database Action]:::databaseAction
