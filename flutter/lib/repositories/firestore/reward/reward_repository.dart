@@ -89,4 +89,30 @@ class RewardRepository {
       return [];
     }
   }
+
+  // Stream of rewards for a participant
+  Stream<List<Reward>> streamRewardsForParticipant(String? participantId) {
+    if (participantId == null) {
+      return Stream.value([]);
+    }
+
+    try {
+      return _firestore
+          .collection(collectionName)
+          .where('participantId', isEqualTo: participantId)
+          .orderBy('timeCreated', descending: true)
+          .snapshots()
+          .map((snapshot) {
+            return snapshot.docs
+                .map((doc) => Reward.fromFirestore(doc))
+                .toList();
+          });
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error streaming rewards: $e');
+      }
+      // Return empty stream on error
+      return Stream.value([]);
+    }
+  }
 }
