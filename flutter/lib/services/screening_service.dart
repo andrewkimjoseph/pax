@@ -1,6 +1,13 @@
+// This service manages the participant screening process:
+// - Handles participant screening through Firebase Functions
+// - Manages screening state and context through Riverpod providers
+// - Updates activity feed after successful screening
+// - Provides error handling and state management for the screening process
+
 // lib/services/screening_service.dart
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/providers/local/screening_state_provider.dart';
 import 'package:pax/providers/local/task_context/screening_context_provider.dart';
 
@@ -52,6 +59,8 @@ class ScreeningService {
 
       // Update state to complete with the result
       ref.read(screeningProvider.notifier).completeScreening(screeningResult);
+
+      ref.invalidate(activityRepositoryProvider);
     } catch (e) {
       // Update state to error with error message
       ref

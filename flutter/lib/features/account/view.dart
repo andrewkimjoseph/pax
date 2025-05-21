@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' show Divider;
+import 'package:flutter/material.dart' show Divider, InkWell;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pax/features/account_and_security/view.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
-import 'package:pax/providers/local/activity_provider.dart';
+import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/utils/token_balance_util.dart';
 import 'package:pax/widgets/account/account_option_card.dart';
 import 'package:pax/widgets/toast.dart';
@@ -264,8 +264,8 @@ class _AccountViewState extends ConsumerState<AccountView> {
                   //     Icon(Icons.arrow_forward_ios_outlined).withPadding(left: 8),
                   //   ],
                   // ).withPadding(bottom: 8),
-                  GestureDetector(
-                    onPanDown: (details) {
+                  InkWell(
+                    onTap: () {
                       context.push("/profile");
                     },
                     child: AccountOptionCard(
@@ -273,8 +273,8 @@ class _AccountViewState extends ConsumerState<AccountView> {
                       true,
                     ).withPadding(bottom: 28),
                   ),
-                  GestureDetector(
-                    onPanDown: (details) {
+                  InkWell(
+                    onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -287,8 +287,8 @@ class _AccountViewState extends ConsumerState<AccountView> {
                       true,
                     ).withPadding(bottom: 28),
                   ),
-                  GestureDetector(
-                    onPanDown: (details) {
+                  InkWell(
+                    onTap: () {
                       context.push("/payment-methods");
                     },
                     child: AccountOptionCard(
@@ -296,8 +296,8 @@ class _AccountViewState extends ConsumerState<AccountView> {
                       true,
                     ).withPadding(bottom: 28),
                   ),
-                  GestureDetector(
-                    onPanDown: (details) {
+                  InkWell(
+                    onTap: () {
                       context.push("/help-and-support");
                     },
                     child: AccountOptionCard(
@@ -306,8 +306,8 @@ class _AccountViewState extends ConsumerState<AccountView> {
                     ).withPadding(bottom: 28),
                   ),
 
-                  GestureDetector(
-                    onPanDown: (details) {
+                  InkWell(
+                    onTap: () {
                       open(context, 0);
                     },
                     child: AccountOptionCard('logout', true),
@@ -407,28 +407,24 @@ class _AccountViewState extends ConsumerState<AccountView> {
                     width: MediaQuery.of(context).size.width * 0.4,
                     height: 48,
                     child: PrimaryButton(
-                      onPressed: () {
+                      onPressed: () async {
                         closeDrawer(context);
-                        showSuccessToast(context);
-                        ref.read(authProvider.notifier).signOut();
-                        context.pushReplacement('/onboarding');
 
-                        // if (onboardingViewModel.isLastPage) {
-                        //   // Handle completion
-                        //   onboardingViewModel.completeOnboarding();
-                        // } else {
-                        //   // Go to next page
-                        //   onboardingViewModel.goToNextPage();
-                        // }
+                        // Show toast immediately before starting the logout process
+                        showSuccessToast(context);
+
+                        // Small delay to ensure toast is visible before redirect
+                        await Future.delayed(const Duration(milliseconds: 300));
+
+                        // Then initiate logout
+                        ref.read(authProvider.notifier).signOut();
                       },
                       child: Text(
                         'Yes, Logout',
                         style: Theme.of(context).typography.base.copyWith(
                           fontWeight: FontWeight.normal,
                           fontSize: 14,
-                          color:
-                              PaxColors
-                                  .white, // The purple color from your images
+                          color: PaxColors.white,
                         ),
                       ),
                     ),

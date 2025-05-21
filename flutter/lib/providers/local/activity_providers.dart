@@ -1,7 +1,6 @@
 // lib/providers/activity/activity_provider.dart
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pax/models/firestore/reward/reward_model.dart';
 import 'package:pax/models/local/activity_model.dart';
 import 'package:pax/repositories/firestore/reward/reward_repository.dart';
 import 'package:pax/repositories/firestore/task_completion/task_completion_repository.dart';
@@ -61,14 +60,6 @@ final rewardActivitiesProvider = FutureProvider.family<List<Activity>, String>((
 });
 
 // Define a rewards provider that will expose the stream of rewards
-final rewardsStreamProvider = StreamProvider.family<List<Reward>, String?>((
-  ref,
-  participantId,
-) {
-  // Use the rewards repository to get the stream of rewards for the participant
-  final rewardsRepository = ref.watch(rewardRepositoryProvider);
-  return rewardsRepository.streamRewardsForParticipant(participantId);
-});
 
 final withdrawalActivitiesProvider =
     FutureProvider.family<List<Activity>, String>((ref, userId) async {

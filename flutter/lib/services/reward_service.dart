@@ -1,3 +1,9 @@
+// This service manages the reward distribution process:
+// - Handles participant rewards through Firebase Functions
+// - Manages reward state through Riverpod providers
+// - Provides error handling and state management for the reward process
+// - Returns detailed reward results including transaction hashes
+
 // lib/services/reward_service.dart
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';

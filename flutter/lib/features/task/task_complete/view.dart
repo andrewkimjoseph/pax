@@ -8,7 +8,7 @@ import 'package:pax/features/home/dashboard/view.dart';
 import 'package:pax/features/home/tasks/view.dart';
 import 'package:pax/features/onboarding/view_model.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
-import 'package:pax/providers/local/activity_provider.dart';
+import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/providers/local/task_context/main_task_context_provider.dart';
 import 'package:pax/providers/local/task_completion_state_provider.dart';

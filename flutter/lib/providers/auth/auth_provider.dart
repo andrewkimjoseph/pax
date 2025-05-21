@@ -11,6 +11,10 @@ class AuthNotifier extends Notifier<AuthStateModel> {
   StreamSubscription? _authStateSubscription;
   Timer? _tokenRefreshTimer;
 
+  // Track consecutive validation failures
+  int _consecutiveValidationFailures = 0;
+  static const int _maxConsecutiveFailures = 3;
+
   @override
   AuthStateModel build() {
     _repository = ref.watch(authRepositoryProvider);
@@ -32,26 +36,33 @@ class AuthNotifier extends Notifier<AuthStateModel> {
     _authStateSubscription = _repository.authStateChanges.listen((user) {
       if (user != null) {
         state = state.copyWith(user: user, state: AuthState.authenticated);
+        // Reset consecutive failures when user successfully authenticates
+        _consecutiveValidationFailures = 0;
         // Start periodic validation when user is authenticated
         _startTokenValidation();
       } else {
-        state = state.copyWith(
-          user: AuthUser.empty(),
-          state: AuthState.unauthenticated,
-        );
-        // Cancel validation when user is signed out
-        _cancelTokenValidation();
+        // Only change to unauthenticated if we were previously authenticated
+        // This prevents multiple sign-out events
+        if (state.state == AuthState.authenticated) {
+          state = state.copyWith(
+            user: AuthUser.empty(),
+            state: AuthState.unauthenticated,
+          );
+          // Cancel validation when user is signed out
+          _cancelTokenValidation();
+        }
       }
     });
   }
 
-  // Start periodic token validation
+  // Start periodic token validation with a longer interval
   void _startTokenValidation() {
     // Cancel any existing timer
     _cancelTokenValidation();
 
-    // Check token validity every 5 minutes
-    _tokenRefreshTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
+    // Check token validity every 30 minutes instead of 5
+    // This reduces the frequency of validation attempts
+    _tokenRefreshTimer = Timer.periodic(const Duration(minutes: 30), (timer) {
       _validateCurrentUser();
     });
   }
@@ -62,7 +73,7 @@ class AuthNotifier extends Notifier<AuthStateModel> {
     _tokenRefreshTimer = null;
   }
 
-  // Validate if the current user is still valid
+  // Validate if the current user is still valid with failure tolerance
   Future<void> _validateCurrentUser() async {
     try {
       // Skip validation if user is not authenticated
@@ -70,21 +81,38 @@ class AuthNotifier extends Notifier<AuthStateModel> {
 
       final isValid = await _repository.validateCurrentUser();
 
-      if (!isValid) {
-        // User has been deleted on the backend or token is invalid
-        // Force sign out locally
-        await _repository.signOut();
-        state = state.copyWith(
-          user: AuthUser.empty(),
-          state: AuthState.unauthenticated,
-          errorMessage:
-              'Your account has been signed out. Please sign in again.',
-        );
+      if (isValid) {
+        // Reset failure counter on successful validation
+        _consecutiveValidationFailures = 0;
+      } else {
+        // Increment failure counter
+        _consecutiveValidationFailures++;
+
+        // Only log out after multiple consecutive failures
+        if (_consecutiveValidationFailures >= _maxConsecutiveFailures) {
+          if (kDebugMode) {
+            print('Multiple consecutive validation failures. Logging out.');
+          }
+
+          await _repository.signOut();
+          state = state.copyWith(
+            user: AuthUser.empty(),
+            state: AuthState.unauthenticated,
+            errorMessage: 'Your session has expired. Please sign in again.',
+          );
+        } else {
+          if (kDebugMode) {
+            print(
+              'Validation failure $_consecutiveValidationFailures/$_maxConsecutiveFailures. Not logging out yet.',
+            );
+          }
+        }
       }
     } catch (e) {
-      // On any error, we'll keep the user signed in but log the error
+      // On any error, log the error but don't count it as a validation failure
+      // This prevents network errors from causing logouts
       if (kDebugMode) {
-        print('Error validating user token: $e');
+        print('Error during token validation: $e');
       }
     }
   }
@@ -103,13 +131,21 @@ class AuthNotifier extends Notifier<AuthStateModel> {
             user: currentUser,
             state: AuthState.authenticated,
           );
+          // Reset consecutive failures on successful refresh
+          _consecutiveValidationFailures = 0;
         } else {
-          // Token is invalid, sign out
-          await _repository.signOut();
-          state = state.copyWith(
-            user: AuthUser.empty(),
-            state: AuthState.unauthenticated,
-          );
+          // Increment failure counter
+          _consecutiveValidationFailures++;
+
+          // Only log out after multiple consecutive failures
+          if (_consecutiveValidationFailures >= _maxConsecutiveFailures) {
+            // Token is invalid, sign out
+            await _repository.signOut();
+            state = state.copyWith(
+              user: AuthUser.empty(),
+              state: AuthState.unauthenticated,
+            );
+          }
         }
       } else {
         // No current user
@@ -119,12 +155,11 @@ class AuthNotifier extends Notifier<AuthStateModel> {
         );
       }
     } catch (e) {
-      // Error with validation, treat as unauthenticated
-      state = state.copyWith(
-        user: AuthUser.empty(),
-        state: AuthState.error,
-        errorMessage: 'Unable to verify authentication status: ${e.toString()}',
-      );
+      // Error with validation, but don't automatically log out
+      // Just log the error and continue
+      if (kDebugMode) {
+        print('Error refreshing user state: $e');
+      }
     }
   }
 
@@ -140,6 +175,8 @@ class AuthNotifier extends Notifier<AuthStateModel> {
       // Update state based on result
       if (user != null) {
         state = state.copyWith(user: user, state: AuthState.authenticated);
+        // Reset consecutive failures on successful sign in
+        _consecutiveValidationFailures = 0;
       } else {
         // User cancelled the sign-in flow
         state = state.copyWith(state: AuthState.unauthenticated);
@@ -162,10 +199,16 @@ class AuthNotifier extends Notifier<AuthStateModel> {
         state: AuthState.unauthenticated,
       );
     } catch (e) {
+      // Even if there's an error, still update the local state to unauthenticated
+      // This ensures the user is logged out even if the backend call fails
       state = state.copyWith(
-        state: AuthState.error,
-        errorMessage: e.toString(),
+        user: AuthUser.empty(),
+        state: AuthState.unauthenticated,
       );
+
+      if (kDebugMode) {
+        print('Error during sign out: $e');
+      }
     }
   }
 }
