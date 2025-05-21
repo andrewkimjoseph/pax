@@ -1,6 +1,6 @@
 // ignore_for_file: unused_import
 
-import 'package:flutter/material.dart' show Divider;
+import 'package:flutter/material.dart' show Divider, InkWell;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
@@ -76,22 +76,43 @@ class _HelpAndSupportViewState extends ConsumerState<HelpAndSupportView> {
               child: Column(
                 spacing: 24,
                 children: [
-                  GestureDetector(
-                    onPanDown: (details) {
+                  InkWell(
+                    onTap: () {
                       context.push("/help-and-support/faq");
                     },
                     child: HelpAndSupportCard('FAQ'),
                   ),
 
-                  GestureDetector(
-                    onPanDown: (details) {
+                  InkWell(
+                    onTap: () {
                       context.push("/help-and-support/contact-support");
                     },
                     child: HelpAndSupportCard('Contact Support'),
                   ),
-                  HelpAndSupportCard('Privacy Policy'),
-                  HelpAndSupportCard('Terms of Service'),
-                  HelpAndSupportCard('About Us'),
+                  InkWell(
+                    onTap: () {
+                      launchExternalUrl(
+                        "https://canvassing.notion.site/Privacy-Policy-9446d085f6f3473087868007d931247c?pvs=74",
+                      );
+                    },
+                    child: HelpAndSupportCard('Privacy Policy'),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      launchExternalUrl(
+                        "https://canvassing.notion.site/Terms-of-Service-1285e1ccc593808f8d1df0b444c36b85?pvs=74",
+                      );
+                    },
+                    child: HelpAndSupportCard('Terms of Service'),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      launchExternalUrl(
+                        "https://optimistic-volunteers-396150.framer.app/",
+                      );
+                    },
+                    child: HelpAndSupportCard('About Us'),
+                  ),
                 ],
               ),
             ),

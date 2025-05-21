@@ -1,6 +1,6 @@
 // ignore_for_file: unused_import
 
-import 'package:flutter/material.dart' show Divider;
+import 'package:flutter/material.dart' show Divider, InkWell;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
@@ -8,6 +8,7 @@ import 'package:pax/features/home/achievements/view.dart';
 import 'package:pax/features/home/dashboard/view.dart';
 import 'package:pax/features/home/tasks/view.dart';
 import 'package:pax/features/onboarding/view_model.dart';
+import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/widgets/account/account_option_card.dart';
 import 'package:pax/widgets/contact_support_card.dart';
@@ -32,6 +33,7 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
 
   @override
   Widget build(BuildContext context) {
+    final participant = ref.read(participantProvider).participant;
     return Scaffold(
       headers: [
         AppBar(
@@ -76,43 +78,44 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
               child: Column(
                 spacing: 24,
                 children: [
-                  GestureDetector(
-                    // onPanDown: (details) {
-                    //   context.push("/help-and-support/contact-support");
-                    // },
+                  InkWell(
+                    onTap: () {
+                      launchExternalUrl(
+                        "https://tally.so/r/nGy7V2?authId=${participant?.id}",
+                      );
+                    },
+
                     child: ContactSupportCard(
-                      'Customer Support',
+                      'Raise a Ticket',
                       'customer_support',
                     ),
                   ),
 
-                  GestureDetector(
-                    // onPanDown: (details) {
-                    //   context.push("/help-and-support/contact-support");
-                    // },
+                  InkWell(
+                    onTap: () {
+                      launchExternalUrl("https://thecanvassing.xyz");
+                    },
                     child: ContactSupportCard('Website', 'website'),
                   ),
 
-                  GestureDetector(
-                    // onPanDown: (details) {
-                    //   context.push("/help-and-support/contact-support");
-                    // },
-                    child: ContactSupportCard('Whatsapp', 'whatsapp'),
-                  ),
-
-                  GestureDetector(
-                    // onPanDown: (details) {
-                    //   context.push("/help-and-support/contact-support");
-                    // },
+                  // InkWell(
+                  //   onTap: () {
+                  //   },
+                  //   child: ContactSupportCard('Whatsapp', 'whatsapp'),
+                  // ),
+                  InkWell(
+                    onTap: () {
+                      launchExternalUrl("https://x.com/thecanvassing");
+                    },
                     child: ContactSupportCard('X', 'x'),
                   ),
 
-                  GestureDetector(
-                    // onPanDown: (details) {
-                    //   context.push("/help-and-support/contact-support");
-                    // },
-                    child: ContactSupportCard('Instagram', 'instagram'),
-                  ),
+                  // GestureDetector(
+                  //   // onPanDown: (details) {
+                  //   //   context.push("/help-and-support/contact-support");
+                  //   // },
+                  //   child: ContactSupportCard('Instagram', 'instagram'),
+                  // ),
 
                   // HelpAndSupportCard('Contact Support'),
                   // HelpAndSupportCard('Privacy Policy'),
