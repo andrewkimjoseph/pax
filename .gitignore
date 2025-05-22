@@ -12,3 +12,6 @@ flutter/ios/Runner/GoogleService-Info.plist
 flutter/.firebaserc
 flutter/.env
 .vscode/settings.json
+
+# Branch keys
+flutter/android/app/src/main/res/values/branch_keys.xml
