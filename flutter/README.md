@@ -1,11 +1,11 @@
-# Pax - Task Management and Reward Platform
+# Pax - Online Micro Tasks Platform
 
-Pax is a Flutter-based mobile application that facilitates task management, participant screening, and reward distribution. The platform enables organizations to create tasks, screen participants, and distribute rewards through a secure and efficient system.
+Pax is a Flutter-based mobile application that facilitates micro-task management, participant screening, and token reward distribution. The platform enables organizations to create micro-tasks and reward participants with both stable and non-stable tokens through a secure and efficient system.
 
 ## Core Features
 
 ### Task Management
-- Task creation and assignment
+- Micro-task creation and assignment
 - Task completion tracking
 - Real-time task status updates
 - Activity feed for task-related events
@@ -17,8 +17,8 @@ Pax is a Flutter-based mobile application that facilitates task management, part
 - Integration with task completion workflow
 
 ### Reward System
-- Automated reward distribution
-- Multiple reward currency support
+- Dual token reward distribution (stable and non-stable)
+- Multiple token support
 - Transaction tracking and verification
 - Reward history and activity logging
 
@@ -40,9 +40,9 @@ Pax is a Flutter-based mobile application that facilitates task management, part
 The application uses a service-oriented architecture with the following core services:
 
 - **AppInitializer**: Handles core app initialization, Firebase setup, and error handling
-- **TaskCompletionService**: Manages task completion workflow and state
+- **TaskCompletionService**: Manages micro-task completion workflow and state
 - **ScreeningService**: Handles participant screening process
-- **RewardService**: Manages reward distribution
+- **RewardService**: Manages token reward distribution
 - **WithdrawalService**: Processes withdrawals and payment methods
 - **FCMService**: Manages push notifications and device tokens
 

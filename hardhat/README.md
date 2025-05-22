@@ -1,20 +1,20 @@
 # Pax Smart Contracts
 
-This directory contains the smart contracts that power the Pax platform's blockchain functionality. The contracts are built using Hardhat and Solidity, implementing the core business logic for task management, rewards, and withdrawals.
+This directory contains the smart contracts that power the Pax platform's blockchain functionality. The contracts are built using Hardhat and Solidity, implementing the core business logic for micro-task management, token rewards, and withdrawals.
 
 ## Core Contracts
 
 ### PaxAccount.sol
-- Manages participant accounts and balances
+- Manages participant accounts and token balances
 - Handles payment method linking
 - Processes withdrawals to payment methods
-- Manages reward distributions
+- Manages token reward distributions
 
 ### TaskManager.sol
-- Creates and manages tasks
+- Creates and manages micro-tasks
 - Handles participant screening
 - Processes task completions
-- Manages reward distributions
+- Manages token reward distributions
 
 ## Development
 
@@ -68,20 +68,20 @@ npx hardhat verify --network <network> <contract_address> <constructor_args>
 ## Contract Architecture
 
 ### PaxAccount Contract
-- **Purpose**: Manages participant accounts and funds
+- **Purpose**: Manages participant accounts and token balances
 - **Key Functions**:
   - `linkPaymentMethod`: Links a payment method to the account
   - `withdraw`: Processes withdrawals to linked payment methods
-  - `receiveReward`: Handles incoming rewards
-  - `getBalance`: Returns account balance
+  - `receiveReward`: Handles incoming token rewards
+  - `getBalance`: Returns account token balance
 
 ### TaskManager Contract
-- **Purpose**: Manages tasks and their lifecycle
+- **Purpose**: Manages micro-tasks and their lifecycle
 - **Key Functions**:
-  - `createTask`: Creates a new task with rewards
+  - `createTask`: Creates a new micro-task with token rewards
   - `screenParticipant`: Validates participant eligibility
   - `completeTask`: Marks a task as complete
-  - `distributeReward`: Handles reward distribution
+  - `distributeReward`: Handles token reward distribution
 
 ## Security
 
