@@ -58,16 +58,12 @@ flowchart TD
 
     %% FLOW 3: TaskMaster Creating a Task
     subgraph F3[FLOW 3: TASK CREATION]
-        C1[TaskMaster creates task]:::userAction --> C2[Validate task data]:::systemProcess
-        C2 --> C3{Valid?}:::decision
-        C3 -->|No| C4[Show error]:::error --> C1
-        C3 -->|Yes| C5[Initialize task creation]:::systemProcess
-        C5 --> C6[Deploy TaskManager contract]:::blockchainAction
-        C6 --> C7[Calculate total reward amount]:::systemProcess
-        C7 --> C8[Fund contract with total rewards]:::blockchainAction
-        C8 --> C9[Create tasks record]:::databaseAction
-        C9 --> C10[Store managerContractAddress]:::databaseAction
-        C10 --> C11[Mark task as available]:::databaseAction
+        C1[TaskMaster creates task]:::userAction --> C2[Deploy TaskManager contract]:::blockchainAction
+        C2 --> C3[Get TaskManager address]:::systemProcess
+        C3 --> C4[Create tasks record]:::databaseAction
+        C4 --> C5[Save task fields with linkingTxnHash]:::databaseAction
+        C5 --> C6[Send reward amount to contract]:::blockchainAction
+        C6 --> C7[Mark task as available]:::databaseAction
     end
 
     %% FLOW 4: Participant Completes a Task
@@ -78,7 +74,7 @@ flowchart TD
         D3 --> D4[ScreeningService]:::service
         D4 --> D5[screenParticipantProxy Function]:::function
         D5 --> D6[Call TaskManager.screenParticipant]:::blockchainAction
-        D6 --> D7[Create screenings record]:::databaseAction
+        D6 --> D7[Create screenings record with hash]:::databaseAction
         D7 --> D8[User completes task/survey]:::userAction
         D8 --> D9[TaskCompletionService]:::service
         D9 --> D10[markTaskCompletionAsComplete Function]:::function
@@ -129,21 +125,19 @@ flowchart TD
 
     %% Flow connections
     F1 --> F2
-    F1 --> F4
-    F1 --> F5
+    F2 --> F4
+    F2 --> F5
     F3 --> F4
     F4 --> F5
     F1 --> F6
 
-    %% Contract connections - simplified
-    A7 -.-> SC1
-    B7 -.-> SC1
-    C6 -.-> SC2
+    %% Contract connections
+    B5 -.-> SC1
+    C2 -.-> SC2
     D6 -.-> SC2
     D14 -.-> SC1
     E10 -.-> SC1
-
-    %% Legend - simplified
+    %% Legend
     subgraph LEGEND[LEGEND]
         direction LR
         LEGEND_USER[User Action]:::userAction
@@ -152,6 +146,7 @@ flowchart TD
         LEGEND_SYSTEM[System Process]:::systemProcess
         LEGEND_BLOCKCHAIN[Blockchain Action]:::blockchainAction
         LEGEND_DATABASE[Database Action]:::databaseAction
+        LEGEND_WALLET[Wallet Creation]:::wallet
         LEGEND_DECISION{Decision}:::decision
         LEGEND_NOTIFICATION[Notification]:::notification
         LEGEND_ERROR[Error]:::error
