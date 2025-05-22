@@ -8,6 +8,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_branch_sdk/flutter_branch_sdk.dart';
 import 'package:pax/firebase_options.dart';
 import 'package:pax/services/notifications/notification_service.dart';
 import 'package:pax/services/remote_config/remote_config_service.dart';
@@ -22,6 +23,7 @@ class AppInitializer {
     await _setupErrorHandling();
     await _initializeNotifications();
     await _initializeRemoteConfig();
+    await _initializeBranch();
   }
 
   Future<void> _initializeFirebase() async {
@@ -48,6 +50,16 @@ class AppInitializer {
 
   Future<void> _initializeRemoteConfig() async {
     await RemoteConfigService().initialize();
+  }
+
+  Future<void> _initializeBranch() async {
+    await FlutterBranchSdk.init(enableLogging: true);
+    // Pass your Branch key(s) here, typically from environment variables or a config file
+    // branchLinkControlParams: BranchLinkControlParams(live: !kDebugMode),
+
+    if (kDebugMode) {
+      print('Branch SDK initialized');
+    }
   }
 }
 
