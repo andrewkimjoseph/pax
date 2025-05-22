@@ -104,16 +104,16 @@ flowchart TD
 
     %% FLOW 6: Account Deletion
     subgraph F6[FLOW 6: ACCOUNT DELETION]
-        F1[User requests account deletion]:::userAction --> F2[deleteParticipantOnRequest Function]:::function
-        F2 --> F3[Delete participant data]:::databaseAction
-        F3 --> F4[Delete PaxAccount record]:::databaseAction
-        F4 --> F5[Delete task completions]:::databaseAction
-        F5 --> F6[Delete rewards]:::databaseAction
-        F6 --> F7[Delete withdrawals]:::databaseAction
-        F7 --> F8[Delete FCM tokens]:::databaseAction
-        F8 --> F9[Delete payment methods]:::databaseAction
-        F9 --> F10[Delete screenings]:::databaseAction
-        F10 --> F11[Delete auth record]:::databaseAction
+        G1[User requests account deletion]:::userAction --> G2[deleteParticipantOnRequest Function]:::function
+        G2 --> G3[Delete participant data]:::databaseAction
+        G3 --> G4[Delete PaxAccount record]:::databaseAction
+        G4 --> G5[Delete task completions]:::databaseAction
+        G5 --> G6[Delete rewards]:::databaseAction
+        G6 --> G7[Delete withdrawals]:::databaseAction
+        G7 --> G8[Delete FCM tokens]:::databaseAction
+        G8 --> G9[Delete payment methods]:::databaseAction
+        G9 --> G10[Delete screenings]:::databaseAction
+        G10 --> G11[Delete auth record]:::databaseAction
     end
 
     %% Smart Contracts (placed on the side)
@@ -129,7 +129,7 @@ flowchart TD
     F2 --> F5
     F3 --> F4
     F4 --> F5
-    F1 --> F6
+    F1 -.-> F6
 
     %% Contract connections
     B5 -.-> SC1
