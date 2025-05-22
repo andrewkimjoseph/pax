@@ -1,6 +1,6 @@
-# Pax - Decentralized Task Management Platform
+# Pax - Online Micro Tasks Platform
 
-Pax is a comprehensive platform that combines mobile application development with blockchain technology to create a secure and efficient task management system. The platform enables organizations to create tasks, screen participants, and distribute rewards through a decentralized infrastructure.
+Pax is a comprehensive platform that enables organizations to create and manage micro-tasks while rewarding participants with both stable and non-stable tokens. The platform combines mobile application development with blockchain technology to create a secure and efficient task management system.
 
 ## Project Overview
 
@@ -161,9 +161,9 @@ flowchart TD
 ## Key Features
 
 ### Mobile Application
-- Task management and completion tracking
+- Micro-task management and completion tracking
 - Participant screening and verification
-- Reward distribution and tracking
+- Dual token reward distribution (stable and non-stable)
 - Payment method management
 - Real-time notifications
 - Activity feed and history
@@ -171,7 +171,7 @@ flowchart TD
 ### Smart Contracts
 - Secure participant account management
 - Task creation and management
-- Automated reward distribution
+- Automated token reward distribution
 - Payment method integration
 - Withdrawal processing
 
