@@ -10,6 +10,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pax/firebase_options.dart';
 import 'package:pax/services/notifications/notification_service.dart';
+import 'package:pax/services/remote_config/remote_config_service.dart';
 
 class AppInitializer {
   static final AppInitializer _instance = AppInitializer._internal();
@@ -20,6 +21,7 @@ class AppInitializer {
     await _initializeFirebase();
     await _setupErrorHandling();
     await _initializeNotifications();
+    await _initializeRemoteConfig();
   }
 
   Future<void> _initializeFirebase() async {
@@ -42,6 +44,10 @@ class AppInitializer {
   Future<void> _initializeNotifications() async {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     await NotificationService().initialize();
+  }
+
+  Future<void> _initializeRemoteConfig() async {
+    await RemoteConfigService().initialize();
   }
 }
 
