@@ -51,9 +51,8 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
       if (kDebugMode) {
         print('Navigating to route from FCM: $route');
       }
-      // TODO: Implement navigation from FCM if needed
-      // final router = ref.read(routerProvider);
-      // router.push(route);
+      final router = ref.read(routerProvider);
+      router.push(route);
     }
   }
 

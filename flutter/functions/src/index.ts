@@ -5,3 +5,4 @@ export { screenParticipantProxy } from './screenParticipantProxy';
 export { markTaskCompletionAsComplete } from './markTaskCompletionAsComplete';
 export { rewardParticipantProxy } from './rewardParticipantProxy';
 export { deleteParticipantOnRequest } from './deleteParticipantOnRequest';
+export { sendNotification } from './sendNotification';

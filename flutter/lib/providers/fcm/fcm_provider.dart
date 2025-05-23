@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/repositories/firestore/fcm_token/fcm_token_repository.dart';
-import 'package:pax/services/fcm_service.dart';
+import 'package:pax/services/notifications/notification_service.dart';
 import 'package:flutter/foundation.dart';
 
 // Provider for the FCM token repository
@@ -12,19 +12,8 @@ final fcmTokenRepositoryProvider = Provider<FcmTokenRepository>((ref) {
 });
 
 // Provider for the FCM service
-final fcmServiceProvider = Provider<FcmService>((ref) {
-  final repository = ref.watch(fcmTokenRepositoryProvider);
-  final service = FcmService(repository);
-
-  // Dispose the service when the provider is disposed
-  ref.onDispose(() {
-    if (kDebugMode) {
-      print('FCM Provider: Disposing FCM service');
-    }
-    service.dispose();
-  });
-
-  return service;
+final notificationServiceProvider = Provider<NotificationService>((ref) {
+  return NotificationService();
 });
 
 // State holder for token initialization status
@@ -68,7 +57,8 @@ class FcmInitNotifier extends Notifier<FcmInitState> {
     return const FcmInitState();
   }
 
-  FcmService get _fcmService => ref.watch(fcmServiceProvider);
+  NotificationService get _notificationService =>
+      ref.watch(notificationServiceProvider);
 
   Future<void> _initialize() async {
     try {
@@ -83,7 +73,7 @@ class FcmInitNotifier extends Notifier<FcmInitState> {
       state = state.copyWith(isSavingToken: true);
 
       // Initialize FCM
-      await _fcmService.initialize();
+      await _notificationService.initialize();
 
       // Set up auth listener if not already set up
       if (!_hasSetUpAuthListener) {
@@ -126,7 +116,7 @@ class FcmInitNotifier extends Notifier<FcmInitState> {
           }
 
           // Stop listening when user signs out
-          _fcmService.stopListening();
+          _notificationService.dispose();
         }
       }
     });
@@ -146,10 +136,10 @@ class FcmInitNotifier extends Notifier<FcmInitState> {
       state = state.copyWith(isSavingToken: true);
 
       // Save token
-      await _fcmService.saveTokenForParticipant(userId);
+      await _notificationService.saveTokenForParticipant(userId);
 
       // Start listening for token refreshes
-      _fcmService.listenForTokenRefresh(userId);
+      _notificationService.listenForTokenRefresh(userId);
 
       state = state.copyWith(isSavingToken: false);
     } catch (e) {
@@ -186,6 +176,6 @@ final fcmInitProvider = NotifierProvider<FcmInitNotifier, FcmInitState>(() {
 
 // Simple provider to get the FCM token
 final fcmTokenProvider = FutureProvider<String?>((ref) async {
-  final fcmService = ref.watch(fcmServiceProvider);
-  return await fcmService.getToken();
+  final notificationService = ref.watch(notificationServiceProvider);
+  return await notificationService.getToken();
 });

@@ -10,6 +10,8 @@ import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/minipay/minipay_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/widgets/gooddollar_verification_steps.dart';
+import 'package:pax/services/notifications/notification_service.dart';
+import 'package:pax/providers/fcm/fcm_provider.dart';
 
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
 import 'package:url_launcher/url_launcher.dart';
@@ -52,7 +54,22 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
   }
 
   // Show success dialog when connection is successful
-  void _showSuccessDialog() {
+  void _showSuccessDialog() async {
+    // Send notification about successful connection
+    final fcmToken = await ref.read(fcmTokenProvider.future);
+    if (fcmToken != null) {
+      final notificationService = NotificationService();
+      await notificationService.sendPaymentMethodLinkedNotification(
+        token: fcmToken,
+        paymentData: {
+          'paymentMethodName': 'MiniPay',
+          'walletAddress': _walletAddressController.text.trim(),
+        },
+      );
+    }
+
+    if (!mounted) return;
+
     showDialog(
       context: context,
       barrierDismissible: false,

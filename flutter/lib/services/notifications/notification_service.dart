@@ -2,14 +2,23 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:pax/repositories/firestore/fcm_token/fcm_token_repository.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:intl/intl.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
-  NotificationService._internal();
 
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+  final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+  final FcmTokenRepository _repository;
+
+  String? _currentToken;
+  String? _currentUserId;
+  bool _isInitialized = false;
+  bool _isSavingToken = false;
 
   static const AndroidNotificationChannel channel = AndroidNotificationChannel(
     'high_importance_channel',
@@ -18,14 +27,27 @@ class NotificationService {
     importance: Importance.high,
   );
 
+  NotificationService._internal() : _repository = FcmTokenRepository();
+
   Future<void> initialize() async {
-    await _initializeLocalNotifications();
-    await _initializeFirebaseMessaging();
+    if (_isInitialized) {
+      if (kDebugMode) print('Notification Service: Already initialized');
+      return;
+    }
+
+    try {
+      await _initializeLocalNotifications();
+      await _initializeFirebaseMessaging();
+      _isInitialized = true;
+      if (kDebugMode) print('Notification Service: Successfully initialized');
+    } catch (e) {
+      if (kDebugMode) print('Notification Service: Error initializing: $e');
+    }
   }
 
   Future<void> _initializeLocalNotifications() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('main_notif');
+        AndroidInitializationSettings('ic_main');
 
     const DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings(
@@ -43,9 +65,7 @@ class NotificationService {
     await _flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
-        if (kDebugMode) {
-          print('Notification tapped: ${response.payload}');
-        }
+        if (kDebugMode) print('Notification tapped: ${response.payload}');
         if (response.payload != null) {
           // Handle navigation based on payload
         }
@@ -62,16 +82,15 @@ class NotificationService {
   }
 
   Future<void> _initializeFirebaseMessaging() async {
-    NotificationSettings settings = await FirebaseMessaging.instance
-        .requestPermission(
-          alert: true,
-          badge: true,
-          sound: true,
-          provisional: false,
-          criticalAlert: false,
-          announcement: false,
-          carPlay: false,
-        );
+    final settings = await _messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      provisional: false,
+      criticalAlert: false,
+      announcement: false,
+      carPlay: false,
+    );
 
     if (kDebugMode) {
       print(
@@ -79,17 +98,80 @@ class NotificationService {
       );
     }
 
-    await FirebaseMessaging.instance
-        .setForegroundNotificationPresentationOptions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
+    await _messaging.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
-    String? token = await FirebaseMessaging.instance.getToken();
+    _currentToken = await _messaging.getToken();
     if (kDebugMode) {
-      print('FCM Token: ${token?.substring(0, 10)}...');
+      print('FCM Token: ${_currentToken?.substring(0, 10)}...');
     }
+  }
+
+  Future<String?> getToken() async {
+    try {
+      if (!_isInitialized) await initialize();
+      final token = await _messaging.getToken();
+      _currentToken = token;
+      if (kDebugMode) {
+        print('Notification Service: Got token: ${token?.substring(0, 10)}...');
+      }
+      return token;
+    } catch (e) {
+      if (kDebugMode) print('Notification Service: Error getting token: $e');
+      return null;
+    }
+  }
+
+  Future<void> saveTokenForParticipant(String participantId) async {
+    if (_isSavingToken) {
+      if (kDebugMode) {
+        print('Notification Service: Token save already in progress');
+      }
+      return;
+    }
+
+    _isSavingToken = true;
+    _currentUserId = participantId;
+
+    try {
+      final token = await getToken();
+      if (token == null) {
+        if (kDebugMode) {
+          print('Notification Service: No token available to save');
+        }
+        return;
+      }
+
+      if (kDebugMode) {
+        print(
+          'Notification Service: Saving token for participant $participantId',
+        );
+      }
+      await _repository.saveToken(participantId, token);
+      if (kDebugMode) print('Notification Service: Token saved successfully');
+    } catch (e) {
+      if (kDebugMode) print('Notification Service: Error saving token: $e');
+    } finally {
+      _isSavingToken = false;
+    }
+  }
+
+  void listenForTokenRefresh(String participantId) {
+    _currentUserId = participantId;
+    _messaging.onTokenRefresh.listen((newToken) {
+      if (kDebugMode) {
+        print(
+          'Notification Service: Token refreshed: ${newToken.substring(0, 10)}...',
+        );
+      }
+      if (_currentToken != newToken && _currentUserId != null) {
+        _currentToken = newToken;
+        saveTokenForParticipant(_currentUserId!);
+      }
+    });
   }
 
   Future<void> showNotification({
@@ -107,7 +189,7 @@ class NotificationService {
           channel.id,
           channel.name,
           channelDescription: channel.description,
-          icon: 'main_notif',
+          icon: 'ic_main',
         ),
         iOS: const DarwinNotificationDetails(),
       ),
@@ -140,8 +222,7 @@ class NotificationService {
   Future<void> checkForInitialMessage(
     Function(RemoteMessage) onMessageTap,
   ) async {
-    RemoteMessage? initialMessage =
-        await FirebaseMessaging.instance.getInitialMessage();
+    RemoteMessage? initialMessage = await _messaging.getInitialMessage();
     if (initialMessage != null) {
       if (kDebugMode) {
         print('App opened from terminated state via notification');
@@ -151,5 +232,88 @@ class NotificationService {
     }
 
     FirebaseMessaging.onMessageOpenedApp.listen(onMessageTap);
+  }
+
+  void dispose() {
+    _currentUserId = null;
+    _currentToken = null;
+  }
+
+  String _formatAmount(dynamic amount) {
+    if (amount is num) {
+      final formatter = NumberFormat('#,###');
+      return amount == amount.toInt()
+          ? formatter.format(amount.toInt())
+          : amount.toString();
+    }
+    return amount.toString();
+  }
+
+  Map<String, String> _convertDataToStrings(Map<String, dynamic> data) {
+    return data.map((key, value) => MapEntry(key, value.toString()));
+  }
+
+  Future<void> sendRemoteNotification({
+    required String title,
+    required String body,
+    required String token,
+    Map<String, dynamic>? data,
+  }) async {
+    try {
+      await FirebaseFunctions.instance.httpsCallable('sendNotification').call({
+        'title': title,
+        'body': body,
+        'token': token,
+        'data': data != null ? _convertDataToStrings(data) : null,
+      });
+
+      if (kDebugMode) {
+        print('Notification Service: Remote notification sent successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Notification Service: Error sending remote notification: $e');
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> sendPaymentMethodLinkedNotification({
+    required String token,
+    required Map<String, dynamic> paymentData,
+  }) async {
+    await sendRemoteNotification(
+      title: 'Payment Method Linked! 🎉',
+      body:
+          '${paymentData['paymentMethodName']} wallet has been successfully connected.',
+      token: token,
+      data: {'type': 'payment_method_linked', ...paymentData},
+    );
+  }
+
+  Future<void> sendWithdrawalSuccessNotification({
+    required String token,
+    required Map<String, dynamic> withdrawalData,
+  }) async {
+    await sendRemoteNotification(
+      title: 'Withdrawal Successful! 💸',
+      body:
+          'Your withdrawal of ${_formatAmount(withdrawalData['amount'])} ${withdrawalData['currencySymbol']} has been processed.',
+      token: token,
+      data: {'type': 'withdrawal_success', ...withdrawalData},
+    );
+  }
+
+  Future<void> sendRewardNotification({
+    required String token,
+    required Map<String, dynamic> rewardData,
+  }) async {
+    await sendRemoteNotification(
+      title: 'Reward Received! 🎉',
+      body:
+          'You\'ve received ${_formatAmount(rewardData['amount'])} ${rewardData['currencySymbol']} for completing a task.',
+      token: token,
+      data: {'type': 'reward', ...rewardData},
+    );
   }
 }

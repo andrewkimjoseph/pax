@@ -7,9 +7,13 @@ import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/providers/local/withdrawal_service_provider.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/services/withdrawal_service.dart';
+import 'package:pax/services/notifications/notification_service.dart';
+import 'package:pax/providers/fcm/fcm_provider.dart';
+import 'package:pax/utils/currency_symbol.dart';
 
 class WithdrawNotifier extends Notifier<WithdrawStateModel> {
   late final WithdrawalService _withdrawalService;
+  final NotificationService _notificationService = NotificationService();
 
   @override
   WithdrawStateModel build() {
@@ -66,6 +70,24 @@ class WithdrawNotifier extends Notifier<WithdrawStateModel> {
         txnHash: result['txnHash'],
         withdrawalId: result['withdrawalId'],
       );
+
+      // Send notification about successful withdrawal
+      final fcmToken = await ref.read(fcmTokenProvider.future);
+      if (fcmToken != null) {
+        final currencyName = CurrencySymbolUtil.getNameForCurrency(tokenId);
+        final currencySymbol = CurrencySymbolUtil.getSymbolForCurrency(
+          currencyName,
+        );
+
+        await _notificationService.sendWithdrawalSuccessNotification(
+          token: fcmToken,
+          withdrawalData: {
+            'amount': amountToWithdraw,
+            'currencySymbol': currencySymbol,
+            'txnHash': result['txnHash'],
+          },
+        );
+      }
 
       // Refresh activities to show the new withdrawal
       ref.invalidate(activityRepositoryProvider);

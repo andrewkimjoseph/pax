@@ -9,11 +9,15 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/providers/local/reward_state_provider.dart';
+import 'package:pax/providers/fcm/fcm_provider.dart';
+import 'package:pax/utils/currency_symbol.dart';
+import 'package:pax/services/notifications/notification_service.dart';
 
 class RewardService {
   final Ref ref;
+  final NotificationService _notificationService;
 
-  RewardService(this.ref);
+  RewardService(this.ref) : _notificationService = NotificationService();
 
   Future<RewardResult> rewardParticipant({
     required String taskCompletionId,
@@ -38,6 +42,29 @@ class RewardService {
 
       // Update state to complete with the result
       ref.read(rewardStateProvider.notifier).completeRewarding(rewardResult);
+
+      // Send notification about the reward
+      final fcmToken = await ref.read(fcmTokenProvider.future);
+      if (fcmToken != null) {
+        final currencyName = CurrencySymbolUtil.getNameForCurrency(
+          rewardResult.rewardCurrencyId,
+        );
+        final currencySymbol = CurrencySymbolUtil.getSymbolForCurrency(
+          currencyName,
+        );
+
+        await _notificationService.sendRewardNotification(
+          token: fcmToken,
+          rewardData: {
+            'amount': rewardResult.amount,
+            'currencySymbol': currencySymbol,
+            'rewardId': rewardResult.rewardId.toString(),
+            'taskId': rewardResult.taskId.toString(),
+            'taskCompletionId': rewardResult.taskCompletionId.toString(),
+            'currency': rewardResult.rewardCurrencyId.toString(),
+          },
+        );
+      }
 
       return rewardResult;
     } catch (e) {

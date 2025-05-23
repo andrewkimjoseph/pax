@@ -134,10 +134,6 @@ class _AccountViewState extends ConsumerState<AccountView> {
                                     data:
                                         (amount) => Row(
                                           children: [
-                                            SvgPicture.asset(
-                                              'lib/assets/svgs/currencies/good_dollar.svg',
-                                              height: 20,
-                                            ).withPadding(right: 2),
                                             Text(
                                               TokenBalanceUtil.getLocaleFormattedAmount(
                                                 amount,
@@ -147,6 +143,10 @@ class _AccountViewState extends ConsumerState<AccountView> {
                                                 fontSize: 16,
                                                 color: PaxColors.black,
                                               ),
+                                            ).withPadding(right: 2),
+                                            SvgPicture.asset(
+                                              'lib/assets/svgs/currencies/good_dollar.svg',
+                                              height: 20,
                                             ),
                                           ],
                                         ),

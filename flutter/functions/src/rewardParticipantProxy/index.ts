@@ -11,10 +11,7 @@ import {
 } from "viem";
 import { entryPoint07Address } from "viem/account-abstraction";
 import { celo } from "viem/chains";
-import { createSmartAccountClient } from "permissionless";
-import { toSimpleSmartAccount } from "permissionless/accounts";
 import { createViemAccount } from "@privy-io/server-auth/viem";
-
 import { taskManagerV1ABI } from "../../shared/abis/taskManagerV1ABI";
 import {
   FUNCTION_RUNTIME_OPTS,
@@ -29,8 +26,6 @@ import {
   generateRandomNonce 
 } from "../../shared/utils/rewardingSignature";
 import { createRewardRecord, updateRewardWithTxnHash } from "../../shared/utils/createReward";
-import { sendParticipantNotification } from "../../shared/utils/sendNotification";
-import { getCurrencySymbol } from "../../shared/utils/currencyUtils";
 
 /**
  * Firebase onCall function to reward a participant after task completion.
@@ -38,6 +33,9 @@ import { getCurrencySymbol } from "../../shared/utils/currencyUtils";
  */
 export const rewardParticipantProxy = onCall(FUNCTION_RUNTIME_OPTS, async (request) => {
   try {
+    const { createSmartAccountClient } = await import("permissionless");
+    const { toSimpleSmartAccount } = await import("permissionless/accounts");
+    
     // Ensure the user is authenticated
     if (!request.auth) {
       throw new HttpsError(
@@ -253,21 +251,6 @@ export const rewardParticipantProxy = onCall(FUNCTION_RUNTIME_OPTS, async (reque
     await updateRewardWithTxnHash(rewardRecordId, txnHash);
     
     logger.info("Reward record updated with transaction hash", { rewardRecordId, txnHash });
-
-    // Step 6: Send notification to the participant
-    await sendParticipantNotification(
-      participantId,
-      "Reward Received! 🎉",
-      `You've received ${getCurrencySymbol(rewardCurrencyId)} ${rewardAmountPerParticipant} for completing a task.`,
-      {
-        type: "reward",
-        rewardId: rewardRecordId,
-        taskId,
-        taskCompletionId,
-        amount: rewardAmountPerParticipant,
-        currency: rewardAmountPerParticipant
-      }
-    );
 
     // Return complete response with all relevant data
     return {
