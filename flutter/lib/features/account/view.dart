@@ -11,9 +11,6 @@ import 'package:pax/utils/token_balance_util.dart';
 import 'package:pax/widgets/account/account_option_card.dart';
 import 'package:pax/widgets/toast.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
-import 'package:cloud_functions/cloud_functions.dart';
-import 'package:flutter/foundation.dart';
-import 'package:pax/providers/fcm/fcm_provider.dart';
 
 import '../../theming/colors.dart' show PaxColors;
 
@@ -314,30 +311,6 @@ class _AccountViewState extends ConsumerState<AccountView> {
                       open(context, 0);
                     },
                     child: AccountOptionCard('logout', true),
-                  ),
-
-                  InkWell(
-                    onTap: () async {
-                      try {
-                        final functions = FirebaseFunctions.instance;
-                        await functions.httpsCallable('sendNotification').call({
-                          'title': 'Test Notification',
-                          'body':
-                              'This is a test notification from the account page',
-                          'token': await ref.read(fcmTokenProvider.future),
-                          'data': {
-                            'type': 'test',
-                            'timestamp': DateTime.now().toIso8601String(),
-                          },
-                        });
-                        showSuccessToast(context);
-                      } catch (e) {
-                        if (kDebugMode) {
-                          print('Error sending test notification: $e');
-                        }
-                      }
-                    },
-                    child: AccountOptionCard('test_notification', true),
                   ),
                 ],
               ),
