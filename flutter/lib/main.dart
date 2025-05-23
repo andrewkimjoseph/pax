@@ -62,6 +62,15 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
       print('Handling deep link in App: $linkData');
     }
 
+    final router = ref.read(routerProvider);
+    // Let the router's redirect logic handle the navigation
+    router.go("/");
+
+    // // Check if this is an initial deep link
+    // if (linkData['+clicked_branch_link'] == true) {
+
+    // }
+
     // if (linkData.containsKey('route')) {
     //   final route = linkData['route'];
     //   if (kDebugMode) {
