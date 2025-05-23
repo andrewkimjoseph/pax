@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:pax/repositories/firestore/fcm_token/fcm_token_repository.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:intl/intl.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -240,8 +241,9 @@ class NotificationService {
 
   String _formatAmount(dynamic amount) {
     if (amount is num) {
+      final formatter = NumberFormat('#,###');
       return amount == amount.toInt()
-          ? amount.toInt().toString()
+          ? formatter.format(amount.toInt())
           : amount.toString();
     }
     return amount.toString();
