@@ -1,4 +1,4 @@
-package xyz.thecanvassing.pax
+package app.thepax.android
 
 import io.flutter.embedding.android.FlutterActivity
 

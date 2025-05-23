@@ -32,7 +32,6 @@ class PaxAccount {
     Timestamp? timeUpdated,
     String? serverWalletId,
     String? serverWalletAddress,
-    String? safeSmartAccountWalletId,
     String? smartAccountWalletAddress,
     Map<int, num>? balances,
   }) {
@@ -109,7 +108,7 @@ class PaxAccount {
       timeUpdated: map['timeUpdated'],
       serverWalletId: map['serverWalletId'],
       serverWalletAddress: map['serverWalletAddress'],
-      smartAccountWalletAddress: map['safeSmartAccountWalletAddress'],
+      smartAccountWalletAddress: map['smartAccountWalletAddress'],
       balances: parsedBalances, // Use the converted map with int keys
     );
   }

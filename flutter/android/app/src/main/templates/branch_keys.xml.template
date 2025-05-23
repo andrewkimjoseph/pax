@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Replace these with your actual Branch keys -->
+    <string name="branch_live_key">YOUR_LIVE_KEY_HERE</string>
+    <string name="branch_test_key">YOUR_TEST_KEY_HERE</string>
+</resources> 

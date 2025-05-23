@@ -182,7 +182,7 @@ class MiniPayService {
         serverWalletData = {
           'serverWalletId': paxAccount.serverWalletId,
           'serverWalletAddress': paxAccount.serverWalletAddress,
-          'safeSmartAccountWalletAddress': paxAccount.smartAccountWalletAddress,
+          'smartAccountWalletAddress': paxAccount.smartAccountWalletAddress,
         };
       } else {
         // Create a new server wallet
@@ -193,8 +193,8 @@ class MiniPayService {
         await _paxAccountRepository.updateAccount(userId, {
           'serverWalletId': serverWalletData['serverWalletId'],
           'serverWalletAddress': serverWalletData['serverWalletAddress'],
-          'safeSmartAccountWalletAddress':
-              serverWalletData['safeSmartAccountWalletAddress'],
+          'smartAccountWalletAddress':
+              serverWalletData['smartAccountWalletAddress'],
         });
       }
 
