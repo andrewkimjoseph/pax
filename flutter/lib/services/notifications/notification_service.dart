@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:pax/repositories/firestore/fcm_token/fcm_token_repository.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -45,7 +46,7 @@ class NotificationService {
 
   Future<void> _initializeLocalNotifications() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('main_notif');
+        AndroidInitializationSettings('ic_main');
 
     const DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings(
@@ -187,7 +188,7 @@ class NotificationService {
           channel.id,
           channel.name,
           channelDescription: channel.description,
-          icon: 'main_notif',
+          icon: 'ic_main',
         ),
         iOS: const DarwinNotificationDetails(),
       ),
@@ -235,5 +236,82 @@ class NotificationService {
   void dispose() {
     _currentUserId = null;
     _currentToken = null;
+  }
+
+  String _formatAmount(dynamic amount) {
+    if (amount is num) {
+      return amount == amount.toInt()
+          ? amount.toInt().toString()
+          : amount.toString();
+    }
+    return amount.toString();
+  }
+
+  Map<String, String> _convertDataToStrings(Map<String, dynamic> data) {
+    return data.map((key, value) => MapEntry(key, value.toString()));
+  }
+
+  Future<void> sendRemoteNotification({
+    required String title,
+    required String body,
+    required String token,
+    Map<String, dynamic>? data,
+  }) async {
+    try {
+      await FirebaseFunctions.instance.httpsCallable('sendNotification').call({
+        'title': title,
+        'body': body,
+        'token': token,
+        'data': data != null ? _convertDataToStrings(data) : null,
+      });
+
+      if (kDebugMode) {
+        print('Notification Service: Remote notification sent successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Notification Service: Error sending remote notification: $e');
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> sendPaymentMethodLinkedNotification({
+    required String token,
+    required Map<String, dynamic> paymentData,
+  }) async {
+    await sendRemoteNotification(
+      title: 'Payment Method Linked! 🎉',
+      body:
+          '${paymentData['paymentMethodName']} wallet has been successfully connected.',
+      token: token,
+      data: {'type': 'payment_method_linked', ...paymentData},
+    );
+  }
+
+  Future<void> sendWithdrawalSuccessNotification({
+    required String token,
+    required Map<String, dynamic> withdrawalData,
+  }) async {
+    await sendRemoteNotification(
+      title: 'Withdrawal Successful! 💸',
+      body:
+          'Your withdrawal of ${_formatAmount(withdrawalData['amount'])} ${withdrawalData['currencySymbol']} has been processed.',
+      token: token,
+      data: {'type': 'withdrawal_success', ...withdrawalData},
+    );
+  }
+
+  Future<void> sendRewardNotification({
+    required String token,
+    required Map<String, dynamic> rewardData,
+  }) async {
+    await sendRemoteNotification(
+      title: 'Reward Received! 🎉',
+      body:
+          'You\'ve received ${_formatAmount(rewardData['amount'])} ${rewardData['currencySymbol']} for completing a task.',
+      token: token,
+      data: {'type': 'reward', ...rewardData},
+    );
   }
 }
