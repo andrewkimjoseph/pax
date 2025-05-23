@@ -106,7 +106,7 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
             children: [
               CircularProgressIndicator(),
               SizedBox(height: 16),
-              Text('Processing your screening...'),
+              Text('Letting you in...'),
             ],
           ),
         );
@@ -121,8 +121,12 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: Text('Screening Failed'),
-          content: Text(errorMessage),
+          title: Text('Screening failed'),
+          content: Text(
+            errorMessage,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),

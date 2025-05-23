@@ -33,53 +33,58 @@ export async function sendParticipantNotification(
       return;
     }
     
-    const tokens: string[] = [];
-    tokensSnapshot.forEach(doc => {
-      const token = doc.data().token;
-      if (token) tokens.push(token);
-    });
+    // Get the most recent token
+    const tokens = tokensSnapshot.docs
+      .map(doc => doc.data().token)
+      .filter((token): token is string => !!token);
     
     if (tokens.length === 0) {
       logger.info("No valid tokens found for participant", { participantId });
       return;
     }
+
+    // Use the most recent token
+    const token = tokens[0];
     
-    // Prepare the notification message
+    // Prepare the notification message with proper format for both platforms
     const message = {
+      android: {
+        priority: 'high' as const,
+        notification: {
+          channelId: 'high_importance_channel',
+          priority: 'high' as const,
+          defaultSound: true,
+          defaultVibrateTimings: true,
+          defaultLightSettings: true,
+        },
+      },
+      apns: {
+        payload: {
+          aps: {
+            sound: 'default',
+            badge: 1,
+          },
+        },
+      },
       notification: {
         title,
         body,
       },
-      data,
-      tokens
+      data: {
+        ...data,
+        click_action: 'FLUTTER_NOTIFICATION_CLICK',
+      },
+      token
     };
     
     // Send the notification
-    const response = await MESSAGING.sendEachForMulticast(message);
+    const response = await MESSAGING.send(message);
     
     logger.info("Notification sent", {
       participantId,
-      success: response.successCount,
-      failure: response.failureCount
+      messageId: response
     });
     
-    // Handle failed tokens if any
-    if (response.failureCount > 0) {
-      const failedTokens: string[] = [];
-      response.responses.forEach((resp, idx) => {
-        if (!resp.success) {
-          failedTokens.push(tokens[idx]);
-        }
-      });
-      
-      logger.warn("Failed to send notifications to some tokens", {
-        participantId,
-        failedTokens
-      });
-      
-      // Optionally: remove invalid tokens from the database
-      // This could be implemented if needed
-    }
   } catch (error) {
     logger.error("Error sending notification", { error, participantId });
     // We don't throw the error to prevent the main function from failing

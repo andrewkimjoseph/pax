@@ -9,6 +9,8 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/providers/local/reward_state_provider.dart';
+import 'package:pax/providers/fcm/fcm_provider.dart';
+import 'package:pax/utils/currency_symbol.dart';
 
 class RewardService {
   final Ref ref;
@@ -38,6 +40,32 @@ class RewardService {
 
       // Update state to complete with the result
       ref.read(rewardStateProvider.notifier).completeRewarding(rewardResult);
+
+      // Send notification about the reward
+      final fcmToken = await ref.read(fcmTokenProvider.future);
+      if (fcmToken != null) {
+        final currencyName = CurrencySymbolUtil.getNameForCurrency(
+          rewardResult.rewardCurrencyId,
+        );
+        final currencySymbol = CurrencySymbolUtil.getSymbolForCurrency(
+          currencyName,
+        );
+
+        await FirebaseFunctions.instance.httpsCallable('sendNotification').call({
+          'title': 'Reward Received! 🎉',
+          'body':
+              'You\'ve received ${rewardResult.amount} $currencySymbol for completing a task.',
+          'token': fcmToken,
+          'data': {
+            'type': 'reward',
+            'rewardId': rewardResult.rewardId,
+            'taskId': rewardResult.taskId,
+            'taskCompletionId': rewardResult.taskCompletionId,
+            'amount': rewardResult.amount.toString(),
+            'currency': rewardResult.rewardCurrencyId.toString(),
+          },
+        });
+      }
 
       return rewardResult;
     } catch (e) {
