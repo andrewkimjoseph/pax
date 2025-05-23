@@ -149,23 +149,25 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
       child: activitiesAsync.when(
         skipLoadingOnRefresh: false,
         data: (activities) {
-          return Column(
-            mainAxisAlignment:
-                activities.isEmpty
-                    ? MainAxisAlignment.center
-                    : MainAxisAlignment.start,
-            children: [
-              if (activities.isEmpty)
-                Center(
-                  child: Text(
-                    'No activities found',
-                    style: TextStyle(color: PaxColors.darkGrey),
-                  ),
-                )
-              else
-                for (var activity in activities)
-                  ActivityCard(activity).withPadding(all: 8),
-            ],
+          return SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment:
+                  activities.isEmpty
+                      ? MainAxisAlignment.center
+                      : MainAxisAlignment.start,
+              children: [
+                if (activities.isEmpty)
+                  Center(
+                    child: Text(
+                      'No activities found',
+                      style: TextStyle(color: PaxColors.darkGrey),
+                    ),
+                  )
+                else
+                  for (var activity in activities)
+                    ActivityCard(activity).withPadding(all: 8),
+              ],
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
