@@ -11,6 +11,9 @@ import 'package:pax/utils/token_balance_util.dart';
 import 'package:pax/widgets/account/account_option_card.dart';
 import 'package:pax/widgets/toast.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:flutter/foundation.dart';
+import 'package:pax/providers/fcm/fcm_provider.dart';
 
 import '../../theming/colors.dart' show PaxColors;
 
@@ -134,10 +137,6 @@ class _AccountViewState extends ConsumerState<AccountView> {
                                     data:
                                         (amount) => Row(
                                           children: [
-                                            SvgPicture.asset(
-                                              'lib/assets/svgs/currencies/good_dollar.svg',
-                                              height: 20,
-                                            ).withPadding(right: 2),
                                             Text(
                                               TokenBalanceUtil.getLocaleFormattedAmount(
                                                 amount,
@@ -147,6 +146,10 @@ class _AccountViewState extends ConsumerState<AccountView> {
                                                 fontSize: 16,
                                                 color: PaxColors.black,
                                               ),
+                                            ).withPadding(right: 2),
+                                            SvgPicture.asset(
+                                              'lib/assets/svgs/currencies/good_dollar.svg',
+                                              height: 20,
                                             ),
                                           ],
                                         ),
@@ -311,6 +314,30 @@ class _AccountViewState extends ConsumerState<AccountView> {
                       open(context, 0);
                     },
                     child: AccountOptionCard('logout', true),
+                  ),
+
+                  InkWell(
+                    onTap: () async {
+                      try {
+                        final functions = FirebaseFunctions.instance;
+                        await functions.httpsCallable('sendNotification').call({
+                          'title': 'Test Notification',
+                          'body':
+                              'This is a test notification from the account page',
+                          'token': await ref.read(fcmTokenProvider.future),
+                          'data': {
+                            'type': 'test',
+                            'timestamp': DateTime.now().toIso8601String(),
+                          },
+                        });
+                        showSuccessToast(context);
+                      } catch (e) {
+                        if (kDebugMode) {
+                          print('Error sending test notification: $e');
+                        }
+                      }
+                    },
+                    child: AccountOptionCard('test_notification', true),
                   ),
                 ],
               ),
