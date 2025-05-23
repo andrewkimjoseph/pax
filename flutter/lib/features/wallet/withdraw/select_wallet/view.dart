@@ -78,9 +78,8 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
                     children: [
                       // Show payment methods if available
                       if (paymentMethods.isNotEmpty)
-                        WalletOptionCard(
-                          paymentMethods[0],
-                          // Assuming iconName is derived from payment method type
+                        ...paymentMethods.map(
+                          (method) => WalletOptionCard(method),
                         ),
                     ],
                   ),
@@ -101,6 +100,7 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
                   height: 48,
                   child: PrimaryButton(
                     // Enable button only when a payment method is selected
+                    enabled: isContinueEnabled,
                     onPressed:
                         isContinueEnabled
                             ? () {

@@ -31,16 +31,10 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
         ref.watch(rewardCurrencyContextProvider).selectedCurrency;
     final tokenId = TokenBalanceUtil.getTokenIdForCurrency(selectedCurrency);
     final currentBalance = paxAccount.account?.balances[tokenId];
-
-    // Listen to the rewards stream
     final participantId = paxAccount.account?.id;
-    ref.listen(rewardsStreamProvider(participantId), (previous, current) {
-      // When the rewards change (any change), update the balances
-      if (previous != current && current.hasValue) {
-        // Update balance from blockchain
-        ref.read(paxAccountProvider.notifier).syncBalancesFromBlockchain();
-      }
-    });
+
+    // Use the balance update provider
+    ref.watch(balanceUpdateProvider(participantId));
 
     return Container(
       decoration: ShapeDecoration(
@@ -179,3 +173,19 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
     );
   }
 }
+
+// Create a new provider to handle balance updates
+final balanceUpdateProvider = Provider.family<void, String?>((
+  ref,
+  participantId,
+) {
+  // This will run whenever the rewards stream changes
+  ref.watch(rewardsStreamProvider(participantId));
+
+  // Schedule the balance sync for the next frame
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (participantId != null) {
+      ref.read(paxAccountProvider.notifier).syncBalancesFromBlockchain();
+    }
+  });
+});

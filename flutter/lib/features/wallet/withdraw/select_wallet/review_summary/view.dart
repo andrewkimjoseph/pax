@@ -220,10 +220,25 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Withdrawal Failed'),
-          content: Text(errorMessage),
+          title: Column(
+            children: [
+              SvgPicture.asset(
+                'lib/assets/svgs/canvassing.svg',
+                height: 24,
+              ).withPadding(bottom: 16),
+              Text(
+                'Withdrawal Failed',
+                style: TextStyle(fontSize: 16),
+              ).withAlign(Alignment.center),
+            ],
+          ),
+          content: Text(
+            errorMessage,
+            maxLines: 5,
+            overflow: TextOverflow.ellipsis,
+          ),
           actions: [
-            TextButton(
+            OutlineButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text('OK'),
             ),
@@ -411,11 +426,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                     onPressed: _isProcessing ? null : _processWithdrawal,
                     child:
                         _isProcessing
-                            ? SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(onSurface: true),
-                            )
+                            ? CircularProgressIndicator(onSurface: true)
                             : Text(
                               'Withdraw',
                               style: Theme.of(context).typography.base.copyWith(

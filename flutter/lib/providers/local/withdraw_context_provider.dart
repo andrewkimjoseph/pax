@@ -31,13 +31,6 @@ class WithdrawContext {
           selectedPaymentMethod ?? this.selectedPaymentMethod,
     );
   }
-
-  // Helper method to check if the context has all the necessary information for a withdrawal
-  bool isReadyForReview() {
-    return amountToWithdraw != null &&
-        amountToWithdraw! > 0 &&
-        selectedPaymentMethod != null;
-  }
 }
 
 // The notifier to manage the state
@@ -61,10 +54,15 @@ class WithdrawContextNotifier extends Notifier<WithdrawContext?> {
   }
 
   // Set the selected payment method
-  void setSelectedPaymentMethod(PaymentMethod method) {
+  void setSelectedPaymentMethod(PaymentMethod? method) {
     if (state == null) return;
 
-    state = state!.copyWith(selectedPaymentMethod: method);
+    state = WithdrawContext(
+      tokenId: state!.tokenId,
+      balance: state!.balance,
+      amountToWithdraw: state!.amountToWithdraw,
+      selectedPaymentMethod: method,
+    );
   }
 
   // Clear the state

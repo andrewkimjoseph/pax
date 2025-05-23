@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart' show InkWell;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -67,9 +68,8 @@ class _WithdrawViewState extends ConsumerState<WithdrawView> {
           backgroundColor: PaxColors.deepPurple,
           child: Row(
             children: [
-              GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onPanDown: (details) {
+              InkWell(
+                onTap: () {
                   context.pop();
                 },
                 child: SvgPicture.asset(

@@ -11,11 +11,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/providers/local/reward_state_provider.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
 import 'package:pax/utils/currency_symbol.dart';
+import 'package:pax/services/notifications/notification_service.dart';
 
 class RewardService {
   final Ref ref;
+  final NotificationService _notificationService;
 
-  RewardService(this.ref);
+  RewardService(this.ref) : _notificationService = NotificationService();
 
   Future<RewardResult> rewardParticipant({
     required String taskCompletionId,
@@ -51,20 +53,17 @@ class RewardService {
           currencyName,
         );
 
-        await FirebaseFunctions.instance.httpsCallable('sendNotification').call({
-          'title': 'Reward Received! 🎉',
-          'body':
-              'You\'ve received ${rewardResult.amount} $currencySymbol for completing a task.',
-          'token': fcmToken,
-          'data': {
-            'type': 'reward',
-            'rewardId': rewardResult.rewardId,
-            'taskId': rewardResult.taskId,
-            'taskCompletionId': rewardResult.taskCompletionId,
-            'amount': rewardResult.amount.toString(),
+        await _notificationService.sendRewardNotification(
+          token: fcmToken,
+          rewardData: {
+            'amount': rewardResult.amount,
+            'currencySymbol': currencySymbol,
+            'rewardId': rewardResult.rewardId.toString(),
+            'taskId': rewardResult.taskId.toString(),
+            'taskCompletionId': rewardResult.taskCompletionId.toString(),
             'currency': rewardResult.rewardCurrencyId.toString(),
           },
-        });
+        );
       }
 
       return rewardResult;
