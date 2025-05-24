@@ -11,8 +11,6 @@ import {
 } from "viem";
 import { entryPoint07Address } from "viem/account-abstraction";
 import { celo } from "viem/chains";
-import { createSmartAccountClient } from "permissionless";
-import { toSimpleSmartAccount } from "permissionless/accounts";
 import { createViemAccount } from "@privy-io/server-auth/viem";
 import { FieldValue } from "firebase-admin/firestore";
 
@@ -44,6 +42,8 @@ import { createScreeningRecord } from "../../shared/utils/createScreening";
  */
 export const screenParticipantProxy = onCall(FUNCTION_RUNTIME_OPTS, async (request) => {
   try {
+    const { createSmartAccountClient } = await import("permissionless");
+    const { toSimpleSmartAccount } = await import("permissionless/accounts");
     // Ensure the user is authenticated
     if (!request.auth) {
       throw new HttpsError(
