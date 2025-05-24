@@ -46,7 +46,16 @@ final routerProvider = Provider((ref) {
       return null;
     },
     routes: [
-      GoRoute(path: Routes.home, builder: (context, state) => const RootView()),
+      GoRoute(
+        path: Routes.home,
+        builder:
+            (BuildContext context, GoRouterState state) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: TextScaler.noScaling),
+              child: RootView(),
+            ),
+      ),
       GoRoute(
         path: Routes.onboarding,
         builder: (context, state) => const OnboardingView(),
@@ -60,113 +69,85 @@ final routerProvider = Provider((ref) {
         builder: (context, state) => const AccountAndSecurityView(),
       ),
       GoRoute(
-        path: Routes.home,
-        builder:
-            (BuildContext context, GoRouterState state) => MediaQuery(
-              data: MediaQuery.of(
-                context,
-              ).copyWith(textScaler: TextScaler.noScaling),
-              child: RootView(),
-            ),
+        path: "/wallet",
+        builder: (BuildContext context, GoRouterState state) => WalletView(),
         routes: [
           GoRoute(
-            path: "wallet",
+            path: "withdraw",
             builder:
-                (BuildContext context, GoRouterState state) => WalletView(),
+                (BuildContext context, GoRouterState state) => WithdrawView(),
             routes: [
               GoRoute(
-                path: "withdraw",
+                path: "select-wallet",
                 builder:
                     (BuildContext context, GoRouterState state) =>
-                        WithdrawView(),
-
+                        SelectWalletView(),
                 routes: [
                   GoRoute(
-                    path: "select-wallet",
+                    path: "review-summary",
                     builder:
                         (BuildContext context, GoRouterState state) =>
-                            SelectWalletView(),
-                    routes: [
-                      GoRoute(
-                        path: "review-summary",
-                        builder:
-                            (BuildContext context, GoRouterState state) =>
-                                ReviewSummaryView(),
-                      ),
-                    ],
+                            ReviewSummaryView(),
                   ),
                 ],
               ),
             ],
           ),
+        ],
+      ),
+      GoRoute(
+        path: "/profile",
+        builder: (BuildContext context, GoRouterState state) => ProfileView(),
+      ),
+      GoRoute(
+        path: "/account-and-security",
+        builder:
+            (BuildContext context, GoRouterState state) =>
+                AccountAndSecurityView(),
+      ),
+      GoRoute(
+        path: "/help-and-support",
+        builder:
+            (BuildContext context, GoRouterState state) => HelpAndSupportView(),
+        routes: [
           GoRoute(
-            path: "profile",
-            builder:
-                (BuildContext context, GoRouterState state) => ProfileView(),
+            path: "faq",
+            builder: (BuildContext context, GoRouterState state) => FAQView(),
           ),
           GoRoute(
-            path: "account-and-security",
-            builder:
-                (BuildContext context, GoRouterState state) =>
-                    AccountAndSecurityView(),
-          ),
-          GoRoute(
-            path: "help-and-support",
-            builder:
-                (BuildContext context, GoRouterState state) =>
-                    HelpAndSupportView(),
-            routes: [
-              GoRoute(
-                path: "faq",
-                builder:
-                    (BuildContext context, GoRouterState state) => FAQView(),
-              ),
-              GoRoute(
-                path: "contact-support",
-                builder:
-                    (BuildContext context, GoRouterState state) =>
-                        ContactSupportView(),
-              ),
-            ],
-          ),
-
-          GoRoute(
-            path: "/task-summary",
+            path: "contact-support",
             builder:
                 (BuildContext context, GoRouterState state) =>
-                    TaskSummaryView(),
+                    ContactSupportView(),
           ),
+        ],
+      ),
+      GoRoute(
+        path: "/task-summary",
+        builder:
+            (BuildContext context, GoRouterState state) => TaskSummaryView(),
+      ),
+      GoRoute(
+        path: "/task-itself",
+        builder:
+            (BuildContext context, GoRouterState state) => TaskItselfView(),
+      ),
+      GoRoute(
+        path: "/task-complete",
+        builder:
+            (BuildContext context, GoRouterState state) => TaskCompleteView(),
+      ),
+      GoRoute(
+        path: "/payment-methods",
+        builder:
+            (BuildContext context, GoRouterState state) => PaymentMethodsView(),
+        routes: [
           GoRoute(
-            path: "/task-itself",
-            builder:
-                (BuildContext context, GoRouterState state) => TaskItselfView(),
-            routes: [],
-          ),
-
-          GoRoute(
-            path: "task-complete",
+            path: "minipay-connection",
             builder:
                 (BuildContext context, GoRouterState state) =>
-                    TaskCompleteView(),
+                    MiniPayConnectionView(),
           ),
-
-          GoRoute(
-            path: "payment-methods",
-            builder:
-                (BuildContext context, GoRouterState state) =>
-                    PaymentMethodsView(),
-
-            routes: [
-              GoRoute(
-                path: "minipay-connection",
-                builder:
-                    (BuildContext context, GoRouterState state) =>
-                        MiniPayConnectionView(),
-              ),
-            ],
-          ),
-
-          // Home and sub-routes
         ],
       ),
     ],
