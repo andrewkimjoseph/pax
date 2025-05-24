@@ -14,12 +14,10 @@ import {
  * Cloud function to delete all participant data
  * This function removes all data associated with a participant including:
  * - Participant record
- * - PaxAccount record
  * - Task completions
  * - Rewards
  * - Withdrawals
  * - FCM tokens
- * - Payment methods
  * - Screenings
  * - Authentication record
  */
@@ -43,9 +41,12 @@ export const deleteParticipantOnRequest = onCall(FUNCTION_RUNTIME_OPTS, async (r
     const participantRef = db.collection('participants').doc(participantId);
     batch.delete(participantRef);
 
-    // 2. Delete pax account
-    const paxAccountRef = db.collection('pax_accounts').doc(participantId);
-    batch.delete(paxAccountRef);
+    // 2. Delete pax accounts
+    const paxAccountsSnapshot = await db
+      .collection('pax_accounts')
+      .where('participantId', '==', participantId)
+      .get();
+    paxAccountsSnapshot.docs.forEach((doc) => batch.delete(doc.ref));
 
     // 3. Delete task completions
     const taskCompletionsSnapshot = await db
@@ -75,14 +76,7 @@ export const deleteParticipantOnRequest = onCall(FUNCTION_RUNTIME_OPTS, async (r
       .get();
     fcmTokensSnapshot.docs.forEach((doc) => batch.delete(doc.ref));
 
-    // 7. Delete payment methods
-    const paymentMethodsSnapshot = await db
-      .collection('payment_methods')
-      .where('participantId', '==', participantId)
-      .get();
-    paymentMethodsSnapshot.docs.forEach((doc) => batch.delete(doc.ref));
-
-    // 8. Delete screenings
+    // 7. Delete screenings
     const screeningsSnapshot = await db
       .collection('screenings')
       .where('participantId', '==', participantId)
