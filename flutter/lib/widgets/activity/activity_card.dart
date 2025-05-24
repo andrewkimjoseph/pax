@@ -59,12 +59,6 @@ class ActivityCard extends ConsumerWidget {
                             activity.withdrawal != null,
                         child: Row(
                           children: [
-                            if (activity.getCurrencyId() != null)
-                              SvgPicture.asset(
-                                'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(activity.getCurrencyId())}.svg',
-                                height: 20,
-                              ).withPadding(right: 4),
-
                             Text(
                               activity.getAmount() ?? '0',
                               style: TextStyle(
@@ -72,7 +66,13 @@ class ActivityCard extends ConsumerWidget {
                                 fontSize: 14,
                                 color: Colors.black,
                               ),
-                            ),
+                            ).withPadding(right: 2),
+
+                            if (activity.getCurrencyId() != null)
+                              SvgPicture.asset(
+                                'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(activity.getCurrencyId())}.svg',
+                                height: 20,
+                              ),
                           ],
                         ),
                       ),
