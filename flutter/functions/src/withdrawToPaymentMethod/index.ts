@@ -11,8 +11,6 @@ import {
 } from "viem";
 import { entryPoint07Address } from "viem/account-abstraction";
 import { celo } from "viem/chains";
-import { createSmartAccountClient } from "permissionless";
-import { toSimpleSmartAccount } from "permissionless/accounts";
 import { createViemAccount } from "@privy-io/server-auth/viem";
 
 import { paxAccountV1ABI } from "../../shared/abis/paxAccountV1ABI";
@@ -23,6 +21,7 @@ import {
   PIMLICO_CLIENT,
   PIMLICO_URL,
 } from "../../shared/config";
+import { createWithdrawalRecord } from "../../shared/utils/createWithdrawal";
 
 /**
  * Cloud function to withdraw tokens to a payment method
@@ -30,6 +29,8 @@ import {
 export const withdrawToPaymentMethod = onCall(FUNCTION_RUNTIME_OPTS, async (request) => {
   try {
     // Ensure the user is authenticated
+    const { createSmartAccountClient } = await import("permissionless");
+    const { toSimpleSmartAccount } = await import("permissionless/accounts");
     if (!request.auth) {
       throw new HttpsError(
         "unauthenticated",
@@ -41,17 +42,21 @@ export const withdrawToPaymentMethod = onCall(FUNCTION_RUNTIME_OPTS, async (requ
     const { 
       serverWalletId, 
       paxAccountAddress, 
-      paymentMethodId = 0,
+      paymentMethodId, // This is now the contract payment method ID (predefinedId - 1)
+      withdrawalPaymentMethodId, // This is the string ID for the withdrawal record
       amountRequested,
       currency,
-      decimals = 18 // Default to 18 decimals (standard for most ERC20 tokens)
+      decimals = 18, // Default to 18 decimals (standard for most ERC20 tokens)
+      tokenId, // Add tokenId to the request data
     } = request.data as {
       serverWalletId: string;
       paxAccountAddress: string;
-      paymentMethodId?: number;
+      paymentMethodId: number; // Changed to number for contract
+      withdrawalPaymentMethodId: string; // Added for withdrawal record
       amountRequested: string; // Human-readable amount (e.g., "0.5")
       currency: string; // ERC20 token address
       decimals?: number; // Token decimals
+      tokenId: number; // Add tokenId to the type
     };
 
     // Validate required parameters
@@ -80,6 +85,20 @@ export const withdrawToPaymentMethod = onCall(FUNCTION_RUNTIME_OPTS, async (requ
       throw new HttpsError(
         "invalid-argument",
         "Missing required parameter: currency"
+      );
+    }
+
+    if (tokenId === undefined) {
+      throw new HttpsError(
+        "invalid-argument",
+        "Missing required parameter: tokenId"
+      );
+    }
+
+    if (!withdrawalPaymentMethodId) {
+      throw new HttpsError(
+        "invalid-argument",
+        "Missing required parameter: withdrawalPaymentMethodId"
       );
     }
     
@@ -111,6 +130,7 @@ export const withdrawToPaymentMethod = onCall(FUNCTION_RUNTIME_OPTS, async (requ
       amountInWei: amountInWei.toString(),
       currency,
       serverWalletId,
+      tokenId,
     });
 
     // Get the server wallet from Privy
@@ -191,16 +211,27 @@ export const withdrawToPaymentMethod = onCall(FUNCTION_RUNTIME_OPTS, async (requ
     const txnHash = userOpReceipt.receipt.transactionHash;
     logger.info("Transaction confirmed", { txnHash });
 
+    // Create withdrawal record
+    const withdrawalId = await createWithdrawalRecord({
+      participantId: userId,
+      paymentMethodId: withdrawalPaymentMethodId, // Use the string ID for the withdrawal record
+      amountRequested: parseFloat(amountRequested),
+      rewardCurrencyId: tokenId,
+      txnHash,
+    });
+
     // Return the transaction hash and details
     return {
       success: true,
       txnHash,
+      withdrawalId,
       details: {
         paxAccountAddress,
         paymentMethodId,
         amountRequested,
         amountInWei: amountInWei.toString(),
         currency,
+        tokenId,
       },
     };
   } catch (error) {

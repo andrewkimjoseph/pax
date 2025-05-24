@@ -1,13 +1,11 @@
 // This service manages the withdrawal process for participants:
 // - Handles withdrawals to payment methods through Firebase Functions
 // - Validates PaxAccount and server wallet information
-// - Creates withdrawal records in Firestore
 // - Provides methods to query withdrawal history
 // - Includes comprehensive error handling and validation
 
 // lib/services/withdrawal/withdrawal_service.dart
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pax/models/firestore/withdrawal/withdrawal_model.dart';
 import 'package:pax/repositories/firestore/pax_account/pax_account_repository.dart';
@@ -29,7 +27,6 @@ class WithdrawalService {
     required String userId,
     required String paymentMethodId,
     int predefinedId = 1,
-
     required double amountToWithdraw,
     required int tokenId,
     required String currencyAddress,
@@ -63,42 +60,31 @@ class WithdrawalService {
         'serverWalletId': serverWalletId,
         'paxAccountAddress': paxAccountAddress,
         'paymentMethodId': predefinedId - 1,
-        'amountRequested': amountToWithdraw,
+        'amountRequested': amountToWithdraw.toString(),
         'currency': currencyAddress,
         'decimals': decimals,
+        'tokenId': tokenId,
+        'withdrawalPaymentMethodId': paymentMethodId,
       });
-
-      Timestamp timeRequested = Timestamp.now();
 
       if (result.data == null) {
         throw Exception('Withdrawal failed - empty response');
       }
 
-      // 4. Create withdrawal record in Firestore
-      final withdrawal = Withdrawal(
-        id: FirebaseFirestore.instance.collection('withdrawals').doc().id,
-        participantId: userId,
-        paymentMethodId: paymentMethodId,
-        amountTakenOut: amountToWithdraw,
-        rewardCurrencyId: tokenId,
-        txnHash: result.data['txnHash'],
-        timeCreated: Timestamp.now(),
-        timeRequested: timeRequested,
-        timeUpdated: Timestamp.now(),
-      );
-
-      await _withdrawalRepository.createWithdrawal(withdrawal);
-
-      // 5. Return success data
+      // 4. Return success data
       return {
         'success': true,
         'txnHash': result.data['txnHash'],
-        'withdrawalId': withdrawal.id,
+        'withdrawalId': result.data['withdrawalId'],
         'details': result.data['details'],
       };
     } catch (e) {
       if (kDebugMode) {
         print('Error withdrawing tokens: $e');
+        if (e is FirebaseFunctionsException) {
+          print('Firebase Functions error code: ${e.code}');
+          print('Firebase Functions error details: ${e.details}');
+        }
       }
       throw Exception('Failed to withdraw tokens: ${e.toString()}');
     }
