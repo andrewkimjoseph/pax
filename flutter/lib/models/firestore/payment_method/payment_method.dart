@@ -15,7 +15,7 @@ class PaymentMethod {
     this.predefinedId = 1,
     required this.participantId,
     required this.paxAccountId,
-    this.name = 'minipay',
+    this.name = 'MiniPay',
     required this.walletAddress,
     this.timeCreated,
     this.timeUpdated,

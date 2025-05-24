@@ -42,7 +42,7 @@ class WalletOptionCard extends ConsumerWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(7),
             child: SvgPicture.asset(
-              'lib/assets/svgs/${paymentMethod.name}.svg',
+              'lib/assets/svgs/${paymentMethod.name.toLowerCase()}.svg',
               height: 48,
             ),
           ).withPadding(right: 16),
