@@ -189,7 +189,9 @@ final balanceUpdateProvider = Provider.family<void, String?>((
   // Schedule the balance sync for the next frame
   WidgetsBinding.instance.addPostFrameCallback((_) {
     if (participantId != null) {
-      print("syncing balances from blockchain");
+      if (kDebugMode) {
+        print("syncing balances from blockchain");
+      }
       ref.read(paxAccountProvider.notifier).syncBalancesFromBlockchain();
     }
   });

@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:go_router/go_router.dart';
 import 'package:pax/features/onboarding/view_model.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
@@ -179,21 +178,10 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                                               showSuccessToast(context);
                                             }
 
-                                            // if (ref
-                                            //         .read(participantProvider)
-                                            //         .state ==
-                                            //     ParticipantState.loaded) {
-                                            //   // Navigate after successful sign in and participant loading
-
-                                            // }
-
+                                            // Reset onboarding state
                                             onboardingViewModel
                                                 .resetOnboarding();
-
-                                            if (context.mounted) {
-                                              context.pushReplacement('/');
-                                            }
-                                          } else {}
+                                          }
                                         })
                                         .onError((error, stackTrace) {
                                           // Handle the error here

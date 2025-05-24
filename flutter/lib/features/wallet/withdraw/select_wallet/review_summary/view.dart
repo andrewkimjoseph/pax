@@ -205,7 +205,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                       onPressed: () {
                         (context).pop();
                         context.pushReplacement(
-                          "/",
+                          "/home",
                         ); // Go back to previous screen
                       },
                     ),
