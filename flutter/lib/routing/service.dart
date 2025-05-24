@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pax/exports/views.dart';
+import 'package:pax/features/account_and_security/view.dart';
 import 'package:pax/features/task/task_itself/view.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
@@ -14,7 +15,7 @@ final routerProvider = Provider((ref) {
 
   return GoRouter(
     refreshListenable: notifier,
-    initialLocation: Routes.root,
+    initialLocation: Routes.home,
     errorBuilder:
         (context, state) => Scaffold(
           child: Column(
@@ -30,21 +31,36 @@ final routerProvider = Provider((ref) {
         ),
     redirect: (context, state) {
       final authState = ref.read(authStateForRouterProvider);
+      final isOnboardingRoute = state.matchedLocation == Routes.onboarding;
 
-      // If user is not authenticated and trying to access any route other than onboarding
-      if (authState != AuthState.authenticated &&
-          state.matchedLocation != Routes.onboarding) {
-        // Redirect unauthenticated users to onboarding
+      // If not authenticated and not on onboarding, redirect to onboarding
+      if (authState != AuthState.authenticated && !isOnboardingRoute) {
         return Routes.onboarding;
       }
 
-      // No redirection needed
+      // If authenticated and on onboarding, redirect to home
+      if (authState == AuthState.authenticated && isOnboardingRoute) {
+        return Routes.home;
+      }
+
       return null;
     },
     routes: [
-      // Root
+      GoRoute(path: Routes.home, builder: (context, state) => const RootView()),
       GoRoute(
-        path: Routes.root,
+        path: Routes.onboarding,
+        builder: (context, state) => const OnboardingView(),
+      ),
+      GoRoute(
+        path: Routes.activity,
+        builder: (context, state) => const ActivityView(),
+      ),
+      GoRoute(
+        path: Routes.accountAndSecurity,
+        builder: (context, state) => const AccountAndSecurityView(),
+      ),
+      GoRoute(
+        path: Routes.home,
         builder:
             (BuildContext context, GoRouterState state) => MediaQuery(
               data: MediaQuery.of(
@@ -52,13 +68,7 @@ final routerProvider = Provider((ref) {
               ).copyWith(textScaler: TextScaler.noScaling),
               child: RootView(),
             ),
-
         routes: [
-          GoRoute(
-            path: "onboarding",
-            builder:
-                (BuildContext context, GoRouterState state) => OnboardingView(),
-          ),
           GoRoute(
             path: "wallet",
             builder:
@@ -93,6 +103,12 @@ final routerProvider = Provider((ref) {
             path: "profile",
             builder:
                 (BuildContext context, GoRouterState state) => ProfileView(),
+          ),
+          GoRoute(
+            path: "account-and-security",
+            builder:
+                (BuildContext context, GoRouterState state) =>
+                    AccountAndSecurityView(),
           ),
           GoRoute(
             path: "help-and-support",
@@ -153,8 +169,6 @@ final routerProvider = Provider((ref) {
           // Home and sub-routes
         ],
       ),
-
-      // Onboarding
     ],
   );
 });
