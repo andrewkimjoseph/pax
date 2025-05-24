@@ -85,4 +85,32 @@ class WithdrawalRepository {
       return [];
     }
   }
+
+  // Stream of withdrawals for a participant
+  Stream<List<Withdrawal>> streamWithdrawalsForParticipant(
+    String? participantId,
+  ) {
+    if (participantId == null) {
+      return Stream.value([]);
+    }
+
+    try {
+      return _firestore
+          .collection(collectionName)
+          .where('participantId', isEqualTo: participantId)
+          .orderBy('timeCreated', descending: true)
+          .snapshots()
+          .map((snapshot) {
+            return snapshot.docs
+                .map((doc) => Withdrawal.fromFirestore(doc))
+                .toList();
+          });
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error streaming withdrawals: $e');
+      }
+      // Return empty stream on error
+      return Stream.value([]);
+    }
+  }
 }

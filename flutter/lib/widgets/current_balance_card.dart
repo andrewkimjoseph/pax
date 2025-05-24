@@ -7,6 +7,7 @@ import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
 import 'package:pax/providers/local/reward_currency_context.dart';
 import 'package:pax/providers/local/reward_state_provider.dart';
 import 'package:pax/providers/local/withdraw_context_provider.dart';
+import 'package:pax/providers/local/withdrawal_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/currency_symbol.dart';
 import 'package:pax/utils/gradient_border.dart';
@@ -182,9 +183,13 @@ final balanceUpdateProvider = Provider.family<void, String?>((
   // This will run whenever the rewards stream changes
   ref.watch(rewardsStreamProvider(participantId));
 
+  // This will run whenever the withdrawals stream changes
+  ref.watch(withdrawalsStreamProvider(participantId));
+
   // Schedule the balance sync for the next frame
   WidgetsBinding.instance.addPostFrameCallback((_) {
     if (participantId != null) {
+      print("syncing balances from blockchain");
       ref.read(paxAccountProvider.notifier).syncBalancesFromBlockchain();
     }
   });

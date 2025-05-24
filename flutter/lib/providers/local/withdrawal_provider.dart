@@ -10,6 +10,7 @@ import 'package:pax/services/withdrawal_service.dart';
 import 'package:pax/services/notifications/notification_service.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
 import 'package:pax/utils/currency_symbol.dart';
+import 'package:pax/models/firestore/withdrawal/withdrawal_model.dart';
 
 class WithdrawNotifier extends Notifier<WithdrawStateModel> {
   late final WithdrawalService _withdrawalService;
@@ -115,3 +116,13 @@ final withdrawProvider = NotifierProvider<WithdrawNotifier, WithdrawStateModel>(
     return WithdrawNotifier();
   },
 );
+
+// Stream provider for withdrawals
+final withdrawalsStreamProvider = StreamProvider.family<
+  List<Withdrawal>,
+  String?
+>((ref, participantId) {
+  // Use the withdrawal repository to get the stream of withdrawals for the participant
+  final withdrawalRepository = ref.watch(withdrawalRepositoryProvider);
+  return withdrawalRepository.streamWithdrawalsForParticipant(participantId);
+});
