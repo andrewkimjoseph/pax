@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pax/exports/views.dart';
 import 'package:pax/features/account_and_security/view.dart';
 import 'package:pax/features/task/task_itself/view.dart';
+import 'package:pax/features/webview/view.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/route/route_notifier_provider.dart';
@@ -16,8 +17,43 @@ final routerProvider = Provider((ref) {
   return GoRouter(
     refreshListenable: notifier,
     initialLocation: Routes.home,
-    errorBuilder:
-        (context, state) => Scaffold(
+    errorBuilder: (context, state) {
+      final authState = ref.read(authStateForRouterProvider);
+
+      // Only redirect if there's an actual routing error
+      if (state.error != null) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            Future.microtask(() {
+              if (context.mounted) {
+                final route =
+                    authState == AuthState.authenticated
+                        ? Routes.home
+                        : Routes.onboarding;
+                GoRouter.of(context).go(route);
+              }
+            });
+            return Scaffold(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset(
+                      'lib/assets/svgs/canvassing.svg',
+                      height: 48,
+                    ).withPadding(bottom: 16),
+                    CircularProgressIndicator(),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      }
+
+      // If no routing error, just show loading screen
+      return Scaffold(
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -29,6 +65,8 @@ final routerProvider = Provider((ref) {
             ],
           ),
         ),
+      );
+    },
     redirect: (context, state) {
       final authState = ref.read(authStateForRouterProvider);
       final isOnboardingRoute = state.matchedLocation == Routes.onboarding;
@@ -43,6 +81,16 @@ final routerProvider = Provider((ref) {
         return Routes.home;
       }
 
+      // If authenticated and route doesn't exist, redirect to home
+      if (authState == AuthState.authenticated && state.error != null) {
+        return Routes.home;
+      }
+
+      // If authenticated and on a valid route, stay there
+      if (authState == AuthState.authenticated) {
+        return null;
+      }
+
       return null;
     },
     routes: [
@@ -55,6 +103,10 @@ final routerProvider = Provider((ref) {
               ).copyWith(textScaler: TextScaler.noScaling),
               child: RootView(),
             ),
+      ),
+      GoRoute(
+        path: "/webview",
+        builder: (context, state) => WebViewPage(url: state.extra as String),
       ),
       GoRoute(
         path: Routes.onboarding,
