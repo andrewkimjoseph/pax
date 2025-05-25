@@ -107,7 +107,7 @@ class _WithdrawViewState extends ConsumerState<WithdrawView> {
                   .setAmountToWithdraw(amount);
 
               // Navigate to next screen
-              context.go('/wallet/withdraw/select-wallet');
+              context.push('/wallet/withdraw/select-wallet');
             } catch (e) {
               // Handle parsing error if needed
             }
