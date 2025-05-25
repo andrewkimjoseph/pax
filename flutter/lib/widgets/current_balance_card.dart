@@ -155,7 +155,7 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
                           ref
                               .read(withdrawContextProvider.notifier)
                               .setWithdrawContext(tokenId ?? 1, currentBalance);
-                          context.go(widget.nextLocation);
+                          context.push(widget.nextLocation);
                         }
                         : null,
                 child: Text(
