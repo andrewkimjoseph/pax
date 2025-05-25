@@ -14,7 +14,6 @@ class HomeView extends ConsumerStatefulWidget {
 
 class _HomeViewState extends ConsumerState<HomeView> {
   int index = 0;
-  int selected = 0;
   String? screenName;
 
   @override

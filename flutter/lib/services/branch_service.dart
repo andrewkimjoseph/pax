@@ -9,6 +9,7 @@ class BranchService {
 
   StreamSubscription<Map>? _linkDataStreamSubscription;
   Function(Map<dynamic, dynamic>)? _deepLinkHandler;
+  bool _isInitialized = false;
 
   void init({required Function(Map<dynamic, dynamic>) deepLinkHandler}) {
     _deepLinkHandler = deepLinkHandler;
@@ -27,6 +28,13 @@ class BranchService {
       return;
     }
 
+    if (_isInitialized) {
+      if (kDebugMode) {
+        print('BranchService: Already listening to deep links');
+      }
+      return;
+    }
+
     if (kDebugMode) {
       print('BranchService: Starting deep link listener');
     }
@@ -35,8 +43,10 @@ class BranchService {
         if (kDebugMode) {
           print('BranchService: Deep link received: $linkData');
         }
-        // Pass deep link data directly to the handler
-        _deepLinkHandler?.call(linkData);
+        // Only handle deep links if they contain actual link data
+        if (linkData.isNotEmpty && linkData['+clicked_branch_link'] == true) {
+          _deepLinkHandler?.call(linkData);
+        }
       },
       onError: (error) {
         if (kDebugMode) {
@@ -44,6 +54,7 @@ class BranchService {
         }
       },
     );
+    _isInitialized = true;
   }
 
   void dispose() {
@@ -52,5 +63,6 @@ class BranchService {
     }
     _linkDataStreamSubscription?.cancel();
     _deepLinkHandler = null;
+    _isInitialized = false;
   }
 }

@@ -49,26 +49,36 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
     });
 
     // Call screening service
-    ref
-        .read(screeningServiceProvider)
-        .screenParticipant(
-          serverWalletId: serverWalletId!,
-          taskId: currentTask.id,
-          participantId: participantId!,
-          taskManagerContractAddress: taskManagerContractAddress!,
-          taskMasterServerWalletId: taskMasterServerWalletId!,
+    try {
+      await ref
+          .read(screeningServiceProvider)
+          .screenParticipant(
+            serverWalletId: serverWalletId!,
+            taskId: currentTask.id,
+            participantId: participantId!,
+            taskManagerContractAddress: taskManagerContractAddress!,
+            taskMasterServerWalletId: taskMasterServerWalletId!,
+          );
+
+      // Show processing dialog
+      if (context.mounted) {
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (dialogContext) => _buildProcessingDialog(dialogContext),
         );
-
-    // Show processing dialog
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => _buildProcessingDialog(dialogContext),
-    );
-
-    setState(() {
-      _isProcessingScreening = false;
-    });
+      }
+    } catch (e) {
+      if (context.mounted) {
+        _showErrorDialog(context, e.toString());
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isProcessingScreening = false;
+        });
+      }
+    }
   }
 
   // Dialog showing processing state
@@ -97,9 +107,21 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
               );
             }
           });
+        } else if (screeningState.state == ScreeningState.loading) {
+          // Show loading indicator
+          return AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Letting you in...'),
+              ],
+            ),
+          );
         }
 
-        // Show loading indicator
+        // Default case - show loading indicator
         return AlertDialog(
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -190,7 +212,7 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
                             ? CircularProgressIndicator(onSurface: true)
                             : Text(
                               'Continue with task',
-                              style: Theme.of(context).typography.base.copyWith(
+                              style: TextStyle(
                                 fontWeight: FontWeight.normal,
                                 fontSize: 14,
                                 color: PaxColors.white,

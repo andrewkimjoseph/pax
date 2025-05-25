@@ -5,7 +5,6 @@ import {
 } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 import { createViemAccount } from "@privy-io/server-auth/viem";
-import { toSimpleSmartAccount } from "permissionless/accounts";
 import { entryPoint07Address } from "viem/account-abstraction";
 
 import {
@@ -20,6 +19,7 @@ import { Address } from "viem";
  */
 export const createPrivyServerWallet = onCall(FUNCTION_RUNTIME_OPTS, async (request) => {
   try {
+    const { toSimpleSmartAccount } = await import("permissionless/accounts");
     // Ensure the user is authenticated
     if (!request.auth) {
       throw new HttpsError(

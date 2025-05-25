@@ -150,23 +150,34 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
         skipLoadingOnRefresh: false,
         data: (activities) {
           return SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment:
-                  activities.isEmpty
-                      ? MainAxisAlignment.center
-                      : MainAxisAlignment.start,
-              children: [
-                if (activities.isEmpty)
-                  Center(
-                    child: Text(
-                      'No activities found',
-                      style: TextStyle(color: PaxColors.darkGrey),
+            child: Builder(
+              builder: (context) {
+                if (activities.isEmpty) {
+                  return SizedBox(
+                    height:
+                        MediaQuery.of(context).size.height /
+                        2, // Account for header height
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            'No activities found',
+                            style: TextStyle(color: PaxColors.darkGrey),
+                          ),
+                        ],
+                      ),
                     ),
-                  )
-                else
-                  for (var activity in activities)
-                    ActivityCard(activity).withPadding(all: 8),
-              ],
+                  );
+                }
+                return Column(
+                  children: [
+                    for (var activity in activities)
+                      ActivityCard(activity).withPadding(all: 8),
+                  ],
+                );
+              },
             ),
           );
         },

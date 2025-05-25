@@ -36,7 +36,10 @@ class Toast extends ConsumerWidget {
         borderRadius: BorderRadius.circular(15),
       ),
       child: Basic(
-        leading: FaIcon(leadingIcon, color: leadingIconColor),
+        leading:
+            leadingIcon != null
+                ? FaIcon(leadingIcon, color: leadingIconColor)
+                : null,
         subtitle: Text(text, style: TextStyle(color: PaxColors.white)),
         trailing: FaIcon(trailingIcon, color: trailingIconColor),
         trailingAlignment: Alignment.center,

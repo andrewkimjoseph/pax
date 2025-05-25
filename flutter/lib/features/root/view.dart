@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:pax/exports/views.dart';
+import 'package:pax/providers/route/selected_index_provider.dart';
 
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -14,16 +15,10 @@ class RootView extends ConsumerStatefulWidget {
 }
 
 class _RootViewState extends ConsumerState<RootView> {
-  int index = 0;
-  int selected = 0;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final selected = ref.watch(selectedIndexProvider);
+
     return Scaffold(
       footers: [
         const Divider(),
@@ -35,9 +30,7 @@ class _RootViewState extends ConsumerState<RootView> {
               expanded: true,
               expands: false,
               onSelected: (index) {
-                setState(() {
-                  selected = index;
-                });
+                ref.read(selectedIndexProvider.notifier).setIndex(index);
               },
               index: selected,
               children: [

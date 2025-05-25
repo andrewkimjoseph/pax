@@ -8,6 +8,8 @@ import 'package:pax/features/home/achievements/view.dart';
 import 'package:pax/features/home/dashboard/view.dart';
 import 'package:pax/features/home/tasks/view.dart';
 import 'package:pax/features/onboarding/view_model.dart';
+import 'package:pax/theming/colors.dart';
+import 'package:pax/utils/url_handler.dart';
 import 'package:pax/widgets/account/account_option_card.dart';
 import 'package:pax/widgets/help_and_support.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
@@ -91,7 +93,8 @@ class _HelpAndSupportViewState extends ConsumerState<HelpAndSupportView> {
                   ),
                   InkWell(
                     onTap: () {
-                      launchExternalUrl(
+                      UrlHandler.launchInAppWebView(
+                        context,
                         "https://canvassing.notion.site/Privacy-Policy-9446d085f6f3473087868007d931247c?pvs=74",
                       );
                     },
@@ -99,7 +102,8 @@ class _HelpAndSupportViewState extends ConsumerState<HelpAndSupportView> {
                   ),
                   InkWell(
                     onTap: () {
-                      launchExternalUrl(
+                      UrlHandler.launchInAppWebView(
+                        context,
                         "https://canvassing.notion.site/Terms-of-Service-1285e1ccc593808f8d1df0b444c36b85?pvs=74",
                       );
                     },
@@ -107,7 +111,8 @@ class _HelpAndSupportViewState extends ConsumerState<HelpAndSupportView> {
                   ),
                   InkWell(
                     onTap: () {
-                      launchExternalUrl(
+                      UrlHandler.launchInAppWebView(
+                        context,
                         "https://optimistic-volunteers-396150.framer.app/",
                       );
                     },

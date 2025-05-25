@@ -63,7 +63,7 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
 
     final router = ref.read(routerProvider);
     // Let the router's redirect logic handle the navigation
-    router.go("/");
+    router.go("/home");
 
     // // Check if this is an initial deep link
     // if (linkData['+clicked_branch_link'] == true) {

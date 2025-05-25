@@ -2,7 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pax/exports/views.dart';
+import 'package:pax/features/account_and_security/view.dart';
 import 'package:pax/features/task/task_itself/view.dart';
+import 'package:pax/features/webview/view.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/route/route_notifier_provider.dart';
@@ -14,9 +16,44 @@ final routerProvider = Provider((ref) {
 
   return GoRouter(
     refreshListenable: notifier,
-    initialLocation: Routes.root,
-    errorBuilder:
-        (context, state) => Scaffold(
+    initialLocation: Routes.home,
+    errorBuilder: (context, state) {
+      final authState = ref.read(authStateForRouterProvider);
+
+      // Only redirect if there's an actual routing error
+      if (state.error != null) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            Future.microtask(() {
+              if (context.mounted) {
+                final route =
+                    authState == AuthState.authenticated
+                        ? Routes.home
+                        : Routes.onboarding;
+                GoRouter.of(context).go(route);
+              }
+            });
+            return Scaffold(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset(
+                      'lib/assets/svgs/canvassing.svg',
+                      height: 48,
+                    ).withPadding(bottom: 16),
+                    CircularProgressIndicator(),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      }
+
+      // If no routing error, just show loading screen
+      return Scaffold(
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -28,23 +65,37 @@ final routerProvider = Provider((ref) {
             ],
           ),
         ),
+      );
+    },
     redirect: (context, state) {
       final authState = ref.read(authStateForRouterProvider);
+      final isOnboardingRoute = state.matchedLocation == Routes.onboarding;
 
-      // If user is not authenticated and trying to access any route other than onboarding
-      if (authState != AuthState.authenticated &&
-          state.matchedLocation != Routes.onboarding) {
-        // Redirect unauthenticated users to onboarding
+      // If not authenticated and not on onboarding, redirect to onboarding
+      if (authState != AuthState.authenticated && !isOnboardingRoute) {
         return Routes.onboarding;
       }
 
-      // No redirection needed
+      // If authenticated and on onboarding, redirect to home
+      if (authState == AuthState.authenticated && isOnboardingRoute) {
+        return Routes.home;
+      }
+
+      // If authenticated and route doesn't exist, redirect to home
+      if (authState == AuthState.authenticated && state.error != null) {
+        return Routes.home;
+      }
+
+      // If authenticated and on a valid route, stay there
+      if (authState == AuthState.authenticated) {
+        return null;
+      }
+
       return null;
     },
     routes: [
-      // Root
       GoRoute(
-        path: Routes.root,
+        path: Routes.home,
         builder:
             (BuildContext context, GoRouterState state) => MediaQuery(
               data: MediaQuery.of(
@@ -52,109 +103,105 @@ final routerProvider = Provider((ref) {
               ).copyWith(textScaler: TextScaler.noScaling),
               child: RootView(),
             ),
-
+      ),
+      GoRoute(
+        path: "/webview",
+        builder: (context, state) => WebViewPage(url: state.extra as String),
+      ),
+      GoRoute(
+        path: Routes.onboarding,
+        builder: (context, state) => const OnboardingView(),
+      ),
+      GoRoute(
+        path: Routes.activity,
+        builder: (context, state) => const ActivityView(),
+      ),
+      GoRoute(
+        path: Routes.accountAndSecurity,
+        builder: (context, state) => const AccountAndSecurityView(),
+      ),
+      GoRoute(
+        path: "/wallet",
+        builder: (BuildContext context, GoRouterState state) => WalletView(),
         routes: [
           GoRoute(
-            path: "onboarding",
+            path: "withdraw",
             builder:
-                (BuildContext context, GoRouterState state) => OnboardingView(),
-          ),
-          GoRoute(
-            path: "wallet",
-            builder:
-                (BuildContext context, GoRouterState state) => WalletView(),
+                (BuildContext context, GoRouterState state) => WithdrawView(),
             routes: [
               GoRoute(
-                path: "withdraw",
+                path: "select-wallet",
                 builder:
                     (BuildContext context, GoRouterState state) =>
-                        WithdrawView(),
-
+                        SelectWalletView(),
                 routes: [
                   GoRoute(
-                    path: "select-wallet",
+                    path: "review-summary",
                     builder:
                         (BuildContext context, GoRouterState state) =>
-                            SelectWalletView(),
-                    routes: [
-                      GoRoute(
-                        path: "review-summary",
-                        builder:
-                            (BuildContext context, GoRouterState state) =>
-                                ReviewSummaryView(),
-                      ),
-                    ],
+                            ReviewSummaryView(),
                   ),
                 ],
               ),
             ],
           ),
-          GoRoute(
-            path: "profile",
-            builder:
-                (BuildContext context, GoRouterState state) => ProfileView(),
-          ),
-          GoRoute(
-            path: "help-and-support",
-            builder:
-                (BuildContext context, GoRouterState state) =>
-                    HelpAndSupportView(),
-            routes: [
-              GoRoute(
-                path: "faq",
-                builder:
-                    (BuildContext context, GoRouterState state) => FAQView(),
-              ),
-              GoRoute(
-                path: "contact-support",
-                builder:
-                    (BuildContext context, GoRouterState state) =>
-                        ContactSupportView(),
-              ),
-            ],
-          ),
-
-          GoRoute(
-            path: "/task-summary",
-            builder:
-                (BuildContext context, GoRouterState state) =>
-                    TaskSummaryView(),
-          ),
-          GoRoute(
-            path: "/task-itself",
-            builder:
-                (BuildContext context, GoRouterState state) => TaskItselfView(),
-            routes: [],
-          ),
-
-          GoRoute(
-            path: "task-complete",
-            builder:
-                (BuildContext context, GoRouterState state) =>
-                    TaskCompleteView(),
-          ),
-
-          GoRoute(
-            path: "payment-methods",
-            builder:
-                (BuildContext context, GoRouterState state) =>
-                    PaymentMethodsView(),
-
-            routes: [
-              GoRoute(
-                path: "minipay-connection",
-                builder:
-                    (BuildContext context, GoRouterState state) =>
-                        MiniPayConnectionView(),
-              ),
-            ],
-          ),
-
-          // Home and sub-routes
         ],
       ),
-
-      // Onboarding
+      GoRoute(
+        path: "/profile",
+        builder: (BuildContext context, GoRouterState state) => ProfileView(),
+      ),
+      GoRoute(
+        path: "/account-and-security",
+        builder:
+            (BuildContext context, GoRouterState state) =>
+                AccountAndSecurityView(),
+      ),
+      GoRoute(
+        path: "/help-and-support",
+        builder:
+            (BuildContext context, GoRouterState state) => HelpAndSupportView(),
+        routes: [
+          GoRoute(
+            path: "faq",
+            builder: (BuildContext context, GoRouterState state) => FAQView(),
+          ),
+          GoRoute(
+            path: "contact-support",
+            builder:
+                (BuildContext context, GoRouterState state) =>
+                    ContactSupportView(),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: "/task-summary",
+        builder:
+            (BuildContext context, GoRouterState state) => TaskSummaryView(),
+      ),
+      GoRoute(
+        path: "/task-itself",
+        builder:
+            (BuildContext context, GoRouterState state) => TaskItselfView(),
+      ),
+      GoRoute(
+        path: "/task-complete",
+        builder:
+            (BuildContext context, GoRouterState state) => TaskCompleteView(),
+      ),
+      GoRoute(
+        path: "/payment-methods",
+        builder:
+            (BuildContext context, GoRouterState state) => PaymentMethodsView(),
+        routes: [
+          GoRoute(
+            path: "minipay-connection",
+            builder:
+                (BuildContext context, GoRouterState state) =>
+                    MiniPayConnectionView(),
+          ),
+        ],
+      ),
     ],
   );
 });

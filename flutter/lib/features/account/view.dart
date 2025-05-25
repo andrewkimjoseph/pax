@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pax/features/account_and_security/view.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/local/activity_providers.dart';
@@ -275,12 +274,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
                   ),
                   InkWell(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AccountAndSecurityView(),
-                        ),
-                      );
+                      context.push('/account-and-security');
                     },
                     child: AccountOptionCard(
                       'account',

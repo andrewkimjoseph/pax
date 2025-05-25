@@ -3,10 +3,10 @@ import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:pax/data/forum_reports.dart';
 import 'package:pax/extensions/tooltip.dart';
 import 'package:pax/theming/colors.dart';
+import 'package:pax/utils/url_handler.dart';
 import 'package:pax/widgets/current_balance_card.dart';
 import 'package:pax/widgets/published_reports_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class DashboardView extends ConsumerStatefulWidget {
   const DashboardView({super.key});
@@ -97,7 +97,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                           children: [
                             Button(
                               onPressed: () {
-                                launchExternalUrl(
+                                UrlHandler.launchInExternalBrowser(
                                   'https://x.com/thecanvassing',
                                 );
                               },
@@ -195,12 +195,6 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
   }
 }
 
-Future<void> launchExternalUrl(String url) async {
-  final Uri uri = Uri.parse(url);
-  if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-    // Show error if URL can't be launched
-  }
-}
 
 // String? selectedValue;
 // @override
@@ -217,3 +211,4 @@ Future<void> launchExternalUrl(String url) async {
 // Widget build(BuildContext context) {
 //   return 
 // }
+

@@ -143,7 +143,7 @@ class _TaskCompleteViewState extends ConsumerState<TaskCompleteView> {
                   height: 48,
                   child: PrimaryButton(
                     onPressed: () {
-                      context.pushReplacement('/');
+                      context.pushReplacement('/home');
                     },
                     child: Text(
                       'OK',

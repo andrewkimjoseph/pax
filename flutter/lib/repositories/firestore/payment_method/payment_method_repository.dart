@@ -32,7 +32,7 @@ class PaymentMethodRepository {
     required String paxAccountId,
     required String walletAddress,
     int predefinedId = 1,
-    String name = 'minipay',
+    String name = 'MiniPay',
     bool isDefault = false,
   }) async {
     try {

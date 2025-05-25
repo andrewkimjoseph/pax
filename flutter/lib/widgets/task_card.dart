@@ -211,11 +211,11 @@ class TaskCard extends ConsumerWidget {
 
                 if (screening?.txnHash != null) {
                   if (context.mounted) {
-                    context.go("/task-itself");
+                    context.push('/task-summary');
                   }
                 } else {
                   if (context.mounted) {
-                    context.go('/task-summary');
+                    context.push('/task-summary');
                   }
                 }
               },

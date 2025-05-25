@@ -147,14 +147,19 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                 'lib/assets/svgs/withdrawal_complete.svg',
               ).withPadding(bottom: 8),
 
-              const Text(
-                'Withdrawal Complete!',
-                style: TextStyle(
-                  color: PaxColors.deepPurple,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ).withPadding(bottom: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Withdrawal Complete!',
+                    style: TextStyle(
+                      color: PaxColors.deepPurple,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ).withPadding(bottom: 8).withAlign(Alignment.center),
+                ],
+              ),
 
               Column(
                 children: [
@@ -200,7 +205,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                       onPressed: () {
                         (context).pop();
                         context.pushReplacement(
-                          "/",
+                          "/home",
                         ); // Go back to previous screen
                       },
                     ),

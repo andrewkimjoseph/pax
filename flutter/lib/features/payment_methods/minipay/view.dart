@@ -12,9 +12,9 @@ import 'package:pax/theming/colors.dart';
 import 'package:pax/widgets/gooddollar_verification_steps.dart';
 import 'package:pax/services/notifications/notification_service.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
+import 'package:pax/utils/url_handler.dart';
 
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
-import 'package:url_launcher/url_launcher.dart';
 
 class MiniPayConnectionView extends ConsumerStatefulWidget {
   const MiniPayConnectionView({super.key});
@@ -54,22 +54,8 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
   }
 
   // Show success dialog when connection is successful
-  void _showSuccessDialog() async {
-    // Send notification about successful connection
-    final fcmToken = await ref.read(fcmTokenProvider.future);
-    if (fcmToken != null) {
-      final notificationService = NotificationService();
-      await notificationService.sendPaymentMethodLinkedNotification(
-        token: fcmToken,
-        paymentData: {
-          'paymentMethodName': 'MiniPay',
-          'walletAddress': _walletAddressController.text.trim(),
-        },
-      );
-    }
-
-    if (!mounted) return;
-
+  void _showSuccessDialog() {
+    // Show dialog immediately
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -107,6 +93,10 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                     child: PrimaryButton(
                       child: const Text('OK'),
                       onPressed: () {
+                        // Reset the connection state before popping
+                        ref
+                            .read(miniPayConnectionProvider.notifier)
+                            .resetState();
                         context.pop();
                         context.pop(); // Pop the MiniPayConnectionView too
                       },
@@ -119,6 +109,28 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
         );
       },
     );
+
+    // Send notification in the background
+    _sendNotification();
+  }
+
+  Future<void> _sendNotification() async {
+    try {
+      final fcmToken = await ref.read(fcmTokenProvider.future);
+      if (fcmToken != null) {
+        final notificationService = NotificationService();
+        await notificationService.sendPaymentMethodLinkedNotification(
+          token: fcmToken,
+          paymentData: {
+            'paymentMethodName': 'MiniPay',
+            'walletAddress': _walletAddressController.text.trim(),
+          },
+        );
+      }
+    } catch (e) {
+      // Silently handle notification errors
+      debugPrint('Failed to send notification: $e');
+    }
   }
 
   @override
@@ -351,9 +363,10 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                         ).withPadding(right: 2),
                         GestureDetector(
                           onPanDown:
-                              (details) =>
-                                  _launchExternalUrl('https://www.minipay.to/'),
-
+                              (details) => UrlHandler.launchInAppWebView(
+                                context,
+                                'https://www.minipay.to/',
+                              ),
                           child: Row(
                             children: [
                               const Text(
@@ -576,12 +589,5 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
         ),
       ),
     );
-  }
-
-  Future<void> _launchExternalUrl(String url) async {
-    final Uri uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      // Show error if URL can't be launched
-    }
   }
 }

@@ -8,6 +8,7 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/providers/local/reward_state_provider.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
 import 'package:pax/utils/currency_symbol.dart';
@@ -65,6 +66,8 @@ class RewardService {
           },
         );
       }
+
+      ref.invalidate(activityRepositoryProvider);
 
       return rewardResult;
     } catch (e) {
