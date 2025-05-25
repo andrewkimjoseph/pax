@@ -104,7 +104,7 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
                     onPressed:
                         isContinueEnabled
                             ? () {
-                              context.go(
+                              context.push(
                                 '/wallet/withdraw/select-wallet/review-summary',
                               );
                             }
