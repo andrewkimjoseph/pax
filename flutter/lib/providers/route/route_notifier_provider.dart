@@ -4,8 +4,11 @@ import 'package:pax/providers/auth/auth_provider.dart';
 
 class RouterNotifier extends ChangeNotifier {
   RouterNotifier(this.ref) {
-    ref.listen(authStateForRouterProvider, (_, __) {
-      notifyListeners();
+    ref.listen(authStateForRouterProvider, (previous, next) {
+      // Only notify if the auth state actually changed
+      if (previous != next) {
+        notifyListeners();
+      }
     });
   }
 
