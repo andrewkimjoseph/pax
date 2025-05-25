@@ -10,6 +10,7 @@ import 'package:pax/features/home/tasks/view.dart';
 import 'package:pax/features/onboarding/view_model.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/theming/colors.dart';
+import 'package:pax/utils/url_handler.dart';
 import 'package:pax/widgets/account/account_option_card.dart';
 import 'package:pax/widgets/contact_support_card.dart';
 import 'package:pax/widgets/help_and_support.dart';
@@ -80,11 +81,11 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
                 children: [
                   InkWell(
                     onTap: () {
-                      launchExternalUrl(
+                      UrlHandler.launchInAppWebView(
+                        context,
                         "https://tally.so/r/nGy7V2?authId=${participant?.id}",
                       );
                     },
-
                     child: ContactSupportCard(
                       'Raise a Ticket',
                       'customer_support',
@@ -93,7 +94,10 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
 
                   InkWell(
                     onTap: () {
-                      launchExternalUrl("https://thecanvassing.xyz");
+                      UrlHandler.launchInAppWebView(
+                        context,
+                        "https://thecanvassing.xyz",
+                      );
                     },
                     child: ContactSupportCard('Website', 'website'),
                   ),
@@ -105,7 +109,9 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
                   // ),
                   InkWell(
                     onTap: () {
-                      launchExternalUrl("https://x.com/thecanvassing");
+                      UrlHandler.launchInExternalBrowser(
+                        "https://x.com/thecanvassing",
+                      );
                     },
                     child: ContactSupportCard('X', 'x'),
                   ),
