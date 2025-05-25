@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/services/branch_service.dart';
+import 'package:pax/models/auth/auth_state_model.dart';
 
 /// A widget that handles app lifecycle events to refresh auth state
 /// when the app is resumed from background
@@ -45,9 +46,11 @@ class _AppLifecycleHandlerState extends ConsumerState<AppLifecycleHandler>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      // When app is resumed from background, refresh auth state
-      // This helps detect if the user was deleted on the backend while the app was in background
-      ref.read(authProvider.notifier).refreshUserState();
+      // Only refresh auth state if we're not already authenticated
+      final currentAuthState = ref.read(authProvider);
+      if (currentAuthState.state != AuthState.authenticated) {
+        ref.read(authProvider.notifier).refreshUserState();
+      }
     }
   }
 
