@@ -2,6 +2,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
 import 'package:pax/providers/db/payment_method/payment_method_provider.dart';
@@ -319,6 +320,32 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
 
         // Refresh participant data in state
         await ref.read(participantProvider.notifier).refreshParticipant();
+
+        final participant = ref.read(participantProvider);
+
+        ref.read(analyticsProvider).identifyUser({
+          '[Pax] Id': participant.participant?.id,
+          '[Pax] Display Name': participant.participant?.displayName,
+          '[Pax] Email Address': participant.participant?.emailAddress,
+          '[Pax] Phone Number': participant.participant?.phoneNumber,
+          '[Pax] Gender': participant.participant?.gender,
+          '[Pax] Country': participant.participant?.country,
+          '[Pax] Date of Birth': participant.participant?.dateOfBirth,
+          '[Pax] Profile Picture URI':
+              participant.participant?.profilePictureURI,
+          '[Pax] GoodDollar Identity Time Last Authenticated':
+              participant.participant?.goodDollarIdentityTimeLastAuthenticated,
+          '[Pax] GoodDollar Identity Expiry Date':
+              participant.participant?.goodDollarIdentityExpiryDate,
+          '[Pax] Time Created': participant.participant?.timeCreated,
+          '[Pax] Time Updated': participant.participant?.timeUpdated,
+        });
+
+        final paymentMethod = ref.read(paymentMethodsProvider).paymentMethods;
+
+        ref
+            .read(analyticsProvider)
+            .minipayConnectionComplete(paymentMethod.first.toMap());
 
         // Set state to success once everything is complete
         state = state.copyWith(

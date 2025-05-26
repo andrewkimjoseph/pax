@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' show InkWell;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
+import 'package:pax/data/faqs.dart';
 import 'package:pax/exports/shadcn.dart';
 import 'package:pax/models/faq.dart';
 import 'package:pax/theming/colors.dart';
@@ -20,8 +21,6 @@ class FAQView extends ConsumerStatefulWidget {
 }
 
 class _FAQViewState extends ConsumerState<FAQView> {
-  String? genderValue;
-
   @override
   void initState() {
     super.initState();

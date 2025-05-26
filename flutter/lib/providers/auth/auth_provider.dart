@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/models/auth/auth_user_model.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/repositories/auth/auth_repository.dart';
 
 class AuthNotifier extends Notifier<AuthStateModel> {
@@ -177,6 +178,8 @@ class AuthNotifier extends Notifier<AuthStateModel> {
         state = state.copyWith(user: user, state: AuthState.authenticated);
         // Reset consecutive failures on successful sign in
         _consecutiveValidationFailures = 0;
+
+        ref.read(analyticsProvider).setUserId(user.uid);
       } else {
         // User cancelled the sign-in flow
         state = state.copyWith(state: AuthState.unauthenticated);

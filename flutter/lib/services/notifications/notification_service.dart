@@ -6,20 +6,27 @@ import 'package:pax/repositories/firestore/fcm_token/fcm_token_repository.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:intl/intl.dart';
 
+/// A singleton service that handles both local and remote (Firebase Cloud Messaging) notifications
+/// for the application. It manages notification permissions, token management, and provides
+/// methods for sending various types of notifications.
 class NotificationService {
+  // Singleton instance
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
 
+  // Core notification plugins
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
   final FcmTokenRepository _repository;
 
-  String? _currentToken;
-  String? _currentUserId;
-  bool _isInitialized = false;
-  bool _isSavingToken = false;
+  // State management variables
+  String? _currentToken; // Current FCM token
+  String? _currentUserId; // Current user's ID
+  bool _isInitialized = false; // Initialization status
+  bool _isSavingToken = false; // Token saving status
 
+  /// Android notification channel configuration for high importance notifications
   static const AndroidNotificationChannel channel = AndroidNotificationChannel(
     'high_importance_channel',
     'High Importance Notifications',
@@ -27,8 +34,11 @@ class NotificationService {
     importance: Importance.high,
   );
 
+  // Private constructor for singleton pattern
   NotificationService._internal() : _repository = FcmTokenRepository();
 
+  /// Initializes the notification service by setting up both local and Firebase notifications.
+  /// This method should be called when the app starts.
   Future<void> initialize() async {
     if (_isInitialized) {
       if (kDebugMode) print('Notification Service: Already initialized');
@@ -45,6 +55,7 @@ class NotificationService {
     }
   }
 
+  /// Initializes local notifications with platform-specific settings
   Future<void> _initializeLocalNotifications() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('ic_main');
@@ -81,6 +92,7 @@ class NotificationService {
     }
   }
 
+  /// Initializes Firebase Cloud Messaging and requests notification permissions
   Future<void> _initializeFirebaseMessaging() async {
     final settings = await _messaging.requestPermission(
       alert: true,
@@ -110,6 +122,8 @@ class NotificationService {
     }
   }
 
+  /// Retrieves the current FCM token. If not initialized, initializes the service first.
+  /// Returns null if token retrieval fails.
   Future<String?> getToken() async {
     try {
       if (!_isInitialized) await initialize();
@@ -125,6 +139,8 @@ class NotificationService {
     }
   }
 
+  /// Saves the FCM token for a specific participant in the database.
+  /// Handles concurrent save attempts to prevent race conditions.
   Future<void> saveTokenForParticipant(String participantId) async {
     if (_isSavingToken) {
       if (kDebugMode) {
@@ -159,6 +175,8 @@ class NotificationService {
     }
   }
 
+  /// Sets up a listener for FCM token refresh events and automatically saves the new token
+  /// when it changes.
   void listenForTokenRefresh(String participantId) {
     _currentUserId = participantId;
     _messaging.onTokenRefresh.listen((newToken) {
@@ -174,6 +192,8 @@ class NotificationService {
     });
   }
 
+  /// Displays a local notification with the specified parameters.
+  /// Used for both local notifications and converting remote notifications to local ones.
   Future<void> showNotification({
     required int id,
     required String title,
@@ -197,6 +217,8 @@ class NotificationService {
     );
   }
 
+  /// Sets up handling of foreground messages (when app is open).
+  /// Converts remote notifications to local notifications for display.
   void setupForegroundMessageHandling(Function(RemoteMessage) onMessageTap) {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       if (kDebugMode) {
@@ -219,6 +241,8 @@ class NotificationService {
     });
   }
 
+  /// Checks for any initial message that opened the app from a terminated state
+  /// and sets up handling of notification taps when app is in background.
   Future<void> checkForInitialMessage(
     Function(RemoteMessage) onMessageTap,
   ) async {
@@ -234,11 +258,13 @@ class NotificationService {
     FirebaseMessaging.onMessageOpenedApp.listen(onMessageTap);
   }
 
+  /// Cleans up the service by resetting state variables
   void dispose() {
     _currentUserId = null;
     _currentToken = null;
   }
 
+  /// Formats numeric amounts for display in notifications
   String _formatAmount(dynamic amount) {
     if (amount is num) {
       final formatter = NumberFormat('#,###');
@@ -249,10 +275,12 @@ class NotificationService {
     return amount.toString();
   }
 
+  /// Converts dynamic data to string format for notification payload
   Map<String, String> _convertDataToStrings(Map<String, dynamic> data) {
     return data.map((key, value) => MapEntry(key, value.toString()));
   }
 
+  /// Sends a remote notification using Firebase Cloud Functions
   Future<void> sendRemoteNotification({
     required String title,
     required String body,
@@ -278,6 +306,7 @@ class NotificationService {
     }
   }
 
+  /// Sends a notification when a payment method is successfully linked
   Future<void> sendPaymentMethodLinkedNotification({
     required String token,
     required Map<String, dynamic> paymentData,
@@ -291,6 +320,7 @@ class NotificationService {
     );
   }
 
+  /// Sends a notification when a withdrawal is successful
   Future<void> sendWithdrawalSuccessNotification({
     required String token,
     required Map<String, dynamic> withdrawalData,
@@ -304,6 +334,7 @@ class NotificationService {
     );
   }
 
+  /// Sends a notification when a reward is received
   Future<void> sendRewardNotification({
     required String token,
     required Map<String, dynamic> rewardData,
