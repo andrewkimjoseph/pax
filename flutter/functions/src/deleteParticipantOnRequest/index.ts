@@ -76,13 +76,6 @@ export const deleteParticipantOnRequest = onCall(FUNCTION_RUNTIME_OPTS, async (r
       .get();
     fcmTokensSnapshot.docs.forEach((doc) => batch.delete(doc.ref));
 
-    // 7. Delete screenings
-    const screeningsSnapshot = await db
-      .collection('screenings')
-      .where('participantId', '==', participantId)
-      .get();
-    screeningsSnapshot.docs.forEach((doc) => batch.delete(doc.ref));
-
     // Commit all deletions
     await batch.commit();
 
