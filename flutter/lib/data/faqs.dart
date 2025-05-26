@@ -3,37 +3,35 @@ import 'package:pax/models/faq.dart';
 class FAQs {
   static const List<FAQ> faqs = [
     FAQ(
-      question: 'How many times does the platform run surveys?',
+      question: 'How many times does the platform run micro tasks?',
+      answer: 'Once every week. So, a total of 4 surveys a month.',
+    ),
+    FAQ(
+      question: 'What time of the day is the micro task made available?',
+      answer: '9:00 AM WAT / 11:00 AM EAT',
+    ),
+    FAQ(
+      question: 'On which day is the micro task available?',
+      answer: 'Wednesday',
+    ),
+    FAQ(
+      question: 'What type of micro tasks are available?',
       answer:
-          'Once every day, for three days each week. So, a total of 3 surveys a week.',
+          'At the moment, we have only one type of micro task: form filling.',
     ),
     FAQ(
-      question: 'What time of the day is the survey made available?',
-      answer: 'From 9 WAT / 11 EAT',
-    ),
-    FAQ(
-      question: 'On which days are surveys available?',
-      answer: 'Wednesday, Thursday, and Friday',
-    ),
-    FAQ(
-      question: 'How many questions are there for a single survey?',
+      question: 'How many questions are there for a task?',
       answer: '5 - 10 questions that require little to no typing input.',
     ),
     FAQ(
       question:
-          'I have been missing out on survey booking, what could be wrong?',
+          'I have been missing out on task screening, what could be wrong?',
       answer:
-          'Survey booking is on a first come, first served basis. Because of the high volumes, once a survey is listed, people rush and thus, the booking closes faster. You just need to be quick enough.',
+          'Survey screening is on a first come, first served basis. Because of the high volumes, once a survey is listed, people rush and thus, the screening closes faster. You just need to be quick enough.',
     ),
     FAQ(
-      question: 'What happens when I book a slot in a survey?',
-      answer:
-          'Survey booking is on a first come, first served basis. Because of the high volumes, once a survey is listed, people rush and thus, the booking closes faster. You just need to be quick enough.',
-    ),
-    FAQ(
-      question: 'How much money can I make from answering surveys per month?',
-      answer:
-          'If you book and complete all possible surveys in a month, you could make up to 0.12 cUSD, which is enough for airtime.',
+      question: 'What happens when I book a slot in a task?',
+      answer: 'You will be let in, and you will be able to complete the task.',
     ),
   ];
 }

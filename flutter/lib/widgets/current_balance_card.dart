@@ -159,7 +159,7 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
                         }
                         : null,
                 child: Text(
-                  'Wallet',
+                  widget.nextLocation == "/wallet" ? "Wallet" : "Withdraw",
                   style: TextStyle(
                     fontWeight: FontWeight.w900,
                     fontSize: 14,

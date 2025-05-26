@@ -1,6 +1,8 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pax/env/env.dart';
+import 'package:pax/providers/analytics_provider.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
 import 'package:pax/providers/remote_config/remote_config_provider.dart';
 import 'package:pax/routing/service.dart';
@@ -32,6 +34,12 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _setupNotifications();
+    _initializeAnalytics();
+  }
+
+  void _initializeAnalytics() {
+    final amplitudeApiKey = Env.amplitudeAPIKey;
+    ref.read(analyticsProvider).initialize(amplitudeApiKey);
   }
 
   @override

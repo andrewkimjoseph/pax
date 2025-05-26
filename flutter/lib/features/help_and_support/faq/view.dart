@@ -21,8 +21,6 @@ class FAQView extends ConsumerStatefulWidget {
 }
 
 class _FAQViewState extends ConsumerState<FAQView> {
-  String? genderValue;
-
   @override
   void initState() {
     super.initState();
