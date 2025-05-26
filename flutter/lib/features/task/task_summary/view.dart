@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart' show InkWell;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
@@ -165,7 +166,10 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
+              onPressed: () {
+                context.pop();
+                context.pop();
+              },
               child: Text('OK'),
             ),
           ],
@@ -184,9 +188,8 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
           backgroundColor: PaxColors.white,
           child: Row(
             children: [
-              GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onPanDown: (details) {
+              InkWell(
+                onTap: () {
                   context.pop();
                 },
                 child: SvgPicture.asset('lib/assets/svgs/arrow_left_long.svg'),

@@ -17,10 +17,12 @@ class TasksView extends ConsumerStatefulWidget {
 class _TaskViewState extends ConsumerState<TasksView> {
   @override
   Widget build(BuildContext context) {
-    final participantId = ref.watch(participantProvider).participant?.id;
+    final participant = ref.watch(participantProvider).participant;
 
     // Watch the tasks stream
-    final tasksStream = ref.watch(availableTasksStreamProvider(participantId));
+    final tasksStream = ref.watch(
+      availableTasksStreamProvider(participant?.id),
+    );
 
     final paxAccount = ref.watch(paxAccountProvider).account;
 
@@ -29,14 +31,43 @@ class _TaskViewState extends ConsumerState<TasksView> {
     // Watch the screenings stream
     final screeningsStream = ref.watch(participantScreeningsStreamProvider);
 
+    final participantIsComplete =
+        (participant?.country != null &&
+            participant?.dateOfBirth != null &&
+            participant?.gender != null);
+
+    final hasPaymentMethod = paxAccount?.contractAddress != null;
+
     // Combine tasks and screenings
     return Scaffold(
       child:
-          paxAccount?.contractAddress == null
-              ? const Center(
-                child: Text(
-                  'Connect a payment method first to see available tasks.',
-                ),
+          !participantIsComplete
+              ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'Please complete your profile by adding your country, date of birth, and gender to see available tasks.',
+                        textAlign: TextAlign.center,
+                      ).withPadding(all: 16).expanded(),
+                    ],
+                  ),
+                ],
+              )
+              : !hasPaymentMethod
+              ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'Please connect a payment method to see available tasks.',
+                        textAlign: TextAlign.center,
+                      ).withPadding(all: 16).expanded(),
+                    ],
+                  ),
+                ],
               )
               : tasksStream.when(
                 data: (tasks) {
@@ -56,8 +87,6 @@ class _TaskViewState extends ConsumerState<TasksView> {
                       return SingleChildScrollView(
                         child: Column(
                           children: [
-                            // Optional category filter UI
-
                             // Task list with matched screenings
                             for (var task in tasks)
                               TaskCard(
