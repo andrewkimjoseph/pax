@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pax/models/firestore/screening/screening_model.dart';
 import 'package:pax/models/firestore/task/task_model.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/local/task_context/main_task_context_provider.dart';
 import 'package:pax/providers/local/task_context/screening_context_provider.dart';
 import 'package:pax/providers/local/task_master_provider.dart';
@@ -209,9 +210,17 @@ class TaskCard extends ConsumerWidget {
                       .setScreening(screening!);
                 }
 
+                ref.read(analyticsProvider).taskTapped({
+                  "taskId": task.id,
+                  "taskTitle": task.title,
+                  "taskType": task.type,
+                  "taskCategory": task.category,
+                  "taskMasterServerWalletId": serverWalletId,
+                });
+
                 if (screening?.txnHash != null) {
                   if (context.mounted) {
-                    context.push('/task-summary');
+                    context.push('/task-itself');
                   }
                 } else {
                   if (context.mounted) {
@@ -224,7 +233,7 @@ class TaskCard extends ConsumerWidget {
               ).withBorderRadius(borderRadius: BorderRadius.circular(7)),
 
               child: Text(
-                screening != null ? 'Go to task' : 'Check it out',
+                screening?.txnHash != null ? 'Go to task' : 'Check it out',
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 14,

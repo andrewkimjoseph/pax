@@ -14,6 +14,7 @@ import 'package:pax/widgets/account/account_option_card.dart';
 import 'package:pax/widgets/help_and_support.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 
 import '../../theming/colors.dart' show PaxColors;
 import '../../utils/clipper.dart';
@@ -27,8 +28,6 @@ class HelpAndSupportView extends ConsumerStatefulWidget {
 }
 
 class _HelpAndSupportViewState extends ConsumerState<HelpAndSupportView> {
-  String? selectedValue;
-  String? genderValue;
   @override
   void initState() {
     super.initState();
@@ -79,43 +78,24 @@ class _HelpAndSupportViewState extends ConsumerState<HelpAndSupportView> {
                 spacing: 24,
                 children: [
                   InkWell(
-                    onTap: () {
-                      context.push("/help-and-support/faq");
-                    },
+                    onTap: _onFaqTapped,
                     child: HelpAndSupportCard('FAQ'),
                   ),
 
                   InkWell(
-                    onTap: () {
-                      context.push("/help-and-support/contact-support");
-                    },
+                    onTap: _onContactSupportTapped,
                     child: HelpAndSupportCard('Contact Support'),
                   ),
                   InkWell(
-                    onTap: () {
-                      UrlHandler.launchInAppWebView(
-                        context,
-                        "https://canvassing.notion.site/Privacy-Policy-9446d085f6f3473087868007d931247c?pvs=74",
-                      );
-                    },
+                    onTap: _onPrivacyPolicyTapped,
                     child: HelpAndSupportCard('Privacy Policy'),
                   ),
                   InkWell(
-                    onTap: () {
-                      UrlHandler.launchInAppWebView(
-                        context,
-                        "https://canvassing.notion.site/Terms-of-Service-1285e1ccc593808f8d1df0b444c36b85?pvs=74",
-                      );
-                    },
+                    onTap: _onTermsOfServiceTapped,
                     child: HelpAndSupportCard('Terms of Service'),
                   ),
                   InkWell(
-                    onTap: () {
-                      UrlHandler.launchInAppWebView(
-                        context,
-                        "https://optimistic-volunteers-396150.framer.app/",
-                      );
-                    },
+                    onTap: _onAboutUsTapped,
                     child: HelpAndSupportCard('About Us'),
                   ),
                 ],
@@ -124,6 +104,40 @@ class _HelpAndSupportViewState extends ConsumerState<HelpAndSupportView> {
           ],
         ),
       ).withPadding(all: 8),
+    );
+  }
+
+  void _onFaqTapped() {
+    ref.read(analyticsProvider).faqTapped();
+    context.push("/help-and-support/faq");
+  }
+
+  void _onContactSupportTapped() {
+    ref.read(analyticsProvider).contactSupportTapped();
+    context.push("/help-and-support/contact-support");
+  }
+
+  void _onPrivacyPolicyTapped() {
+    ref.read(analyticsProvider).privacyPolicyTapped();
+    UrlHandler.launchInAppWebView(
+      context,
+      "https://canvassing.notion.site/Privacy-Policy-9446d085f6f3473087868007d931247c?pvs=74",
+    );
+  }
+
+  void _onTermsOfServiceTapped() {
+    ref.read(analyticsProvider).termsOfServiceTapped();
+    UrlHandler.launchInAppWebView(
+      context,
+      "https://canvassing.notion.site/Terms-of-Service-1285e1ccc593808f8d1df0b444c36b85?pvs=74",
+    );
+  }
+
+  void _onAboutUsTapped() {
+    ref.read(analyticsProvider).aboutUsTapped();
+    UrlHandler.launchInAppWebView(
+      context,
+      "https://optimistic-volunteers-396150.framer.app/",
     );
   }
 }

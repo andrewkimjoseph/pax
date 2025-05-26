@@ -11,6 +11,7 @@ import 'package:pax/theming/colors.dart';
 import 'package:pax/providers/local/task_context/main_task_context_provider.dart';
 import 'package:pax/providers/local/task_completion_state_provider.dart';
 import 'package:pax/services/task_completion_service.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 
 class TaskItselfView extends ConsumerStatefulWidget {
   const TaskItselfView({super.key});
@@ -26,6 +27,7 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
   @override
   void initState() {
     super.initState();
+    ref.read(analyticsProvider).taskTapped();
 
     // Reset task completion state
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -154,9 +156,21 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
           // Get the task completion ID from the result
           final taskCompletionId = completionState.result?.taskCompletionId;
 
+          ref.read(analyticsProvider).taskCompletionComplete({
+            "taskId": taskId,
+            "screeningId": screeningId,
+            "taskCompletionId": taskCompletionId,
+          });
+
           if (taskCompletionId != null) {
             // Schedule rewarding after the build cycle
             WidgetsBinding.instance.addPostFrameCallback((_) {
+              ref.read(analyticsProvider).rewardingStarted({
+                "taskId": taskId,
+                "screeningId": screeningId,
+                "taskCompletionId": taskCompletionId,
+              });
+
               ref
                   .read(rewardServiceProvider)
                   .rewardParticipant(taskCompletionId: taskCompletionId);
@@ -174,6 +188,14 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
             }
           });
         } else if (rewardState.state == RewardState.error) {
+          final taskCompletionId = completionState.result?.taskCompletionId;
+
+          ref.read(analyticsProvider).rewardingFailed({
+            "taskId": taskId,
+            "screeningId": screeningId,
+            "taskCompletionId": taskCompletionId,
+          });
+
           // Dismiss the dialog after a short delay
           Future.delayed(Duration(milliseconds: 500), () {
             if (dialogContext.mounted) {

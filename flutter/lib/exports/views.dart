@@ -9,7 +9,7 @@ export 'package:pax/features/home/tasks/view.dart';
 export 'package:pax/features/home/view.dart';
 export 'package:pax/features/onboarding/view.dart';
 export 'package:pax/features/payment_methods/view.dart';
-export 'package:pax/features/payment_methods/minipay/view.dart';
+export 'package:pax/features/payment_methods/minipay-connection/view.dart';
 export 'package:pax/features/profile/view.dart';
 export 'package:pax/features/root/view.dart';
 export 'package:pax/features/task/task_summary/view.dart';

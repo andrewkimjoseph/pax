@@ -2,6 +2,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/models/local/withdrawal_state_model.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
 import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/providers/local/withdrawal_service_provider.dart';
@@ -71,6 +72,12 @@ class WithdrawNotifier extends Notifier<WithdrawStateModel> {
         txnHash: result['txnHash'],
         withdrawalId: result['withdrawalId'],
       );
+
+      ref.read(analyticsProvider).withdrawalComplete({
+        "amount": amountToWithdraw,
+        "tokenId": tokenId,
+        "selectedPaymentMethodId": paymentMethodId,
+      });
 
       // Send notification about successful withdrawal
       final fcmToken = await ref.read(fcmTokenProvider.future);

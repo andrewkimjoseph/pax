@@ -323,8 +323,14 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
 
         final participant = ref.read(participantProvider);
 
+        final paymentMethod = ref.read(paymentMethodsProvider).paymentMethods;
+
+        ref
+            .read(analyticsProvider)
+            .minipayConnectionComplete(paymentMethod.first.toMap());
+
         ref.read(analyticsProvider).identifyUser({
-          '[Pax] Id': participant.participant?.id,
+          '[Pax] Participant Id': participant.participant?.id,
           '[Pax] Display Name': participant.participant?.displayName,
           '[Pax] Email Address': participant.participant?.emailAddress,
           '[Pax] Phone Number': participant.participant?.phoneNumber,
@@ -339,13 +345,16 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
               participant.participant?.goodDollarIdentityExpiryDate,
           '[Pax] Time Created': participant.participant?.timeCreated,
           '[Pax] Time Updated': participant.participant?.timeUpdated,
+          '[Pax] MiniPay Wallet Address': primaryPaymentMethod,
+          '[Pax] Privy Server Wallet Id': paxAccount.serverWalletId,
+          '[Pax] Privy Server Wallet Address': paxAccount.serverWalletAddress,
+          '[Pax] Smart Account Wallet Address':
+              paxAccount.smartAccountWalletAddress,
+          '[Pax] PaxAccount Id': paxAccount.id,
+          '[Pax] PaxAccount Contract Address': paxAccount.contractAddress,
+          '[Pax] PaxAccount Contract Creation Txn Hash':
+              paxAccount.contractCreationTxnHash,
         });
-
-        final paymentMethod = ref.read(paymentMethodsProvider).paymentMethods;
-
-        ref
-            .read(analyticsProvider)
-            .minipayConnectionComplete(paymentMethod.first.toMap());
 
         // Set state to success once everything is complete
         state = state.copyWith(
@@ -363,6 +372,9 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
         );
       }
     } catch (e) {
+      ref.read(analyticsProvider).minipayConnectionFailed({
+        "primaryPaymentMethod": primaryPaymentMethod,
+      });
       state = state.copyWith(
         state: MiniPayConnectionState.error,
         errorMessage: 'An error occurred: ${e.toString()}',

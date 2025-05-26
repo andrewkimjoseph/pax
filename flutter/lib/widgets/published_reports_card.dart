@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:pax/features/report_page/view.dart' show ReportPageView;
+import 'package:go_router/go_router.dart';
 import 'package:pax/models/forum_report.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/gradient_border.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -70,12 +71,10 @@ class _ForumReportCardState extends ConsumerState<ForumReportCard> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ReportPageView(widget.report.postURI!),
-          ),
-        );
+        context.push("/report-page", extra: widget.report.postURI);
+        ref
+            .read(analyticsProvider)
+            .publishedReportTapped(widget.report.toMap());
       },
       child: Container(
         decoration: BoxDecoration(

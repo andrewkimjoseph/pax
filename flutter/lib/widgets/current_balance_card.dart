@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
 import 'package:pax/extensions/tooltip.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
 import 'package:pax/providers/local/reward_currency_context.dart';
 import 'package:pax/providers/local/reward_state_provider.dart';
@@ -155,6 +156,22 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
                           ref
                               .read(withdrawContextProvider.notifier)
                               .setWithdrawContext(tokenId ?? 1, currentBalance);
+
+                          if (widget.nextLocation == "/wallet") {
+                            ref.read(analyticsProvider).homeWalletTapped({
+                              "selectedCurrency": selectedCurrency,
+                              "currentBalance": currentBalance,
+                              "tokenId": tokenId,
+                              "toLocation": widget.nextLocation,
+                            });
+                          } else {
+                            ref.read(analyticsProvider).walletWithdrawTapped({
+                              "selectedCurrency": selectedCurrency,
+                              "currentBalance": currentBalance,
+                              "tokenId": tokenId,
+                              "toLocation": widget.nextLocation,
+                            });
+                          }
                           context.push(widget.nextLocation);
                         }
                         : null,

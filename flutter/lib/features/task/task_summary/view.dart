@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
 import 'package:pax/providers/local/task_context/main_task_context_provider.dart';
@@ -33,6 +34,7 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
 
   // Method to handle screening process
   Future<void> _processScreening(BuildContext context) async {
+    ref.read(analyticsProvider).continueWithTaskTapped();
     final currentTask = ref.read(taskContextProvider)?.task;
     if (currentTask == null) {
       _showErrorDialog(context, 'Task not found');
@@ -50,6 +52,12 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
 
     // Call screening service
     try {
+      ref.read(analyticsProvider).screeningStarted({
+        "taskId": currentTask.id,
+        "taskManagerContractAddress": taskManagerContractAddress,
+        "taskMasterServerWalletId": taskMasterServerWalletId,
+      });
+
       await ref
           .read(screeningServiceProvider)
           .screenParticipant(
@@ -69,6 +77,12 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
         );
       }
     } catch (e) {
+      ref.read(analyticsProvider).screeningFailed({
+        "taskId": currentTask.id,
+        "taskManagerContractAddress": taskManagerContractAddress,
+        "taskMasterServerWalletId": taskMasterServerWalletId,
+      });
+
       if (context.mounted) {
         _showErrorDialog(context, e.toString());
       }

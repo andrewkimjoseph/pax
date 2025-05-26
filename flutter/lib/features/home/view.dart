@@ -126,6 +126,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         screenName = 'Tasks';
                         index = 1;
                       });
+                      ref.read(analyticsProvider).tasksTapped();
                     },
 
                     child: Text(

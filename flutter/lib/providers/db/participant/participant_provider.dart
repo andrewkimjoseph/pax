@@ -2,6 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/models/firestore/participant/participant_model.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/repositories/firestore/participant/participants_repository.dart';
 
@@ -125,6 +126,8 @@ class ParticipantNotifier extends Notifier<ParticipantStateModel> {
         data,
       );
 
+      ref.read(analyticsProvider).profileUpdateComplete();
+
       // Update state with updated participant
       state = state.copyWith(
         participant: updatedParticipant,
@@ -132,6 +135,7 @@ class ParticipantNotifier extends Notifier<ParticipantStateModel> {
       );
     } catch (e) {
       // Handle error
+      ref.read(analyticsProvider).profileUpdateFailed();
       state = state.copyWith(
         state: ParticipantState.error,
         errorMessage: e.toString(),

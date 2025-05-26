@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart' show Divider;
+import 'package:flutter/material.dart' show Divider, InkWell;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:pax/models/local/withdrawal_state_model.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/local/withdraw_context_provider.dart';
 import 'package:pax/providers/local/withdrawal_provider.dart';
 import 'package:pax/theming/colors.dart';
@@ -36,6 +37,8 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
 
   // Handle withdrawal process
   Future<void> _processWithdrawal() async {
+    ref.read(analyticsProvider).reviewSummaryWithdrawTapped();
+
     final withdrawContext = ref.read(withdrawContextProvider);
     if (withdrawContext == null) {
       _showErrorDialog('Withdrawal details not found');
@@ -60,6 +63,12 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
     });
 
     // Call withdraw provider to process the withdrawal
+    ref.read(analyticsProvider).withdrawalStarted({
+      "amount": amountToWithdraw,
+      "tokenId": tokenId,
+      "selectedPaymentMethodId": paymentMethod.id,
+    });
+
     ref
         .read(withdrawProvider.notifier)
         .withdrawToPaymentMethod(
@@ -268,9 +277,8 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
           backgroundColor: PaxColors.white,
           child: Row(
             children: [
-              GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onPanDown: (details) {
+              InkWell(
+                onTap: () {
                   context.pop();
                 },
                 child: SvgPicture.asset('lib/assets/svgs/arrow_left_long.svg'),

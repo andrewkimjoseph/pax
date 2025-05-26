@@ -24,4 +24,13 @@ class AuthUser {
 
   bool get isEmpty => uid.isEmpty;
   bool get isNotEmpty => !isEmpty;
+
+  Map<String, dynamic> toMap() {
+    return {
+      'uid': uid,
+      'email': email,
+      'displayName': displayName,
+      'photoURL': photoURL,
+    };
+  }
 }

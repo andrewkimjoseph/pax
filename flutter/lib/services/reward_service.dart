@@ -8,6 +8,7 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/providers/local/reward_state_provider.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
@@ -43,6 +44,14 @@ class RewardService {
 
       // Update state to complete with the result
       ref.read(rewardStateProvider.notifier).completeRewarding(rewardResult);
+
+      ref.read(analyticsProvider).rewardingComplete({
+        "taskId": rewardResult.taskId,
+        "taskCompletionId": rewardResult.taskCompletionId,
+        "rewardId": rewardResult.rewardId,
+        "amount": rewardResult.amount,
+        "currency": rewardResult.rewardCurrencyId,
+      });
 
       // Send notification about the reward
       final fcmToken = await ref.read(fcmTokenProvider.future);

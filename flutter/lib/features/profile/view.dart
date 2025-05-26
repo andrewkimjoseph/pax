@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -455,6 +456,9 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                 (isLoading || isProcessing)
                                     ? null
                                     : () async {
+                                      ref
+                                          .read(analyticsProvider)
+                                          .saveProfileChangesTapped();
                                       // Prevent double-pressing
                                       setState(() {
                                         isProcessing = true;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' show Divider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/db/payment_method/payment_method_provider.dart';
 import 'package:pax/providers/local/withdraw_context_provider.dart';
 import 'package:pax/widgets/withdrawal_option_card.dart';
@@ -104,6 +105,16 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
                     onPressed:
                         isContinueEnabled
                             ? () {
+                              ref
+                                  .read(analyticsProvider)
+                                  .continueSelectWalletTapped({
+                                    "amount": withdrawContext?.amountToWithdraw,
+                                    "tokenId": withdrawContext?.tokenId,
+                                    "selectedPaymentMethodId":
+                                        withdrawContext
+                                            ?.selectedPaymentMethod
+                                            ?.id,
+                                  });
                               context.push(
                                 '/wallet/withdraw/select-wallet/review-summary',
                               );

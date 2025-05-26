@@ -7,6 +7,7 @@
 // lib/services/screening_service.dart
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/providers/local/screening_state_provider.dart';
 import 'package:pax/providers/local/task_context/screening_context_provider.dart';
@@ -61,6 +62,16 @@ class ScreeningService {
       ref.read(screeningProvider.notifier).completeScreening(screeningResult);
 
       ref.invalidate(activityRepositoryProvider);
+
+      ref.read(analyticsProvider).screeningComplete({
+        "taskId": taskId,
+        "taskManagerContractAddress": taskManagerContractAddress,
+        "screeningId": screeningResult.screeningId,
+        "txnHash": screeningResult.txnHash,
+        "signature": screeningResult.signature,
+        "nonce": screeningResult.nonce,
+        "taskCompletionId": screeningResult.taskCompletionId,
+      });
     } catch (e) {
       // Update state to error with error message
       ref
