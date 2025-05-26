@@ -228,16 +228,24 @@ class TaskCard extends ConsumerWidget {
                   }
                 }
               },
-              style: const ButtonStyle.primary(
-                density: ButtonDensity.normal,
-              ).withBorderRadius(borderRadius: BorderRadius.circular(7)),
+              style: const ButtonStyle.primary(density: ButtonDensity.normal)
+                  .withBorderRadius(borderRadius: BorderRadius.circular(7))
+                  .withBackgroundColor(
+                    color:
+                        screening?.txnHash != null
+                            ? PaxColors.blue
+                            : PaxColors.deepPurple,
+                  ),
 
               child: Text(
                 screening?.txnHash != null ? 'Go to task' : 'Check it out',
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 14,
-                  color: PaxColors.white,
+                  color:
+                      screening?.txnHash != null
+                          ? PaxColors.black
+                          : PaxColors.white,
                 ),
               ),
             ),
