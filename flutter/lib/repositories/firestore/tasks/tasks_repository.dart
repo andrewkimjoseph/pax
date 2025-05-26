@@ -124,6 +124,12 @@ class TasksRepository {
         // If participant has been screened for this task, show it
         if (participantScreenedTaskIds.contains(task.id)) return true;
 
+        // Check if the task is past due
+        if (task.deadline != null &&
+            task.deadline!.toDate().isBefore(DateTime.now())) {
+          return false;
+        }
+
         // For tasks neither completed, in progress, nor screened by this participant,
         // check if they're full
         int currentScreenings = taskScreeningCounts[task.id] ?? 0;
