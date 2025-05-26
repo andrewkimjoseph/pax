@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/exports/views.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -88,6 +89,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         screenName = 'Dashboard';
                         index = 0;
                       });
+                      ref.read(analyticsProvider).dashboardTapped();
 
                       // showToast(
                       //   context: context,

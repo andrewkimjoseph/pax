@@ -2,7 +2,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/env/env.dart';
-import 'package:pax/providers/analytics_provider.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
 import 'package:pax/providers/remote_config/remote_config_provider.dart';
 import 'package:pax/routing/service.dart';

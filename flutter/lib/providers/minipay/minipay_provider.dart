@@ -2,6 +2,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
 import 'package:pax/providers/db/payment_method/payment_method_provider.dart';
@@ -319,6 +320,14 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
 
         // Refresh participant data in state
         await ref.read(participantProvider.notifier).refreshParticipant();
+
+        final participant = ref.read(participantProvider);
+
+        ref
+            .read(analyticsProvider)
+            .identifyUser(participant.participant?.toMap());
+
+        ref.read(analyticsProvider).minipayConnectionComplete();
 
         // Set state to success once everything is complete
         state = state.copyWith(
