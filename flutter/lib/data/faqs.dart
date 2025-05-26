@@ -1,9 +1,4 @@
-class FAQ {
-  final String question;
-  final String answer;
-
-  const FAQ({required this.question, required this.answer});
-}
+import 'package:pax/models/faq.dart';
 
 class FAQs {
   static const List<FAQ> faqs = [
