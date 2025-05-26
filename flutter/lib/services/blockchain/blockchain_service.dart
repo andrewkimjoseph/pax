@@ -166,4 +166,33 @@ class BlockchainService {
       return "$symbol ${balance.toStringAsFixed(8)}";
     }
   }
+
+  // Check if contract has sufficient balance for withdrawal
+  Future<bool> hasSufficientBalance(
+    String contractAddress,
+    String currencyAddress,
+    double amountToWithdraw,
+    int decimals,
+  ) async {
+    try {
+      final balance = await _getTokenBalance(
+        contractAddress,
+        currencyAddress,
+        decimals,
+      );
+
+      if (kDebugMode) {
+        print(
+          'Contract balance: $balance, Amount to withdraw: $amountToWithdraw',
+        );
+      }
+
+      return balance >= amountToWithdraw;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error checking contract balance: $e');
+      }
+      return false;
+    }
+  }
 }

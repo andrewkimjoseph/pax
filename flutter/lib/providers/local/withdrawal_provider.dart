@@ -12,10 +12,12 @@ import 'package:pax/services/notifications/notification_service.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
 import 'package:pax/utils/currency_symbol.dart';
 import 'package:pax/models/firestore/withdrawal/withdrawal_model.dart';
+import 'package:pax/services/blockchain/blockchain_service.dart';
 
 class WithdrawNotifier extends Notifier<WithdrawStateModel> {
   late final WithdrawalService _withdrawalService;
   final NotificationService _notificationService = NotificationService();
+  final BlockchainService _blockchainService = BlockchainService();
 
   @override
   WithdrawStateModel build() {
@@ -41,6 +43,8 @@ class WithdrawNotifier extends Notifier<WithdrawStateModel> {
     try {
       final auth = ref.read(authProvider);
       final userId = auth.user.uid;
+      final paxAccountState = ref.read(paxAccountProvider);
+      final paxAccount = paxAccountState.account;
 
       if (kDebugMode) {
         print(
@@ -49,6 +53,22 @@ class WithdrawNotifier extends Notifier<WithdrawStateModel> {
         print(
           'Using currency address: $currencyAddress with $decimals decimals',
         );
+      }
+
+      // Check if contract has sufficient balance
+      if (paxAccount?.contractAddress == null) {
+        throw Exception('Contract address not found');
+      }
+
+      final hasBalance = await _blockchainService.hasSufficientBalance(
+        paxAccount!.contractAddress!,
+        currencyAddress,
+        amountToWithdraw,
+        decimals,
+      );
+
+      if (!hasBalance) {
+        throw Exception('Insufficient contract balance for withdrawal');
       }
 
       // Call the withdrawal service
@@ -77,6 +97,8 @@ class WithdrawNotifier extends Notifier<WithdrawStateModel> {
         "amount": amountToWithdraw,
         "tokenId": tokenId,
         "selectedPaymentMethodId": paymentMethodId,
+        "contractAddress": paxAccount.contractAddress,
+        "currencyAddress": currencyAddress,
       });
 
       // Send notification about successful withdrawal
