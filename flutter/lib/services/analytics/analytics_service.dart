@@ -3,6 +3,7 @@ import 'package:amplitude_flutter/configuration.dart';
 import 'package:amplitude_flutter/events/base_event.dart';
 import 'package:amplitude_flutter/events/identify.dart';
 import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// A service class that handles all analytics events using Amplitude.
 class AnalyticsService {
@@ -13,6 +14,25 @@ class AnalyticsService {
   bool _isInitialized = false;
 
   AnalyticsService._internal();
+
+  /// Converts all top-level property values to strings
+  Map<String, String> _convertValuesToString(Map<String, dynamic> properties) {
+    return Map.fromEntries(
+      properties.entries.map((entry) {
+        String value;
+        if (entry.value == null) {
+          value = '';
+        } else if (entry.value is DateTime) {
+          value = (entry.value as DateTime).toIso8601String();
+        } else if (entry.value is Timestamp) {
+          value = (entry.value as Timestamp).toDate().toIso8601String();
+        } else {
+          value = entry.value.toString();
+        }
+        return MapEntry(entry.key, value);
+      }),
+    );
+  }
 
   /// Initializes the analytics service with the provided API key.
   Future<void> initialize(String apiKey) async {
@@ -42,16 +62,32 @@ class AnalyticsService {
     Map<String, dynamic>? properties,
   }) async {
     if (!_isInitialized) return;
-    await _amplitude.track(BaseEvent(eventName, eventProperties: properties));
+
+    Map<String, String>? convertedProperties;
+    if (properties != null) {
+      convertedProperties = _convertValuesToString(properties);
+    }
+
+    await _amplitude.track(
+      BaseEvent(eventName, eventProperties: convertedProperties),
+    );
   }
 
   /// Logs a user property.
-  Future<void> identifyUser(Map<String, dynamic> userProperties) async {
+  Future<void> identifyUser(
+    String? participantId,
+    Map<String, dynamic> userProperties,
+  ) async {
     if (!_isInitialized) return;
 
     final Identify identity = Identify();
+    final convertedProperties = _convertValuesToString(userProperties);
 
-    userProperties.forEach((property, value) {
+    if (participantId != null) {
+      await _amplitude.setUserId(participantId);
+    }
+
+    convertedProperties.forEach((property, value) {
       identity.set(property, value);
     });
     await _amplitude.identify(identity);
