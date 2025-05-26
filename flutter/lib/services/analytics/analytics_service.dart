@@ -51,9 +51,9 @@ class AnalyticsService {
   }
 
   /// Sets the user ID for analytics tracking.
-  Future<void> setUserId(String userId) async {
+  Future<void> setUserId(String participantId) async {
     if (!_isInitialized) return;
-    await _amplitude.setUserId(userId);
+    await _amplitude.setUserId(participantId);
   }
 
   /// Logs an event with optional properties.
@@ -74,18 +74,11 @@ class AnalyticsService {
   }
 
   /// Logs a user property.
-  Future<void> identifyUser(
-    String? participantId,
-    Map<String, dynamic> userProperties,
-  ) async {
+  Future<void> identifyUser(Map<String, dynamic> userProperties) async {
     if (!_isInitialized) return;
 
     final Identify identity = Identify();
     final convertedProperties = _convertValuesToString(userProperties);
-
-    if (participantId != null) {
-      await _amplitude.setUserId(participantId);
-    }
 
     convertedProperties.forEach((property, value) {
       identity.set(property, value);

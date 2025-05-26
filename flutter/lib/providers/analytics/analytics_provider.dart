@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:pax/services/analytics/analytics_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,8 +12,12 @@ class AnalyticsProvider {
   }
 
   /// Sets the user ID for analytics tracking.
-  Future<void> setUserId(String userId) async {
-    await _analyticsService.setUserId(userId);
+  Future<void> setUserId(String participantId) async {
+    await _analyticsService.setUserId(participantId);
+
+    if (kDebugMode) {
+      print('Analytics Service: Set user ID: $participantId');
+    }
   }
 
   /// Logs an event with optional properties.
@@ -24,13 +29,10 @@ class AnalyticsProvider {
   }
 
   /// Logs a user property.
-  Future<void> identifyUser(
-    String? participantId,
-    Map<String, dynamic>? userProperties,
-  ) async {
+  Future<void> identifyUser(Map<String, dynamic>? userProperties) async {
     if (userProperties == null) return;
 
-    await _analyticsService.identifyUser(participantId, userProperties);
+    await _analyticsService.identifyUser(userProperties);
   }
 
   /// Resets the user ID and clears all user properties.

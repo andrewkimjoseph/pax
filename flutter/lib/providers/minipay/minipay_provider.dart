@@ -323,7 +323,7 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
 
         final participant = ref.read(participantProvider);
 
-        ref.read(analyticsProvider).identifyUser(participant.participant?.id, {
+        ref.read(analyticsProvider).identifyUser({
           '[Pax] Id': participant.participant?.id,
           '[Pax] Display Name': participant.participant?.displayName,
           '[Pax] Email Address': participant.participant?.emailAddress,
