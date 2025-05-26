@@ -90,35 +90,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         index = 0;
                       });
                       ref.read(analyticsProvider).dashboardTapped();
-
-                      // showToast(
-                      //   context: context,
-                      //   builder:
-                      //       (context, overlay) => Container(
-                      //         padding: EdgeInsets.all(12),
-                      //         decoration: BoxDecoration(
-                      //           gradient: LinearGradient(
-                      //             colors: PaxColors.orangeToPinkGradient,
-                      //           ),
-                      //           borderRadius: BorderRadius.circular(15),
-                      //         ),
-                      //         child: Basic(
-                      //           title: const Text('Event has been created'),
-                      //           subtitle: const Text(
-                      //             'Sunday, July 07, 2024 at 12:00 PM',
-                      //           ),
-                      //           trailing: PrimaryButton(
-                      //             size: ButtonSize.small,
-                      //             onPressed: () {
-                      //               overlay.close();
-                      //             },
-                      //             child: const Text('Undo'),
-                      //           ),
-                      //           trailingAlignment: Alignment.center,
-                      //         ),
-                      //       ),
-                      //   location: ToastLocation.bottomCenter,
-                      // );
                     },
 
                     child: Text(
