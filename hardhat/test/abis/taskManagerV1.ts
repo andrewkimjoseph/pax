@@ -142,7 +142,7 @@ export const taskManagerV1ABI = [
       },
       {
         indexed: false,
-        internalType: "contract IERC20Metadata",
+        internalType: "contract IERC20",
         name: "tokenAddress",
         type: "address",
       },
@@ -581,7 +581,7 @@ export const taskManagerV1ABI = [
     name: "getRewardTokenContractAddress",
     outputs: [
       {
-        internalType: "contract IERC20Metadata",
+        internalType: "contract IERC20",
         name: "",
         type: "address",
       },
@@ -778,7 +778,7 @@ export const taskManagerV1ABI = [
   {
     inputs: [
       {
-        internalType: "contract IERC20Metadata",
+        internalType: "contract IERC20",
         name: "token",
         type: "address",
       },

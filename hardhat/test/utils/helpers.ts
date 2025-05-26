@@ -13,7 +13,6 @@ import {
   import { taskManagerV1ABI } from "../abis/taskManagerV1";
   import { erc1967ProxyABI } from "../abis/erc1967Proxy";
   import { erc1967ByteCode } from "../bytecode/ERC1967";
-  import { paxAccountV1Bytecode } from "../bytecode/paxAccountV1";
   import { taskManagerV1Bytecode } from "../bytecode/taskManagerV1";
   import { publicClient } from "./clients";
   import { randomBytes } from "crypto";

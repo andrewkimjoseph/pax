@@ -396,6 +396,26 @@ contract TaskManagerV1 is Ownable, Pausable, EIP712 {
     }
 
     /**
+     * @notice Ensures the contract has sufficient reward tokens for all potential rewards
+     * @dev Prevents screening when there are insufficient funds for all potential rewards
+     * @dev The check verifies that the contract's token balance is greater than or equal to:
+     *      (reward amount per participant) * (remaining available slots)
+     *      where remaining slots = target number - already screened number
+     * @dev This ensures that if all remaining participants complete the task,
+     *      there will be enough tokens to reward them all
+     */
+    modifier onlyIfContractHasEnoughRewardTokensForAllPotentialRewards() {
+        require(
+            rewardToken.balanceOf(address(this)) >=
+                rewardAmountPerParticipantProxyInWei *
+                    (targetNumberOfParticipantProxies -
+                        numberOfScreenedParticipantProxies),
+            "Contract does not have enough reward tokens for all potential rewards"
+        );
+        _;
+    }
+
+    /**
      * @notice Initializes the task management contract with initial parameters
      * @dev Sets up the contract with taskMaster address, signer address, reward amount, participantProxy target, and reward token
      *      Emits a TaskManagerCreated event to record the deployment on-chain
@@ -468,6 +488,7 @@ contract TaskManagerV1 is Ownable, Pausable, EIP712 {
             signature
         )
         onlyIfGivenScreeningSignatureIsUnused(signature)
+        onlyIfContractHasEnoughRewardTokensForAllPotentialRewards
     {
         require(participantProxy != address(0), "Zero address passed");
 
