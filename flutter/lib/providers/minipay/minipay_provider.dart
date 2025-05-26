@@ -323,11 +323,29 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
 
         final participant = ref.read(participantProvider);
 
+        ref.read(analyticsProvider).identifyUser(participant.participant?.id, {
+          '[Pax] Id': participant.participant?.id,
+          '[Pax] Display Name': participant.participant?.displayName,
+          '[Pax] Email Address': participant.participant?.emailAddress,
+          '[Pax] Phone Number': participant.participant?.phoneNumber,
+          '[Pax] Gender': participant.participant?.gender,
+          '[Pax] Country': participant.participant?.country,
+          '[Pax] Date of Birth': participant.participant?.dateOfBirth,
+          '[Pax] Profile Picture URI':
+              participant.participant?.profilePictureURI,
+          '[Pax] GoodDollar Identity Time Last Authenticated':
+              participant.participant?.goodDollarIdentityTimeLastAuthenticated,
+          '[Pax] GoodDollar Identity Expiry Date':
+              participant.participant?.goodDollarIdentityExpiryDate,
+          '[Pax] Time Created': participant.participant?.timeCreated,
+          '[Pax] Time Updated': participant.participant?.timeUpdated,
+        });
+
+        final paymentMethod = ref.read(paymentMethodsProvider).paymentMethods;
+
         ref
             .read(analyticsProvider)
-            .identifyUser(participant.participant?.toMap());
-
-        ref.read(analyticsProvider).minipayConnectionComplete();
+            .minipayConnectionComplete(paymentMethod.first.toMap());
 
         // Set state to success once everything is complete
         state = state.copyWith(
