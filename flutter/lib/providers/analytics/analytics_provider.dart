@@ -24,10 +24,13 @@ class AnalyticsProvider {
   }
 
   /// Logs a user property.
-  Future<void> identifyUser(Map<String, dynamic>? userProperties) async {
+  Future<void> identifyUser(
+    String? participantId,
+    Map<String, dynamic>? userProperties,
+  ) async {
     if (userProperties == null) return;
 
-    await _analyticsService.identifyUser(userProperties);
+    await _analyticsService.identifyUser(participantId, userProperties);
   }
 
   /// Resets the user ID and clears all user properties.
