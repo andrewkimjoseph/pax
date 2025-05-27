@@ -2,23 +2,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/gradient_border.dart';
+import 'package:pax/models/firestore/achievement/achievement_model.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:intl/intl.dart' show toBeginningOfSentenceCase;
+import 'package:intl/intl.dart';
 
 class AchievementCard extends ConsumerWidget {
-  const AchievementCard(this.achievement, this.isEarned, {super.key});
+  const AchievementCard({required this.achievement, super.key});
 
-  final String achievement;
-
-  final bool isEarned;
+  final Achievement achievement;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isEarned =
+        achievement.status == AchievementStatus.earned ||
+        achievement.status == AchievementStatus.claimed;
+    final isClaimed = achievement.status == AchievementStatus.claimed;
+
     return Container(
       width: MediaQuery.of(context).size.width,
-
       padding: EdgeInsets.all(8),
-
       decoration:
           isEarned
               ? ShapeDecoration(
@@ -46,33 +48,33 @@ class AchievementCard extends ConsumerWidget {
               Column(
                 children: [
                   SvgPicture.asset(
-                    'lib/assets/svgs/$achievement.svg',
-
-                    // height: 24,
+                    'lib/assets/svgs/achievements/${achievement.svgAssetName}.svg',
+                    height: 48,
                   ).withPadding(right: 12),
                 ],
               ),
-
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.7,
-                    child: Row(
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          '${toBeginningOfSentenceCase(achievement.split('_')[0])} ${toBeginningOfSentenceCase(achievement.split('_')[1])}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            fontSize: 16,
-                            color: PaxColors.black,
+                        Expanded(
+                          child: Text(
+                            achievement.name ?? 'Achievement',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 16,
+                              color: PaxColors.black,
+                            ),
                           ),
                         ),
-                        Spacer(),
                         Text(
-                          isEarned ? 'Earned' : "G\$ 100",
+                          isEarned
+                              ? 'Earned'
+                              : 'G\$ ${achievement.amountAwarded}',
                           style: TextStyle(
                             fontWeight: FontWeight.w900,
                             fontSize: 12,
@@ -81,65 +83,64 @@ class AchievementCard extends ConsumerWidget {
                         ),
                       ],
                     ).withPadding(bottom: 8),
-                  ),
-
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Completed your first survey',
-                        style: TextStyle(
-                          fontWeight: FontWeight.normal,
-                          fontSize: 12,
-                          color: PaxColors.black,
-                        ),
-                      ).withPadding(bottom: 8),
-
-                      if (isEarned)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          'Earned on March 12, 2025 | 9.41 AM',
+                          achievement.goal,
                           style: TextStyle(
                             fontWeight: FontWeight.normal,
-                            fontSize: 11,
+                            fontSize: 12,
                             color: PaxColors.black,
                           ),
-                        ),
+                        ).withPadding(bottom: 8),
 
-                      if (!isEarned)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.7,
-                              height: 5,
-                              child: ShaderMask(
-                                shaderCallback: (Rect bounds) {
-                                  return LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: PaxColors.orangeToPinkGradient,
-                                    stops: [0.0, 1.0],
-                                  ).createShader(bounds);
-                                },
-                                blendMode: BlendMode.srcIn,
-                                child: Progress(
-                                  // color: PaxColors.orange,
-                                  progress: 50,
-                                  min: 0,
-                                  max: 100,
+                        if (isEarned && achievement.timeCompleted != null)
+                          Text(
+                            'Earned on ${DateFormat('MMMM d, yyyy | h:mm a').format(achievement.timeCompleted!.toDate())}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.normal,
+                              fontSize: 11,
+                              color: PaxColors.black,
+                            ),
+                          ),
+
+                        if (!isEarned)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: double.infinity,
+                                height: 5,
+                                child: ShaderMask(
+                                  shaderCallback: (Rect bounds) {
+                                    return LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: PaxColors.orangeToPinkGradient,
+                                      stops: [0.0, 1.0],
+                                    ).createShader(bounds);
+                                  },
+                                  blendMode: BlendMode.srcIn,
+                                  child: Progress(
+                                    progress:
+                                        (achievement.tasksCompleted /
+                                                achievement
+                                                    .tasksNeededForCompletion *
+                                                100)
+                                            .toDouble(),
+                                    min: 0,
+                                    max: 100,
+                                  ),
                                 ),
-                              ),
-                            ).withPadding(bottom: 4),
+                              ).withPadding(bottom: 4),
 
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.7,
-
-                              child: Row(
+                              Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    '5/10',
+                                    '${achievement.tasksCompleted}/${achievement.tasksNeededForCompletion}',
                                     style: TextStyle(
                                       fontWeight: FontWeight.normal,
                                       fontSize: 11,
@@ -147,7 +148,7 @@ class AchievementCard extends ConsumerWidget {
                                     ),
                                   ),
                                   Text(
-                                    'Complete 5 more to earn',
+                                    'Complete ${achievement.tasksNeededForCompletion - achievement.tasksCompleted} more to earn',
                                     style: TextStyle(
                                       fontWeight: FontWeight.normal,
                                       fontSize: 11,
@@ -156,12 +157,12 @@ class AchievementCard extends ConsumerWidget {
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
-                        ),
-                    ],
-                  ),
-                ],
+                            ],
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ],
           ).withPadding(bottom: 8),
@@ -169,11 +170,11 @@ class AchievementCard extends ConsumerWidget {
             width: MediaQuery.of(context).size.width,
             child: Button(
               onPressed: () {
-                // context.go('/task');
+                // TODO: Implement claim functionality
               },
-              enabled: isEarned,
+              enabled: isEarned && !isClaimed,
               style:
-                  isEarned
+                  isEarned && !isClaimed
                       ? const ButtonStyle.primary(
                         density: ButtonDensity.dense,
                       ).withBorderRadius(borderRadius: BorderRadius.circular(7))
@@ -187,17 +188,17 @@ class AchievementCard extends ConsumerWidget {
                               width: 2,
                             ),
                           ),
-
               child: Text(
-                !isEarned ? 'Claimed G\$ 100' : 'Claim G\$ 100',
+                isClaimed
+                    ? 'Claimed G\$${achievement.amountAwarded}'
+                    : 'Claim G\$${achievement.amountAwarded}',
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 14,
                   color:
-                      isEarned
+                      isEarned && !isClaimed
                           ? PaxColors.white
-                          : PaxColors
-                              .lilac, // The purple color from your images
+                          : PaxColors.lilac,
                 ),
               ),
             ),
