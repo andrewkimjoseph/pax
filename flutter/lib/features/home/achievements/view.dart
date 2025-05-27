@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
-import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/widgets/achievement/achievement_card.dart';
 import 'package:pax/providers/db/achievement_provider.dart';

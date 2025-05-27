@@ -6,3 +6,4 @@ export { markTaskCompletionAsComplete } from './markTaskCompletionAsComplete';
 export { rewardParticipantProxy } from './rewardParticipantProxy';
 export { deleteParticipantOnRequest } from './deleteParticipantOnRequest';
 export { sendNotification } from './sendNotification';
+export { createAchievement } from './createAchievement';
