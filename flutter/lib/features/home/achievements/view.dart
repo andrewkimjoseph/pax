@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
+import 'package:pax/providers/db/achievement/achievement_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/widgets/achievement/achievement_card.dart';
-import 'package:pax/providers/db/achievement_provider.dart';
 import 'package:pax/models/firestore/achievement/achievement_model.dart';
 import 'package:pax/widgets/achievement/filter_button.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -24,41 +24,41 @@ class _AchievementsViewState extends ConsumerState<AchievementsView> {
     // Load achievements when the page is initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final participantId = ref.read(authProvider).user.uid;
-      ref.read(achievementProvider.notifier).loadAchievements(participantId);
+      ref.read(achievementProvider.notifier).fetchAchievements(participantId);
     });
-  }
-
-  List<Achievement> _filterAchievements(List<Achievement> achievements) {
-    switch (index) {
-      case 0: // All
-        return achievements;
-      case 1: // Earned
-        return achievements
-            .where((a) => a.status == AchievementStatus.earned)
-            .toList();
-      case 2: // In Progress
-        return achievements
-            .where((a) => a.status == AchievementStatus.inProgress)
-            .toList();
-      case 3: // Claimed
-        return achievements
-            .where((a) => a.status == AchievementStatus.claimed)
-            .toList();
-      default:
-        return achievements;
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final achievementsAsync = ref.watch(achievementProvider);
+    final achievementState = ref.watch(achievementProvider);
+
+    List<Achievement> filterAchievements(List<Achievement> achievements) {
+      switch (index) {
+        case 0: // All
+          return achievements;
+        case 1: // Earned
+          return achievements
+              .where((a) => a.status == AchievementStatus.earned)
+              .toList();
+        case 2: // In Progress
+          return achievements
+              .where((a) => a.status == AchievementStatus.inProgress)
+              .toList();
+        case 3: // Claimed
+          return achievements
+              .where((a) => a.status == AchievementStatus.claimed)
+              .toList();
+        default:
+          return achievements;
+      }
+    }
 
     return Scaffold(
       child: SingleChildScrollView(
         child: Column(
           children: [
             Container(
-              height: 150,
+              height: 130,
               decoration: BoxDecoration(
                 color: PaxColors.white,
                 borderRadius: BorderRadius.circular(7),
@@ -74,7 +74,7 @@ class _AchievementsViewState extends ConsumerState<AchievementsView> {
               child: Column(
                 children: [
                   Container(
-                    height: 25,
+                    height: 20,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(7),
@@ -101,7 +101,7 @@ class _AchievementsViewState extends ConsumerState<AchievementsView> {
                       Row(
                         children: [
                           Text(
-                            "Earn G\$ token points every time you complete surveys, tasks or reach certain milestones. These points are added to your GoodDollar balance and can be withdrawn at any time.",
+                            "Earn G\$ points by completing tasks and reaching milestones. Points are added to your GoodDollar balance and can be withdrawn anytime.",
                             style: TextStyle(
                               fontSize: 14,
                               color: PaxColors.black,
@@ -147,43 +147,41 @@ class _AchievementsViewState extends ConsumerState<AchievementsView> {
               ),
             ).withPadding(bottom: 8),
 
-            achievementsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(child: Text('Error: $error')),
-              data: (achievements) {
-                final filteredAchievements = _filterAchievements(achievements);
-
-                if (filteredAchievements.isEmpty) {
-                  return SizedBox(
-                    height: 200,
-                    width: double.infinity,
-                    child: Center(
-                      child: Text(
-                        index == 0
-                            ? 'No achievements yet'
-                            : 'No ${index == 1
-                                ? 'earned'
-                                : index == 2
-                                ? 'in progress'
-                                : 'claimed'} achievements',
-                        style: TextStyle(fontSize: 16, color: PaxColors.black),
+            if (achievementState.state == AchievementState.loading)
+              const Center(child: CircularProgressIndicator())
+            else if (achievementState.state == AchievementState.error)
+              Center(child: Text('Error: ${achievementState.errorMessage}'))
+            else
+              Column(
+                children: [
+                  if (filterAchievements(achievementState.achievements).isEmpty)
+                    SizedBox(
+                      height: 200,
+                      width: double.infinity,
+                      child: Center(
+                        child: Text(
+                          index == 0
+                              ? 'No achievements yet'
+                              : 'No ${index == 1
+                                  ? 'earned'
+                                  : index == 2
+                                  ? 'in progress'
+                                  : 'claimed'} achievements',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: PaxColors.black,
+                          ),
+                        ),
                       ),
+                    )
+                  else
+                    ...filterAchievements(achievementState.achievements).map(
+                      (achievement) => AchievementCard(
+                        achievement: achievement,
+                      ).withPadding(bottom: 8),
                     ),
-                  );
-                }
-
-                return SingleChildScrollView(
-                  child: Column(
-                    children:
-                        filteredAchievements.map((achievement) {
-                          return AchievementCard(
-                            achievement: achievement,
-                          ).withPadding(bottom: 8);
-                        }).toList(),
-                  ),
-                );
-              },
-            ),
+                ],
+              ),
           ],
         ).withPadding(all: 8),
       ),
