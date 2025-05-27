@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:pax/data/forum_reports.dart';
 import 'package:pax/extensions/tooltip.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/url_handler.dart';
 import 'package:pax/widgets/current_balance_card.dart';
@@ -97,6 +98,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                           children: [
                             Button(
                               onPressed: () {
+                                ref.read(analyticsProvider).xFollowTapped();
                                 UrlHandler.launchInExternalBrowser(
                                   'https://x.com/thecanvassing',
                                 );

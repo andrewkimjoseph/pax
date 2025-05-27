@@ -1,6 +1,7 @@
 // lib/views/activity/activity_view.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/models/local/activity_model.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 
 import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/widgets/activity/activity_card.dart';
@@ -72,6 +73,7 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
                     index = 0;
                   });
                   activityNotifier.setFilterType(ActivityType.taskCompletion);
+                  ref.read(analyticsProvider).taskCompletionsTapped();
                 },
                 child: Text(
                   'Task Completions',
@@ -102,6 +104,7 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
                     index = 1;
                   });
                   activityNotifier.setFilterType(ActivityType.reward);
+                  ref.read(analyticsProvider).rewardsTapped();
                 },
                 child: Text(
                   'Rewards',
@@ -132,6 +135,7 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
                     index = 2;
                   });
                   activityNotifier.setFilterType(ActivityType.withdrawal);
+                  ref.read(analyticsProvider).withdrawalsTapped();
                 },
                 child: Text(
                   'Withdrawals',
@@ -163,7 +167,11 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            'No activities found',
+                            index == 0
+                                ? 'No task completions'
+                                : index == 1
+                                ? 'No rewards'
+                                : 'No withdrawals',
                             style: TextStyle(color: PaxColors.darkGrey),
                           ),
                         ],

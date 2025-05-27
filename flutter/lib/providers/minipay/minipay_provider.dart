@@ -3,11 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
+import 'package:pax/providers/db/achievement/achievement_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
 import 'package:pax/providers/db/payment_method/payment_method_provider.dart';
 import 'package:pax/repositories/firestore/payment_method/payment_method_repository.dart';
 import 'package:pax/services/minipay/minipay_service.dart';
+import 'package:pax/providers/fcm/fcm_provider.dart';
 
 final paymentMethodRepositoryProvider = Provider<PaymentMethodRepository>((
   ref,
@@ -88,7 +90,7 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
   }
 
   // Validate and connect wallet
-  Future<void> connectPrimaryPaymentMethod(
+  Future<void> connectMiniPay(
     String userId,
     String primaryPaymentMethod,
   ) async {
@@ -318,13 +320,78 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
             .read(participantProvider.notifier)
             .updateProfile(participantUpdateData);
 
+        // Create achievements
+        await ref
+            .read(achievementProvider.notifier)
+            .createAchievement(
+              timeCreated: Timestamp.now(),
+              participantId: userId,
+              name: 'Payout Connector',
+              tasksNeededForCompletion: 1,
+              tasksCompleted: 1,
+              timeCompleted: Timestamp.now(),
+              amountEarned: 1000,
+            );
+        ref.read(analyticsProvider).achievementCreated({
+          'achievementName': 'Payout Connector',
+          'amountEarned': 1000,
+        });
+        final fcmToken = await ref.read(fcmTokenProvider.future);
+        if (fcmToken != null) {
+          await ref
+              .read(notificationServiceProvider)
+              .sendAchievementEarnedNotification(
+                token: fcmToken,
+                achievementData: {
+                  'achievementName': 'Payout Connector',
+                  'amountEarned': 1000,
+                },
+              );
+        }
+
+        await ref
+            .read(achievementProvider.notifier)
+            .createAchievement(
+              timeCreated: Timestamp.now(),
+              participantId: userId,
+              name: 'Verified Human',
+              tasksNeededForCompletion: 1,
+              tasksCompleted: 1,
+              timeCompleted: Timestamp.now(),
+              amountEarned: 1000,
+            );
+        ref.read(analyticsProvider).achievementCreated({
+          'achievementName': 'Verified Human',
+          'amountEarned': 1000,
+        });
+        if (fcmToken != null) {
+          ref
+              .read(notificationServiceProvider)
+              .sendAchievementEarnedNotification(
+                token: fcmToken,
+                achievementData: {
+                  'achievementName': 'Verified Human',
+                  'amountEarned': 1000,
+                },
+              );
+        }
+
+        // Refresh achievements
+        await ref.read(achievementProvider.notifier).fetchAchievements(userId);
+
         // Refresh participant data in state
         await ref.read(participantProvider.notifier).refreshParticipant();
 
         final participant = ref.read(participantProvider);
 
+        final paymentMethod = ref.read(paymentMethodsProvider).paymentMethods;
+
+        ref
+            .read(analyticsProvider)
+            .minipayConnectionComplete(paymentMethod.first.toMap());
+
         ref.read(analyticsProvider).identifyUser({
-          '[Pax] Id': participant.participant?.id,
+          '[Pax] Participant Id': participant.participant?.id,
           '[Pax] Display Name': participant.participant?.displayName,
           '[Pax] Email Address': participant.participant?.emailAddress,
           '[Pax] Phone Number': participant.participant?.phoneNumber,
@@ -339,13 +406,16 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
               participant.participant?.goodDollarIdentityExpiryDate,
           '[Pax] Time Created': participant.participant?.timeCreated,
           '[Pax] Time Updated': participant.participant?.timeUpdated,
+          '[Pax] MiniPay Wallet Address': primaryPaymentMethod,
+          '[Pax] Privy Server Wallet Id': paxAccount.serverWalletId,
+          '[Pax] Privy Server Wallet Address': paxAccount.serverWalletAddress,
+          '[Pax] Smart Account Wallet Address':
+              paxAccount.smartAccountWalletAddress,
+          '[Pax] PaxAccount Id': paxAccount.id,
+          '[Pax] PaxAccount Contract Address': paxAccount.contractAddress,
+          '[Pax] PaxAccount Contract Creation Txn Hash':
+              paxAccount.contractCreationTxnHash,
         });
-
-        final paymentMethod = ref.read(paymentMethodsProvider).paymentMethods;
-
-        ref
-            .read(analyticsProvider)
-            .minipayConnectionComplete(paymentMethod.first.toMap());
 
         // Set state to success once everything is complete
         state = state.copyWith(
@@ -363,6 +433,9 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
         );
       }
     } catch (e) {
+      ref.read(analyticsProvider).minipayConnectionFailed({
+        "primaryPaymentMethod": primaryPaymentMethod,
+      });
       state = state.copyWith(
         state: MiniPayConnectionState.error,
         errorMessage: 'An error occurred: ${e.toString()}',

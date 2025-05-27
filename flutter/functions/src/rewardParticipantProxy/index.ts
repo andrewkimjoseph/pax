@@ -17,7 +17,6 @@ import {
   FUNCTION_RUNTIME_OPTS,
   PRIVY_CLIENT,
   PUBLIC_CLIENT,
-  PIMLICO_CLIENT,
   PIMLICO_URL,
   DB
 } from "../../shared/config";
@@ -35,7 +34,15 @@ export const rewardParticipantProxy = onCall(FUNCTION_RUNTIME_OPTS, async (reque
   try {
     const { createSmartAccountClient } = await import("permissionless");
     const { toSimpleSmartAccount } = await import("permissionless/accounts");
-    
+    const { createPimlicoClient } = await import ("permissionless/clients/pimlico");
+
+    const PIMLICO_CLIENT = createPimlicoClient({
+      transport: http(PIMLICO_URL),
+      entryPoint: {
+        address: entryPoint07Address,
+        version: "0.7",
+      },
+    });
     // Ensure the user is authenticated
     if (!request.auth) {
       throw new HttpsError(

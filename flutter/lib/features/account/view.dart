@@ -11,6 +11,7 @@ import 'package:pax/utils/token_balance_util.dart';
 import 'package:pax/widgets/account/account_option_card.dart';
 import 'package:pax/widgets/toast.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
+import 'package:pax/providers/analytics/analytics_provider.dart';
 
 import '../../theming/colors.dart' show PaxColors;
 
@@ -31,16 +32,13 @@ class _AccountViewState extends ConsumerState<AccountView> {
   Widget build(BuildContext context) {
     final participant = ref.watch(participantProvider).participant;
     final tasksCount = ref.watch(totalTaskCompletionsProvider);
-    // Use with: tasksCount.when(data: (count) => Text('$count'), ...)
-
-    // Access total G$ earned
     final totalGoodDollars = ref.watch(totalGoodDollarTokensEarnedProvider);
+
     return Scaffold(
       headers: [
         AppBar(
           padding: EdgeInsets.all(8),
           height: 50,
-
           backgroundColor: PaxColors.white,
           header: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -50,7 +48,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 32,
-                  color: PaxColors.black, // The purple color from your images
+                  color: PaxColors.black,
                 ),
               ),
             ],
@@ -58,7 +56,6 @@ class _AccountViewState extends ConsumerState<AccountView> {
         ),
         Divider(color: PaxColors.lightGrey),
       ],
-
       child: SingleChildScrollView(
         child: Column(
           children: [
@@ -205,9 +202,8 @@ class _AccountViewState extends ConsumerState<AccountView> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color:
-                                PaxColors.deepPurple, // Change color as needed
-                            width: 2.5, // Adjust border thickness as needed
+                            color: PaxColors.deepPurple,
+                            width: 2.5,
                           ),
                         ),
                         child: Avatar(
@@ -244,28 +240,10 @@ class _AccountViewState extends ConsumerState<AccountView> {
                       ),
                     ],
                   ).withPadding(bottom: 8, top: 8),
-
                   Divider().withPadding(top: 8, bottom: 16),
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  //   crossAxisAlignment: CrossAxisAlignment.start,
-                  //   children: [
-
-                  //     Expanded(
-                  //       child: Text(
-                  //         'My Profile',
-                  //         style: TextStyle(
-                  //           fontSize: 16,
-                  //           color: PaxColors.black,
-                  //           fontWeight: FontWeight.bold,
-                  //         ),
-                  //       ).withPadding(bottom: 8),
-                  //     ),
-                  //     Icon(Icons.arrow_forward_ios_outlined).withPadding(left: 8),
-                  //   ],
-                  // ).withPadding(bottom: 8),
                   InkWell(
                     onTap: () {
+                      ref.read(analyticsProvider).myProfileTapped();
                       context.push("/profile");
                     },
                     child: AccountOptionCard(
@@ -275,6 +253,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
                   ),
                   InkWell(
                     onTap: () {
+                      ref.read(analyticsProvider).accountAndSecurityTapped();
                       context.push('/account-and-security');
                     },
                     child: AccountOptionCard(
@@ -284,6 +263,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
                   ),
                   InkWell(
                     onTap: () {
+                      ref.read(analyticsProvider).paymentMethodsTapped();
                       context.push("/payment-methods");
                     },
                     child: AccountOptionCard(
@@ -293,6 +273,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
                   ),
                   InkWell(
                     onTap: () {
+                      ref.read(analyticsProvider).helpAndSupportTapped();
                       context.push("/help-and-support");
                     },
                     child: AccountOptionCard(
@@ -300,9 +281,9 @@ class _AccountViewState extends ConsumerState<AccountView> {
                       true,
                     ).withPadding(bottom: 28),
                   ),
-
                   InkWell(
                     onTap: () {
+                      ref.read(analyticsProvider).logoutTapped();
                       open(context, 0);
                     },
                     child: AccountOptionCard('logout', true),
@@ -343,9 +324,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
                       ),
                     ],
                   ).withPadding(bottom: 8),
-
                   Divider().withPadding(top: 8, bottom: 8),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -359,11 +338,9 @@ class _AccountViewState extends ConsumerState<AccountView> {
                       ),
                     ],
                   ).withPadding(top: 8, bottom: 32),
-
                   Divider().withPadding(top: 8, bottom: 8),
                 ],
               ).withPadding(left: 16, right: 16),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -372,47 +349,34 @@ class _AccountViewState extends ConsumerState<AccountView> {
                     height: 48,
                     child: Button(
                       style: const ButtonStyle.outline()
-                          .withBackgroundColor(
-                            color: PaxColors.lightGrey,
-                            // hoverColor: Colors.purple,
-                          )
+                          .withBackgroundColor(color: PaxColors.lightGrey)
                           .withBorder(
                             border: Border.all(color: Colors.transparent),
                           ),
                       onPressed: () {
                         closeDrawer(context);
-
-                        // Handle skip action
-                        // onboardingViewModel.jumpToPage(2);
                       },
                       child: Text(
                         'Cancel',
                         style: Theme.of(context).typography.base.copyWith(
                           fontWeight: FontWeight.normal,
                           fontSize: 14,
-                          color:
-                              PaxColors
-                                  .deepPurple, // The purple color from your images
+                          color: PaxColors.deepPurple,
                         ),
                       ),
                     ),
                   ),
-
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.4,
                     height: 48,
                     child: PrimaryButton(
                       onPressed: () async {
                         closeDrawer(context);
-
-                        // Show toast immediately before starting the logout process
                         showSuccessToast(context);
-
-                        // Small delay to ensure toast is visible before redirect
                         await Future.delayed(const Duration(milliseconds: 300));
-
-                        // Then initiate logout
                         ref.read(authProvider.notifier).signOut();
+
+                        ref.read(analyticsProvider).logoutComplete();
                         ref.read(selectedIndexProvider.notifier).reset();
                       },
                       child: Text(

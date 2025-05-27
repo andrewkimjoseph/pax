@@ -1,9 +1,13 @@
 // providers/db/participants_provider.dart
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/models/firestore/participant/participant_model.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
+import 'package:pax/providers/db/achievement/achievement_provider.dart';
 import 'package:pax/repositories/firestore/participant/participants_repository.dart';
+import 'package:pax/providers/fcm/fcm_provider.dart';
 
 // State for the participant provider
 enum ParticipantState { initial, loading, loaded, error }
@@ -125,13 +129,66 @@ class ParticipantNotifier extends Notifier<ParticipantStateModel> {
         data,
       );
 
+      ref.read(analyticsProvider).profileUpdateComplete();
+
+      // Check if this is the first time completing profile
+      final isFirstTimeCompletingProfile =
+          // Check if all required fields were previously null
+          state.participant?.phoneNumber == null &&
+          state.participant?.gender == null &&
+          state.participant?.dateOfBirth == null &&
+          // Check if all required fields are being set now
+          data.containsKey('phoneNumber') &&
+          data.containsKey('gender') &&
+          data.containsKey('dateOfBirth') &&
+          // Ensure we're not just updating verification timestamps
+          !data.containsKey('goodDollarIdentityTimeLastAuthenticated') &&
+          !data.containsKey('goodDollarIdentityExpiryDate');
+
+      if (isFirstTimeCompletingProfile) {
+        // Create Profile Perfectionist achievement
+        await ref
+            .read(achievementProvider.notifier)
+            .createAchievement(
+              timeCreated: Timestamp.now(),
+              participantId: state.participant!.id,
+              name: 'Profile Perfectionist',
+              tasksNeededForCompletion: 1,
+              tasksCompleted: 1,
+              timeCompleted: Timestamp.now(),
+              amountEarned: 500,
+            );
+        ref.read(analyticsProvider).achievementCreated({
+          'achievementName': 'Profile Perfectionist',
+          'amountEarned': 500,
+        });
+        final fcmToken = await ref.read(fcmTokenProvider.future);
+        if (fcmToken != null) {
+          await ref
+              .read(notificationServiceProvider)
+              .sendAchievementEarnedNotification(
+                token: fcmToken,
+                achievementData: {
+                  'achievementName': 'Profile Perfectionist',
+                  'amountEarned': 500,
+                },
+              );
+        }
+      }
+
       // Update state with updated participant
       state = state.copyWith(
         participant: updatedParticipant,
         state: ParticipantState.loaded,
       );
+
+      // Refresh achievements
+      await ref
+          .read(achievementProvider.notifier)
+          .fetchAchievements(authState.user.uid);
     } catch (e) {
       // Handle error
+      ref.read(analyticsProvider).profileUpdateFailed();
       state = state.copyWith(
         state: ParticipantState.error,
         errorMessage: e.toString(),

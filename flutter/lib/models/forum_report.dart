@@ -14,4 +14,15 @@ class ForumReport {
     this.coverImageURI,
     this.postURI,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'title': title,
+      'subtitle': subtitle,
+      'timePublished': timePublished?.toIso8601String(),
+      'coverImageURI': coverImageURI,
+      'postURI': postURI,
+    };
+  }
 }

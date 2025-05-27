@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/minipay/minipay_provider.dart';
@@ -44,13 +45,14 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
   }
 
   void _connectWallet() {
-    final walletAddress = _walletAddressController.text.trim();
+    ref.read(analyticsProvider).connectMinipayTapped();
+    final miniPayWalletAddress = _walletAddressController.text.trim();
     final authState = ref.read(authProvider);
 
     // Connect wallet using the provider
     ref
         .read(miniPayConnectionProvider.notifier)
-        .connectPrimaryPaymentMethod(authState.user.uid, walletAddress);
+        .connectMiniPay(authState.user.uid, miniPayWalletAddress);
   }
 
   // Show success dialog when connection is successful

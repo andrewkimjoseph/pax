@@ -1,7 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pax/models/firestore/payment_method/payment_method.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:intl/intl.dart';
@@ -69,8 +71,14 @@ class _ChangeWithdrawalMethodCardState
           ],
         ),
         const Spacer(),
-        GestureDetector(
-          onTap: () => context.pop(),
+        InkWell(
+          onTap: () {
+            ref.read(analyticsProvider).changePaymentMethodTapped({
+              "paymentMethodName": widget.paymentMethod.name,
+              "paymentMethodId": widget.paymentMethod.id,
+            });
+            context.pop();
+          },
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

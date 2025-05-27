@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/widgets/current_balance_card.dart';
 import 'package:pax/widgets/payment_method_cards/minipay_payment_method_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -83,9 +84,12 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                         MiniPayPaymentMethodCard(
                           'minipay',
                           "MiniPay Wallet",
-                          () => context.push(
-                            "/payment-methods/minipay-connection",
-                          ),
+                          () {
+                            ref.read(analyticsProvider).paymentMethodTapped({
+                              "paymentMethodName": "MiniPay",
+                            });
+                            context.push("/payment-methods/minipay-connection");
+                          },
                         ),
                       ],
                     ),

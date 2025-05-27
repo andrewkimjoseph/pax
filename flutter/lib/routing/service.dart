@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pax/exports/views.dart';
 import 'package:pax/features/account_and_security/view.dart';
+import 'package:pax/features/report_page/view.dart';
 import 'package:pax/features/task/task_itself/view.dart';
 import 'package:pax/features/webview/view.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
@@ -103,6 +104,10 @@ final routerProvider = Provider((ref) {
               ).copyWith(textScaler: TextScaler.noScaling),
               child: RootView(),
             ),
+      ),
+      GoRoute(
+        path: Routes.reportPage,
+        builder: (context, state) => ReportPageView(state.extra as String),
       ),
       GoRoute(
         path: "/webview",

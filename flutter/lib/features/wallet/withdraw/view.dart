@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/local/withdraw_context_provider.dart';
 
 import 'package:pax/theming/colors.dart';
@@ -105,6 +106,11 @@ class _WithdrawViewState extends ConsumerState<WithdrawView> {
               ref
                   .read(withdrawContextProvider.notifier)
                   .setAmountToWithdraw(amount);
+
+              ref.read(analyticsProvider).continueWithdrawTapped({
+                "amount": amount,
+                "tokenId": tokenId,
+              });
 
               // Navigate to next screen
               context.push('/wallet/withdraw/select-wallet');

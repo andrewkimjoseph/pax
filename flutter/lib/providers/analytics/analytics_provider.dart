@@ -99,6 +99,9 @@ class AnalyticsProvider {
   Future<void> screeningStarted([Map<String, dynamic>? properties]) =>
       _logEvent('screening_started', properties: properties);
 
+  Future<void> screeningFailed([Map<String, dynamic>? properties]) =>
+      _logEvent('screening_failed', properties: properties);
+
   Future<void> screeningComplete([Map<String, dynamic>? properties]) =>
       _logEvent('screening_complete', properties: properties);
 
@@ -110,6 +113,9 @@ class AnalyticsProvider {
 
   Future<void> rewardingComplete([Map<String, dynamic>? properties]) =>
       _logEvent('rewarding_complete', properties: properties);
+
+  Future<void> rewardingFailed([Map<String, dynamic>? properties]) =>
+      _logEvent('rewarding_failed', properties: properties);
 
   Future<void> taskCompletionsTapped([Map<String, dynamic>? properties]) =>
       _logEvent('task_completions_tapped', properties: properties);
@@ -123,8 +129,14 @@ class AnalyticsProvider {
   Future<void> myProfileTapped([Map<String, dynamic>? properties]) =>
       _logEvent('my_profile_tapped', properties: properties);
 
+  Future<void> saveProfileChangesTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('save_profile_changes_tapped', properties: properties);
+
   Future<void> profileUpdateComplete([Map<String, dynamic>? properties]) =>
       _logEvent('profile_update_complete', properties: properties);
+
+  Future<void> profileUpdateFailed([Map<String, dynamic>? properties]) =>
+      _logEvent('profile_update_failed', properties: properties);
 
   Future<void> accountAndSecurityTapped([Map<String, dynamic>? properties]) =>
       _logEvent('account_and_security_tapped', properties: properties);
@@ -148,6 +160,9 @@ class AnalyticsProvider {
   Future<void> minipayConnectionComplete([Map<String, dynamic>? properties]) =>
       _logEvent('minipay_connection_complete', properties: properties);
 
+  Future<void> minipayConnectionFailed([Map<String, dynamic>? properties]) =>
+      _logEvent('minipay_connection_failed', properties: properties);
+
   Future<void> helpAndSupportTapped([Map<String, dynamic>? properties]) =>
       _logEvent('help_and_support_tapped', properties: properties);
 
@@ -168,6 +183,15 @@ class AnalyticsProvider {
 
   Future<void> logoutTapped([Map<String, dynamic>? properties]) =>
       _logEvent('logout_tapped', properties: properties);
+
+  Future<void> logoutComplete([Map<String, dynamic>? properties]) =>
+      _logEvent('logout_complete', properties: properties);
+
+  Future<void> achievementCreated([Map<String, dynamic>? properties]) =>
+      _logEvent('achievement_created', properties: properties);
+
+  Future<void> achievementUpdated(Map<String, dynamic> params) =>
+      _logEvent('achievement_updated', properties: params);
 }
 
 final analyticsProvider = Provider<AnalyticsProvider>((ref) {

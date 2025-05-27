@@ -6,6 +6,7 @@ import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/widgets/toast.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -156,7 +157,9 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                                   ? null
                                   : () {
                                     // Handle Google sign in
-
+                                    ref
+                                        .read(analyticsProvider)
+                                        .signInWithGoogleTapped();
                                     ref
                                         .read(authProvider.notifier)
                                         .signInWithGoogle()
@@ -173,6 +176,13 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                                           if (ref.read(authProvider).state ==
                                               AuthState.authenticated) {
                                             // Navigate after successful sign in
+                                            final user =
+                                                ref.read(authProvider).user;
+                                            ref
+                                                .read(analyticsProvider)
+                                                .signInWithGoogleComplete(
+                                                  user.toMap(),
+                                                );
 
                                             if (context.mounted) {
                                               showSuccessToast(context);
@@ -247,6 +257,10 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                               ),
                           onPressed: () {
                             // Handle skip action
+                            ref.read(analyticsProvider).onboardingSkipTapped({
+                              "currentPageIndex":
+                                  onboardingState.currentPageIndex,
+                            });
                             onboardingViewModel.jumpToPage(2);
                           },
                           child: Text(
