@@ -41,21 +41,7 @@ class _TaskViewState extends ConsumerState<TasksView> {
     // Combine tasks and screenings
     return Scaffold(
       child:
-          !participantIsComplete
-              ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Please complete your profile by adding your country, date of birth, and gender to see available tasks.',
-                        textAlign: TextAlign.center,
-                      ).withPadding(all: 16).expanded(),
-                    ],
-                  ),
-                ],
-              )
-              : !hasPaymentMethod
+          !hasPaymentMethod
               ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -63,6 +49,20 @@ class _TaskViewState extends ConsumerState<TasksView> {
                     children: [
                       Text(
                         'Please connect a payment method to see available tasks.',
+                        textAlign: TextAlign.center,
+                      ).withPadding(all: 16).expanded(),
+                    ],
+                  ),
+                ],
+              )
+              : !participantIsComplete
+              ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'Please complete your profile by adding your country, date of birth, and gender to see available tasks.',
                         textAlign: TextAlign.center,
                       ).withPadding(all: 16).expanded(),
                     ],
