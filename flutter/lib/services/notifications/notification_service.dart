@@ -347,4 +347,18 @@ class NotificationService {
       data: {'type': 'reward', ...rewardData},
     );
   }
+
+  Future<void> sendAchievementEarnedNotification({
+    required String token,
+    required Map<String, dynamic> achievementData,
+  }) async {
+    await sendRemoteNotification(
+      title: 'Achievement Unlocked! 🎉',
+      body:
+          'You earned ${_formatAmount(achievementData['amountEarned'])} G\$ for completing the ${achievementData['achievementName']} achievement!',
+      token: token,
+      data: Map<String, dynamic>.from({'type': 'achievementEarned'})
+        ..addAll(achievementData),
+    );
+  }
 }
