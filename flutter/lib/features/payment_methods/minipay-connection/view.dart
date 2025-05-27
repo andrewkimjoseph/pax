@@ -46,13 +46,13 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
 
   void _connectWallet() {
     ref.read(analyticsProvider).connectMinipayTapped();
-    final walletAddress = _walletAddressController.text.trim();
+    final miniPayWalletAddress = _walletAddressController.text.trim();
     final authState = ref.read(authProvider);
 
     // Connect wallet using the provider
     ref
         .read(miniPayConnectionProvider.notifier)
-        .connectPrimaryPaymentMethod(authState.user.uid, walletAddress);
+        .connectMiniPay(authState.user.uid, miniPayWalletAddress);
   }
 
   // Show success dialog when connection is successful

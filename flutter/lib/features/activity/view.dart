@@ -167,7 +167,11 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            'No activities found',
+                            index == 0
+                                ? 'No task completions'
+                                : index == 1
+                                ? 'No rewards'
+                                : 'No withdrawals',
                             style: TextStyle(color: PaxColors.darkGrey),
                           ),
                         ],
