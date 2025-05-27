@@ -186,6 +186,12 @@ class AnalyticsProvider {
 
   Future<void> logoutComplete([Map<String, dynamic>? properties]) =>
       _logEvent('logout_complete', properties: properties);
+
+  Future<void> achievementCreated([Map<String, dynamic>? properties]) =>
+      _logEvent('achievement_created', properties: properties);
+
+  Future<void> achievementUpdated(Map<String, dynamic> params) =>
+      _logEvent('achievement_updated', properties: params);
 }
 
 final analyticsProvider = Provider<AnalyticsProvider>((ref) {
