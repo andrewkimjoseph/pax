@@ -81,11 +81,11 @@ class Achievement {
       case 'Payout Connector':
         return 1000;
       case 'Verified Human':
-        return 10000;
+        return 1000;
       case 'Profile Perfectionist':
         return 500;
       case 'Task Starter':
-        return 100;
+        return 500;
       case 'Task Expert':
         return 1000;
       default:
