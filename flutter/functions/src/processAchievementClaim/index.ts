@@ -49,8 +49,6 @@ export const processAchievementClaim = onCall(
         achievementId: string;
         paxAccountContractAddress: string;
         amountEarned: number;
-        timeCompleted?: number;
-        tasksNeededForCompletion: number;
         tasksCompleted: number;
       };
 
