@@ -104,7 +104,7 @@ class TaskCompletionService {
                 timeCreated: Timestamp.now(),
                 participantId: authState.user.uid,
                 name: 'Task Expert',
-                tasksNeededForCompletion: 2,
+                tasksNeededForCompletion: 10,
                 tasksCompleted: 1,
                 amountEarned: 1000,
               );
