@@ -113,7 +113,7 @@ class _AchievementsViewState extends ConsumerState<AchievementsView> {
                       Row(
                         children: [
                           Text(
-                            "Earn G\$ points by completing tasks and reaching milestones. Points are added to your GoodDollar balance and can be withdrawn anytime.",
+                            "Earn G\$ tokens by completing tasks and reaching milestones. The tokens are added to your GoodDollar balance and can be withdrawn anytime.",
                             style: TextStyle(
                               fontSize: 14,
                               color: PaxColors.black,
