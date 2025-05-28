@@ -252,10 +252,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
             overflow: TextOverflow.ellipsis,
           ),
           actions: [
-            OutlineButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('OK'),
-            ),
+            OutlineButton(onPressed: () => context.pop(), child: Text('OK')),
           ],
         );
       },

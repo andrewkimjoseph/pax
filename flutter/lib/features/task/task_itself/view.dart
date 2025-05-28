@@ -184,7 +184,7 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
           // Dismiss the dialog after a short delay and navigate
           Future.delayed(Duration(milliseconds: 500), () {
             if (dialogContext.mounted) {
-              Navigator.of(dialogContext).pop();
+              dialogContext.pop();
               context.pushReplacement('/task-complete');
             }
           });
@@ -200,7 +200,7 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
           // Dismiss the dialog after a short delay
           Future.delayed(Duration(milliseconds: 500), () {
             if (dialogContext.mounted) {
-              Navigator.of(dialogContext).pop();
+              dialogContext.pop();
               _showErrorDialog(
                 rewardState.errorMessage ??
                     'An unknown error occurred during rewarding',
@@ -211,7 +211,7 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
           // Dismiss the dialog after a short delay
           Future.delayed(Duration(milliseconds: 500), () {
             if (dialogContext.mounted) {
-              Navigator.of(dialogContext).pop();
+              dialogContext.pop();
               _showErrorDialog(
                 completionState.errorMessage ?? 'An unknown error occurred',
               );
@@ -251,10 +251,7 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
           title: Text('Task Error'),
           content: Text(errorMessage),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('OK'),
-            ),
+            TextButton(onPressed: () => context.pop(), child: Text('OK')),
           ],
         );
       },

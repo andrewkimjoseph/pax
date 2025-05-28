@@ -51,6 +51,15 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
       _isProcessingScreening = true;
     });
 
+    // Show processing dialog immediately
+    if (context.mounted) {
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) => _buildProcessingDialog(dialogContext),
+      );
+    }
+
     // Call screening service
     try {
       ref.read(analyticsProvider).screeningStarted({
@@ -68,15 +77,6 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
             taskManagerContractAddress: taskManagerContractAddress!,
             taskMasterServerWalletId: taskMasterServerWalletId!,
           );
-
-      // Show processing dialog
-      if (context.mounted) {
-        await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (dialogContext) => _buildProcessingDialog(dialogContext),
-        );
-      }
     } catch (e) {
       ref.read(analyticsProvider).screeningFailed({
         "taskId": currentTask.id,
@@ -107,7 +107,7 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
           // Dismiss the dialog after a short delay and navigate
           Future.delayed(Duration(milliseconds: 500), () {
             if (dialogContext.mounted) {
-              Navigator.of(dialogContext).pop();
+              context.pop();
               dialogContext.go('/task-itself');
             }
           });
@@ -115,7 +115,7 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
           // Dismiss the dialog after a short delay
           Future.delayed(Duration(milliseconds: 500), () {
             if (dialogContext.mounted) {
-              Navigator.of(dialogContext).pop();
+              context.pop();
               _showErrorDialog(
                 dialogContext,
                 screeningState.errorMessage ?? 'An unknown error occurred',
