@@ -165,7 +165,7 @@ class _AchievementsViewState extends ConsumerState<AchievementsView> {
                 width: double.infinity,
                 child: Center(
                   child: Text(
-                    'Please complete your profile by adding your name, gender, country, and date of birth to see your achievements.',
+                    'Complete your profile by adding your phone number, gender and date of birth to see your achievements.',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16, color: PaxColors.black),
                   ).withPadding(all: 16),
