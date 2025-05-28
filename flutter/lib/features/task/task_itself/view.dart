@@ -27,8 +27,6 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
   @override
   void initState() {
     super.initState();
-    ref.read(analyticsProvider).taskTapped();
-
     // Reset task completion state
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(taskCompletionProvider.notifier).reset();
@@ -49,6 +47,9 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
               onPageFinished: (String url) {
                 setState(() {
                   isLoading = false;
+                });
+                ref.read(analyticsProvider).taskLoadingComplete({
+                  "taskUrl": url,
                 });
               },
               onNavigationRequest: (NavigationRequest request) {

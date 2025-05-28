@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pax/features/home/dashboard/view.dart';
 import 'package:pax/features/home/tasks/view.dart';
 import 'package:pax/features/onboarding/view_model.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/theming/colors.dart';
@@ -143,6 +144,12 @@ class _TaskCompleteViewState extends ConsumerState<TaskCompleteView> {
                   height: 48,
                   child: PrimaryButton(
                     onPressed: () {
+                      ref.read(analyticsProvider).okOnTaskCompleteTapped({
+                        "taskId": currentTask?.id,
+                        "taskTitle": currentTask?.title,
+                        "taskCompletionId":
+                            taskCompletion.result?.taskCompletionId,
+                      });
                       context.pushReplacement('/home');
                     },
                     child: Text(
