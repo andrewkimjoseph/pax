@@ -62,21 +62,21 @@ export const deleteParticipantOnRequest = onCall(FUNCTION_RUNTIME_OPTS, async (r
       .get();
     rewardsSnapshot.docs.forEach((doc) => batch.delete(doc.ref));
 
-    // 4.5 Delete achievements
+    // 5 Delete achievements
     const achievementsSnapshot = await db
       .collection('achievements')
       .where('participantId', '==', participantId)
       .get();
     achievementsSnapshot.docs.forEach((doc) => batch.delete(doc.ref));
 
-    // 5. Delete withdrawals
+    // 6. Delete withdrawals
     const withdrawalsSnapshot = await db
       .collection('withdrawals')
       .where('participantId', '==', participantId)
       .get();
     withdrawalsSnapshot.docs.forEach((doc) => batch.delete(doc.ref));
 
-    // 6. Delete FCM tokens
+    // 7. Delete FCM tokens
     const fcmTokensSnapshot = await db
       .collection('fcm_tokens')
       .where('participantId', '==', participantId)
