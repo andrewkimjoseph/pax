@@ -1,6 +1,6 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
-import { Address, encodeFunctionData, http } from "viem";
+import { Address, encodeFunctionData, http, parseEther } from "viem";
 import { celo } from "viem/chains";
 import { erc20ABI } from "../../shared/abis/erc20";
 import {
@@ -40,6 +40,11 @@ export const processAchievementClaim = onCall(
         );
       }
 
+      logger.info("Processing achievement claim for user:", { 
+        userId: request.auth.uid,
+        achievementId: request.data.achievementId 
+      });
+
       const { 
         achievementId, 
         paxAccountContractAddress, 
@@ -52,6 +57,13 @@ export const processAchievementClaim = onCall(
         tasksCompleted: number;
       };
 
+      logger.info("Claim parameters:", {
+        achievementId,
+        paxAccountContractAddress,
+        amountEarned,
+        tasksCompleted
+      });
+
       if (!achievementId || !paxAccountContractAddress || !amountEarned === undefined || tasksCompleted === undefined) {
         throw new HttpsError(
           "invalid-argument",
@@ -61,6 +73,12 @@ export const processAchievementClaim = onCall(
 
 
       const recipientAddress = paxAccountContractAddress as Address;
+
+      logger.info("Preparing transaction:", {
+        recipientAddress,
+        amountEarned: amountEarned.toString(),
+        rewardTokenAddress: REWARD_TOKEN_ADDRESS
+      });
 
       const PAX_MASTER_ACCOUNT = privateKeyToAccount(PAX_MASTER);
 
@@ -73,11 +91,15 @@ export const processAchievementClaim = onCall(
         },
       });
 
+      logger.info("Smart Account Address:", { address: smartAccount.address });
+
       const data = encodeFunctionData({
         abi: erc20ABI,
         functionName: "transfer",
-        args: [recipientAddress, BigInt(amountEarned)],
+        args: [recipientAddress, parseEther(amountEarned.toString())],
       });
+
+      logger.info("Encoded transaction data:", { data });
 
       // Create a smart account client
       const smartAccountClient = createSmartAccountClient({
@@ -98,9 +120,19 @@ export const processAchievementClaim = onCall(
         data,
       });
 
+      logger.info("Transaction sent successfully:", { 
+        transactionHash: hash,
+        achievementId,
+        recipientAddress
+      });
+
       return { success: true, txnHash: hash };
     } catch (error) {
-      logger.error("Error processing achievement claim:", error);
+      logger.error("Error processing achievement claim:", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        achievementId: request.data?.achievementId
+      });
       throw new HttpsError("internal", "Error processing achievement claim.");
     }
   }

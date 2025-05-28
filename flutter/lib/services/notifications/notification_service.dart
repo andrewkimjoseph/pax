@@ -361,4 +361,18 @@ class NotificationService {
         ..addAll(achievementData),
     );
   }
+
+  Future<void> sendAchievementClaimedNotification({
+    required String token,
+    required Map<String, dynamic> achievementData,
+  }) async {
+    await sendRemoteNotification(
+      title: 'Achievement Claimed! 💰',
+      body:
+          'You\'ve claimed ${_formatAmount(achievementData['amountEarned'])} G\$ for the ${achievementData['achievementName']} achievement!',
+      token: token,
+      data: Map<String, dynamic>.from({'type': 'achievementClaimed'})
+        ..addAll(achievementData),
+    );
+  }
 }

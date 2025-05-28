@@ -79,13 +79,13 @@ class Achievement {
   num get amountAwarded {
     switch (name) {
       case 'Payout Connector':
-        return 1000;
+        return 100;
       case 'Verified Human':
-        return 1000;
+        return 100;
       case 'Profile Perfectionist':
-        return 500;
+        return 100;
       case 'Task Starter':
-        return 500;
+        return 100;
       case 'Task Expert':
         return 1000;
       default:
