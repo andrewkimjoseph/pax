@@ -163,6 +163,19 @@ class TokenBalanceUtil {
     return formattedNumber;
   }
 
+  static String getLocaleFormattedAmountNoDecimals(num amount) {
+    // Get the raw balance
+    final locale = Intl.getCurrentLocale();
+
+    // Create formatter based on whether to include decimals
+    final NumberFormat formatter = NumberFormat('#,###', locale);
+
+    // Format the number
+    final formattedNumber = formatter.format(amount);
+
+    return formattedNumber;
+  }
+
   static String getLocaleFormattedAmount(num amount) {
     // Get the raw balance
     final locale = Intl.getCurrentLocale();

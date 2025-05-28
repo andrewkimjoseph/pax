@@ -169,21 +169,21 @@ class BlockchainService {
 
   // Check if contract has sufficient balance for withdrawal
   Future<bool> hasSufficientBalance(
-    String contractAddress,
+    String contractOrEOAAddress,
     String currencyAddress,
     double amountToWithdraw,
     int decimals,
   ) async {
     try {
       final balance = await _getTokenBalance(
-        contractAddress,
+        contractOrEOAAddress,
         currencyAddress,
         decimals,
       );
 
       if (kDebugMode) {
         print(
-          'Contract balance: $balance, Amount to withdraw: $amountToWithdraw',
+          'Contract/EOA balance: $balance, Amount to withdraw: $amountToWithdraw',
         );
       }
 
