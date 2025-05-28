@@ -77,12 +77,22 @@ class TaskCompletionService {
                 tasksNeededForCompletion: 1,
                 tasksCompleted: 1,
                 timeCompleted: Timestamp.now(),
-                amountEarned: 500,
+                amountEarned: 100,
               );
           ref.read(analyticsProvider).achievementCreated({
             'achievementName': 'Task Starter',
-            'amountEarned': 500,
+            'amountEarned': 100,
           });
+          final fcmToken = await ref.read(fcmTokenProvider.future);
+          ref
+              .read(notificationServiceProvider)
+              .sendAchievementEarnedNotification(
+                token: fcmToken!,
+                achievementData: {
+                  'achievementName': 'Task Starter',
+                  'amountEarned': 100,
+                },
+              );
         }
 
         // Handle Task Expert achievement
