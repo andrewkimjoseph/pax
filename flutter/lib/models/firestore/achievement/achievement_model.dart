@@ -35,17 +35,28 @@ class Achievement {
   }
 
   String get goal {
+    final isCompleted =
+        status == AchievementStatus.earned ||
+        status == AchievementStatus.claimed;
     switch (name) {
       case 'Payout Connector':
-        return 'Connect a payment method';
+        return isCompleted
+            ? 'Connected a payment method'
+            : 'Connect a payment method';
       case 'Verified Human':
-        return 'Verify humanness on your connected payment method';
+        return isCompleted
+            ? 'Verified humanness on your connected payment method'
+            : 'Verify humanness on your connected payment method';
       case 'Profile Perfectionist':
-        return 'Fill in your phone number, gender, and date of birth';
+        return isCompleted
+            ? 'Filled in your phone number, gender, and date of birth'
+            : 'Fill in your phone number, gender, and date of birth';
       case 'Task Starter':
-        return 'Complete 1 task';
+        return isCompleted
+            ? 'Completed $tasksNeededForCompletion task${tasksNeededForCompletion == 1 ? '' : 's'}'
+            : 'Complete $tasksNeededForCompletion task${tasksNeededForCompletion == 1 ? '' : 's'}';
       case 'Task Expert':
-        return 'Complete 10 tasks';
+        return isCompleted ? 'Completed 10 tasks' : 'Complete 10 tasks';
       default:
         return '';
     }
@@ -76,22 +87,22 @@ class Achievement {
     return '$tasksCompleted/$tasksNeededForCompletion';
   }
 
-  num get amountAwarded {
-    switch (name) {
-      case 'Payout Connector':
-        return 100;
-      case 'Verified Human':
-        return 100;
-      case 'Profile Perfectionist':
-        return 100;
-      case 'Task Starter':
-        return 100;
-      case 'Task Expert':
-        return 1000;
-      default:
-        return 0;
-    }
-  }
+  // num get amountAwarded {
+  //   switch (name) {
+  //     case 'Payout Connector':
+  //       return 100;
+  //     case 'Verified Human':
+  //       return 100;
+  //     case 'Profile Perfectionist':
+  //       return 100;
+  //     case 'Task Starter':
+  //       return 100;
+  //     case 'Task Expert':
+  //       return 1000;
+  //     default:
+  //       return 0;
+  //   }
+  // }
 
   // Factory method to create an Achievement from Firestore document
   factory Achievement.fromFirestore(DocumentSnapshot doc) {

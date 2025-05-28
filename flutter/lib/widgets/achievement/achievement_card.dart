@@ -83,7 +83,7 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
                         Text(
                           isEarned
                               ? 'Earned'
-                              : 'G\$ ${widget.achievement.amountAwarded}',
+                              : 'G\$ ${widget.achievement.amountEarned}',
                           style: TextStyle(
                             fontWeight: FontWeight.w900,
                             fontSize: 12,
@@ -202,8 +202,8 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
                       ? CircularProgressIndicator()
                       : Text(
                         isClaimed
-                            ? 'Claimed G\$ ${widget.achievement.amountAwarded}'
-                            : 'Claim G\$ ${widget.achievement.amountAwarded}',
+                            ? 'Claimed G\$ ${widget.achievement.amountEarned}'
+                            : 'Claim G\$ ${widget.achievement.amountEarned}',
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 14,
@@ -291,7 +291,7 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
                         children: [
                           Text(
                             TokenBalanceUtil.getLocaleFormattedAmount(
-                              widget.achievement.amountAwarded,
+                              widget.achievement.amountEarned ?? 0,
                             ),
                             style: TextStyle(
                               color: PaxColors.black,

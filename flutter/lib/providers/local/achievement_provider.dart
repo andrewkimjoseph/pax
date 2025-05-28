@@ -72,7 +72,7 @@ class AchievementNotifier extends Notifier<AchievementStateModel> {
       final hasBalance = await _blockchainService.hasSufficientBalance(
         paxMasterAddressSmartAccount,
         BlockchainService.supportedTokens[1]!.address,
-        achievement.amountAwarded.toDouble(),
+        achievement.amountEarned?.toDouble() ?? 0,
         18,
       );
 
@@ -84,7 +84,7 @@ class AchievementNotifier extends Notifier<AchievementStateModel> {
       final txnHash = await _achievementService.processAchievementClaim(
         achievementId: achievement.id,
         paxAccountContractAddress: paxAccountContractAddress,
-        amountEarned: achievement.amountAwarded,
+        amountEarned: achievement.amountEarned ?? 0,
         tasksCompleted: achievement.tasksCompleted,
       );
 
@@ -95,7 +95,7 @@ class AchievementNotifier extends Notifier<AchievementStateModel> {
           token: fcmToken,
           achievementData: {
             'achievementName': achievement.name,
-            'amountEarned': achievement.amountAwarded,
+            'amountEarned': achievement.amountEarned ?? 0,
             'txnHash': txnHash,
           },
         );
