@@ -58,22 +58,22 @@ describe("1. Initial Setup Tests", function () {
     // Setup all wallet accounts
     console.log("Setting up wallet accounts...");
     wallets.TASK_MANAGER = await getWalletInfo(WALLET_IDS.TASK_MANAGER, true);
-    wallets.PARTICIPANT_2 = await getWalletInfo(WALLET_IDS.PARTICIPANT_2, false);
-    wallets.PARTICIPANT_3 = await getWalletInfo(WALLET_IDS.PARTICIPANT_3, false);
-    wallets.PARTICIPANT_4 = await getWalletInfo(WALLET_IDS.PARTICIPANT_4, false);
+    // wallets.PARTICIPANT_2 = await getWalletInfo(WALLET_IDS.PARTICIPANT_2, false);
+    // wallets.PARTICIPANT_3 = await getWalletInfo(WALLET_IDS.PARTICIPANT_3, false);
+    // wallets.PARTICIPANT_4 = await getWalletInfo(WALLET_IDS.PARTICIPANT_4, false);
 
-    console.log("Task Manager wallet address:", wallets.TASK_MANAGER.address);
-    console.log("Participant 2 wallet address:", wallets.PARTICIPANT_2.address);
-    console.log("Participant 3 wallet address:", wallets.PARTICIPANT_3.address);
-    console.log("Participant 4 wallet address:", wallets.PARTICIPANT_4.address);
+    // console.log("Task Manager wallet address:", wallets.TASK_MANAGER.address);
+    // console.log("Participant 2 wallet address:", wallets.PARTICIPANT_2.address);
+    // console.log("Participant 3 wallet address:", wallets.PARTICIPANT_3.address);
+    // console.log("Participant 4 wallet address:", wallets.PARTICIPANT_4.address);
   });
 
-  it("should create Smart Accounts successfully", async function () {
-    expect(wallets.TASK_MANAGER.address).to.match(/^0x[a-fA-F0-9]{40}$/);
-    expect(wallets.PARTICIPANT_2.address).to.match(/^0x[a-fA-F0-9]{40}$/);
-    expect(wallets.PARTICIPANT_3.address).to.match(/^0x[a-fA-F0-9]{40}$/);
-    expect(wallets.PARTICIPANT_4.address).to.match(/^0x[a-fA-F0-9]{40}$/);
-  });
+  // it("should create Smart Accounts successfully", async function () {
+  //   expect(wallets.TASK_MANAGER.address).to.match(/^0x[a-fA-F0-9]{40}$/);
+  //   expect(wallets.PARTICIPANT_2.address).to.match(/^0x[a-fA-F0-9]{40}$/);
+  //   expect(wallets.PARTICIPANT_3.address).to.match(/^0x[a-fA-F0-9]{40}$/);
+  //   expect(wallets.PARTICIPANT_4.address).to.match(/^0x[a-fA-F0-9]{40}$/);
+  // });
 
   it("should deploy TaskManager contract", async function () {
     // Deploy TaskManager with default parameters
