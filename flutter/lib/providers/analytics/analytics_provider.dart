@@ -50,6 +50,9 @@ class AnalyticsProvider {
   Future<void> signInWithGoogleComplete([Map<String, dynamic>? properties]) =>
       _logEvent('sign_in_with_google_complete', properties: properties);
 
+  Future<void> signInWithGoogleIncomplete([Map<String, dynamic>? properties]) =>
+      _logEvent('sign_in_with_google_incomplete', properties: properties);
+
   Future<void> dashboardTapped([Map<String, dynamic>? properties]) =>
       _logEvent('dashboard_tapped', properties: properties);
 

@@ -195,6 +195,9 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                                         })
                                         .onError((error, stackTrace) {
                                           // Handle the error here
+                                          ref
+                                              .read(analyticsProvider)
+                                              .signInWithGoogleIncomplete();
                                           if (context.mounted) {
                                             showToast(
                                               context: context,
