@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/services/branch_service.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
+import 'package:pax/providers/remote_config/remote_config_provider.dart';
 
 /// A widget that handles app lifecycle events to refresh auth state
 /// when the app is resumed from background
@@ -46,6 +47,9 @@ class _AppLifecycleHandlerState extends ConsumerState<AppLifecycleHandler>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      // Refresh remote config
+      ref.read(remoteConfigServiceProvider).refreshConfig();
+
       // Only refresh auth state if we're not already authenticated
       final currentAuthState = ref.read(authProvider);
       if (currentAuthState.state != AuthState.authenticated) {
