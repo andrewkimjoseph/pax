@@ -224,7 +224,6 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
     final claimState = ref.read(achievementClaimProvider.notifier);
 
     // Show claiming dialog
-
     showDialog(
       context: context,
       barrierDismissible: false,
