@@ -77,6 +77,14 @@ class AchievementNotifier extends Notifier<AchievementStateModel> {
       );
 
       if (!hasBalance) {
+        final finalClaimingStates = Map<String, bool>.from(
+          state.claimingStates,
+        );
+        finalClaimingStates.remove(achievement.id);
+        state = state.copyWith(
+          claimingStates: finalClaimingStates,
+          errorMessage: 'B: Claiming is not possible at this time',
+        );
         throw Exception('B: Claiming is not possible at this time');
       }
 
@@ -125,6 +133,7 @@ class AchievementNotifier extends Notifier<AchievementStateModel> {
         claimingStates: finalClaimingStates,
         errorMessage: e.toString(),
       );
+      rethrow;
     }
   }
 
