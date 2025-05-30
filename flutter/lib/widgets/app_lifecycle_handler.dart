@@ -51,6 +51,8 @@ class _AppLifecycleHandlerState extends ConsumerState<AppLifecycleHandler>
       ref.read(remoteConfigServiceProvider).refreshConfig();
       // Invalidate the app version config provider to force a rebuild
       ref.invalidate(appVersionConfigProvider);
+      // Invalidate the maintenance config provider to force a rebuild
+      ref.invalidate(maintenanceConfigProvider);
 
       // Only refresh auth state if we're not already authenticated
       final currentAuthState = ref.read(authProvider);

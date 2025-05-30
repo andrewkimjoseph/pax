@@ -1,6 +1,7 @@
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pax/models/remote_config/app_version_config.dart';
+import 'package:pax/models/remote_config/maintenance_config.dart';
 import 'dart:convert';
 
 class RemoteConfigService {
@@ -74,6 +75,45 @@ class RemoteConfigService {
     } catch (e) {
       if (kDebugMode) {
         print('Remote Config Service: Error getting app version config: $e');
+      }
+      rethrow;
+    }
+  }
+
+  Future<MaintenanceConfig> getMaintenanceConfig() async {
+    if (!_isInitialized) {
+      await initialize();
+    }
+
+    try {
+      if (kDebugMode) {
+        print(
+          'Remote Config Service: All parameters: ${_remoteConfig.getAll()}',
+        );
+      }
+
+      final jsonString = _remoteConfig.getString('maintenance_config');
+      if (kDebugMode) {
+        print(
+          'Remote Config Service: Raw maintenance config string: $jsonString',
+        );
+      }
+
+      if (jsonString.isEmpty) {
+        throw Exception('Maintenance config not found in remote config');
+      }
+
+      final Map<String, dynamic> configMap = json.decode(jsonString);
+      if (kDebugMode) {
+        print(
+          'Remote Config Service: Parsed maintenance config map: $configMap',
+        );
+      }
+
+      return MaintenanceConfig.fromJson(configMap);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Remote Config Service: Error getting maintenance config: $e');
       }
       rethrow;
     }

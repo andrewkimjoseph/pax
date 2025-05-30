@@ -10,6 +10,7 @@ import 'package:pax/services/app_initializer.dart';
 import 'package:pax/services/notifications/notification_service.dart';
 import 'package:pax/theming/theme_provider.dart';
 import 'package:pax/widgets/app_lifecycle_handler.dart';
+import 'package:pax/widgets/maintenance_dialog.dart';
 import 'package:pax/widgets/update_dialog.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -130,6 +131,9 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
                 // The UpdateDialog is now a widget within the tree,
                 // controlling its own visibility based on config.
                 const UpdateDialog(),
+                // The MaintenanceDialog is also a widget within the tree,
+                // controlling its own visibility based on config.
+                const MaintenanceDialog(),
               ],
             ),
           );
