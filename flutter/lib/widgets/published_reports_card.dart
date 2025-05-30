@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:pax/models/forum_report.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/theming/colors.dart';
@@ -129,7 +130,9 @@ class _ForumReportCardState extends ConsumerState<ForumReportCard> {
 
                       Expanded(
                         child: Text(
-                          widget.report.timePublished!.toIso8601String(),
+                          DateFormat(
+                            'd MMM yyyy',
+                          ).format(widget.report.timePublished!),
                           style: TextStyle(
                             fontWeight: FontWeight.normal,
                             fontSize: 10,
