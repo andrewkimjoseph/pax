@@ -33,7 +33,7 @@ class RemoteConfigService {
       if (kDebugMode) {
         print('Remote Config Service: Successfully initialized');
         print(
-          'Remote Config Service: All parameters: ${_remoteConfig.getAll()}',
+          'Remote Config Service: All parameters: ${_remoteConfig.getAll().map((key, value) => MapEntry(key, value.asString()))}',
         );
       }
     } catch (e) {
@@ -85,7 +85,7 @@ class RemoteConfigService {
       if (kDebugMode) {
         print('Remote Config Service: Config refreshed successfully');
         print(
-          'Remote Config Service: All parameters after refresh: ${_remoteConfig.getAll()}',
+          'Remote Config Service: All parameters after refresh: ${_remoteConfig.getAll().map((key, value) => MapEntry(key, value.asString()))}',
         );
       }
     } catch (e) {

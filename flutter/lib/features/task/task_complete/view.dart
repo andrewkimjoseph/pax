@@ -75,6 +75,40 @@ class _TaskCompleteViewState extends ConsumerState<TaskCompleteView> {
         ).withPadding(top: 16),
       ],
 
+      footers: [
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: Column(
+            children: [
+              Divider().withPadding(top: 10, bottom: 10),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: PrimaryButton(
+                  onPressed: () {
+                    ref.read(analyticsProvider).okOnTaskCompleteTapped({
+                      "taskId": currentTask?.id,
+                      "taskTitle": currentTask?.title,
+                      "taskCompletionId":
+                          taskCompletion.result?.taskCompletionId,
+                    });
+                    context.pushReplacement('/home');
+                  },
+                  child: Text(
+                    'OK',
+                    style: Theme.of(context).typography.base.copyWith(
+                      fontWeight: FontWeight.normal,
+                      fontSize: 14,
+                      color: PaxColors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ).withPadding(bottom: 32),
+      ],
+
       // Use Column as the main container
       child: Column(
         children: [
@@ -99,7 +133,7 @@ class _TaskCompleteViewState extends ConsumerState<TaskCompleteView> {
                           fontSize: 16,
                           fontWeight: FontWeight.normal,
                         ),
-                      ).withPadding(bottom: 16),
+                      ).withPadding(bottom: 16, top: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
 
@@ -134,37 +168,6 @@ class _TaskCompleteViewState extends ConsumerState<TaskCompleteView> {
           ),
 
           // Fixed button at the bottom
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            child: Column(
-              children: [
-                Divider().withPadding(top: 10, bottom: 10),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: PrimaryButton(
-                    onPressed: () {
-                      ref.read(analyticsProvider).okOnTaskCompleteTapped({
-                        "taskId": currentTask?.id,
-                        "taskTitle": currentTask?.title,
-                        "taskCompletionId":
-                            taskCompletion.result?.taskCompletionId,
-                      });
-                      context.pushReplacement('/home');
-                    },
-                    child: Text(
-                      'OK',
-                      style: Theme.of(context).typography.base.copyWith(
-                        fontWeight: FontWeight.normal,
-                        fontSize: 14,
-                        color: PaxColors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );

@@ -49,6 +49,8 @@ class _AppLifecycleHandlerState extends ConsumerState<AppLifecycleHandler>
     if (state == AppLifecycleState.resumed) {
       // Refresh remote config
       ref.read(remoteConfigServiceProvider).refreshConfig();
+      // Invalidate the app version config provider to force a rebuild
+      ref.invalidate(appVersionConfigProvider);
 
       // Only refresh auth state if we're not already authenticated
       final currentAuthState = ref.read(authProvider);
