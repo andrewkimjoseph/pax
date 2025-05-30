@@ -70,22 +70,31 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
     }
 
     final router = ref.read(routerProvider);
-    // Let the router's redirect logic handle the navigation
-    router.go("/home");
 
-    // // Check if this is an initial deep link
-    // if (linkData['+clicked_branch_link'] == true) {
+    // Only handle navigation if it's a valid Branch link
+    if (linkData['+clicked_branch_link'] == true) {
+      // Extract the path from the referring link
+      String? path;
+      if (linkData.containsKey('~referring_link')) {
+        final url = Uri.parse(linkData['~referring_link'] as String);
+        if (url.path.isNotEmpty) {
+          path = url.path;
+        }
+      }
 
-    // }
-
-    // if (linkData.containsKey('route')) {
-    //   final route = linkData['route'];
-    //   if (kDebugMode) {
-    //     print('Navigating to route from deep link: $route');
-    //   }
-    //   final router = ref.read(routerProvider);
-    //   router.push(route);
-    // }
+      // If we have a valid path, navigate to it
+      if (path != null && path.isNotEmpty) {
+        // First navigate to home to ensure proper navigation stack
+        router.go("/home");
+        // Then push the target route
+        router.push(path);
+      } else {
+        router.go("/home");
+      }
+    } else {
+      // If not a valid Branch link, just go to home
+      router.go("/home");
+    }
   }
 
   @override
