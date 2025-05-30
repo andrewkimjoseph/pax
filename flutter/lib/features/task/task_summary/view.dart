@@ -35,9 +35,12 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
 
   // Method to handle screening process
   Future<void> _processScreening(BuildContext context) async {
+    if (!mounted) return;
+
     ref.read(analyticsProvider).continueWithTaskTapped();
     final currentTask = ref.read(taskContextProvider)?.task;
     if (currentTask == null) {
+      if (!mounted) return;
       _showErrorDialog(context, 'Task not found');
       return;
     }
@@ -47,27 +50,38 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
     final participantId = ref.read(participantProvider).participant?.id;
     final taskManagerContractAddress = currentTask.managerContractAddress;
 
+    if (!mounted) return;
     setState(() {
       _isProcessingScreening = true;
     });
 
-    // Show processing dialog immediately
-    if (context.mounted) {
-      await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (dialogContext) => _buildProcessingDialog(dialogContext),
-      );
-    }
+    // Show loading dialog
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (dialogContext) => AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Letting you in...'),
+              ],
+            ),
+          ),
+    );
 
-    // Call screening service
     try {
+      if (!mounted) return;
       ref.read(analyticsProvider).screeningStarted({
         "taskId": currentTask.id,
         "taskManagerContractAddress": taskManagerContractAddress,
         "taskMasterServerWalletId": taskMasterServerWalletId,
       });
 
+      if (!mounted) return;
       await ref
           .read(screeningServiceProvider)
           .screenParticipant(
@@ -77,7 +91,15 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
             taskManagerContractAddress: taskManagerContractAddress!,
             taskMasterServerWalletId: taskMasterServerWalletId!,
           );
+
+      if (!mounted) return;
+
+      if (!context.mounted) return;
+      // Dismiss loading dialog and navigate on success
+      context.pop();
+      context.go('/task-itself');
     } catch (e) {
+      if (!mounted) return;
       ref.read(analyticsProvider).screeningFailed({
         "taskId": currentTask.id,
         "taskManagerContractAddress": taskManagerContractAddress,
@@ -85,6 +107,8 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
       });
 
       if (context.mounted) {
+        // Dismiss loading dialog and show error
+        context.pop();
         _showErrorDialog(context, e.toString());
       }
     } finally {
@@ -94,61 +118,6 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
         });
       }
     }
-  }
-
-  // Dialog showing processing state
-  Widget _buildProcessingDialog(BuildContext dialogContext) {
-    return Consumer(
-      builder: (context, ref, _) {
-        final screeningState = ref.watch(screeningProvider);
-
-        // Handle different screening states
-        if (screeningState.state == ScreeningState.complete) {
-          // Dismiss the dialog after a short delay and navigate
-          Future.delayed(Duration(milliseconds: 500), () {
-            if (dialogContext.mounted) {
-              context.pop();
-              dialogContext.go('/task-itself');
-            }
-          });
-        } else if (screeningState.state == ScreeningState.error) {
-          // Dismiss the dialog after a short delay
-          Future.delayed(Duration(milliseconds: 500), () {
-            if (dialogContext.mounted) {
-              context.pop();
-              _showErrorDialog(
-                dialogContext,
-                screeningState.errorMessage ?? 'An unknown error occurred',
-              );
-            }
-          });
-        } else if (screeningState.state == ScreeningState.loading) {
-          // Show loading indicator
-          return AlertDialog(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Letting you in...'),
-              ],
-            ),
-          );
-        }
-
-        // Default case - show loading indicator
-        return AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Letting you in...'),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   // Error dialog
