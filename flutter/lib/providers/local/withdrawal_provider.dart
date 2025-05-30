@@ -17,7 +17,6 @@ import 'package:pax/services/blockchain/blockchain_service.dart';
 class WithdrawNotifier extends Notifier<WithdrawStateModel> {
   late final WithdrawalService _withdrawalService;
   final NotificationService _notificationService = NotificationService();
-  final BlockchainService _blockchainService = BlockchainService();
 
   @override
   WithdrawStateModel build() {
@@ -60,7 +59,7 @@ class WithdrawNotifier extends Notifier<WithdrawStateModel> {
         throw Exception('Contract address not found');
       }
 
-      final hasBalance = await _blockchainService.hasSufficientBalance(
+      final hasBalance = await BlockchainService.hasSufficientBalance(
         paxAccount!.contractAddress!,
         currencyAddress,
         amountToWithdraw,

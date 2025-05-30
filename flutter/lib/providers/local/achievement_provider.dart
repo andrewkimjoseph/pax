@@ -39,7 +39,6 @@ class AchievementStateModel {
 
 class AchievementNotifier extends Notifier<AchievementStateModel> {
   final AchievementService _achievementService = AchievementService();
-  final BlockchainService _blockchainService = BlockchainService();
   final NotificationService _notificationService = NotificationService();
 
   @override
@@ -69,7 +68,7 @@ class AchievementNotifier extends Notifier<AchievementStateModel> {
       }
 
       // Check if the claiming address has sufficient balance
-      final hasBalance = await _blockchainService.hasSufficientBalance(
+      final hasBalance = await BlockchainService.hasSufficientBalance(
         paxMasterAddressSmartAccount,
         BlockchainService.supportedTokens[1]!.address,
         achievement.amountEarned?.toDouble() ?? 0,
