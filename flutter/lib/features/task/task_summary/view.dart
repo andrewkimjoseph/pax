@@ -7,6 +7,8 @@ import 'package:pax/providers/local/task_context/main_task_context_provider.dart
 import 'package:pax/providers/local/task_master_server_id_provider.dart';
 import 'package:pax/providers/local/screening_state_provider.dart';
 import 'package:pax/services/screening_service.dart';
+import 'package:pax/services/blockchain/blockchain_service.dart';
+import 'package:pax/utils/token_address_util.dart';
 import 'package:pax/widgets/other_task_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Consumer;
 import 'package:go_router/go_router.dart';
@@ -75,6 +77,18 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
 
     try {
       if (!mounted) return;
+
+      final hasBalance = await BlockchainService.hasSufficientBalance(
+        taskManagerContractAddress!,
+        TokenAddressUtil.getAddressForCurrency(currentTask.rewardCurrencyId!),
+        currentTask.rewardAmountPerParticipant!.toDouble(),
+        TokenAddressUtil.getDecimalsForCurrency(currentTask.rewardCurrencyId!),
+      );
+
+      if (!hasBalance) {
+        throw Exception('Task manager contract has insufficient balance');
+      }
+
       ref.read(analyticsProvider).screeningStarted({
         "taskId": currentTask.id,
         "taskManagerContractAddress": taskManagerContractAddress,
@@ -88,7 +102,7 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
             serverWalletId: serverWalletId!,
             taskId: currentTask.id,
             participantId: participantId!,
-            taskManagerContractAddress: taskManagerContractAddress!,
+            taskManagerContractAddress: taskManagerContractAddress,
             taskMasterServerWalletId: taskMasterServerWalletId!,
           );
 
