@@ -101,30 +101,30 @@ describe("1. Initial Setup Tests", function () {
     // Deploy PaxAccount for Task Manager / Participant 1
     const paxAccount1 = await deployPaxAccountProxy(
       wallets.TASK_MANAGER,
-      wallets.TASK_MANAGER.address // Use its own address as primary payment method
+      "0x96a6086f14A4FEf488d36fd1F0F175A639315e56" // Use its own address as primary payment method
     );
     paxAccountAddresses.push(paxAccount1);
 
     // Deploy PaxAccount for Participant 2
-    const paxAccount2 = await deployPaxAccountProxy(
-      wallets.PARTICIPANT_2,
-      wallets.PARTICIPANT_2.address // Use its own address as primary payment method
-    );
-    paxAccountAddresses.push(paxAccount2);
+    // const paxAccount2 = await deployPaxAccountProxy(
+    //   wallets.PARTICIPANT_2,
+    //   wallets.PARTICIPANT_2.address // Use its own address as primary payment method
+    // );
+    // paxAccountAddresses.push(paxAccount2);
 
-    // Deploy PaxAccount for Participant 3
-    const paxAccount3 = await deployPaxAccountProxy(
-      wallets.PARTICIPANT_3,
-      wallets.PARTICIPANT_3.address // Use its own address as primary payment method
-    );
-    paxAccountAddresses.push(paxAccount3);
+    // // Deploy PaxAccount for Participant 3
+    // const paxAccount3 = await deployPaxAccountProxy(
+    //   wallets.PARTICIPANT_3,
+    //   wallets.PARTICIPANT_3.address // Use its own address as primary payment method
+    // );
+    // paxAccountAddresses.push(paxAccount3);
 
-    // Deploy PaxAccount for Participant 4
-    const paxAccount4 = await deployPaxAccountProxy(
-      wallets.PARTICIPANT_4,
-      wallets.PARTICIPANT_4.address // Use its own address as primary payment method
-    );
-    paxAccountAddresses.push(paxAccount4);
+    // // Deploy PaxAccount for Participant 4
+    // const paxAccount4 = await deployPaxAccountProxy(
+    //   wallets.PARTICIPANT_4,
+    //   wallets.PARTICIPANT_4.address // Use its own address as primary payment method
+    // );
+    // paxAccountAddresses.push(paxAccount4);
 
     // Verify all PaxAccounts were deployed successfully
     expect(paxAccountAddresses.length).to.equal(4);
