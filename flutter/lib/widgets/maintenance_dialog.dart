@@ -14,9 +14,25 @@ class MaintenanceDialog extends ConsumerWidget {
 
     return maintenanceConfigAsync.when(
       data: (config) {
-        if (kDebugMode) return const SizedBox.shrink();
+        if (kDebugMode) {
+          print(
+            'MaintenanceDialog - Config received: ${config.isUnderMaintenance}',
+          );
+          print('MaintenanceDialog - Message: ${config.message}');
+        }
 
-        if (!config.isUnderMaintenance) return const SizedBox.shrink();
+        if (!config.isUnderMaintenance) {
+          if (kDebugMode) {
+            print(
+              'MaintenanceDialog - Not showing: isUnderMaintenance is false',
+            );
+          }
+          return const SizedBox.shrink();
+        }
+
+        if (kDebugMode) {
+          print('MaintenanceDialog - Showing maintenance dialog');
+        }
 
         return Stack(
           children: [
@@ -61,9 +77,16 @@ class MaintenanceDialog extends ConsumerWidget {
           ],
         );
       },
-      loading: () => const SizedBox.shrink(),
+      loading: () {
+        if (kDebugMode) {
+          print('MaintenanceDialog - Loading state');
+        }
+        return const SizedBox.shrink();
+      },
       error: (error, stack) {
-        debugPrint('Error loading maintenance config: $error');
+        if (kDebugMode) {
+          print('MaintenanceDialog - Error: $error');
+        }
         return const SizedBox.shrink();
       },
     );
