@@ -85,6 +85,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                   fontSize: 16,
                   fontWeight: FontWeight.normal,
                 ),
+                textAlign: TextAlign.center,
               ).withPadding(bottom: 8),
 
               Row(
