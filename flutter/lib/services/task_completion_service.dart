@@ -124,7 +124,7 @@ class TaskCompletionService {
           if (newTasksCompleted >= taskExpert.tasksNeededForCompletion) {
             updateData['timeCompleted'] = Timestamp.now();
 
-            ref.read(analyticsProvider).achievementCompleted({
+            ref.read(analyticsProvider).achievementComplete({
               'achievementName': 'Task Expert',
               'tasksCompleted': newTasksCompleted,
               'tasksNeededForCompletion': taskExpert.tasksNeededForCompletion,

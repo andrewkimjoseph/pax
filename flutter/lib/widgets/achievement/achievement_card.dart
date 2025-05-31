@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/gradient_border.dart';
 import 'package:pax/models/firestore/achievement/achievement_model.dart';
@@ -221,6 +222,10 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
   }
 
   Future<void> _handleClaim() async {
+    ref.read(analyticsProvider).claimAchievementTapped({
+      'achievementId': widget.achievement.id,
+      'achievementName': widget.achievement.name,
+    });
     final claimState = ref.read(achievementClaimProvider.notifier);
 
     // Show claiming dialog
@@ -254,6 +259,10 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
 
       if (!mounted) return;
       context.pop();
+      ref.read(analyticsProvider).claimAchievementComplete({
+        'achievementId': widget.achievement.id,
+        'achievementName': widget.achievement.name,
+      });
 
       // Show success dialog
       showDialog(
@@ -336,7 +345,10 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
     } catch (e) {
       if (!mounted) return;
       context.pop();
-
+      ref.read(analyticsProvider).claimAchievementFailed({
+        'achievementId': widget.achievement.id,
+        'achievementName': widget.achievement.name,
+      });
       // Show error dialog
       showDialog(
         context: context,

@@ -199,8 +199,17 @@ class AnalyticsProvider {
   Future<void> achievementUpdated(Map<String, dynamic> params) =>
       _logEvent('achievement_updated', properties: params);
 
-  Future<void> achievementCompleted([Map<String, dynamic>? properties]) =>
-      _logEvent('achievement_completed', properties: properties);
+  Future<void> achievementComplete([Map<String, dynamic>? properties]) =>
+      _logEvent('achievement_complete', properties: properties);
+
+  Future<void> claimAchievementTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('claim_achievement_tapped', properties: properties);
+
+  Future<void> claimAchievementComplete([Map<String, dynamic>? properties]) =>
+      _logEvent('claim_achievement_complete', properties: properties);
+
+  Future<void> claimAchievementFailed([Map<String, dynamic>? properties]) =>
+      _logEvent('claim_achievement_failed', properties: properties);
 
   Future<void> okOnTaskCompleteTapped([Map<String, dynamic>? properties]) =>
       _logEvent('ok_on_task_complete_tapped', properties: properties);
