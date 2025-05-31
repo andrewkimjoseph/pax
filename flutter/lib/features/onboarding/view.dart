@@ -155,67 +155,68 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                               isLoading ||
                                       authState.state == AuthState.authenticated
                                   ? null
-                                  : () {
+                                  : () async {
                                     // Handle Google sign in
-                                    ref
-                                        .read(analyticsProvider)
-                                        .signInWithGoogleTapped();
-                                    ref
-                                        .read(authProvider.notifier)
-                                        .signInWithGoogle()
-                                        .then((_) {
-                                          if (ref.read(authProvider).state ==
-                                                  AuthState.unauthenticated ||
-                                              ref.read(authProvider).state ==
-                                                  AuthState.error) {
-                                            if (context.mounted) {
-                                              showErrorToast(context);
-                                            }
-                                          }
+                                    final analytics = ref.read(
+                                      analyticsProvider,
+                                    );
+                                    final authNotifier = ref.read(
+                                      authProvider.notifier,
+                                    );
 
-                                          if (ref.read(authProvider).state ==
-                                              AuthState.authenticated) {
-                                            // Navigate after successful sign in
-                                            final user =
-                                                ref.read(authProvider).user;
-                                            ref
-                                                .read(analyticsProvider)
-                                                .signInWithGoogleComplete(
-                                                  user.toMap(),
-                                                );
+                                    analytics.signInWithGoogleTapped();
 
-                                            if (context.mounted) {
-                                              showSuccessToast(context);
-                                            }
+                                    try {
+                                      await authNotifier.signInWithGoogle();
 
-                                            // Reset onboarding state
-                                            onboardingViewModel
-                                                .resetOnboarding();
-                                          }
-                                        })
-                                        .onError((error, stackTrace) {
-                                          // Handle the error here
-                                          ref
-                                              .read(analyticsProvider)
-                                              .signInWithGoogleIncomplete();
-                                          if (context.mounted) {
-                                            showToast(
-                                              context: context,
-                                              location: ToastLocation.topCenter,
-                                              builder:
-                                                  (context, overlay) => Toast(
-                                                    leadingIcon:
-                                                        FontAwesomeIcons.google,
-                                                    toastColor: PaxColors.red,
-                                                    text:
-                                                        'Google signin incomplete',
-                                                    trailingIcon:
-                                                        FontAwesomeIcons
-                                                            .triangleExclamation,
-                                                  ),
-                                            );
-                                          }
-                                        });
+                                      if (!context.mounted) return;
+
+                                      final currentAuthState =
+                                          ref.read(authProvider).state;
+
+                                      if (currentAuthState ==
+                                              AuthState.unauthenticated ||
+                                          currentAuthState == AuthState.error) {
+                                        showErrorToast(context);
+                                        return;
+                                      }
+
+                                      if (currentAuthState ==
+                                          AuthState.authenticated) {
+                                        final user =
+                                            ref.read(authProvider).user;
+                                        analytics.signInWithGoogleComplete(
+                                          user.toMap(),
+                                        );
+                                        showSuccessToast(context);
+
+                                        // Reset onboarding state
+                                        ref
+                                            .read(
+                                              onboardingViewModelProvider
+                                                  .notifier,
+                                            )
+                                            .resetOnboarding();
+                                      }
+                                    } catch (error) {
+                                      if (!context.mounted) return;
+
+                                      analytics.signInWithGoogleIncomplete();
+                                      showToast(
+                                        context: context,
+                                        location: ToastLocation.topCenter,
+                                        builder:
+                                            (context, overlay) => Toast(
+                                              leadingIcon:
+                                                  FontAwesomeIcons.google,
+                                              toastColor: PaxColors.red,
+                                              text: 'Google signin incomplete',
+                                              trailingIcon:
+                                                  FontAwesomeIcons
+                                                      .triangleExclamation,
+                                            ),
+                                      );
+                                    }
                                   },
                           child:
                               isLoading
