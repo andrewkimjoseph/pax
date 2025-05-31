@@ -11,6 +11,8 @@ class RemoteConfigService {
 
   final FirebaseRemoteConfig _remoteConfig = FirebaseRemoteConfig.instance;
   bool _isInitialized = false;
+  DateTime? _lastFetchTime;
+  static const _refreshInterval = Duration(seconds: 3);
 
   Future<void> initialize() async {
     if (_isInitialized) {
@@ -28,11 +30,31 @@ class RemoteConfigService {
         ),
       );
 
-      await _remoteConfig.fetchAndActivate();
+      // Set default values before fetching
+      await _remoteConfig.setDefaults({
+        'app_version_config': json.encode({
+          'minimum_version': '1.0.0',
+          'current_version': '1.0.0',
+          'force_update': false,
+          'update_message': 'A new version is available',
+          'update_url':
+              'https://play.google.com/store/apps/details?id=app.thepax.android',
+        }),
+        'maintenance_config': json.encode({
+          'is_under_maintenance': false,
+          'maintenance_message': 'The app is currently under maintenance',
+        }),
+      });
+
+      final bool activated = await _remoteConfig.fetchAndActivate();
       _isInitialized = true;
+      _lastFetchTime = DateTime.now();
 
       if (kDebugMode) {
         print('Remote Config Service: Successfully initialized');
+        print(
+          'Remote Config Service: Config ${activated ? "activated" : "not activated"}',
+        );
         print(
           'Remote Config Service: All parameters: ${_remoteConfig.getAll().map((key, value) => MapEntry(key, value.asString()))}',
         );
@@ -41,6 +63,8 @@ class RemoteConfigService {
       if (kDebugMode) {
         print('Remote Config Service: Error initializing: $e');
       }
+      // Set initialized to true even on error to prevent infinite retry loops
+      _isInitialized = true;
       rethrow;
     }
   }
@@ -48,6 +72,12 @@ class RemoteConfigService {
   Future<AppVersionConfig> getAppVersionConfig() async {
     if (!_isInitialized) {
       await initialize();
+    }
+
+    // Force refresh if last fetch was more than 3 seconds ago
+    if (_lastFetchTime == null ||
+        DateTime.now().difference(_lastFetchTime!) > _refreshInterval) {
+      await refreshConfig();
     }
 
     try {
@@ -63,7 +93,15 @@ class RemoteConfigService {
       }
 
       if (jsonString.isEmpty) {
-        throw Exception('App version config not found in remote config');
+        // Return default config if no remote config is available
+        return AppVersionConfig(
+          minimumVersion: '1.0.0',
+          currentVersion: '1.0.0',
+          forceUpdate: false,
+          updateMessage: 'A new version is available',
+          updateUrl:
+              'https://play.google.com/store/apps/details?id=com.pax.app',
+        );
       }
 
       final Map<String, dynamic> configMap = json.decode(jsonString);
@@ -76,13 +114,26 @@ class RemoteConfigService {
       if (kDebugMode) {
         print('Remote Config Service: Error getting app version config: $e');
       }
-      rethrow;
+      // Return default config on error
+      return AppVersionConfig(
+        minimumVersion: '1.0.0',
+        currentVersion: '1.0.0',
+        forceUpdate: false,
+        updateMessage: 'A new version is available',
+        updateUrl: 'https://play.google.com/store/apps/details?id=com.pax.app',
+      );
     }
   }
 
   Future<MaintenanceConfig> getMaintenanceConfig() async {
     if (!_isInitialized) {
       await initialize();
+    }
+
+    // Force refresh if last fetch was more than 3 seconds ago
+    if (_lastFetchTime == null ||
+        DateTime.now().difference(_lastFetchTime!) > _refreshInterval) {
+      await refreshConfig();
     }
 
     try {
@@ -100,7 +151,11 @@ class RemoteConfigService {
       }
 
       if (jsonString.isEmpty) {
-        throw Exception('Maintenance config not found in remote config');
+        // Return default config if no remote config is available
+        return MaintenanceConfig(
+          isUnderMaintenance: false,
+          message: 'The app is currently under maintenance',
+        );
       }
 
       final Map<String, dynamic> configMap = json.decode(jsonString);
@@ -115,24 +170,54 @@ class RemoteConfigService {
       if (kDebugMode) {
         print('Remote Config Service: Error getting maintenance config: $e');
       }
-      rethrow;
+      // Return default config on error
+      return MaintenanceConfig(
+        isUnderMaintenance: false,
+        message: 'The app is currently under maintenance',
+      );
     }
   }
 
   Future<void> refreshConfig() async {
-    try {
-      await _remoteConfig.fetchAndActivate();
-      if (kDebugMode) {
-        print('Remote Config Service: Config refreshed successfully');
-        print(
-          'Remote Config Service: All parameters after refresh: ${_remoteConfig.getAll().map((key, value) => MapEntry(key, value.asString()))}',
-        );
+    if (!_isInitialized) {
+      await initialize();
+    }
+
+    int retryCount = 0;
+    const maxRetries = 3;
+    const retryDelay = Duration(seconds: 2);
+
+    while (retryCount < maxRetries) {
+      try {
+        final bool activated = await _remoteConfig.fetchAndActivate();
+        _lastFetchTime = DateTime.now();
+
+        if (kDebugMode) {
+          print(
+            'Remote Config Service: Config refresh ${activated ? "successful" : "not activated"}',
+          );
+          print(
+            'Remote Config Service: All parameters after refresh: ${_remoteConfig.getAll().map((key, value) => MapEntry(key, value.asString()))}',
+          );
+        }
+        return;
+      } catch (e) {
+        retryCount++;
+        if (kDebugMode) {
+          print(
+            'Remote Config Service: Error refreshing config (attempt $retryCount/$maxRetries): $e',
+          );
+        }
+
+        if (retryCount == maxRetries) {
+          if (kDebugMode) {
+            print('Remote Config Service: Max retries reached, giving up');
+          }
+          rethrow;
+        }
+
+        await Future.delayed(retryDelay);
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Remote Config Service: Error refreshing config: $e');
-      }
-      rethrow;
     }
   }
 }

@@ -19,11 +19,50 @@ class AppInitializer {
   AppInitializer._internal();
 
   Future<void> initialize() async {
-    await _initializeFirebase();
-    await _setupErrorHandling();
-    await _initializeNotifications();
-    await _initializeRemoteConfig();
-    await _initializeBranch();
+    try {
+      await _initializeFirebase();
+      await _setupErrorHandling();
+      await _initializeNotifications();
+
+      // Initialize Remote Config with retry logic
+      int retryCount = 0;
+      const maxRetries = 3;
+      const retryDelay = Duration(seconds: 2);
+
+      while (retryCount < maxRetries) {
+        try {
+          await _initializeRemoteConfig();
+          break;
+        } catch (e) {
+          retryCount++;
+          if (kDebugMode) {
+            print(
+              'Remote Config initialization attempt $retryCount failed: $e',
+            );
+          }
+
+          if (retryCount == maxRetries) {
+            if (kDebugMode) {
+              print(
+                'Remote Config initialization failed after $maxRetries attempts',
+              );
+            }
+            // Don't rethrow - allow app to continue without Remote Config
+            break;
+          }
+
+          await Future.delayed(retryDelay);
+        }
+      }
+
+      await _initializeBranch();
+    } catch (e) {
+      if (kDebugMode) {
+        print('App initialization error: $e');
+      }
+      // Record the error but don't crash the app
+      FirebaseCrashlytics.instance.recordError(e, StackTrace.current);
+    }
   }
 
   Future<void> _initializeFirebase() async {
