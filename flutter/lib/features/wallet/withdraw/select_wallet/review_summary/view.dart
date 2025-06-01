@@ -120,14 +120,17 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
         }
 
         // Show loading indicator
-        return AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Processing your withdrawal...'),
-            ],
+        return PopScope(
+          canPop: false,
+          child: AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Processing your withdrawal...'),
+              ],
+            ),
           ),
         );
       },

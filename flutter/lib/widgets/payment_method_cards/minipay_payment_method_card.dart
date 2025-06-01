@@ -54,7 +54,7 @@ class MiniPayPaymentMethodCard extends ConsumerWidget {
                   ).withPadding(bottom: 8),
                   Text(
                     minipay?.walletAddress != null
-                        ? '${minipay!.walletAddress.substring(0, 15)}${'.' * 6}'
+                        ? '${minipay!.walletAddress.substring(0, 15)}${'.' * 3}'
                         : 'Dollar stablecoin wallet',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,

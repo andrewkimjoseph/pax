@@ -63,14 +63,17 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
       context: context,
       barrierDismissible: false,
       builder:
-          (dialogContext) => AlertDialog(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Letting you in...'),
-              ],
+          (dialogContext) => PopScope(
+            canPop: false,
+            child: AlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Letting you in...'),
+                ],
+              ),
             ),
           ),
     );
