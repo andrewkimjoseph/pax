@@ -1,26 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:pax/providers/db/payment_method/payment_method_provider.dart';
+import 'package:pax/models/firestore/payment_method/payment_method.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 class MiniPayPaymentMethodCard extends ConsumerWidget {
   const MiniPayPaymentMethodCard(
-    this.option,
-    this.paymentMethodName,
-    this.callBack, {
+    this.minipay, {
+    required this.callBack,
     super.key,
   });
 
-  final String option;
-  final String paymentMethodName;
   final VoidCallback callBack;
+  final PaymentMethod? minipay;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final minipay = ref.watch(primaryPaymentMethodProvider);
-
     return InkWell(
       onTap: minipay?.walletAddress != null ? null : callBack,
       child: Container(
@@ -35,7 +31,7 @@ class MiniPayPaymentMethodCard extends ConsumerWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(7),
               child: SvgPicture.asset(
-                'lib/assets/svgs/$option.svg',
+                'lib/assets/svgs/minipay.svg',
                 height: 48,
               ),
             ).withPadding(right: 12),
@@ -45,7 +41,7 @@ class MiniPayPaymentMethodCard extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    paymentMethodName,
+                    minipay?.name ?? "",
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 18,

@@ -15,7 +15,7 @@ import 'package:pax/services/notifications/notification_service.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
 import 'package:pax/utils/url_handler.dart';
 
-import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
+import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider, Consumer;
 
 class MiniPayConnectionView extends ConsumerStatefulWidget {
   const MiniPayConnectionView({super.key});
@@ -28,6 +28,7 @@ class MiniPayConnectionView extends ConsumerStatefulWidget {
 class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
   final TextEditingController _walletAddressController =
       TextEditingController();
+  bool _isShowingDialog = false;
 
   @override
   void initState() {
@@ -49,67 +50,185 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
     final miniPayWalletAddress = _walletAddressController.text.trim();
     final authState = ref.read(authProvider);
 
+    // Show processing dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => _buildProcessingDialog(),
+    );
+
     // Connect wallet using the provider
     ref
         .read(miniPayConnectionProvider.notifier)
         .connectMiniPay(authState.user.uid, miniPayWalletAddress);
   }
 
-  // Show success dialog when connection is successful
+  // Dialog showing processing state
+  Widget _buildProcessingDialog() {
+    return PopScope(
+      canPop: false,
+      child: AlertDialog(
+        content: Consumer(
+          builder: (context, ref, _) {
+            final connectionState = ref.watch(miniPayConnectionProvider);
+
+            // Handle different connection states
+            if (connectionState.state == MiniPayConnectionState.success) {
+              // Dismiss the dialog after a short delay
+              Future.delayed(Duration(milliseconds: 500), () {
+                if (context.mounted && !_isShowingDialog) {
+                  _isShowingDialog = true;
+                  context.pop();
+                  _showSuccessDialog();
+                }
+              });
+            } else if (connectionState.state == MiniPayConnectionState.error) {
+              // Dismiss the dialog after a short delay
+              Future.delayed(Duration(milliseconds: 500), () {
+                if (context.mounted && !_isShowingDialog) {
+                  _isShowingDialog = true;
+                  context.pop();
+                  _showErrorDialog(
+                    connectionState.errorMessage ?? 'An unknown error occurred',
+                  );
+                }
+              });
+            }
+
+            // Show loading indicator with current state message
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text(_getStateMessage(connectionState.state)),
+              ],
+            ).animate().fadeIn(duration: 200.ms);
+          },
+        ),
+      ),
+    );
+  }
+
+  String _getStateMessage(MiniPayConnectionState state) {
+    switch (state) {
+      case MiniPayConnectionState.validating:
+        return 'Validating address...';
+      case MiniPayConnectionState.checkingWhitelist:
+        return 'Checking GoodDollar verification...';
+      case MiniPayConnectionState.creatingServerWallet:
+        return 'Creating secure wallet...';
+      case MiniPayConnectionState.deployingContract:
+        return 'Deploying smart contract...';
+      case MiniPayConnectionState.creatingPaymentMethod:
+        return 'Setting up payment method...';
+      case MiniPayConnectionState.updatingParticipant:
+        return 'Syncing account data...';
+      default:
+        return 'Processing your connection...';
+    }
+  }
+
+  // Error dialog
+  void _showErrorDialog(String errorMessage) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return PopScope(
+          canPop: false,
+          child: AlertDialog(
+            title: Column(
+              children: [
+                SvgPicture.asset(
+                  'lib/assets/svgs/canvassing.svg',
+                  height: 24,
+                ).withPadding(bottom: 16),
+                Text(
+                  'Connection Failed',
+                  style: TextStyle(fontSize: 16),
+                ).withAlign(Alignment.center),
+              ],
+            ),
+            content: Text(
+              errorMessage,
+              maxLines: 5,
+              overflow: TextOverflow.ellipsis,
+            ),
+            actions: [
+              OutlineButton(
+                onPressed: () {
+                  _isShowingDialog = false;
+                  context.pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          ),
+        ).animate().fadeIn(duration: 200.ms);
+      },
+    );
+  }
+
+  // Success dialog
   void _showSuccessDialog() {
-    // Show dialog immediately
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
-        return AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SvgPicture.asset(
-                'lib/assets/svgs/minipay_connected.svg',
-              ).withPadding(bottom: 8),
+        return PopScope(
+          canPop: false,
+          child: AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SvgPicture.asset(
+                  'lib/assets/svgs/minipay_connected.svg',
+                ).withPadding(bottom: 8).animate().fadeIn(duration: 300.ms),
 
-              const Text(
-                'Success!',
-                style: TextStyle(
-                  color: PaxColors.deepPurple,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
-              ).withPadding(bottom: 8),
-              const Text(
-                'MiniPay Wallet Connected Successfully',
-                style: TextStyle(
-                  color: PaxColors.deepPurple,
-                  fontSize: 16,
-                  fontWeight: FontWeight.normal,
-                ),
-                textAlign: TextAlign.center,
-              ).withPadding(bottom: 8),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width / 2.5,
-                    child: PrimaryButton(
-                      child: const Text('OK'),
-                      onPressed: () {
-                        // Reset the connection state before popping
-                        ref
-                            .read(miniPayConnectionProvider.notifier)
-                            .resetState();
-                        context.pop();
-                        context.pop(); // Pop the MiniPayConnectionView too
-                      },
-                    ),
+                const Text(
+                  'Success!',
+                  style: TextStyle(
+                    color: PaxColors.deepPurple,
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
-              ).withPadding(top: 8),
-            ],
+                ).withPadding(bottom: 8).animate().fadeIn(delay: 100.ms),
+
+                const Text(
+                  'MiniPay Wallet Connected Successfully',
+                  style: TextStyle(
+                    color: PaxColors.deepPurple,
+                    fontSize: 16,
+                    fontWeight: FontWeight.normal,
+                  ),
+                  textAlign: TextAlign.center,
+                ).withPadding(bottom: 8).animate().fadeIn(delay: 200.ms),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width / 2.5,
+                      child: PrimaryButton(
+                        child: const Text('OK'),
+                        onPressed: () {
+                          _isShowingDialog = false;
+                          // Reset the connection state before popping
+                          ref
+                              .read(miniPayConnectionProvider.notifier)
+                              .resetState();
+                          context.pop();
+                          context.pop(); // Pop the MiniPayConnectionView too
+                        },
+                      ),
+                    ),
+                  ],
+                ).withPadding(top: 8).animate().fadeIn(delay: 300.ms),
+              ],
+            ),
           ),
-        );
+        ).animate().fadeIn(duration: 200.ms);
       },
     );
 
@@ -218,90 +337,85 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                       ),
                     ).withPadding(vertical: 20),
 
-                    _buildErrorMessage(connectionState),
-
-                    Visibility(
-                      visible: !connectionState.isConnecting,
-
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        width: MediaQuery.of(context).size.width,
-                        decoration: BoxDecoration(
-                          color: PaxColors.otherOrange.withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: PaxColors.otherOrange,
-                            width: 2,
-                          ),
+                    // _buildErrorMessage(connectionState).animate().fadeIn(),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        color: PaxColors.otherOrange.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: PaxColors.otherOrange,
+                          width: 2,
                         ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Column(
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Column(
+                            children: [
+                              FaIcon(
+                                FontAwesomeIcons.triangleExclamation,
+                                color: PaxColors.otherOrange,
+                                size: 25,
+                              ).withPadding(right: 8),
+                              // SvgPicture.asset(
+                              //   'lib/assets/svgs/verification_required.svg',
+                              // ).withPadding(right: 8),
+                            ],
+                          ),
+
+                          Expanded(
+                            child: Column(
                               children: [
-                                FaIcon(
-                                  FontAwesomeIcons.triangleExclamation,
-                                  color: PaxColors.otherOrange,
-                                  size: 25,
-                                ).withPadding(right: 8),
-                                // SvgPicture.asset(
-                                //   'lib/assets/svgs/verification_required.svg',
-                                // ).withPadding(right: 8),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'GoodDollar',
+                                      style: TextStyle(
+                                        color: PaxColors.deepPurple,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SvgPicture.asset(
+                                      'lib/assets/svgs/currencies/good_dollar.svg',
+                                      height: 20,
+                                    ),
+
+                                    const Text(
+                                      ' Face Verification Required',
+                                      style: TextStyle(
+                                        color: PaxColors.deepPurple,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                // .withPadding(bottom: 8),
+                                // Row(
+                                //   crossAxisAlignment:
+                                //       CrossAxisAlignment.start,
+                                //   children: [
+                                //     Expanded(
+                                //       child: const Text(
+                                //         'To connect successfully, your wallet should be GoodDollar verified.',
+                                //         style: TextStyle(
+                                //           color: PaxColors.black,
+                                //           fontSize: 14,
+                                //         ),
+                                //       ),
+                                //     ),
+                                //   ],
+                                // ),
                               ],
                             ),
-
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'GoodDollar',
-                                        style: TextStyle(
-                                          color: PaxColors.deepPurple,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      SvgPicture.asset(
-                                        'lib/assets/svgs/currencies/good_dollar.svg',
-                                        height: 20,
-                                      ),
-
-                                      const Text(
-                                        ' Verification Required',
-                                        style: TextStyle(
-                                          color: PaxColors.deepPurple,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ).withPadding(bottom: 8),
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        child: const Text(
-                                          'To connect successfully, your wallet should be GoodDollar verified. \n\nIf verified, paste the address and connect.',
-                                          style: TextStyle(
-                                            color: PaxColors.black,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ).withPadding(bottom: 8),
-                    ),
+                          ),
+                        ],
+                      ),
+                    ).withPadding(bottom: 12).animate().fadeIn(),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -435,166 +549,81 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
   }
 
   Widget _buildConnectButton(MiniPayConnectionStateModel connectionState) {
-    // Different button states based on connection state
-    switch (connectionState.state) {
-      case MiniPayConnectionState.validating:
-        return SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: PrimaryButton(
-            enabled: true,
-            onPressed: null,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(onSurface: true),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Validating address...',
-                  style: Theme.of(context).typography.base.copyWith(
-                    fontWeight: FontWeight.normal,
-                    fontSize: 14,
-                    color: PaxColors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-
-      case MiniPayConnectionState.checkingWhitelist:
-        return SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: PrimaryButton(
-            enabled: false,
-            onPressed: null,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(onSurface: true),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Checking GoodDollar verification...',
-                  style: Theme.of(context).typography.base.copyWith(
-                    fontWeight: FontWeight.normal,
-                    fontSize: 14,
-                    color: PaxColors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-
-      case MiniPayConnectionState.creatingServerWallet:
-        return _buildConnectingButton('Creating secure wallet...');
-
-      case MiniPayConnectionState.deployingContract:
-        return _buildConnectingButton('Deploying smart contract...');
-
-      case MiniPayConnectionState.creatingPaymentMethod:
-        return _buildConnectingButton('Setting up payment method...');
-
-      case MiniPayConnectionState.updatingParticipant:
-        return _buildConnectingButton('Syncing account data...');
-
-      default:
-        // Normal connect button
-        return SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: PrimaryButton(
-            onPressed:
-                _walletAddressController.text.trim().isNotEmpty &&
-                        _walletAddressController.text.length >= 42
-                    ? _connectWallet
-                    : null,
-            child: Text(
-              'Connect',
-              style: Theme.of(context).typography.base.copyWith(
-                fontWeight: FontWeight.normal,
-                fontSize: 14,
-                color: PaxColors.white,
-              ),
-            ),
-          ),
-        );
-    }
-  }
-
-  Widget _buildErrorMessage(MiniPayConnectionStateModel connectionState) {
-    if (connectionState.state == MiniPayConnectionState.error &&
-        connectionState.errorMessage != null) {
-      return Container(
+    // Show loading indicator when connecting
+    if (connectionState.state != MiniPayConnectionState.initial &&
+        connectionState.state != MiniPayConnectionState.error) {
+      return SizedBox(
         width: double.infinity,
-        padding: const EdgeInsets.all(8),
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          color: PaxColors.red.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: PaxColors.red, width: 2),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            FaIcon(
-              FontAwesomeIcons.xmark,
-              color: PaxColors.red,
-              size: 25,
-            ).withPadding(right: 8),
-            // SvgPicture.asset(
-            //   'lib/assets/svgs/error.svg',
-            //   height: 20,
-            // ).withPadding(right: 8, top: 2),
-            Expanded(
-              child: Text(
-                connectionState.errorMessage!,
-                style: TextStyle(color: PaxColors.red, fontSize: 14),
+        height: 48,
+        child: PrimaryButton(
+          enabled: false,
+          onPressed: null,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(onSurface: true),
+              const SizedBox(width: 8),
+              Text(
+                'Connecting...',
+                style: TextStyle(fontSize: 14, color: PaxColors.white),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ).animate().fadeIn().shader();
+      );
     }
-    return const SizedBox.shrink();
-  }
 
-  Widget _buildConnectingButton(String message) {
+    // Normal connect button
     return SizedBox(
       width: double.infinity,
       height: 48,
       child: PrimaryButton(
-        enabled: false,
-        onPressed: null,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(onSurface: true),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              message,
-              style: Theme.of(context).typography.base.copyWith(
-                fontWeight: FontWeight.normal,
-                fontSize: 14,
-                color: PaxColors.white,
-              ),
-            ),
-          ],
+        onPressed:
+            _walletAddressController.text.trim().isNotEmpty &&
+                    _walletAddressController.text.length >= 42
+                ? _connectWallet
+                : null,
+        child: Text(
+          'Connect',
+          style: TextStyle(fontSize: 14, color: PaxColors.white),
         ),
       ),
     );
   }
+
+  // Widget _buildErrorMessage(MiniPayConnectionStateModel connectionState) {
+  //   if (connectionState.state == MiniPayConnectionState.error &&
+  //       connectionState.errorMessage != null) {
+  //     return Container(
+  //           width: double.infinity,
+  //           padding: const EdgeInsets.all(8),
+  //           margin: const EdgeInsets.only(bottom: 16),
+  //           decoration: BoxDecoration(
+  //             color: PaxColors.red.withValues(alpha: 0.2),
+  //             borderRadius: BorderRadius.circular(8),
+  //             border: Border.all(color: PaxColors.red, width: 2),
+  //           ),
+  //           child: Row(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //               FaIcon(
+  //                 FontAwesomeIcons.xmark,
+  //                 color: PaxColors.red,
+  //                 size: 25,
+  //               ).withPadding(right: 8),
+  //               Expanded(
+  //                 child: Text(
+  //                   connectionState.errorMessage!,
+  //                   style: TextStyle(color: PaxColors.red, fontSize: 14),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         )
+  //         .animate()
+  //         .fadeIn(duration: 200.ms)
+  //         .slideX(begin: -0.1, end: 0, duration: 200.ms, curve: Curves.easeOut);
+  //   }
+  //   return const SizedBox.shrink();
+  // }
 }
