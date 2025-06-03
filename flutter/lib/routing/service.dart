@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pax/exports/views.dart';
 import 'package:pax/features/account_and_security/view.dart';
@@ -34,39 +33,13 @@ final routerProvider = Provider((ref) {
                 GoRouter.of(context).go(route);
               }
             });
-            return Scaffold(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SvgPicture.asset(
-                      'lib/assets/svgs/canvassing.svg',
-                      height: 48,
-                    ).withPadding(bottom: 16),
-                    CircularProgressIndicator(),
-                  ],
-                ),
-              ),
-            );
+            return const Scaffold(child: SizedBox());
           },
         );
       }
 
-      // If no routing error, just show loading screen
-      return Scaffold(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset(
-                'lib/assets/svgs/canvassing.svg',
-                height: 48,
-              ).withPadding(bottom: 16),
-              CircularProgressIndicator(),
-            ],
-          ),
-        ),
-      );
+      // If no routing error, just show empty screen
+      return const Scaffold(child: SizedBox());
     },
     redirect: (context, state) {
       final authState = ref.read(authStateForRouterProvider);

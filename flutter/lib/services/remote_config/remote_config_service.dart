@@ -1,5 +1,6 @@
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:pax/models/remote_config/app_version_config.dart';
 import 'package:pax/models/remote_config/maintenance_config.dart';
 import 'dart:convert';
@@ -184,11 +185,17 @@ class RemoteConfigService {
     }
 
     int retryCount = 0;
-    const maxRetries = 3;
-    const retryDelay = Duration(seconds: 2);
+    const maxRetries = 2;
+    const retryDelay = Duration(seconds: 5);
 
     while (retryCount < maxRetries) {
       try {
+        if (kDebugMode) {
+          print(
+            'Remote Config Service: Attempting to fetch config (attempt ${retryCount + 1}/$maxRetries)',
+          );
+        }
+
         final bool activated = await _remoteConfig.fetchAndActivate();
         _lastFetchTime = DateTime.now();
 
@@ -207,13 +214,18 @@ class RemoteConfigService {
           print(
             'Remote Config Service: Error refreshing config (attempt $retryCount/$maxRetries): $e',
           );
+          if (e is PlatformException) {
+            print('Remote Config Service: Error code: ${e.code}');
+            print('Remote Config Service: Error message: ${e.message}');
+            print('Remote Config Service: Error details: ${e.details}');
+          }
         }
 
         if (retryCount == maxRetries) {
           if (kDebugMode) {
             print('Remote Config Service: Max retries reached, giving up');
           }
-          rethrow;
+          return;
         }
 
         await Future.delayed(retryDelay);
