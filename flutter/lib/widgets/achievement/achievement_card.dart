@@ -291,9 +291,10 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
-                      ).withPadding(bottom: 8).withAlign(Alignment.center),
+                        textAlign: TextAlign.center,
+                      ),
                     ],
-                  ),
+                  ).withPadding(bottom: 8),
 
                   Column(
                     children: [

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/remote_config/remote_config_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/version_util.dart';
@@ -83,6 +84,7 @@ class UpdateDialog extends ConsumerWidget {
                           width: MediaQuery.of(context).size.width / 2.5,
                           child: PrimaryButton(
                             onPressed: () async {
+                              ref.read(analyticsProvider).updateNowTapped();
                               final url = Uri.parse(config.updateUrl);
                               if (await canLaunchUrl(url)) {
                                 await launchUrl(url);

@@ -169,7 +169,8 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                     ),
-                  ).withPadding(bottom: 8).withAlign(Alignment.center),
+                    textAlign: TextAlign.center,
+                  ).withPadding(bottom: 8),
                 ],
               ),
 

@@ -213,6 +213,12 @@ class AnalyticsProvider {
 
   Future<void> okOnTaskCompleteTapped([Map<String, dynamic>? properties]) =>
       _logEvent('ok_on_task_complete_tapped', properties: properties);
+
+  Future<void> updateNowTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('update_now_tapped', properties: properties);
+
+  Future<void> okMaintenanceTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('ok_maintenance_tapped', properties: properties);
 }
 
 final analyticsProvider = Provider<AnalyticsProvider>((ref) {
