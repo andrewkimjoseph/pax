@@ -49,10 +49,11 @@ class _AppLifecycleHandlerState extends ConsumerState<AppLifecycleHandler>
     if (state == AppLifecycleState.resumed) {
       // Refresh remote config
       ref.read(remoteConfigServiceProvider).refreshConfig();
-      // Invalidate the app version config provider to force a rebuild
+
+      // Invalidate all remote config providers to force a rebuild
       ref.invalidate(appVersionConfigProvider);
-      // Invalidate the maintenance config provider to force a rebuild
       ref.invalidate(maintenanceConfigProvider);
+      ref.invalidate(featureFlagsProvider);
 
       // Only refresh auth state if we're not already authenticated
       final currentAuthState = ref.read(authProvider);
@@ -67,14 +68,3 @@ class _AppLifecycleHandlerState extends ConsumerState<AppLifecycleHandler>
     return widget.child;
   }
 }
-
-// Usage in your main.dart:
-// void main() {
-//   runApp(
-//     ProviderScope(
-//       child: AppLifecycleHandler(
-//         child: MyApp(),
-//       ),
-//     ),
-//   );
-// }

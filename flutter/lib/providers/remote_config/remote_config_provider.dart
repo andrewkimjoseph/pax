@@ -1,20 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pax/models/remote_config/app_version_config.dart';
-import 'package:pax/models/remote_config/maintenance_config.dart';
 import 'package:pax/services/remote_config/remote_config_service.dart';
 
-final remoteConfigServiceProvider = Provider<RemoteConfigService>((ref) {
-  return RemoteConfigService();
+final remoteConfigServiceProvider = Provider((ref) => RemoteConfigService());
+
+final appVersionConfigProvider = FutureProvider((ref) async {
+  final service = ref.watch(remoteConfigServiceProvider);
+  return service.getAppVersionConfig();
 });
 
-final appVersionConfigProvider = FutureProvider<AppVersionConfig>((ref) async {
-  final remoteConfigService = ref.watch(remoteConfigServiceProvider);
-  return await remoteConfigService.getAppVersionConfig();
+final maintenanceConfigProvider = FutureProvider((ref) async {
+  final service = ref.watch(remoteConfigServiceProvider);
+  return service.getMaintenanceConfig();
 });
 
-final maintenanceConfigProvider = FutureProvider<MaintenanceConfig>((
-  ref,
-) async {
-  final remoteConfigService = ref.watch(remoteConfigServiceProvider);
-  return await remoteConfigService.getMaintenanceConfig();
+final featureFlagsProvider = FutureProvider((ref) async {
+  final service = ref.watch(remoteConfigServiceProvider);
+  return service.getFeatureFlags();
 });

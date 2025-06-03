@@ -45,6 +45,11 @@ class RemoteConfigService {
           'is_under_maintenance': false,
           'maintenance_message': 'The app is currently under maintenance',
         }),
+        'feature_flags': json.encode({
+          'is_wallet_available': true,
+          'is_achievements_available': true,
+          'are_tasks_available': true,
+        }),
       });
 
       final bool activated = await _remoteConfig.fetchAndActivate();
@@ -230,6 +235,56 @@ class RemoteConfigService {
 
         await Future.delayed(retryDelay);
       }
+    }
+  }
+
+  Future<Map<String, bool>> getFeatureFlags() async {
+    if (!_isInitialized) {
+      await initialize();
+    }
+
+    // Force refresh if last fetch was more than 3 seconds ago
+    if (_lastFetchTime == null ||
+        DateTime.now().difference(_lastFetchTime!) > _refreshInterval) {
+      await refreshConfig();
+    }
+
+    try {
+      final jsonString = _remoteConfig.getString('feature_flags');
+      if (kDebugMode) {
+        print('Remote Config Service: Raw feature flags string: $jsonString');
+      }
+
+      if (jsonString.isEmpty) {
+        // Return default config if no remote config is available
+        return {
+          'is_wallet_available': true,
+          'is_achievements_available': true,
+          'are_tasks_available': true,
+        };
+      }
+
+      final Map<String, dynamic> configMap = json.decode(jsonString);
+      if (kDebugMode) {
+        print('Remote Config Service: Parsed feature flags map: $configMap');
+      }
+
+      return {
+        'is_wallet_available': configMap['is_wallet_available'] ?? true,
+        'is_achievements_available':
+            configMap['is_achievements_available'] ?? true,
+        'are_tasks_available': configMap['are_tasks_available'] ?? true,
+      };
+    } catch (e) {
+      if (kDebugMode) {
+        print('Remote Config Service: Error getting feature flags: $e');
+      }
+      // Return default config on error
+      return {
+        'is_wallet_available': true,
+        'is_achievements_available': true,
+        'are_tasks_available': true,
+      };
     }
   }
 }
