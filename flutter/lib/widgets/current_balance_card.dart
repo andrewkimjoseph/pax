@@ -9,6 +9,7 @@ import 'package:pax/providers/local/reward_currency_context.dart';
 import 'package:pax/providers/local/reward_state_provider.dart';
 import 'package:pax/providers/local/withdraw_context_provider.dart';
 import 'package:pax/providers/local/withdrawal_provider.dart';
+import 'package:pax/providers/remote_config/remote_config_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/currency_symbol.dart';
 import 'package:pax/utils/gradient_border.dart';
@@ -141,49 +142,76 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
                 ),
               ).withPadding(right: 8),
 
-              Button(
-                style:
-                    const ButtonStyle.primary(density: ButtonDensity.normal)
-                        .withBackgroundColor(color: PaxColors.deepPurple)
-                        .withBorder(),
-                onPressed:
-                    currentBalance != null && currentBalance > 0
-                        ? () async {
-                          ref
-                              .read(rewardCurrencyContextProvider.notifier)
-                              .setSelectedCurrency(selectedCurrency);
+              ref
+                  .watch(featureFlagsProvider)
+                  .when(
+                    data: (flags) {
+                      final isWalletAvailable =
+                          flags['is_wallet_available'] ?? false;
+                      if (!isWalletAvailable) return const SizedBox.shrink();
 
-                          ref
-                              .read(withdrawContextProvider.notifier)
-                              .setWithdrawContext(tokenId ?? 1, currentBalance);
+                      return Button(
+                        style:
+                            const ButtonStyle.primary(
+                                  density: ButtonDensity.normal,
+                                )
+                                .withBackgroundColor(
+                                  color: PaxColors.deepPurple,
+                                )
+                                .withBorder(),
+                        onPressed:
+                            currentBalance != null && currentBalance > 0
+                                ? () async {
+                                  ref
+                                      .read(
+                                        rewardCurrencyContextProvider.notifier,
+                                      )
+                                      .setSelectedCurrency(selectedCurrency);
 
-                          if (widget.nextLocation == "/wallet") {
-                            ref.read(analyticsProvider).homeWalletTapped({
-                              "selectedCurrency": selectedCurrency,
-                              "currentBalance": currentBalance,
-                              "tokenId": tokenId,
-                              "toLocation": widget.nextLocation,
-                            });
-                          } else {
-                            ref.read(analyticsProvider).walletWithdrawTapped({
-                              "selectedCurrency": selectedCurrency,
-                              "currentBalance": currentBalance,
-                              "tokenId": tokenId,
-                              "toLocation": widget.nextLocation,
-                            });
-                          }
-                          context.push(widget.nextLocation);
-                        }
-                        : null,
-                child: Text(
-                  widget.nextLocation == "/wallet" ? "Wallet" : "Withdraw",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 14,
-                    color: PaxColors.white,
+                                  ref
+                                      .read(withdrawContextProvider.notifier)
+                                      .setWithdrawContext(
+                                        tokenId ?? 1,
+                                        currentBalance,
+                                      );
+
+                                  if (widget.nextLocation == "/wallet") {
+                                    ref
+                                        .read(analyticsProvider)
+                                        .homeWalletTapped({
+                                          "selectedCurrency": selectedCurrency,
+                                          "currentBalance": currentBalance,
+                                          "tokenId": tokenId,
+                                          "toLocation": widget.nextLocation,
+                                        });
+                                  } else {
+                                    ref
+                                        .read(analyticsProvider)
+                                        .walletWithdrawTapped({
+                                          "selectedCurrency": selectedCurrency,
+                                          "currentBalance": currentBalance,
+                                          "tokenId": tokenId,
+                                          "toLocation": widget.nextLocation,
+                                        });
+                                  }
+                                  context.push(widget.nextLocation);
+                                }
+                                : null,
+                        child: Text(
+                          widget.nextLocation == "/wallet"
+                              ? "Wallet"
+                              : "Withdraw",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 14,
+                            color: PaxColors.white,
+                          ),
+                        ),
+                      ).withToolTip('Check out your wallet.');
+                    },
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
                   ),
-                ),
-              ).withToolTip('Check out your wallet.'),
             ],
           ),
         ],

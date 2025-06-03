@@ -7,6 +7,7 @@ import 'package:pax/models/local/withdrawal_state_model.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/local/withdraw_context_provider.dart';
 import 'package:pax/providers/local/withdrawal_provider.dart';
+import 'package:pax/providers/remote_config/remote_config_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/currency_symbol.dart';
 import 'package:pax/utils/token_address_util.dart';
@@ -269,6 +270,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
     final amountToWithdraw = withdrawContext?.amountToWithdraw ?? 1;
     final tokenId = withdrawContext?.tokenId ?? 0;
     final paymentMethod = withdrawContext?.selectedPaymentMethod;
+    final featureFlags = ref.watch(featureFlagsProvider);
 
     return Scaffold(
       backgroundColor: PaxColors.white,
@@ -432,24 +434,52 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
             child: Column(
               children: [
                 Divider().withPadding(vertical: 8),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: PrimaryButton(
-                    // Disable button during processing
-                    onPressed: _isProcessing ? null : _processWithdrawal,
-                    child:
-                        _isProcessing
-                            ? CircularProgressIndicator(onSurface: true)
-                            : Text(
-                              'Withdraw',
-                              style: Theme.of(context).typography.base.copyWith(
-                                fontWeight: FontWeight.normal,
-                                fontSize: 14,
-                                color: PaxColors.white,
-                              ),
-                            ),
-                  ),
+                featureFlags.when(
+                  data: (flags) {
+                    final isWalletAvailable =
+                        flags['is_wallet_available'] ?? false;
+                    return SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: PrimaryButton(
+                        onPressed:
+                            (_isProcessing || !isWalletAvailable)
+                                ? null
+                                : _processWithdrawal,
+                        child:
+                            _isProcessing
+                                ? CircularProgressIndicator(onSurface: true)
+                                : Text(
+                                  'Withdraw',
+                                  style: Theme.of(
+                                    context,
+                                  ).typography.base.copyWith(
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 14,
+                                    color: PaxColors.white,
+                                  ),
+                                ),
+                      ),
+                    );
+                  },
+                  loading:
+                      () => const SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: PrimaryButton(
+                          onPressed: null,
+                          child: CircularProgressIndicator(onSurface: true),
+                        ),
+                      ),
+                  error:
+                      (_, __) => const SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: PrimaryButton(
+                          onPressed: null,
+                          child: Text('Withdrawal Unavailable'),
+                        ),
+                      ),
                 ),
               ],
             ),
