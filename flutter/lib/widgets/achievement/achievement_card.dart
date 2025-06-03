@@ -1,14 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pax/providers/db/achievement/achievement_provider.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/gradient_border.dart';
 import 'package:pax/models/firestore/achievement/achievement_model.dart';
-import 'package:pax/services/achievement_service.dart';
-import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
+import 'package:pax/utils/token_balance_util.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:pax/providers/local/achievement_provider.dart';
+import 'package:pax/utils/currency_symbol.dart';
 
 class AchievementCard extends ConsumerStatefulWidget {
   const AchievementCard({required this.achievement, super.key});
@@ -20,20 +21,18 @@ class AchievementCard extends ConsumerStatefulWidget {
 }
 
 class _AchievementCardState extends ConsumerState<AchievementCard> {
-  bool _isClaiming = false;
-
   @override
   Widget build(BuildContext context) {
-    final isEarned =
-        widget.achievement.status == AchievementStatus.earned ||
-        widget.achievement.status == AchievementStatus.claimed;
+    final isEarned = widget.achievement.status == AchievementStatus.earned;
     final isClaimed = widget.achievement.status == AchievementStatus.claimed;
+    final claimState = ref.watch(achievementClaimProvider);
+    final isClaiming = claimState.isClaiming(widget.achievement.id);
 
     return Container(
       width: MediaQuery.of(context).size.width,
       padding: EdgeInsets.all(8),
       decoration:
-          isEarned
+          isEarned && !isClaimed
               ? ShapeDecoration(
                 shape: GradientBorder(
                   gradient: LinearGradient(
@@ -85,7 +84,7 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
                         Text(
                           isEarned
                               ? 'Earned'
-                              : 'G\$ ${widget.achievement.amountAwarded}',
+                              : 'G\$ ${widget.achievement.amountEarned}',
                           style: TextStyle(
                             fontWeight: FontWeight.w900,
                             fontSize: 12,
@@ -106,8 +105,7 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
                           ),
                         ).withPadding(bottom: 8),
 
-                        if (isEarned &&
-                            widget.achievement.timeCompleted != null)
+                        if (isEarned || isClaimed)
                           Text(
                             'Earned on ${DateFormat('MMMM d, yyyy | h:mm a').format(widget.achievement.timeCompleted!.toDate())}',
                             style: TextStyle(
@@ -117,7 +115,7 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
                             ),
                           ),
 
-                        if (!isEarned)
+                        if (!isEarned && !isClaimed)
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -183,10 +181,10 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
             width: MediaQuery.of(context).size.width,
             height: 35,
             child: Button(
-              onPressed: _isClaiming ? null : _handleClaim,
-              enabled: isEarned && !isClaimed && !_isClaiming,
+              onPressed: isClaiming ? null : _handleClaim,
+              enabled: isEarned && !isClaimed && !isClaiming,
               style:
-                  isEarned && !isClaimed && !_isClaiming
+                  isEarned && !isClaimed && !isClaiming
                       ? const ButtonStyle.primary(
                         density: ButtonDensity.dense,
                       ).withBorderRadius(borderRadius: BorderRadius.circular(7))
@@ -201,17 +199,17 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
                             ),
                           ),
               child:
-                  _isClaiming
+                  isClaiming
                       ? CircularProgressIndicator()
                       : Text(
                         isClaimed
-                            ? 'Claimed G\$ ${widget.achievement.amountAwarded}'
-                            : 'Claim G\$ ${widget.achievement.amountAwarded}',
+                            ? 'Claimed G\$ ${widget.achievement.amountEarned}'
+                            : 'Claim G\$ ${widget.achievement.amountEarned}',
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 14,
                           color:
-                              isEarned && !isClaimed && !_isClaiming
+                              isEarned && !isClaimed && !isClaiming
                                   ? PaxColors.white
                                   : PaxColors.lilac,
                         ),
@@ -224,13 +222,52 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
   }
 
   Future<void> _handleClaim() async {
-    if (_isClaiming) return;
+    ref.read(analyticsProvider).claimAchievementTapped({
+      'achievementId': widget.achievement.id,
+      'achievementName': widget.achievement.name,
+    });
+    final claimState = ref.read(achievementClaimProvider.notifier);
 
-    setState(() => _isClaiming = true);
+    // Show claiming dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (dialogContext) => PopScope(
+            canPop: false,
+            child: AlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  SizedBox(height: 8),
+                  Text(
+                    'Please wait while we process your claim...',
+                    style: TextStyle(
+                      color: PaxColors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.normal,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+    );
 
     try {
-      // Show claiming dialog
+      await claimState.claimAchievement(achievement: widget.achievement);
+
       if (!mounted) return;
+      context.pop();
+      ref.read(analyticsProvider).claimAchievementComplete({
+        'achievementId': widget.achievement.id,
+        'achievementName': widget.achievement.name,
+      });
+
+      // Show success dialog
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -238,124 +275,113 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
             (dialogContext) => AlertDialog(
               content: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text(
-                    'Claiming Achievement',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 16,
-                      color: PaxColors.black,
-                    ),
+                  SvgPicture.asset(
+                    'lib/assets/svgs/withdrawal_complete.svg',
+                  ).withPadding(bottom: 8),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Achievement Claimed!',
+                        style: TextStyle(
+                          color: PaxColors.deepPurple,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ).withPadding(bottom: 8).withAlign(Alignment.center),
+                    ],
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Please wait while we process your claim...',
-                    style: TextStyle(
-                      fontWeight: FontWeight.normal,
-                      fontSize: 14,
-                      color: PaxColors.black,
-                    ),
+
+                  Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            TokenBalanceUtil.getLocaleFormattedAmount(
+                              widget.achievement.amountEarned ?? 0,
+                            ),
+                            style: TextStyle(
+                              color: PaxColors.black,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          SvgPicture.asset(
+                            'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(1)}.svg',
+                            height: 25,
+                          ),
+                        ],
+                      ).withPadding(vertical: 4),
+                      Text(
+                        'has been added to your wallet!',
+                        style: TextStyle(
+                          color: PaxColors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.normal,
+                        ),
+                        textAlign: TextAlign.center,
+                      ).withPadding(vertical: 8),
+                    ],
                   ),
-                ],
-              ),
-            ),
-      );
 
-      // Get the PAX account address from your provider
-      final paxAccountContractAddress =
-          ref.read(paxAccountProvider).account?.contractAddress;
-
-      if (paxAccountContractAddress == null) {
-        throw Exception('Pax account not found');
-      }
-
-      // Call the cloud function
-      final achievementService = AchievementService();
-
-      await achievementService.processAchievementClaim(
-        achievementId: widget.achievement.id,
-        paxAccountContractAddress: paxAccountContractAddress,
-        amountEarned: widget.achievement.amountAwarded,
-        tasksCompleted: widget.achievement.tasksCompleted,
-      );
-
-      ref.invalidate(achievementProvider);
-
-      if (!mounted) return;
-      context.pop();
-
-      // Show success dialog
-      if (!mounted) return;
-      showDialog(
-        context: context,
-        builder:
-            (dialogContext) => AlertDialog(
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.check_circle, color: Colors.green, size: 48),
-                  SizedBox(height: 16),
-                  Text(
-                    'Achievement Claimed!',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 16,
-                      color: PaxColors.black,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'You have successfully claimed G\$${widget.achievement.amountAwarded}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.normal,
-                      fontSize: 14,
-                      color: PaxColors.black,
-                    ),
-                  ),
-                  SizedBox(height: 24),
-                  Button(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: const ButtonStyle.primary(),
-                    child: const Text('Close'),
-                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width / 2.5,
+                        child: PrimaryButton(
+                          child: const Text('OK'),
+                          onPressed: () => dialogContext.pop(),
+                        ),
+                      ),
+                    ],
+                  ).withPadding(top: 8),
                 ],
               ),
             ),
       );
     } catch (e) {
-      // Close the claiming dialog if it's open
-      if (mounted && context.canPop()) {
-        context.pop();
-      }
-
-      print(e.toString());
-
-      // Show error dialog
       if (!mounted) return;
+      context.pop();
+      ref.read(analyticsProvider).claimAchievementFailed({
+        'achievementId': widget.achievement.id,
+        'achievementName': widget.achievement.name,
+      });
+      // Show error dialog
       showDialog(
         context: context,
         builder:
             (dialogContext) => AlertDialog(
-              title: Text('Claim Failed'),
+              title: Column(
+                children: [
+                  SvgPicture.asset(
+                    'lib/assets/svgs/canvassing.svg',
+                    height: 24,
+                  ).withPadding(bottom: 16),
+                  Text(
+                    'Claim Failed',
+                    style: TextStyle(fontSize: 16),
+                  ).withAlign(Alignment.center),
+                ],
+              ),
               content: Text(
                 e.toString(),
-                // maxLines: 3,
-                // overflow: TextOverflow.ellipsis,
+                maxLines: 5,
+                overflow: TextOverflow.ellipsis,
               ),
               actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
+                OutlineButton(
+                  onPressed: () => dialogContext.pop(),
                   child: Text('OK'),
                 ),
               ],
             ),
       );
-    } finally {
-      if (mounted) {
-        setState(() => _isClaiming = false);
-      }
     }
   }
 }

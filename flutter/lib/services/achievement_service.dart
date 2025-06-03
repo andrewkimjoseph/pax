@@ -110,11 +110,16 @@ class AchievementService {
             'paxAccountContractAddress': paxAccountContractAddress,
             'amountEarned': amountEarned,
             'tasksCompleted': tasksCompleted,
-
-            // Only pass timeCompleted if tasks are already completed
           });
 
-      return result.data['txnHash'] as String;
+      final txnHash = result.data['txnHash'] as String;
+
+      // Update the achievement with the transaction hash
+      await _firestore.collection('achievements').doc(achievementId).update({
+        'txnHash': txnHash,
+      });
+
+      return txnHash;
     } catch (e) {
       throw Exception('Failed to process achievement claim: $e');
     }

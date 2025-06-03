@@ -6,6 +6,8 @@ import 'package:pax/repositories/firestore/reward/reward_repository.dart';
 import 'package:pax/repositories/firestore/task_completion/task_completion_repository.dart';
 import 'package:pax/repositories/firestore/withdrawal/withdrawal_repository.dart';
 import 'package:pax/repositories/local/activity_repository.dart';
+import 'package:pax/providers/db/achievement/achievement_provider.dart';
+import 'package:pax/models/firestore/achievement/achievement_model.dart';
 
 import '../auth/auth_provider.dart';
 
@@ -194,10 +196,12 @@ final totalTaskCompletionsProvider = Provider<AsyncValue<int>>((ref) {
 final totalGoodDollarTokensEarnedProvider = Provider<AsyncValue<double>>((ref) {
   final userId = ref.watch(authProvider).user.uid;
   final rewardsAsync = ref.watch(rewardActivitiesProvider(userId));
+  final achievementsAsync = ref.watch(achievementProvider);
 
   return rewardsAsync.when(
     data: (rewards) {
       double total = 0.0;
+      // Add rewards from reward activities
       for (final activity in rewards) {
         if (activity.type == ActivityType.reward &&
             activity.reward?.rewardCurrencyId == 1 &&
@@ -205,6 +209,17 @@ final totalGoodDollarTokensEarnedProvider = Provider<AsyncValue<double>>((ref) {
           total += activity.reward!.amountReceived!.toDouble();
         }
       }
+
+      // Add amounts from claimed achievements
+      if (achievementsAsync.state == AchievementState.loaded) {
+        for (final achievement in achievementsAsync.achievements) {
+          if (achievement.status == AchievementStatus.claimed &&
+              achievement.amountEarned != null) {
+            total += achievement.amountEarned!.toDouble();
+          }
+        }
+      }
+
       return AsyncValue.data(total);
     },
     loading: () => const AsyncValue.loading(),

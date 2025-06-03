@@ -13,6 +13,7 @@ import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/achievement/achievement_provider.dart';
+import 'package:pax/providers/fcm/fcm_provider.dart';
 import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/providers/local/task_completion_state_provider.dart';
 
@@ -76,12 +77,22 @@ class TaskCompletionService {
                 tasksNeededForCompletion: 1,
                 tasksCompleted: 1,
                 timeCompleted: Timestamp.now(),
-                amountEarned: 500,
+                amountEarned: 100,
               );
           ref.read(analyticsProvider).achievementCreated({
             'achievementName': 'Task Starter',
-            'amountEarned': 500,
+            'amountEarned': 100,
           });
+          final fcmToken = await ref.read(fcmTokenProvider.future);
+          ref
+              .read(notificationServiceProvider)
+              .sendAchievementEarnedNotification(
+                token: fcmToken!,
+                achievementData: {
+                  'achievementName': 'Task Starter',
+                  'amountEarned': 100,
+                },
+              );
         }
 
         // Handle Task Expert achievement
@@ -112,6 +123,23 @@ class TaskCompletionService {
           // Only set timeCompleted if tasks are now completed
           if (newTasksCompleted >= taskExpert.tasksNeededForCompletion) {
             updateData['timeCompleted'] = Timestamp.now();
+
+            ref.read(analyticsProvider).achievementComplete({
+              'achievementName': 'Task Expert',
+              'tasksCompleted': newTasksCompleted,
+              'tasksNeededForCompletion': taskExpert.tasksNeededForCompletion,
+            });
+
+            final fcmToken = await ref.read(fcmTokenProvider.future);
+            ref
+                .read(notificationServiceProvider)
+                .sendAchievementEarnedNotification(
+                  token: fcmToken!,
+                  achievementData: {
+                    'achievementName': 'Task Expert',
+                    'amountEarned': 1000,
+                  },
+                );
           }
 
           await ref

@@ -22,7 +22,36 @@ class AppInitializer {
     await _initializeFirebase();
     await _setupErrorHandling();
     await _initializeNotifications();
-    await _initializeRemoteConfig();
+
+    // Initialize Remote Config with retry logic
+    int retryCount = 0;
+    const maxRetries = 3;
+    const retryDelay = Duration(seconds: 2);
+
+    while (retryCount < maxRetries) {
+      try {
+        await _initializeRemoteConfig();
+        break;
+      } catch (e) {
+        retryCount++;
+        if (kDebugMode) {
+          print('Remote Config initialization attempt $retryCount failed: $e');
+        }
+
+        if (retryCount == maxRetries) {
+          if (kDebugMode) {
+            print(
+              'Remote Config initialization failed after $maxRetries attempts',
+            );
+          }
+          // Don't rethrow - allow app to continue without Remote Config
+          break;
+        }
+
+        await Future.delayed(retryDelay);
+      }
+    }
+
     await _initializeBranch();
   }
 

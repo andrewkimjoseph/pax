@@ -330,11 +330,11 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
               tasksNeededForCompletion: 1,
               tasksCompleted: 1,
               timeCompleted: Timestamp.now(),
-              amountEarned: 1000,
+              amountEarned: 500,
             );
         ref.read(analyticsProvider).achievementCreated({
           'achievementName': 'Payout Connector',
-          'amountEarned': 1000,
+          'amountEarned': 500,
         });
         final fcmToken = await ref.read(fcmTokenProvider.future);
         if (fcmToken != null) {
@@ -344,7 +344,7 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
                 token: fcmToken,
                 achievementData: {
                   'achievementName': 'Payout Connector',
-                  'amountEarned': 1000,
+                  'amountEarned': 500,
                 },
               );
         }
@@ -358,11 +358,11 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
               tasksNeededForCompletion: 1,
               tasksCompleted: 1,
               timeCompleted: Timestamp.now(),
-              amountEarned: 1000,
+              amountEarned: 500,
             );
         ref.read(analyticsProvider).achievementCreated({
           'achievementName': 'Verified Human',
-          'amountEarned': 1000,
+          'amountEarned': 500,
         });
         if (fcmToken != null) {
           ref
@@ -371,7 +371,7 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
                 token: fcmToken,
                 achievementData: {
                   'achievementName': 'Verified Human',
-                  'amountEarned': 1000,
+                  'amountEarned': 500,
                 },
               );
         }

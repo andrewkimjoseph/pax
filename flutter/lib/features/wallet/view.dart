@@ -72,27 +72,15 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                     'Available Payment Methods',
                     style: TextStyle(fontSize: 20),
                   ).withPadding(bottom: 8),
-                  Container(
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: PaxColors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: PaxColors.lightLilac, width: 1),
-                    ),
-                    child: Column(
-                      children: [
-                        MiniPayPaymentMethodCard(
-                          'minipay',
-                          "MiniPay Wallet",
-                          () {
-                            ref.read(analyticsProvider).paymentMethodTapped({
-                              "paymentMethodName": "MiniPay",
-                            });
-                            context.push("/payment-methods/minipay-connection");
-                          },
-                        ),
-                      ],
-                    ),
+                  Column(
+                    children: [
+                      MiniPayPaymentMethodCard('minipay', "MiniPay Wallet", () {
+                        ref.read(analyticsProvider).paymentMethodTapped({
+                          "paymentMethodName": "MiniPay",
+                        });
+                        context.push("/payment-methods/minipay-connection");
+                      }),
+                    ],
                   ),
                 ],
               ),

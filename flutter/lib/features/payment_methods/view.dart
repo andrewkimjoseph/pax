@@ -63,7 +63,7 @@ class _PaymentMethodsViewState extends ConsumerState<PaymentMethodsView> {
         child: Column(
           children: [
             Container(
-              padding: EdgeInsets.all(12),
+              padding: EdgeInsets.all(8),
               width: double.infinity,
               decoration: BoxDecoration(
                 color: PaxColors.white,
@@ -72,24 +72,12 @@ class _PaymentMethodsViewState extends ConsumerState<PaymentMethodsView> {
               ),
               child: Column(
                 children: [
-                  Container(
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: PaxColors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: PaxColors.lightLilac, width: 1),
-                    ),
-                    child: Column(
-                      children: [
-                        MiniPayPaymentMethodCard('minipay', "MiniPay", () {
-                          ref
-                              .read(analyticsProvider)
-                              .minipayPaymentMethodCardTapped();
-                          context.push("/payment-methods/minipay-connection");
-                        }),
-                      ],
-                    ),
-                  ),
+                  MiniPayPaymentMethodCard('minipay', "MiniPay", () {
+                    ref
+                        .read(analyticsProvider)
+                        .minipayPaymentMethodCardTapped();
+                    context.push("/payment-methods/minipay-connection");
+                  }),
                 ],
               ),
             ),

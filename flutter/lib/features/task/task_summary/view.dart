@@ -7,6 +7,8 @@ import 'package:pax/providers/local/task_context/main_task_context_provider.dart
 import 'package:pax/providers/local/task_master_server_id_provider.dart';
 import 'package:pax/providers/local/screening_state_provider.dart';
 import 'package:pax/services/screening_service.dart';
+import 'package:pax/services/blockchain/blockchain_service.dart';
+import 'package:pax/utils/token_address_util.dart';
 import 'package:pax/widgets/other_task_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Consumer;
 import 'package:go_router/go_router.dart';
@@ -35,9 +37,12 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
 
   // Method to handle screening process
   Future<void> _processScreening(BuildContext context) async {
+    if (!mounted) return;
+
     ref.read(analyticsProvider).continueWithTaskTapped();
     final currentTask = ref.read(taskContextProvider)?.task;
     if (currentTask == null) {
+      if (!mounted) return;
       _showErrorDialog(context, 'Task not found');
       return;
     }
@@ -47,37 +52,71 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
     final participantId = ref.read(participantProvider).participant?.id;
     final taskManagerContractAddress = currentTask.managerContractAddress;
 
+    if (!mounted) return;
     setState(() {
       _isProcessingScreening = true;
     });
 
-    // Call screening service
+    // Show loading dialog
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (dialogContext) => PopScope(
+            canPop: false,
+            child: AlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Letting you in...'),
+                ],
+              ),
+            ),
+          ),
+    );
+
     try {
+      if (!mounted) return;
+
+      final hasBalance = await BlockchainService.hasSufficientBalance(
+        taskManagerContractAddress!,
+        TokenAddressUtil.getAddressForCurrency(currentTask.rewardCurrencyId!),
+        currentTask.rewardAmountPerParticipant!.toDouble(),
+        TokenAddressUtil.getDecimalsForCurrency(currentTask.rewardCurrencyId!),
+      );
+
+      if (!hasBalance) {
+        throw Exception('Task manager contract has insufficient balance');
+      }
+
       ref.read(analyticsProvider).screeningStarted({
         "taskId": currentTask.id,
         "taskManagerContractAddress": taskManagerContractAddress,
         "taskMasterServerWalletId": taskMasterServerWalletId,
       });
 
+      if (!mounted) return;
       await ref
           .read(screeningServiceProvider)
           .screenParticipant(
             serverWalletId: serverWalletId!,
             taskId: currentTask.id,
             participantId: participantId!,
-            taskManagerContractAddress: taskManagerContractAddress!,
+            taskManagerContractAddress: taskManagerContractAddress,
             taskMasterServerWalletId: taskMasterServerWalletId!,
           );
 
-      // Show processing dialog
-      if (context.mounted) {
-        await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (dialogContext) => _buildProcessingDialog(dialogContext),
-        );
-      }
+      if (!mounted) return;
+
+      if (!context.mounted) return;
+      // Dismiss loading dialog and navigate on success
+      context.pop();
+      context.go('/task-itself');
     } catch (e) {
+      if (!mounted) return;
       ref.read(analyticsProvider).screeningFailed({
         "taskId": currentTask.id,
         "taskManagerContractAddress": taskManagerContractAddress,
@@ -85,6 +124,8 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
       });
 
       if (context.mounted) {
+        // Dismiss loading dialog and show error
+        context.pop();
         _showErrorDialog(context, e.toString());
       }
     } finally {
@@ -94,61 +135,6 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
         });
       }
     }
-  }
-
-  // Dialog showing processing state
-  Widget _buildProcessingDialog(BuildContext dialogContext) {
-    return Consumer(
-      builder: (context, ref, _) {
-        final screeningState = ref.watch(screeningProvider);
-
-        // Handle different screening states
-        if (screeningState.state == ScreeningState.complete) {
-          // Dismiss the dialog after a short delay and navigate
-          Future.delayed(Duration(milliseconds: 500), () {
-            if (dialogContext.mounted) {
-              Navigator.of(dialogContext).pop();
-              dialogContext.go('/task-itself');
-            }
-          });
-        } else if (screeningState.state == ScreeningState.error) {
-          // Dismiss the dialog after a short delay
-          Future.delayed(Duration(milliseconds: 500), () {
-            if (dialogContext.mounted) {
-              Navigator.of(dialogContext).pop();
-              _showErrorDialog(
-                dialogContext,
-                screeningState.errorMessage ?? 'An unknown error occurred',
-              );
-            }
-          });
-        } else if (screeningState.state == ScreeningState.loading) {
-          // Show loading indicator
-          return AlertDialog(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Letting you in...'),
-              ],
-            ),
-          );
-        }
-
-        // Default case - show loading indicator
-        return AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Letting you in...'),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   // Error dialog

@@ -146,9 +146,6 @@ class _WithdrawViewState extends ConsumerState<WithdrawView> {
                   validator: amountValidator,
                   showErrors: const {FormValidationMode.submitted},
                   child: TextField(
-                    initialValue: TokenBalanceUtil.getLocaleFormattedAmount(
-                      balance,
-                    ),
                     keyboardType: TextInputType.numberWithOptions(
                       decimal: true,
                     ),

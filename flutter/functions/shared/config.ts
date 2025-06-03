@@ -11,6 +11,7 @@ export const PRIVY_APP_ID = process.env.PRIVY_APP_ID || '';
 export const PRIVY_APP_SECRET = process.env.PRIVY_APP_SECRET || '';
 export const PRIVY_WALLET_AUTH_PRIVATE_KEY = process.env.PRIVY_WALLET_AUTH_PRIVATE_KEY || '';
 export const PIMLICO_API_KEY = process.env.PIMLICO_API_KEY || '';
+export const DRPC_API_KEY = process.env.DRPC_API_KEY || '';
 export const PAX_MASTER = `0x${process.env.PAX_MASTER}` as Address;
 export const PAXACCOUNT_IMPLEMENTATION_ADDRESS = process.env.PAXACCOUNT_IMPLEMENTATION_ADDRESS as Address;
 
@@ -28,14 +29,14 @@ export const CREATE2_FACTORY = "0x4e59b44847b379578588920cA78FbF26c0B4956C" as A
 // API endpoint configs
 export const PIMLICO_URL = `https://api.pimlico.io/v2/42220/rpc?apikey=${PIMLICO_API_KEY}`;
 
+export const DRPC_URL = `https://lb.drpc.org/ogrpc?network=celo&dkey=${DRPC_API_KEY}`;
+
 export const REWARD_TOKEN_ADDRESS = "0x62B8B11039FcfE5aB0C56E502b1C372A3d2a9c7A" as Address;
 
 export const PUBLIC_CLIENT = createPublicClient({
   chain: celo,
-  transport: http(),
+  transport: http(DRPC_URL),
 });
-
-
 
 export const PRIVY_CLIENT = new PrivyClient(PRIVY_APP_ID, PRIVY_APP_SECRET, {
   walletApi: {

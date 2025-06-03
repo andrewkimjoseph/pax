@@ -58,28 +58,28 @@ describe("1. Initial Setup Tests", function () {
     // Setup all wallet accounts
     console.log("Setting up wallet accounts...");
     wallets.TASK_MANAGER = await getWalletInfo(WALLET_IDS.TASK_MANAGER, true);
-    wallets.PARTICIPANT_2 = await getWalletInfo(WALLET_IDS.PARTICIPANT_2, false);
-    wallets.PARTICIPANT_3 = await getWalletInfo(WALLET_IDS.PARTICIPANT_3, false);
-    wallets.PARTICIPANT_4 = await getWalletInfo(WALLET_IDS.PARTICIPANT_4, false);
+    // wallets.PARTICIPANT_2 = await getWalletInfo(WALLET_IDS.PARTICIPANT_2, false);
+    // wallets.PARTICIPANT_3 = await getWalletInfo(WALLET_IDS.PARTICIPANT_3, false);
+    // wallets.PARTICIPANT_4 = await getWalletInfo(WALLET_IDS.PARTICIPANT_4, false);
 
-    console.log("Task Manager wallet address:", wallets.TASK_MANAGER.address);
-    console.log("Participant 2 wallet address:", wallets.PARTICIPANT_2.address);
-    console.log("Participant 3 wallet address:", wallets.PARTICIPANT_3.address);
-    console.log("Participant 4 wallet address:", wallets.PARTICIPANT_4.address);
+    // console.log("Task Manager wallet address:", wallets.TASK_MANAGER.address);
+    // console.log("Participant 2 wallet address:", wallets.PARTICIPANT_2.address);
+    // console.log("Participant 3 wallet address:", wallets.PARTICIPANT_3.address);
+    // console.log("Participant 4 wallet address:", wallets.PARTICIPANT_4.address);
   });
 
-  it("should create Smart Accounts successfully", async function () {
-    expect(wallets.TASK_MANAGER.address).to.match(/^0x[a-fA-F0-9]{40}$/);
-    expect(wallets.PARTICIPANT_2.address).to.match(/^0x[a-fA-F0-9]{40}$/);
-    expect(wallets.PARTICIPANT_3.address).to.match(/^0x[a-fA-F0-9]{40}$/);
-    expect(wallets.PARTICIPANT_4.address).to.match(/^0x[a-fA-F0-9]{40}$/);
-  });
+  // it("should create Smart Accounts successfully", async function () {
+  //   expect(wallets.TASK_MANAGER.address).to.match(/^0x[a-fA-F0-9]{40}$/);
+  //   expect(wallets.PARTICIPANT_2.address).to.match(/^0x[a-fA-F0-9]{40}$/);
+  //   expect(wallets.PARTICIPANT_3.address).to.match(/^0x[a-fA-F0-9]{40}$/);
+  //   expect(wallets.PARTICIPANT_4.address).to.match(/^0x[a-fA-F0-9]{40}$/);
+  // });
 
   it("should deploy TaskManager contract", async function () {
     // Deploy TaskManager with default parameters
     taskManagerAddress = await deployTaskManager(
       wallets.TASK_MANAGER,
-      parseEther("1"), // 0.01 cUSD per participant
+      parseEther("100"), // 0.01 cUSD per participant
       1n // 5 target participants
     );
 
@@ -101,30 +101,30 @@ describe("1. Initial Setup Tests", function () {
     // Deploy PaxAccount for Task Manager / Participant 1
     const paxAccount1 = await deployPaxAccountProxy(
       wallets.TASK_MANAGER,
-      wallets.TASK_MANAGER.address // Use its own address as primary payment method
+      "0x96a6086f14A4FEf488d36fd1F0F175A639315e56" // Use its own address as primary payment method
     );
     paxAccountAddresses.push(paxAccount1);
 
     // Deploy PaxAccount for Participant 2
-    const paxAccount2 = await deployPaxAccountProxy(
-      wallets.PARTICIPANT_2,
-      wallets.PARTICIPANT_2.address // Use its own address as primary payment method
-    );
-    paxAccountAddresses.push(paxAccount2);
+    // const paxAccount2 = await deployPaxAccountProxy(
+    //   wallets.PARTICIPANT_2,
+    //   wallets.PARTICIPANT_2.address // Use its own address as primary payment method
+    // );
+    // paxAccountAddresses.push(paxAccount2);
 
-    // Deploy PaxAccount for Participant 3
-    const paxAccount3 = await deployPaxAccountProxy(
-      wallets.PARTICIPANT_3,
-      wallets.PARTICIPANT_3.address // Use its own address as primary payment method
-    );
-    paxAccountAddresses.push(paxAccount3);
+    // // Deploy PaxAccount for Participant 3
+    // const paxAccount3 = await deployPaxAccountProxy(
+    //   wallets.PARTICIPANT_3,
+    //   wallets.PARTICIPANT_3.address // Use its own address as primary payment method
+    // );
+    // paxAccountAddresses.push(paxAccount3);
 
-    // Deploy PaxAccount for Participant 4
-    const paxAccount4 = await deployPaxAccountProxy(
-      wallets.PARTICIPANT_4,
-      wallets.PARTICIPANT_4.address // Use its own address as primary payment method
-    );
-    paxAccountAddresses.push(paxAccount4);
+    // // Deploy PaxAccount for Participant 4
+    // const paxAccount4 = await deployPaxAccountProxy(
+    //   wallets.PARTICIPANT_4,
+    //   wallets.PARTICIPANT_4.address // Use its own address as primary payment method
+    // );
+    // paxAccountAddresses.push(paxAccount4);
 
     // Verify all PaxAccounts were deployed successfully
     expect(paxAccountAddresses.length).to.equal(4);

@@ -9,6 +9,7 @@ import {
   FUNCTION_RUNTIME_OPTS,
   DB
 } from "../../shared/config";
+import { Timestamp } from "firebase-admin/firestore";
 
 /**
  * Cloud function to delete all participant data
@@ -37,6 +38,22 @@ export const deleteParticipantOnRequest = onCall(FUNCTION_RUNTIME_OPTS, async (r
 
     logger.info("Starting participant data deletion", { participantId });
 
+    // Get payment method to save wallet address
+    const paymentMethodSnapshot = await db
+      .collection('payment_methods')
+      .where('participantId', '==', participantId)
+      .get();
+    const walletAddress = paymentMethodSnapshot.docs[0]?.data()?.walletAddress;
+
+    // Create record in former_participants collection
+    const formerParticipantRef = db.collection('former_participants').doc(participantId);
+    
+    batch.set(formerParticipantRef, { 
+      id: participantId,
+      miniPayWalletAddress: walletAddress || null,
+      timeDeleted: Timestamp.now()
+    });
+
     // 1. Delete participant record
     const participantRef = db.collection('participants').doc(participantId);
     batch.delete(participantRef);
@@ -44,7 +61,7 @@ export const deleteParticipantOnRequest = onCall(FUNCTION_RUNTIME_OPTS, async (r
     // 2. Delete pax accounts
     const paxAccountsSnapshot = await db
       .collection('pax_accounts')
-      .where('participantId', '==', participantId)
+      .where('id', '==', participantId)
       .get();
     paxAccountsSnapshot.docs.forEach((doc) => batch.delete(doc.ref));
 
@@ -62,14 +79,21 @@ export const deleteParticipantOnRequest = onCall(FUNCTION_RUNTIME_OPTS, async (r
       .get();
     rewardsSnapshot.docs.forEach((doc) => batch.delete(doc.ref));
 
-    // 5. Delete withdrawals
+    // 5 Delete achievements
+    const achievementsSnapshot = await db
+      .collection('achievements')
+      .where('participantId', '==', participantId)
+      .get();
+    achievementsSnapshot.docs.forEach((doc) => batch.delete(doc.ref));
+
+    // 6. Delete withdrawals
     const withdrawalsSnapshot = await db
       .collection('withdrawals')
       .where('participantId', '==', participantId)
       .get();
     withdrawalsSnapshot.docs.forEach((doc) => batch.delete(doc.ref));
 
-    // 6. Delete FCM tokens
+    // 7. Delete FCM tokens
     const fcmTokensSnapshot = await db
       .collection('fcm_tokens')
       .where('participantId', '==', participantId)

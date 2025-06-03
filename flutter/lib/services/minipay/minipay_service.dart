@@ -15,8 +15,8 @@ class MiniPayService {
   final PaxAccountRepository _paxAccountRepository;
   final PaymentMethodRepository _paymentMethodRepository;
 
-  // API endpoint for whitelist checking (from whitelist_status.dart)
-  final Uri _whitelistApiUrl = Uri.parse(
+  // API endpoint for RPC calls
+  final Uri _rpcUrl = Uri.parse(
     'https://lb.drpc.org/ogrpc?network=celo&dkey=${Env.drpcAPIKey}',
   );
   final String _whitelistContractAddress =
@@ -352,7 +352,7 @@ class MiniPayService {
     var headers = {'Content-Type': 'application/json'};
 
     var response = await http.post(
-      _whitelistApiUrl,
+      _rpcUrl,
       headers: headers,
       body: requestBody,
     );

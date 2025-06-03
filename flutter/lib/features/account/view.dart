@@ -251,16 +251,16 @@ class _AccountViewState extends ConsumerState<AccountView> {
                       true,
                     ).withPadding(bottom: 28),
                   ),
-                  InkWell(
-                    onTap: () {
-                      ref.read(analyticsProvider).accountAndSecurityTapped();
-                      context.push('/account-and-security');
-                    },
-                    child: AccountOptionCard(
-                      'account',
-                      true,
-                    ).withPadding(bottom: 28),
-                  ),
+                  // InkWell(
+                  //   onTap: () {
+                  //     ref.read(analyticsProvider).accountAndSecurityTapped();
+                  //     context.push('/account-and-security');
+                  //   },
+                  //   child: AccountOptionCard(
+                  //     'account',
+                  //     true,
+                  //   ).withPadding(bottom: 28),
+                  // ),
                   InkWell(
                     onTap: () {
                       ref.read(analyticsProvider).paymentMethodsTapped();

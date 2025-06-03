@@ -45,10 +45,13 @@ class BlockchainService {
   };
 
   // Get the full API URL with key
-  String get _fullApiUrl => '$_apiUrl$_apiKey';
+  static String get _fullApiUrl => '$_apiUrl$_apiKey';
 
   // Fetch balance for a single token
-  Future<double> fetchTokenBalance(String walletAddress, int tokenId) async {
+  static Future<double> fetchTokenBalance(
+    String walletAddress,
+    int tokenId,
+  ) async {
     if (!supportedTokens.containsKey(tokenId)) {
       throw Exception("Unsupported token ID: $tokenId");
     }
@@ -62,7 +65,9 @@ class BlockchainService {
   }
 
   // Fetch balances for all supported tokens
-  Future<Map<int, double>> fetchAllTokenBalances(String walletAddress) async {
+  static Future<Map<int, double>> fetchAllTokenBalances(
+    String walletAddress,
+  ) async {
     final Map<int, double> balances = {};
 
     for (final entry in supportedTokens.entries) {
@@ -85,7 +90,7 @@ class BlockchainService {
   }
 
   // Helper method to get token balance using RPC call
-  Future<double> _getTokenBalance(
+  static Future<double> _getTokenBalance(
     String walletAddress,
     String tokenAddress,
     int decimals,
@@ -168,22 +173,22 @@ class BlockchainService {
   }
 
   // Check if contract has sufficient balance for withdrawal
-  Future<bool> hasSufficientBalance(
-    String contractAddress,
+  static Future<bool> hasSufficientBalance(
+    String contractOrEOAAddress,
     String currencyAddress,
     double amountToWithdraw,
     int decimals,
   ) async {
     try {
       final balance = await _getTokenBalance(
-        contractAddress,
+        contractOrEOAAddress,
         currencyAddress,
         decimals,
       );
 
       if (kDebugMode) {
         print(
-          'Contract balance: $balance, Amount to withdraw: $amountToWithdraw',
+          'Contract/EOA balance: $balance, Amount to withdraw: $amountToWithdraw',
         );
       }
 

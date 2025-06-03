@@ -47,7 +47,7 @@ class _HelpAndSupportViewState extends ConsumerState<AccountAndSecurityView> {
     });
   }
 
-  void _showDeleteAccountDrawer() {
+  void showDeleteAccountDrawer() {
     openDrawer(
       context: context,
       transformBackdrop: false,
@@ -102,7 +102,7 @@ class _HelpAndSupportViewState extends ConsumerState<AccountAndSecurityView> {
                 spacing: 24,
                 children: [
                   InkWell(
-                    onTap: _showDeleteAccountDrawer,
+                    // onTap: showDeleteAccountDrawer,
                     child: AccountAndSecurityCard('Delete Account'),
                   ),
 

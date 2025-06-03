@@ -50,6 +50,9 @@ class AnalyticsProvider {
   Future<void> signInWithGoogleComplete([Map<String, dynamic>? properties]) =>
       _logEvent('sign_in_with_google_complete', properties: properties);
 
+  Future<void> signInWithGoogleIncomplete([Map<String, dynamic>? properties]) =>
+      _logEvent('sign_in_with_google_incomplete', properties: properties);
+
   Future<void> dashboardTapped([Map<String, dynamic>? properties]) =>
       _logEvent('dashboard_tapped', properties: properties);
 
@@ -92,6 +95,9 @@ class AnalyticsProvider {
 
   Future<void> taskTapped([Map<String, dynamic>? properties]) =>
       _logEvent('task_tapped', properties: properties);
+
+  Future<void> taskLoadingComplete([Map<String, dynamic>? properties]) =>
+      _logEvent('task_loading_complete', properties: properties);
 
   Future<void> continueWithTaskTapped([Map<String, dynamic>? properties]) =>
       _logEvent('continue_with_task_tapped', properties: properties);
@@ -192,6 +198,21 @@ class AnalyticsProvider {
 
   Future<void> achievementUpdated(Map<String, dynamic> params) =>
       _logEvent('achievement_updated', properties: params);
+
+  Future<void> achievementComplete([Map<String, dynamic>? properties]) =>
+      _logEvent('achievement_complete', properties: properties);
+
+  Future<void> claimAchievementTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('claim_achievement_tapped', properties: properties);
+
+  Future<void> claimAchievementComplete([Map<String, dynamic>? properties]) =>
+      _logEvent('claim_achievement_complete', properties: properties);
+
+  Future<void> claimAchievementFailed([Map<String, dynamic>? properties]) =>
+      _logEvent('claim_achievement_failed', properties: properties);
+
+  Future<void> okOnTaskCompleteTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('ok_on_task_complete_tapped', properties: properties);
 }
 
 final analyticsProvider = Provider<AnalyticsProvider>((ref) {

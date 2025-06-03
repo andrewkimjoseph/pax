@@ -27,8 +27,6 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
   @override
   void initState() {
     super.initState();
-    ref.read(analyticsProvider).taskTapped();
-
     // Reset task completion state
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(taskCompletionProvider.notifier).reset();
@@ -49,6 +47,9 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
               onPageFinished: (String url) {
                 setState(() {
                   isLoading = false;
+                });
+                ref.read(analyticsProvider).taskLoadingComplete({
+                  "taskUrl": url,
                 });
               },
               onNavigationRequest: (NavigationRequest request) {
@@ -145,99 +146,102 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
     String screeningId,
     String taskId,
   ) {
-    return Consumer(
-      builder: (context, ref, _) {
-        final completionState = ref.watch(taskCompletionProvider);
-        final rewardState = ref.watch(rewardStateProvider);
+    return PopScope(
+      canPop: false,
+      child: Consumer(
+        builder: (context, ref, _) {
+          final completionState = ref.watch(taskCompletionProvider);
+          final rewardState = ref.watch(rewardStateProvider);
 
-        // If task completion is complete, start the rewarding process
-        if (completionState.state == TaskCompletionState.complete &&
-            rewardState.state == RewardState.initial) {
-          // Get the task completion ID from the result
-          final taskCompletionId = completionState.result?.taskCompletionId;
+          // If task completion is complete, start the rewarding process
+          if (completionState.state == TaskCompletionState.complete &&
+              rewardState.state == RewardState.initial) {
+            // Get the task completion ID from the result
+            final taskCompletionId = completionState.result?.taskCompletionId;
 
-          ref.read(analyticsProvider).taskCompletionComplete({
-            "taskId": taskId,
-            "screeningId": screeningId,
-            "taskCompletionId": taskCompletionId,
-          });
+            ref.read(analyticsProvider).taskCompletionComplete({
+              "taskId": taskId,
+              "screeningId": screeningId,
+              "taskCompletionId": taskCompletionId,
+            });
 
-          if (taskCompletionId != null) {
-            // Schedule rewarding after the build cycle
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              ref.read(analyticsProvider).rewardingStarted({
-                "taskId": taskId,
-                "screeningId": screeningId,
-                "taskCompletionId": taskCompletionId,
+            if (taskCompletionId != null) {
+              // Schedule rewarding after the build cycle
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                ref.read(analyticsProvider).rewardingStarted({
+                  "taskId": taskId,
+                  "screeningId": screeningId,
+                  "taskCompletionId": taskCompletionId,
+                });
+
+                ref
+                    .read(rewardServiceProvider)
+                    .rewardParticipant(taskCompletionId: taskCompletionId);
               });
+            }
+          }
 
-              ref
-                  .read(rewardServiceProvider)
-                  .rewardParticipant(taskCompletionId: taskCompletionId);
+          // Check for reward completion or errors
+          if (rewardState.state == RewardState.complete) {
+            // Dismiss the dialog after a short delay and navigate
+            Future.delayed(Duration(milliseconds: 500), () {
+              if (dialogContext.mounted) {
+                dialogContext.pop();
+                context.pushReplacement('/task-complete');
+              }
+            });
+          } else if (rewardState.state == RewardState.error) {
+            final taskCompletionId = completionState.result?.taskCompletionId;
+
+            ref.read(analyticsProvider).rewardingFailed({
+              "taskId": taskId,
+              "screeningId": screeningId,
+              "taskCompletionId": taskCompletionId,
+            });
+
+            // Dismiss the dialog after a short delay
+            Future.delayed(Duration(milliseconds: 500), () {
+              if (dialogContext.mounted) {
+                dialogContext.pop();
+                _showErrorDialog(
+                  rewardState.errorMessage ??
+                      'An unknown error occurred during rewarding',
+                );
+              }
+            });
+          } else if (completionState.state == TaskCompletionState.error) {
+            // Dismiss the dialog after a short delay
+            Future.delayed(Duration(milliseconds: 500), () {
+              if (dialogContext.mounted) {
+                dialogContext.pop();
+                _showErrorDialog(
+                  completionState.errorMessage ?? 'An unknown error occurred',
+                );
+              }
             });
           }
-        }
 
-        // Check for reward completion or errors
-        if (rewardState.state == RewardState.complete) {
-          // Dismiss the dialog after a short delay and navigate
-          Future.delayed(Duration(milliseconds: 500), () {
-            if (dialogContext.mounted) {
-              Navigator.of(dialogContext).pop();
-              context.pushReplacement('/task-complete');
-            }
-          });
-        } else if (rewardState.state == RewardState.error) {
-          final taskCompletionId = completionState.result?.taskCompletionId;
+          // Show appropriate loading message based on state
+          String message = 'Processing...';
+          if (completionState.state == TaskCompletionState.processing) {
+            message = 'Completing your task...';
+          } else if (rewardState.state == RewardState.rewarding) {
+            message = 'Rewarding your account...';
+          }
 
-          ref.read(analyticsProvider).rewardingFailed({
-            "taskId": taskId,
-            "screeningId": screeningId,
-            "taskCompletionId": taskCompletionId,
-          });
-
-          // Dismiss the dialog after a short delay
-          Future.delayed(Duration(milliseconds: 500), () {
-            if (dialogContext.mounted) {
-              Navigator.of(dialogContext).pop();
-              _showErrorDialog(
-                rewardState.errorMessage ??
-                    'An unknown error occurred during rewarding',
-              );
-            }
-          });
-        } else if (completionState.state == TaskCompletionState.error) {
-          // Dismiss the dialog after a short delay
-          Future.delayed(Duration(milliseconds: 500), () {
-            if (dialogContext.mounted) {
-              Navigator.of(dialogContext).pop();
-              _showErrorDialog(
-                completionState.errorMessage ?? 'An unknown error occurred',
-              );
-            }
-          });
-        }
-
-        // Show appropriate loading message based on state
-        String message = 'Processing...';
-        if (completionState.state == TaskCompletionState.processing) {
-          message = 'Completing your task...';
-        } else if (rewardState.state == RewardState.rewarding) {
-          message = 'Rewarding your account...';
-        }
-
-        // Show loading indicator with appropriate message
-        return AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text(message),
-            ],
-          ),
-        );
-      },
+          // Show loading indicator with appropriate message
+          return AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text(message),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -250,10 +254,7 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
           title: Text('Task Error'),
           content: Text(errorMessage),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('OK'),
-            ),
+            TextButton(onPressed: () => context.pop(), child: Text('OK')),
           ],
         );
       },

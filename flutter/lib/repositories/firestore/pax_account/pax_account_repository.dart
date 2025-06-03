@@ -6,7 +6,6 @@ import 'package:pax/services/blockchain/blockchain_service.dart';
 
 class PaxAccountRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final BlockchainService _blockchainService = BlockchainService();
   final String collectionName = 'pax_accounts';
 
   // Check if an account exists for user
@@ -182,7 +181,7 @@ class PaxAccountRepository {
 
       // Fetch balances from blockchain for all tokens
       final paxAccountContractAddress = account.contractAddress!;
-      final updatedBalances = await _blockchainService.fetchAllTokenBalances(
+      final updatedBalances = await BlockchainService.fetchAllTokenBalances(
         paxAccountContractAddress,
       );
 
@@ -224,7 +223,7 @@ class PaxAccountRepository {
 
       // Fetch balance from blockchain
       final walletAddress = account.contractAddress!;
-      return await _blockchainService.fetchTokenBalance(walletAddress, tokenId);
+      return await BlockchainService.fetchTokenBalance(walletAddress, tokenId);
     } catch (e) {
       if (kDebugMode) {
         print('Error fetching token balance: $e');

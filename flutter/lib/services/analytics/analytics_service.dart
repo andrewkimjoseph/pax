@@ -1,5 +1,6 @@
 import 'package:amplitude_flutter/amplitude.dart';
 import 'package:amplitude_flutter/configuration.dart';
+import 'package:amplitude_flutter/default_tracking.dart';
 import 'package:amplitude_flutter/events/base_event.dart';
 import 'package:amplitude_flutter/events/identify.dart';
 import 'package:flutter/foundation.dart';
@@ -42,7 +43,12 @@ class AnalyticsService {
     }
 
     try {
-      _amplitude = Amplitude(Configuration(apiKey: apiKey));
+      _amplitude = Amplitude(
+        Configuration(
+          apiKey: apiKey,
+          defaultTracking: DefaultTrackingOptions.all(),
+        ),
+      );
       _isInitialized = await _amplitude.isBuilt;
       if (kDebugMode) print('Analytics Service: Successfully initialized');
     } catch (e) {

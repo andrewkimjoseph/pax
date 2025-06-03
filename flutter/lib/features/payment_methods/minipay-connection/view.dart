@@ -85,6 +85,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                   fontSize: 16,
                   fontWeight: FontWeight.normal,
                 ),
+                textAlign: TextAlign.center,
               ).withPadding(bottom: 8),
 
               Row(
@@ -325,6 +326,10 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                             // Force UI update
                             setState(() {});
                           },
+                          onSubmitted: (_) {
+                            FocusManager.instance.primaryFocus?.unfocus();
+                          },
+                          textInputAction: TextInputAction.done,
                           scrollPhysics: const ClampingScrollPhysics(),
                           enabled: !connectionState.isConnecting,
                           keyboardType: TextInputType.text,

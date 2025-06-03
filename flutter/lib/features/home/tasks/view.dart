@@ -62,7 +62,7 @@ class _TaskViewState extends ConsumerState<TasksView> {
                   Row(
                     children: [
                       Text(
-                        'Please complete your profile by adding your country, date of birth, and gender to see available tasks.',
+                        'Complete your profile by adding your phone number, gender and date of birth to see your achievements.',
                         textAlign: TextAlign.center,
                       ).withPadding(all: 16).expanded(),
                     ],

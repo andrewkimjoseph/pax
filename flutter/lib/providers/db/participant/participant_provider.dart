@@ -156,11 +156,11 @@ class ParticipantNotifier extends Notifier<ParticipantStateModel> {
               tasksNeededForCompletion: 1,
               tasksCompleted: 1,
               timeCompleted: Timestamp.now(),
-              amountEarned: 500,
+              amountEarned: 400,
             );
         ref.read(analyticsProvider).achievementCreated({
           'achievementName': 'Profile Perfectionist',
-          'amountEarned': 500,
+          'amountEarned': 400,
         });
         final fcmToken = await ref.read(fcmTokenProvider.future);
         if (fcmToken != null) {

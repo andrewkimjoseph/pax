@@ -1,9 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pax/providers/remote_config/remote_config_provider.dart';
 import 'package:pax/theming/colors.dart';
+import 'package:pax/utils/version_util.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Colors;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -16,19 +16,6 @@ class UpdateDialog extends ConsumerWidget {
     return info.version;
   }
 
-  bool isVersionLower(String current, String minimum) {
-    final currentParts = current.split('.').map(int.parse).toList();
-    final minimumParts = minimum.split('.').map(int.parse).toList();
-    for (int i = 0; i < minimumParts.length; i++) {
-      if (currentParts.length <= i || currentParts[i] < minimumParts[i]) {
-        return true;
-      } else if (currentParts[i] > minimumParts[i]) {
-        return false;
-      }
-    }
-    return false;
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appVersionConfigAsync = ref.watch(appVersionConfigProvider);
@@ -39,24 +26,16 @@ class UpdateDialog extends ConsumerWidget {
           future: getCurrentAppVersion(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) return const SizedBox.shrink();
-            if (snapshot.hasError) {
-              if (kDebugMode) {
-                print('Could not get app version: ${snapshot.error}');
-              }
-              return const SizedBox.shrink();
-            }
+            if (snapshot.hasError) return const SizedBox.shrink();
+
             final currentAppVersion = snapshot.data!;
-            if (kDebugMode) {
-              print('Current app version: $currentAppVersion');
-              print('Minimum required version: ${config.minimumVersion}');
-              print('Force update: ${config.forceUpdate}');
-              print(
-                'Needs update: ${config.forceUpdate && isVersionLower(currentAppVersion, config.minimumVersion)}',
-              );
-            }
             final needsUpdate =
                 config.forceUpdate &&
-                isVersionLower(currentAppVersion, config.minimumVersion);
+                VersionUtil.isVersionLower(
+                  currentAppVersion,
+                  config.minimumVersion,
+                );
+
             if (!needsUpdate) return const SizedBox.shrink();
 
             return Stack(
@@ -122,10 +101,7 @@ class UpdateDialog extends ConsumerWidget {
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (error, stack) {
-        debugPrint('Error loading app version config: $error');
-        return const SizedBox.shrink();
-      },
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 }
