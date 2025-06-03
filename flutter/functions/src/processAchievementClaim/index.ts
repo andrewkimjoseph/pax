@@ -93,6 +93,19 @@ export const processAchievementClaim = onCall(
 
       logger.info("Smart Account Address:", { address: smartAccount.address });
 
+      // Check balance before transfer
+      const balanceBefore = await PUBLIC_CLIENT.readContract({
+        address: REWARD_TOKEN_ADDRESS,
+        abi: erc20ABI,
+        functionName: 'balanceOf',
+        args: [recipientAddress],
+      }) as bigint;
+
+      logger.info("G$ Balance before transfer:", { 
+        address: recipientAddress,
+        balance: balanceBefore.toString()
+      });
+
       const data = encodeFunctionData({
         abi: erc20ABI,
         functionName: "transfer",
@@ -124,6 +137,19 @@ export const processAchievementClaim = onCall(
         transactionHash: hash,
         achievementId,
         recipientAddress
+      });
+
+      // Check balance after transfer
+      const balanceAfter = await PUBLIC_CLIENT.readContract({
+        address: REWARD_TOKEN_ADDRESS,
+        abi: erc20ABI,
+        functionName: 'balanceOf',
+        args: [recipientAddress],
+      }) as bigint;
+
+      logger.info("G$ Balance after transfer:", { 
+        address: recipientAddress,
+        balance: balanceAfter.toString()
       });
 
       return { success: true, txnHash: hash };
