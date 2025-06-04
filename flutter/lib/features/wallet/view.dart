@@ -72,7 +72,7 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Available Payment Methods',
+                    'Available Withdrawal Methods',
                     style: TextStyle(fontSize: 20),
                   ).withPadding(bottom: 8),
                   Column(

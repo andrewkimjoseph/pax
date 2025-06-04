@@ -45,7 +45,7 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
               ),
               const Spacer(),
               const Text(
-                "Select Wallet",
+                "Select Withdrawal Method",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 20),
               ),
