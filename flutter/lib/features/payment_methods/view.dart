@@ -52,7 +52,7 @@ class _PaymentMethodsViewState extends ConsumerState<PaymentMethodsView> {
               ),
               Spacer(),
               Text(
-                "Payment Methods",
+                "Withdrawal Methods",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 20),
               ),
