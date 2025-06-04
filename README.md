@@ -24,131 +24,104 @@ flowchart TD
     classDef error fill:#ffcdd2,stroke:#d32f2f,stroke-width:1px,color:#b71c1c
     classDef service fill:#e1f5fe,stroke:#0288d1,stroke-width:1px,color:#01579b
     classDef function fill:#f3e5f5,stroke:#7b1fa2,stroke-width:1px,color:#4a148c
+    classDef contract fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20
+    classDef provider fill:#f3e5f5,stroke:#7b1fa2,stroke-width:1px,color:#4a148c
+    classDef repository fill:#e8eaf6,stroke:#3949ab,stroke-width:1px,color:#1a237e
     
-    %% Main entry point
-    START([User opens Pax App]) --> F1
-
-    %% FLOW 1: Registration & Onboarding
-    subgraph F1[FLOW 1: REGISTRATION]
-        A1[User logs in with Google]:::userAction --> A2{Auth success?}:::decision
-        A2 -->|No| A3[Show error]:::error --> A1
-        A2 -->|Yes| A4[AppInitializer Service]:::service
-        A4 --> A5[createPrivyServerWallet Function]:::function
-        A5 --> A6[Create Ethereum server wallet]:::systemProcess
-        A6 --> A7[createPaxAccountV1Proxy Function]:::function
-        A7 --> A8[Deploy PaxAccount contract]:::blockchainAction
-        A8 --> A9[Store contract & wallet info]:::systemProcess
-        A9 --> A10[Create pax_accounts record]:::databaseAction
-        A10 --> A11[Update participant with paxAccountId]:::databaseAction
+    %% Main Components
+    subgraph APP[Flutter Mobile App]
+        direction TB
+        UI[User Interface]:::userAction
+        Providers[State Providers]:::provider
+        Repositories[Data Repositories]:::repository
+        Services[Core Services]:::service
     end
 
-    %% FLOW 2: Payment Method Connection
-    subgraph F2[FLOW 2: PAYMENT METHOD]
-        B1[User enters payment details]:::userAction --> B2[WithdrawalService]:::service
+    subgraph BC[Blockchain Layer]
+        direction TB
+        PA[PaxAccount Contract]:::contract
+        TM[TaskManager Contract]:::contract
+        Tokens[Token Contracts]:::contract
+    end
+
+    subgraph DB[Database Layer]
+        direction TB
+        Firestore[(Firestore DB)]:::databaseAction
+        Auth[(Firebase Auth)]:::databaseAction
+        FCM[(Firebase Cloud Messaging)]:::notification
+    end
+
+    %% Core Flows
+    subgraph F1[Account Creation Flow]
+        A1[User Signs In]:::userAction --> A2[Auth Service]:::service
+        A2 --> A3[Create PaxAccount]:::blockchainAction
+        A3 --> A4[Store Account Data]:::databaseAction
+    end
+
+    subgraph F2[Payment Method Flow]
+        B1[Add Payment Method]:::userAction --> B2[Validate Payment Details]:::service
         B2 --> B3{Valid?}:::decision
-        B3 -->|No| B4[Show error]:::error --> B1
-        B3 -->|Yes| B5[Create payment method request]:::systemProcess
-        B5 --> B6[Fetch server wallet]:::systemProcess
-        B6 --> B7[Call PaxAccount.linkPaymentMethod]:::blockchainAction
-        B7 --> B8[Get transaction hash]:::blockchainAction
-        B8 --> B9[Create payment_methods record]:::databaseAction
-        B9 --> B10[Store linkingTxnHash]:::databaseAction
-        B10 --> B11[FCMService Notification]:::notification
+        B3 -->|No| B4[Show Error]:::error --> B1
+        B3 -->|Yes| B5[Link Payment Method]:::blockchainAction
+        B5 --> B6[Store Payment Method]:::databaseAction
+        B6 --> B7[Send Confirmation]:::notification
     end
 
-    %% FLOW 3: TaskMaster Creating a Task
-    subgraph F3[FLOW 3: TASK CREATION]
-        C1[TaskMaster creates task]:::userAction --> C2[Deploy TaskManager contract]:::blockchainAction
-        C2 --> C3[Get TaskManager address]:::systemProcess
-        C3 --> C4[Create tasks record]:::databaseAction
-        C4 --> C5[Save task fields with linkingTxnHash]:::databaseAction
-        C5 --> C6[Send reward amount to contract]:::blockchainAction
-        C6 --> C7[Mark task as available]:::databaseAction
+    subgraph F3[Task Completion Flow]
+        C1[Complete Task]:::userAction --> C2[Verify Completion]:::service
+        C2 --> C3[Distribute Reward]:::blockchainAction
+        C3 --> C4[Update Balances]:::databaseAction
+        C4 --> C5[Send Notification]:::notification
     end
 
-    %% FLOW 4: Participant Completes a Task
-    subgraph F4[FLOW 4: TASK COMPLETION]
-        D1[User browses available tasks]:::userAction
-        D1 --> D2[User selects task]:::userAction
-        D2 --> D3[Book/screen task]:::userAction
-        D3 --> D4[ScreeningService]:::service
-        D4 --> D5[screenParticipantProxy Function]:::function
-        D5 --> D6[Call TaskManager.screenParticipant]:::blockchainAction
-        D6 --> D7[Create screenings record with hash]:::databaseAction
-        D7 --> D8[User completes task/survey]:::userAction
-        D8 --> D9[TaskCompletionService]:::service
-        D9 --> D10[markTaskCompletionAsComplete Function]:::function
-        D10 --> D11[Create task_completions record]:::databaseAction
-        D11 --> D12[RewardService]:::service
-        D12 --> D13[rewardParticipantProxy Function]:::function
-        D13 --> D14[Call transferRewardToPaxAccount]:::blockchainAction
-        D14 --> D15[Update reward as paid out]:::databaseAction
-        D15 --> D16[FCMService Notification]:::notification
+    subgraph F4[Withdrawal Flow]
+        D1[Request Withdrawal]:::userAction --> D2[Verify Balance]:::service
+        D2 --> D3[Process Withdrawal]:::blockchainAction
+        D3 --> D4[Update Records]:::databaseAction
+        D4 --> D5[Send Confirmation]:::notification
     end
 
-    %% FLOW 5: Participant Makes a Withdrawal
-    subgraph F5[FLOW 5: WITHDRAWAL]
-        E1[User initiates withdrawal]:::userAction --> E2[WithdrawalService]:::service
-        E2 --> E3{Balance > 0?}:::decision
-        E3 -->|No| E4[Show insufficient funds]:::error
-        E3 -->|Yes| E5[Select amount & payment method]:::userAction
-        E5 --> E6{Valid?}:::decision
-        E6 -->|No| E7[Show error]:::error --> E5
-        E6 -->|Yes| E8[Confirm withdrawal]:::userAction
-        E8 --> E9[withdrawToPaymentMethod Function]:::function
-        E9 --> E10[Call PaxAccount.withdraw]:::blockchainAction
-        E10 --> E11[Transfer funds to payment method]:::blockchainAction
-        E11 --> E12[Create withdrawals record]:::databaseAction
-        E12 --> E13[FCMService Notification]:::notification
+    subgraph F5[Achievement Flow]
+        E1[Complete Milestone]:::userAction --> E2[Check Achievement Criteria]:::service
+        E2 --> E3[Update Achievement Status]:::databaseAction
+        E3 --> E4[Unlock Rewards]:::blockchainAction
+        E4 --> E5[Notify User]:::notification
     end
 
-    %% FLOW 6: Account Deletion
-    subgraph F6[FLOW 6: ACCOUNT DELETION]
-        G1[User requests account deletion]:::userAction --> G2[deleteParticipantOnRequest Function]:::function
-        G2 --> G3[Delete participant data]:::databaseAction
-        G3 --> G4[Delete PaxAccount record]:::databaseAction
-        G4 --> G5[Delete task completions]:::databaseAction
-        G5 --> G6[Delete rewards]:::databaseAction
-        G6 --> G7[Delete withdrawals]:::databaseAction
-        G7 --> G8[Delete FCM tokens]:::databaseAction
-        G8 --> G9[Delete payment methods]:::databaseAction
-        G9 --> G10[Delete screenings]:::databaseAction
-        G10 --> G11[Delete auth record]:::databaseAction
+    subgraph F6[Claim Flow]
+        F1[Check Available Claims]:::userAction --> F2[Verify Eligibility]:::service
+        F2 --> F3[Process Claim]:::blockchainAction
+        F3 --> F4[Update Claim Status]:::databaseAction
+        F4 --> F5[Distribute Rewards]:::blockchainAction
+        F5 --> F6[Send Confirmation]:::notification
     end
 
-    %% Smart Contracts (placed on the side)
-    subgraph SC[SMART CONTRACTS]
-        direction LR
-        SC1[PaxAccount.sol]:::blockchainAction
-        SC2[TaskManager.sol]:::blockchainAction
-    end
+    %% Component Connections
+    UI --> Providers
+    Providers --> Repositories
+    Repositories --> Services
+    Services --> BC
+    Services --> DB
 
-    %% Flow connections
+    %% Flow Connections
     F1 --> F2
-    F2 --> F4
-    F2 --> F5
+    F2 --> F3
     F3 --> F4
-    F4 --> F5
-    F1 -.-> F6
+    F3 --> F5
+    F5 --> F6
 
-    %% Contract connections
-    B5 -.-> SC1
-    C2 -.-> SC2
-    D6 -.-> SC2
-    D14 -.-> SC1
-    E10 -.-> SC1
     %% Legend
     subgraph LEGEND[LEGEND]
         direction LR
         LEGEND_USER[User Action]:::userAction
         LEGEND_SERVICE[Service]:::service
-        LEGEND_FUNCTION[Function]:::function
-        LEGEND_SYSTEM[System Process]:::systemProcess
-        LEGEND_BLOCKCHAIN[Blockchain Action]:::blockchainAction
-        LEGEND_DATABASE[Database Action]:::databaseAction
-        LEGEND_WALLET[Wallet Creation]:::wallet
+        LEGEND_PROVIDER[Provider]:::provider
+        LEGEND_REPO[Repository]:::repository
+        LEGEND_CONTRACT[Smart Contract]:::contract
+        LEGEND_DB[Database]:::databaseAction
+        LEGEND_BC[Blockchain Action]:::blockchainAction
+        LEGEND_NOTIF[Notification]:::notification
         LEGEND_DECISION{Decision}:::decision
-        LEGEND_NOTIFICATION[Notification]:::notification
         LEGEND_ERROR[Error]:::error
     end
 ```
@@ -156,19 +129,23 @@ flowchart TD
 ## Key Features
 
 ### Mobile Application
-- Micro-task management and completion tracking
+- Task completion and tracking
 - Participant screening and verification
 - Dual token reward distribution (stable and non-stable)
-- Payment method management
+- Payment method management and verification
 - Real-time notifications
 - Activity feed and history
+- Achievement system with milestones
+- Reward claiming mechanism
 
 ### Smart Contracts
 - Secure participant account management
-- Task creation and management
+- Task completion verification
 - Automated token reward distribution
-- Payment method integration
+- Payment method integration and verification
 - Withdrawal processing
+- Achievement tracking and rewards
+- Claim verification and processing
 
 ## Technology Stack
 

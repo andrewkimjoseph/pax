@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/remote_config/remote_config_provider.dart';
-import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/version_util.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Colors;
 import 'package:url_launcher/url_launcher.dart';
@@ -40,11 +40,10 @@ class UpdateDialog extends ConsumerWidget {
 
             return Stack(
               children: [
-                Container(color: PaxColors.black.withValues(alpha: 0.5)),
-                AlertDialog(
-                  content: SizedBox(
-                    width: MediaQuery.of(context).size.width / 2,
-                    child: Column(
+                Container(
+                  padding: EdgeInsets.all(28),
+                  child: AlertDialog(
+                    content: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -58,6 +57,7 @@ class UpdateDialog extends ConsumerWidget {
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
+                          textAlign: TextAlign.center,
                         ).withPadding(bottom: 16),
                         Text(
                           config.updateMessage,
@@ -83,6 +83,7 @@ class UpdateDialog extends ConsumerWidget {
                           width: MediaQuery.of(context).size.width / 2.5,
                           child: PrimaryButton(
                             onPressed: () async {
+                              ref.read(analyticsProvider).updateNowTapped();
                               final url = Uri.parse(config.updateUrl);
                               if (await canLaunchUrl(url)) {
                                 await launchUrl(url);
@@ -93,8 +94,8 @@ class UpdateDialog extends ConsumerWidget {
                         ),
                       ],
                     ),
-                  ),
-                ).withAlign(Alignment.center),
+                  ).withAlign(Alignment.center),
+                ),
               ],
             );
           },

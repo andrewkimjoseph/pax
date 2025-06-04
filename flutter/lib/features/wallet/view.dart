@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
+import 'package:pax/providers/db/payment_method/payment_method_provider.dart';
 import 'package:pax/widgets/current_balance_card.dart';
 import 'package:pax/widgets/payment_method_cards/minipay_payment_method_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -23,6 +24,8 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
 
   @override
   Widget build(BuildContext context) {
+    final minipay = ref.watch(primaryPaymentMethodProvider);
+
     return Scaffold(
       headers: [
         AppBar(
@@ -74,12 +77,15 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                   ).withPadding(bottom: 8),
                   Column(
                     children: [
-                      MiniPayPaymentMethodCard('minipay', "MiniPay Wallet", () {
-                        ref.read(analyticsProvider).paymentMethodTapped({
-                          "paymentMethodName": "MiniPay",
-                        });
-                        context.push("/payment-methods/minipay-connection");
-                      }),
+                      MiniPayPaymentMethodCard(
+                        minipay,
+                        callBack: () {
+                          ref.read(analyticsProvider).paymentMethodTapped({
+                            "paymentMethodName": "MiniPay",
+                          });
+                          context.push("/payment-methods/minipay-connection");
+                        },
+                      ),
                     ],
                   ),
                 ],

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart' show InkWell;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -165,9 +166,8 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
           backgroundColor: PaxColors.white,
           child: Row(
             children: [
-              GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onPanDown: (details) {
+              InkWell(
+                onTap: () {
                   context.pop();
                 },
                 child: SvgPicture.asset('lib/assets/svgs/arrow_left_long.svg'),
@@ -625,8 +625,8 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                       ),
                     ),
                   ],
-                ).withPadding(all: 8),
-              ),
+                ),
+              ).withPadding(all: 8),
     );
   }
 }

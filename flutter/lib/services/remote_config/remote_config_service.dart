@@ -1,5 +1,6 @@
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:pax/models/remote_config/app_version_config.dart';
 import 'package:pax/models/remote_config/maintenance_config.dart';
 import 'dart:convert';
@@ -43,6 +44,11 @@ class RemoteConfigService {
         'maintenance_config': json.encode({
           'is_under_maintenance': false,
           'maintenance_message': 'The app is currently under maintenance',
+        }),
+        'feature_flags': json.encode({
+          'is_wallet_available': true,
+          'is_achievements_available': true,
+          'are_tasks_available': true,
         }),
       });
 
@@ -184,11 +190,17 @@ class RemoteConfigService {
     }
 
     int retryCount = 0;
-    const maxRetries = 3;
-    const retryDelay = Duration(seconds: 2);
+    const maxRetries = 2;
+    const retryDelay = Duration(seconds: 5);
 
     while (retryCount < maxRetries) {
       try {
+        if (kDebugMode) {
+          print(
+            'Remote Config Service: Attempting to fetch config (attempt ${retryCount + 1}/$maxRetries)',
+          );
+        }
+
         final bool activated = await _remoteConfig.fetchAndActivate();
         _lastFetchTime = DateTime.now();
 
@@ -207,17 +219,72 @@ class RemoteConfigService {
           print(
             'Remote Config Service: Error refreshing config (attempt $retryCount/$maxRetries): $e',
           );
+          if (e is PlatformException) {
+            print('Remote Config Service: Error code: ${e.code}');
+            print('Remote Config Service: Error message: ${e.message}');
+            print('Remote Config Service: Error details: ${e.details}');
+          }
         }
 
         if (retryCount == maxRetries) {
           if (kDebugMode) {
             print('Remote Config Service: Max retries reached, giving up');
           }
-          rethrow;
+          return;
         }
 
         await Future.delayed(retryDelay);
       }
+    }
+  }
+
+  Future<Map<String, bool>> getFeatureFlags() async {
+    if (!_isInitialized) {
+      await initialize();
+    }
+
+    // Force refresh if last fetch was more than 3 seconds ago
+    if (_lastFetchTime == null ||
+        DateTime.now().difference(_lastFetchTime!) > _refreshInterval) {
+      await refreshConfig();
+    }
+
+    try {
+      final jsonString = _remoteConfig.getString('feature_flags');
+      if (kDebugMode) {
+        print('Remote Config Service: Raw feature flags string: $jsonString');
+      }
+
+      if (jsonString.isEmpty) {
+        // Return default config if no remote config is available
+        return {
+          'is_wallet_available': true,
+          'is_achievements_available': true,
+          'are_tasks_available': true,
+        };
+      }
+
+      final Map<String, dynamic> configMap = json.decode(jsonString);
+      if (kDebugMode) {
+        print('Remote Config Service: Parsed feature flags map: $configMap');
+      }
+
+      return {
+        'is_wallet_available': configMap['is_wallet_available'] ?? true,
+        'is_achievements_available':
+            configMap['is_achievements_available'] ?? true,
+        'are_tasks_available': configMap['are_tasks_available'] ?? true,
+      };
+    } catch (e) {
+      if (kDebugMode) {
+        print('Remote Config Service: Error getting feature flags: $e');
+      }
+      // Return default config on error
+      return {
+        'is_wallet_available': true,
+        'is_achievements_available': true,
+        'are_tasks_available': true,
+      };
     }
   }
 }

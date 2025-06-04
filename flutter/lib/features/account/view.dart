@@ -60,7 +60,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
         child: Column(
           children: [
             Container(
-              padding: EdgeInsets.all(12),
+              padding: EdgeInsets.all(8),
               width: double.infinity,
               decoration: BoxDecoration(
                 color: PaxColors.white,
@@ -293,7 +293,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
             ),
           ],
         ),
-      ).withPadding(all: 8),
+      ).withPadding(horizontal: 8, bottom: 8),
     );
   }
 

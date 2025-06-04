@@ -9,6 +9,7 @@ import 'package:pax/features/home/dashboard/view.dart';
 import 'package:pax/features/home/tasks/view.dart';
 import 'package:pax/features/onboarding/view_model.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
+import 'package:pax/providers/db/payment_method/payment_method_provider.dart';
 import 'package:pax/widgets/account/account_option_card.dart';
 import 'package:pax/widgets/payment_method_cards/minipay_payment_method_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
@@ -34,6 +35,8 @@ class _PaymentMethodsViewState extends ConsumerState<PaymentMethodsView> {
 
   @override
   Widget build(BuildContext context) {
+    final minipay = ref.watch(primaryPaymentMethodProvider);
+
     return Scaffold(
       headers: [
         AppBar(
@@ -72,12 +75,15 @@ class _PaymentMethodsViewState extends ConsumerState<PaymentMethodsView> {
               ),
               child: Column(
                 children: [
-                  MiniPayPaymentMethodCard('minipay', "MiniPay", () {
-                    ref
-                        .read(analyticsProvider)
-                        .minipayPaymentMethodCardTapped();
-                    context.push("/payment-methods/minipay-connection");
-                  }),
+                  MiniPayPaymentMethodCard(
+                    minipay,
+                    callBack: () {
+                      ref
+                          .read(analyticsProvider)
+                          .minipayPaymentMethodCardTapped();
+                      context.push("/payment-methods/minipay-connection");
+                    },
+                  ),
                 ],
               ),
             ),

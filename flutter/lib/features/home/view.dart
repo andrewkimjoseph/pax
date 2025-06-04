@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/exports/views.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
+import 'package:pax/providers/remote_config/remote_config_provider.dart';
 
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -24,12 +25,13 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   @override
   Widget build(BuildContext context) {
+    final featureFlags = ref.watch(featureFlagsProvider);
+
     return Scaffold(
       headers: [
         AppBar(
           height: 87.5,
           padding: EdgeInsets.all(8),
-
           backgroundColor: PaxColors.white,
           header: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -39,7 +41,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 style: Theme.of(context).typography.base.copyWith(
                   fontWeight: FontWeight.w900,
                   fontSize: 32,
-                  color: PaxColors.black, // The purple color from your images
+                  color: PaxColors.black,
                 ),
               ),
 
@@ -91,7 +93,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       });
                       ref.read(analyticsProvider).dashboardTapped();
                     },
-
                     child: Text(
                       'Dashboard',
                       style: TextStyle(
@@ -99,80 +100,99 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       ),
                     ),
                   ).withPadding(right: 8),
-                  Button(
-                    style: const ButtonStyle.primary(
-                          density: ButtonDensity.dense,
-                        )
-                        .withBackgroundColor(
-                          color:
-                              index == 1
-                                  ? PaxColors.deepPurple
-                                  : Colors.transparent,
-                        )
-                        .withBorder(
-                          border: Border.all(
-                            color:
-                                index == 1
-                                    ? PaxColors.deepPurple
-                                    : PaxColors.lilac,
-                            width: 2,
-                          ),
-                        )
-                        .withBorderRadius(
-                          borderRadius: BorderRadius.circular(7),
-                        ),
-                    onPressed: () {
-                      setState(() {
-                        screenName = 'Tasks';
-                        index = 1;
-                      });
-                      ref.read(analyticsProvider).tasksTapped();
-                    },
-
-                    child: Text(
-                      'Tasks',
-                      style: TextStyle(
-                        color: index == 1 ? PaxColors.white : PaxColors.black,
-                      ),
-                    ),
-                  ).withPadding(right: 8),
-
-                  Button(
-                    style: const ButtonStyle.primary(
-                          density: ButtonDensity.dense,
-                        )
-                        .withBackgroundColor(
-                          color:
-                              index == 2
-                                  ? PaxColors.deepPurple
-                                  : Colors.transparent,
-                        )
-                        .withBorder(
-                          border: Border.all(
-                            color:
-                                index == 2
-                                    ? PaxColors.deepPurple
-                                    : PaxColors.lilac,
-                            width: 2,
-                          ),
-                        )
-                        .withBorderRadius(
-                          borderRadius: BorderRadius.circular(7),
-                        ),
-                    onPressed: () {
-                      setState(() {
-                        screenName = 'Achievements';
-                        index = 2;
-                      });
-                    },
-
-                    child: Text(
-                      'Achievements',
-                      style: TextStyle(
-                        color: index == 2 ? PaxColors.white : PaxColors.black,
-                      ),
-                    ),
-                  ).withPadding(right: 8),
+                  featureFlags.when(
+                    data:
+                        (flags) =>
+                            flags['are_tasks_available'] == true
+                                ? Button(
+                                  style: const ButtonStyle.primary(
+                                        density: ButtonDensity.dense,
+                                      )
+                                      .withBackgroundColor(
+                                        color:
+                                            index == 1
+                                                ? PaxColors.deepPurple
+                                                : Colors.transparent,
+                                      )
+                                      .withBorder(
+                                        border: Border.all(
+                                          color:
+                                              index == 1
+                                                  ? PaxColors.deepPurple
+                                                  : PaxColors.lilac,
+                                          width: 2,
+                                        ),
+                                      )
+                                      .withBorderRadius(
+                                        borderRadius: BorderRadius.circular(7),
+                                      ),
+                                  onPressed: () {
+                                    setState(() {
+                                      screenName = 'Tasks';
+                                      index = 1;
+                                    });
+                                    ref.read(analyticsProvider).tasksTapped();
+                                  },
+                                  child: Text(
+                                    'Tasks',
+                                    style: TextStyle(
+                                      color:
+                                          index == 1
+                                              ? PaxColors.white
+                                              : PaxColors.black,
+                                    ),
+                                  ),
+                                ).withPadding(right: 8)
+                                : const SizedBox.shrink(),
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
+                  ),
+                  featureFlags.when(
+                    data:
+                        (flags) =>
+                            flags['is_achievements_available'] == true
+                                ? Button(
+                                  style: const ButtonStyle.primary(
+                                        density: ButtonDensity.dense,
+                                      )
+                                      .withBackgroundColor(
+                                        color:
+                                            index == 2
+                                                ? PaxColors.deepPurple
+                                                : Colors.transparent,
+                                      )
+                                      .withBorder(
+                                        border: Border.all(
+                                          color:
+                                              index == 2
+                                                  ? PaxColors.deepPurple
+                                                  : PaxColors.lilac,
+                                          width: 2,
+                                        ),
+                                      )
+                                      .withBorderRadius(
+                                        borderRadius: BorderRadius.circular(7),
+                                      ),
+                                  onPressed: () {
+                                    setState(() {
+                                      screenName = 'Achievements';
+                                      index = 2;
+                                    });
+                                  },
+                                  child: Text(
+                                    'Achievements',
+                                    style: TextStyle(
+                                      color:
+                                          index == 2
+                                              ? PaxColors.white
+                                              : PaxColors.black,
+                                    ),
+                                  ),
+                                ).withPadding(right: 8)
+                                : const SizedBox.shrink(),
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
+                  ),
                 ],
               ),
             ],
@@ -180,10 +200,29 @@ class _HomeViewState extends ConsumerState<HomeView> {
         ),
         Divider(color: PaxColors.lightGrey),
       ],
-
       child: IndexedStack(
         index: index,
-        children: [DashboardView(), TasksView(), AchievementsView()],
+        children: [
+          DashboardView(),
+          featureFlags.when(
+            data:
+                (flags) =>
+                    flags['are_tasks_available'] == true
+                        ? TasksView()
+                        : const SizedBox.shrink(),
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+          ),
+          featureFlags.when(
+            data:
+                (flags) =>
+                    flags['is_achievements_available'] == true
+                        ? AchievementsView()
+                        : const SizedBox.shrink(),
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+          ),
+        ],
       ),
     );
   }

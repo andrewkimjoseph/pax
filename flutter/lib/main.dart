@@ -30,25 +30,16 @@ class App extends ConsumerStatefulWidget {
   ConsumerState<ConsumerStatefulWidget> createState() => _AppState();
 }
 
-class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
+class _AppState extends ConsumerState<App> {
   final _notificationService = NotificationService();
   String? _currentVersion;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     _setupNotifications();
     _initializeAnalytics();
     _loadCurrentVersion();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      ref.invalidate(appVersionConfigProvider);
-      ref.invalidate(maintenanceConfigProvider);
-    }
   }
 
   void _initializeAnalytics() {
@@ -59,12 +50,6 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
   Future<void> _loadCurrentVersion() async {
     final info = await PackageInfo.fromPlatform();
     setState(() => _currentVersion = info.version);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
   }
 
   void _setupNotifications() {
@@ -94,7 +79,7 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
 
       if (path != null && path.isNotEmpty) {
         router.go("/home");
-        router.push(path);
+        // router.push(path);
       } else {
         router.go("/home");
       }
