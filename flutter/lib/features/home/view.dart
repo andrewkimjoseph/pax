@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/exports/views.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/remote_config/remote_config_provider.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -103,7 +104,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   featureFlags.when(
                     data:
                         (flags) =>
-                            flags['are_tasks_available'] == true
+                            kDebugMode || flags['are_tasks_available'] == true
                                 ? Button(
                                   style: const ButtonStyle.primary(
                                         density: ButtonDensity.dense,
@@ -150,7 +151,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   featureFlags.when(
                     data:
                         (flags) =>
-                            flags['is_achievements_available'] == true
+                            kDebugMode ||
+                                    flags['is_achievements_available'] == true
                                 ? Button(
                                   style: const ButtonStyle.primary(
                                         density: ButtonDensity.dense,
@@ -207,7 +209,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
           featureFlags.when(
             data:
                 (flags) =>
-                    flags['are_tasks_available'] == true
+                    kDebugMode || flags['are_tasks_available'] == true
                         ? TasksView()
                         : const SizedBox.shrink(),
             loading: () => const SizedBox.shrink(),
@@ -216,7 +218,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
           featureFlags.when(
             data:
                 (flags) =>
-                    flags['is_achievements_available'] == true
+                    kDebugMode || flags['is_achievements_available'] == true
                         ? AchievementsView()
                         : const SizedBox.shrink(),
             loading: () => const SizedBox.shrink(),
