@@ -35,13 +35,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
             const CurrentBalanceCard('/wallet').withPadding(bottom: 8),
 
             Container(
-              // width: double.infinity,
               height: 120,
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
-                // gradient: LinearGradient(
-                //   colors: PaxColors.orangeToPinkGradient,
-                // ),
                 color: PaxColors.black,
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -57,27 +53,25 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                         Colors.white,
                         BlendMode.srcIn,
                       ),
-
                       height: 32,
                     ),
                   ).withPadding(right: 12),
 
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Join the tribe!',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 18,
-                          color: PaxColors.white,
-                        ),
-                      ).withPadding(bottom: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Join the tribe!',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 18,
+                            color: PaxColors.white,
+                          ),
+                        ).withPadding(bottom: 8),
 
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.5,
-                        child: Text(
+                        Text(
                           "Our X followers get early access to 30% more high-paying surveys.",
                           style: TextStyle(
                             fontWeight: FontWeight.normal,
@@ -85,58 +79,40 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                             color: Colors.white,
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
 
-                  Spacer(),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        child: Row(
-                          children: [
-                            Button(
-                              onPressed: () {
-                                ref.read(analyticsProvider).xFollowTapped();
-                                UrlHandler.launchInExternalBrowser(
-                                  'https://x.com/thecanvassing',
-                                );
-                              },
-                              disableHoverEffect: true,
-                              disableTransition: true,
-                              style: ButtonStyle.outline(
-                                    density: ButtonDensity.dense,
-                                  )
-                                  .withBorder(
-                                    border: Border.all(color: Colors.white),
-                                  )
-                                  .withBorderRadius(
-                                    borderRadius: BorderRadius.circular(20),
-                                    hoverBorderRadius: BorderRadius.circular(
-                                      20,
-                                    ),
-                                  ),
-
-                              trailing: SvgPicture.asset(
-                                'lib/assets/svgs/arrow_icon.svg',
-                                colorFilter: ColorFilter.mode(
-                                  Colors.white,
-                                  BlendMode.srcIn,
-                                ),
-
-                                height: 16,
-                              ),
-                              // onPressed: callBack,
-                              child: const Text(
-                                "Follow",
-                                style: TextStyle(color: PaxColors.white),
-                              ),
-                            ).withToolTip('Follow us on X.'),
-                          ],
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: Button(
+                      onPressed: () {
+                        ref.read(analyticsProvider).xFollowTapped();
+                        UrlHandler.launchInExternalBrowser(
+                          'https://x.com/thecanvassing',
+                        );
+                      },
+                      disableHoverEffect: true,
+                      disableTransition: true,
+                      style: ButtonStyle.outline(density: ButtonDensity.dense)
+                          .withBorder(border: Border.all(color: Colors.white))
+                          .withBorderRadius(
+                            borderRadius: BorderRadius.circular(20),
+                            hoverBorderRadius: BorderRadius.circular(20),
+                          ),
+                      trailing: SvgPicture.asset(
+                        'lib/assets/svgs/arrow_icon.svg',
+                        colorFilter: ColorFilter.mode(
+                          Colors.white,
+                          BlendMode.srcIn,
                         ),
+                        height: 16,
                       ),
-                    ],
+                      child: const Text(
+                        "Follow",
+                        style: TextStyle(color: PaxColors.white),
+                      ),
+                    ).withToolTip('Follow us on X.'),
                   ),
                 ],
               ),
