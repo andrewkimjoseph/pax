@@ -1,3 +1,7 @@
+// Note: This service manages withdrawals to payment methods. While the UI refers to these
+// as "Withdrawal Methods" for better user experience, the underlying database and
+// service layer maintain the "payment_methods" terminology for consistency.
+
 // This service manages the withdrawal process for participants:
 // - Handles withdrawals to payment methods through Firebase Functions
 // - Validates PaxAccount and server wallet information

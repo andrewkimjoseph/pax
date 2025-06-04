@@ -12,7 +12,7 @@ import 'package:intl/intl.dart';
 class ChangeWithdrawalMethodCard extends ConsumerStatefulWidget {
   const ChangeWithdrawalMethodCard(this.paymentMethod, {super.key});
 
-  final PaymentMethod paymentMethod;
+  final WithdrawalMethod paymentMethod;
 
   @override
   ConsumerState<ChangeWithdrawalMethodCard> createState() =>

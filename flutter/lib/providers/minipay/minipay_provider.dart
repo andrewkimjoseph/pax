@@ -11,10 +11,10 @@ import 'package:pax/repositories/firestore/payment_method/payment_method_reposit
 import 'package:pax/services/minipay/minipay_service.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
 
-final paymentMethodRepositoryProvider = Provider<PaymentMethodRepository>((
+final paymentMethodRepositoryProvider = Provider<WithdrawalMethodRepository>((
   ref,
 ) {
-  return PaymentMethodRepository();
+  return WithdrawalMethodRepository();
 });
 
 final miniPayServiceProvider = Provider<MiniPayService>((ref) {
@@ -294,7 +294,7 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
             .getGoodDollarIdentityExpiryDate(primaryPaymentMethod);
 
         // Refresh payment methods in state
-        await ref.read(paymentMethodsProvider.notifier).refresh(userId);
+        await ref.read(withdrawalMethodsProvider.notifier).refresh(userId);
 
         // Sync blockchain balances with Firestore
         await ref
@@ -384,11 +384,12 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
 
         final participant = ref.read(participantProvider);
 
-        final paymentMethod = ref.read(paymentMethodsProvider).paymentMethods;
+        final withdrawalMethod =
+            ref.read(withdrawalMethodsProvider).withdrawalMethods;
 
         ref
             .read(analyticsProvider)
-            .minipayConnectionComplete(paymentMethod.first.toMap());
+            .minipayConnectionComplete(withdrawalMethod.first.toMap());
 
         ref.read(analyticsProvider).identifyUser({
           '[Pax] Participant Id': participant.participant?.id,

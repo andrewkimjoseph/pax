@@ -104,3 +104,6 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
 //   return 
 // }
 
+// Note: The UI presents these as "Withdrawal Methods" for better user experience,
+// while the underlying data structure and database collection remain as "payment_methods".
+
