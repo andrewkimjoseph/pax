@@ -10,156 +10,51 @@ Pax consists of two main components:
 
 ## System Architecture
 
-The following diagram illustrates the complete flow of the Pax platform:
-
-```mermaid
-flowchart TD
-    %% Style definitions
-    classDef userAction fill:#d1c4e9,stroke:#7e57c2,stroke-width:2px,color:#4527a0
-    classDef systemProcess fill:#bbdefb,stroke:#1976d2,stroke-width:1px,color:#0d47a1
-    classDef blockchainAction fill:#ffccbc,stroke:#e64a19,stroke-width:2px,color:#bf360c
-    classDef databaseAction fill:#c8e6c9,stroke:#388e3c,stroke-width:1px,color:#1b5e20
-    classDef decision fill:#fff9c4,stroke:#fbc02d,stroke-width:1px,color:#f57f17
-    classDef notification fill:#ffe0b2,stroke:#f57c00,stroke-width:1px,color:#e65100
-    classDef error fill:#ffcdd2,stroke:#d32f2f,stroke-width:1px,color:#b71c1c
-    classDef service fill:#e1f5fe,stroke:#0288d1,stroke-width:1px,color:#01579b
-    classDef function fill:#f3e5f5,stroke:#7b1fa2,stroke-width:1px,color:#4a148c
-    classDef contract fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20
-    classDef provider fill:#f3e5f5,stroke:#7b1fa2,stroke-width:1px,color:#4a148c
-    classDef repository fill:#e8eaf6,stroke:#3949ab,stroke-width:1px,color:#1a237e
-    
-    %% Main Components
-    subgraph APP[Flutter Mobile App]
-        direction TB
-        UI[User Interface]:::userAction
-        Providers[State Providers]:::provider
-        Repositories[Data Repositories]:::repository
-        Services[Core Services]:::service
-    end
-
-    subgraph BC[Blockchain Layer]
-        direction TB
-        PA[PaxAccount Contract]:::contract
-        TM[TaskManager Contract]:::contract
-        Tokens[Token Contracts]:::contract
-    end
-
-    subgraph DB[Database Layer]
-        direction TB
-        Firestore[(Firestore DB)]:::databaseAction
-        Auth[(Firebase Auth)]:::databaseAction
-        FCM[(Firebase Cloud Messaging)]:::notification
-    end
-
-    %% Core Flows
-    subgraph F1[Account Creation Flow]
-        A1[User Signs In]:::userAction --> A2[Auth Service]:::service
-        A2 --> A3[Create PaxAccount]:::blockchainAction
-        A3 --> A4[Store Account Data]:::databaseAction
-    end
-
-    subgraph F2[Payment Method Flow]
-        B1[Add Payment Method]:::userAction --> B2[Validate Payment Details]:::service
-        B2 --> B3{Valid?}:::decision
-        B3 -->|No| B4[Show Error]:::error --> B1
-        B3 -->|Yes| B5[Link Payment Method]:::blockchainAction
-        B5 --> B6[Store Payment Method]:::databaseAction
-        B6 --> B7[Send Confirmation]:::notification
-    end
-
-    subgraph F3[Task Completion Flow]
-        C1[Complete Task]:::userAction --> C2[Verify Completion]:::service
-        C2 --> C3[Distribute Reward]:::blockchainAction
-        C3 --> C4[Update Balances]:::databaseAction
-        C4 --> C5[Send Notification]:::notification
-    end
-
-    subgraph F4[Withdrawal Flow]
-        D1[Request Withdrawal]:::userAction --> D2[Verify Balance]:::service
-        D2 --> D3[Process Withdrawal]:::blockchainAction
-        D3 --> D4[Update Records]:::databaseAction
-        D4 --> D5[Send Confirmation]:::notification
-    end
-
-    subgraph F5[Achievement Flow]
-        E1[Complete Milestone]:::userAction --> E2[Check Achievement Criteria]:::service
-        E2 --> E3[Update Achievement Status]:::databaseAction
-        E3 --> E4[Unlock Rewards]:::blockchainAction
-        E4 --> E5[Notify User]:::notification
-    end
-
-    subgraph F6[Claim Flow]
-        F1[Check Available Claims]:::userAction --> F2[Verify Eligibility]:::service
-        F2 --> F3[Process Claim]:::blockchainAction
-        F3 --> F4[Update Claim Status]:::databaseAction
-        F4 --> F5[Distribute Rewards]:::blockchainAction
-        F5 --> F6[Send Confirmation]:::notification
-    end
-
-    %% Component Connections
-    UI --> Providers
-    Providers --> Repositories
-    Repositories --> Services
-    Services --> BC
-    Services --> DB
-
-    %% Flow Connections
-    F1 --> F2
-    F2 --> F3
-    F3 --> F4
-    F3 --> F5
-    F5 --> F6
-
-    %% Legend
-    subgraph LEGEND[LEGEND]
-        direction LR
-        LEGEND_USER[User Action]:::userAction
-        LEGEND_SERVICE[Service]:::service
-        LEGEND_PROVIDER[Provider]:::provider
-        LEGEND_REPO[Repository]:::repository
-        LEGEND_CONTRACT[Smart Contract]:::contract
-        LEGEND_DB[Database]:::databaseAction
-        LEGEND_BC[Blockchain Action]:::blockchainAction
-        LEGEND_NOTIF[Notification]:::notification
-        LEGEND_DECISION{Decision}:::decision
-        LEGEND_ERROR[Error]:::error
-    end
-```
-
-## Key Features
+The system is built with a modular architecture that separates concerns across different layers:
 
 ### Mobile Application
-- Task completion and tracking
-- Participant screening and verification
-- Dual token reward distribution (stable and non-stable)
-- Payment method management and verification
-- Real-time notifications
-- Activity feed and history
-- Achievement system with milestones
-- Reward claiming mechanism
+- User interface and interaction
+- Task completion tracking
+- Payment method management
+- Achievement tracking
+- Claim processing
 
-### Smart Contracts
-- Secure participant account management
-- Task completion verification
-- Automated token reward distribution
-- Payment method integration and verification
-- Withdrawal processing
-- Achievement tracking and rewards
-- Claim verification and processing
+### Services Layer
+- Authentication and user management
+- Task verification and tracking
+- Payment processing
+- Achievement system
+- Claim management
+
+### Blockchain Layer
+- Smart contract for task verification
+- Wallet integration
+- Payment processing
+- Achievement verification
+- Claim verification
+
+### Database Layer
+- User data storage
+- Task completion records
+- Payment transaction history
+- Achievement tracking
+- Claim management
 
 ## Technology Stack
 
 ### Mobile Application
 - Flutter for cross-platform development
-- Firebase for backend services
-- Riverpod for state management
-- Firebase Cloud Messaging for notifications
+- Firebase for authentication
+- Web3 for blockchain integration
+- Secure storage for sensitive data
 
-### Smart Contracts
+### Smart Contract
 - Solidity for contract development
-- Hardhat for development environment
 - OpenZeppelin for security standards
-- Ethers.js for blockchain interaction
+- Task completion verification
+- Payment processing
+- Achievement tracking
+- Claim management
 
 ## Getting Started
 
@@ -241,3 +136,97 @@ This project is proprietary and confidential. All rights reserved.
 ## Support
 
 For support, please contact the development team or raise an issue in the repository.
+
+```mermaid
+graph TD
+    %% Define components
+    subgraph MobileApp[📱 Mobile App]
+        UI[User Interface]
+        Auth[Authentication]
+        Task[Task Management]
+        Payment[Payment Processing]
+        Achievement[Achievement System]
+        Claim[Claim Management]
+    end
+
+    subgraph Services[🔄 Services]
+        AuthService[Authentication Service]
+        TaskService[Task Service]
+        PaymentService[Payment Service]
+        AchievementService[Achievement Service]
+        ClaimService[Claim Service]
+    end
+
+    subgraph Blockchain[⛓️ Blockchain Layer]
+        SmartContract[Smart Contract]
+        Wallet[Wallet Integration]
+    end
+
+    subgraph Database[💾 Database Layer]
+        UserDB[(User Data)]
+        TaskDB[(Task Data)]
+        PaymentDB[(Payment Data)]
+        AchievementDB[(Achievement Data)]
+        ClaimDB[(Claim Data)]
+    end
+
+    %% Define flows
+    subgraph Flows[🔄 Core Flows]
+        F1[Account Creation Flow]
+        F2[Payment Method Flow]
+        F3[Task Completion Flow]
+        F4[Withdrawal Flow]
+        F5[Achievement Flow]
+        F6[Claim Flow]
+    end
+
+    %% Define relationships
+    classDef userAction fill:#f9f,stroke:#333,stroke-width:2px
+    classDef systemProcess fill:#bbf,stroke:#333,stroke-width:2px
+    classDef blockchainAction fill:#bfb,stroke:#333,stroke-width:2px
+    classDef databaseAction fill:#fbb,stroke:#333,stroke-width:2px
+    classDef other fill:#ddd,stroke:#333,stroke-width:2px
+
+    %% User Actions
+    UI -->|Sign In| Auth
+    UI -->|Complete Task| Task
+    UI -->|Connect Payment| Payment
+    UI -->|View Achievements| Achievement
+    UI -->|Claim Reward| Claim
+
+    %% Service Connections
+    Auth -->|Verify| AuthService
+    Task -->|Update| TaskService
+    Payment -->|Process| PaymentService
+    Achievement -->|Track| AchievementService
+    Claim -->|Manage| ClaimService
+
+    %% Blockchain Interactions
+    PaymentService -->|Verify| SmartContract
+    TaskService -->|Verify| SmartContract
+    AchievementService -->|Verify| SmartContract
+    ClaimService -->|Verify| SmartContract
+    SmartContract -->|Connect| Wallet
+
+    %% Database Operations
+    AuthService -->|Store| UserDB
+    TaskService -->|Update| TaskDB
+    PaymentService -->|Record| PaymentDB
+    AchievementService -->|Track| AchievementDB
+    ClaimService -->|Manage| ClaimDB
+
+    %% Flow Connections
+    F1 -->|Initialize| AuthService
+    F2 -->|Setup| PaymentService
+    F3 -->|Process| TaskService
+    F4 -->|Execute| PaymentService
+    F5 -->|Track| AchievementService
+    F6 -->|Process| ClaimService
+
+    %% Apply styles
+    class UI,Auth,Task,Payment,Achievement,Claim userAction
+    class AuthService,TaskService,PaymentService,AchievementService,ClaimService systemProcess
+    class SmartContract,Wallet blockchainAction
+    class UserDB,TaskDB,PaymentDB,AchievementDB,ClaimDB databaseAction
+    class Flows other
+```
