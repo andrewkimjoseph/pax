@@ -43,9 +43,8 @@ class _HelpAndSupportViewState extends ConsumerState<HelpAndSupportView> {
           backgroundColor: PaxColors.white,
           child: Row(
             children: [
-              GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onPanDown: (details) {
+              InkWell(
+                onTap: () {
                   context.pop();
                 },
                 child: SvgPicture.asset('lib/assets/svgs/arrow_left_long.svg'),
@@ -103,7 +102,7 @@ class _HelpAndSupportViewState extends ConsumerState<HelpAndSupportView> {
             ),
           ],
         ),
-      ).withPadding(all: 8),
+      ).withPadding(horizontal: 8, bottom: 8),
     );
   }
 

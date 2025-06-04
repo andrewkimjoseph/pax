@@ -59,7 +59,7 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(8),
             width: double.infinity,
             decoration: BoxDecoration(
               color: PaxColors.white,
@@ -134,7 +134,7 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
             ),
           ).withMargin(bottom: 32),
         ],
-      ).withPadding(all: 8),
+      ).withPadding(horizontal: 8, bottom: 8),
     );
   }
 }

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/remote_config/remote_config_provider.dart';
-import 'package:pax/theming/colors.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Colors;
 
 class MaintenanceDialog extends ConsumerWidget {
@@ -37,11 +36,10 @@ class MaintenanceDialog extends ConsumerWidget {
 
         return Stack(
           children: [
-            Container(color: PaxColors.black.withValues(alpha: 0.5)),
-            AlertDialog(
-              content: SizedBox(
-                width: MediaQuery.of(context).size.width / 2,
-                child: Column(
+            Container(
+              padding: EdgeInsets.all(28),
+              child: AlertDialog(
+                content: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -73,8 +71,8 @@ class MaintenanceDialog extends ConsumerWidget {
                     ),
                   ],
                 ),
-              ),
-            ).withAlign(Alignment.center),
+              ).withAlign(Alignment.center),
+            ),
           ],
         );
       },

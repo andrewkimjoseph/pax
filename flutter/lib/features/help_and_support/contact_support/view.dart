@@ -132,7 +132,7 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
             ),
           ],
         ),
-      ).withPadding(all: 8),
+      ).withPadding(horizontal: 8, bottom: 8),
     );
   }
 }
