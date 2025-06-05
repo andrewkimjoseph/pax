@@ -10,7 +10,7 @@ import 'package:intl/intl.dart';
 class WalletOptionCard extends ConsumerWidget {
   const WalletOptionCard(this.paymentMethod, {super.key});
 
-  final PaymentMethod paymentMethod;
+  final WithdrawalMethod paymentMethod;
 
   void _toggleSelection(WidgetRef ref, bool isSelected) {
     if (isSelected) {

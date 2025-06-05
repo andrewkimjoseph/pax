@@ -21,7 +21,8 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
   @override
   Widget build(BuildContext context) {
     // Get available payment methods
-    final paymentMethods = ref.watch(paymentMethodsProvider).paymentMethods;
+    final withdrawalMethods =
+        ref.watch(withdrawalMethodsProvider).withdrawalMethods;
 
     // Watch the withdraw context
     final withdrawContext = ref.watch(withdrawContextProvider);
@@ -45,7 +46,7 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
               ),
               const Spacer(),
               const Text(
-                "Select Wallet",
+                "Select Withdrawal Method",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 20),
               ),
@@ -78,8 +79,8 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
                   child: Column(
                     children: [
                       // Show payment methods if available
-                      if (paymentMethods.isNotEmpty)
-                        ...paymentMethods.map(
+                      if (withdrawalMethods.isNotEmpty)
+                        ...withdrawalMethods.map(
                           (method) => WalletOptionCard(method),
                         ),
                     ],

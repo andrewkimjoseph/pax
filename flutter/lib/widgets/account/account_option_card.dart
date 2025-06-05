@@ -40,7 +40,7 @@ class AccountOptionCard extends ConsumerWidget {
                           : option == 'account'
                           ? 'Account & Security'
                           : option == 'payment_methods'
-                          ? 'Payment Methods'
+                          ? 'Withdrawal Methods'
                           : option == 'help_and_support'
                           ? 'Help & Support'
                           : option == 'logout'

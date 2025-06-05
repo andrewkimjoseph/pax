@@ -151,82 +151,85 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
       barrierDismissible: false,
       context: context,
       builder: (context) {
-        return AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SvgPicture.asset(
-                'lib/assets/svgs/withdrawal_complete.svg',
-              ).withPadding(bottom: 8),
+        return PopScope(
+          canPop: false,
+          child: AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SvgPicture.asset(
+                  'lib/assets/svgs/withdrawal_complete.svg',
+                ).withPadding(bottom: 8),
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Withdrawal Complete!',
-                    style: TextStyle(
-                      color: PaxColors.deepPurple,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ).withPadding(bottom: 8),
-                ],
-              ),
-
-              Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        TokenBalanceUtil.getLocaleFormattedAmount(
-                          amountToWithdraw,
-                        ),
-                        style: TextStyle(
-                          color: PaxColors.black,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Withdrawal Complete!',
+                      style: TextStyle(
+                        color: PaxColors.deepPurple,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
                       ),
-                      SvgPicture.asset(
-                        'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(tokenId)}.svg',
-                        height: 25,
-                      ),
-                    ],
-                  ).withPadding(vertical: 4),
-                  Text(
-                    'sent to your ${toBeginningOfSentenceCase(paymentMethod?.name)} account!',
-                    style: TextStyle(
-                      color: PaxColors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.normal,
-                    ),
-                    textAlign: TextAlign.center,
-                  ).withPadding(vertical: 8),
-                ],
-              ),
+                      textAlign: TextAlign.center,
+                    ).withPadding(bottom: 8),
+                  ],
+                ),
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width / 2.5,
-                    child: PrimaryButton(
-                      child: const Text('OK'),
-                      onPressed: () {
-                        (context).pop();
-                        context.pushReplacement(
-                          "/home",
-                        ); // Go back to previous screen
-                      },
+                Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          TokenBalanceUtil.getLocaleFormattedAmount(
+                            amountToWithdraw,
+                          ),
+                          style: TextStyle(
+                            color: PaxColors.black,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SvgPicture.asset(
+                          'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(tokenId)}.svg',
+                          height: 25,
+                        ),
+                      ],
+                    ).withPadding(vertical: 4),
+                    Text(
+                      'sent to your ${toBeginningOfSentenceCase(paymentMethod?.name)} account!',
+                      style: TextStyle(
+                        color: PaxColors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.normal,
+                      ),
+                      textAlign: TextAlign.center,
+                    ).withPadding(vertical: 8),
+                  ],
+                ),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width / 2.5,
+                      child: PrimaryButton(
+                        child: const Text('OK'),
+                        onPressed: () {
+                          (context).pop();
+                          context.pushReplacement(
+                            "/home",
+                          ); // Go back to previous screen
+                        },
+                      ),
                     ),
-                  ),
-                ],
-              ).withPadding(top: 8),
-            ],
+                  ],
+                ).withPadding(top: 8),
+              ],
+            ),
           ),
         );
       },
@@ -238,27 +241,30 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Column(
-            children: [
-              SvgPicture.asset(
-                'lib/assets/svgs/canvassing.svg',
-                height: 24,
-              ).withPadding(bottom: 16),
-              Text(
-                'Withdrawal Failed',
-                style: TextStyle(fontSize: 16),
-              ).withAlign(Alignment.center),
+        return PopScope(
+          canPop: false,
+          child: AlertDialog(
+            title: Column(
+              children: [
+                SvgPicture.asset(
+                  'lib/assets/svgs/canvassing.svg',
+                  height: 24,
+                ).withPadding(bottom: 16),
+                Text(
+                  'Withdrawal Failed',
+                  style: TextStyle(fontSize: 16),
+                ).withAlign(Alignment.center),
+              ],
+            ),
+            content: Text(
+              errorMessage,
+              maxLines: 5,
+              overflow: TextOverflow.ellipsis,
+            ),
+            actions: [
+              OutlineButton(onPressed: () => context.pop(), child: Text('OK')),
             ],
           ),
-          content: Text(
-            errorMessage,
-            maxLines: 5,
-            overflow: TextOverflow.ellipsis,
-          ),
-          actions: [
-            OutlineButton(onPressed: () => context.pop(), child: Text('OK')),
-          ],
         );
       },
     );

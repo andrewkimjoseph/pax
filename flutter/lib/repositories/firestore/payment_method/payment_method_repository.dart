@@ -1,9 +1,11 @@
 // repositories/firestore/payment_method/payment_method_repository.dart
+// Note: This repository interacts with the 'payment_methods' collection in Firestore,
+// while the UI presents these as "Withdrawal Methods" for better user experience.
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pax/models/firestore/payment_method/payment_method.dart';
 
-class PaymentMethodRepository {
+class WithdrawalMethodRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String collectionName = 'payment_methods';
 
@@ -27,7 +29,7 @@ class PaymentMethodRepository {
   }
 
   // Create a new payment method
-  Future<PaymentMethod> createPaymentMethod({
+  Future<WithdrawalMethod> createPaymentMethod({
     required String participantId,
     required String paxAccountId,
     required String walletAddress,
@@ -44,7 +46,7 @@ class PaymentMethodRepository {
       }
 
       // Create payment method
-      final newPaymentMethod = PaymentMethod(
+      final newPaymentMethod = WithdrawalMethod(
         id: _firestore.collection(collectionName).doc().id, // Auto-generate ID
         predefinedId: predefinedId,
         participantId: participantId,
@@ -71,7 +73,7 @@ class PaymentMethodRepository {
   }
 
   // Update a payment method
-  Future<PaymentMethod> updatePaymentMethod(
+  Future<WithdrawalMethod> updatePaymentMethod(
     String paymentMethodId,
     Map<String, dynamic> data,
   ) async {
@@ -112,7 +114,7 @@ class PaymentMethodRepository {
               .doc(paymentMethodId)
               .get();
 
-      return PaymentMethod.fromMap(updatedDoc.data()!, id: updatedDoc.id);
+      return WithdrawalMethod.fromMap(updatedDoc.data()!, id: updatedDoc.id);
     } catch (e) {
       if (kDebugMode) {
         print('Error updating payment method: $e');
@@ -134,7 +136,7 @@ class PaymentMethodRepository {
   }
 
   // Get all payment methods for a participant
-  Future<List<PaymentMethod>> getPaymentMethodsForParticipant(
+  Future<List<WithdrawalMethod>> getPaymentMethodsForParticipant(
     String participantId,
   ) async {
     try {
@@ -145,7 +147,7 @@ class PaymentMethodRepository {
               .get();
 
       return querySnapshot.docs
-          .map((doc) => PaymentMethod.fromMap(doc.data(), id: doc.id))
+          .map((doc) => WithdrawalMethod.fromMap(doc.data(), id: doc.id))
           .toList();
     } catch (e) {
       if (kDebugMode) {
@@ -156,7 +158,7 @@ class PaymentMethodRepository {
   }
 
   // Get payment method by wallet address
-  Future<PaymentMethod?> getPaymentMethodByWalletAddress(
+  Future<WithdrawalMethod?> getPaymentMethodByWalletAddress(
     String walletAddress,
   ) async {
     try {
@@ -171,7 +173,7 @@ class PaymentMethodRepository {
         return null;
       }
 
-      return PaymentMethod.fromMap(
+      return WithdrawalMethod.fromMap(
         querySnapshot.docs.first.data(),
         id: querySnapshot.docs.first.id,
       );

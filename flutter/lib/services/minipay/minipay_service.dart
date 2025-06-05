@@ -13,7 +13,7 @@ import 'package:pointycastle/digests/keccak.dart';
 class MiniPayService {
   final FirebaseFunctions _functions = FirebaseFunctions.instance;
   final PaxAccountRepository _paxAccountRepository;
-  final PaymentMethodRepository _paymentMethodRepository;
+  final WithdrawalMethodRepository _paymentMethodRepository;
 
   // API endpoint for RPC calls
   final Uri _rpcUrl = Uri.parse(
@@ -24,7 +24,7 @@ class MiniPayService {
 
   MiniPayService({
     required PaxAccountRepository paxAccountRepository,
-    required PaymentMethodRepository paymentMethodRepository,
+    required WithdrawalMethodRepository paymentMethodRepository,
   }) : _paxAccountRepository = paxAccountRepository,
        _paymentMethodRepository = paymentMethodRepository;
 

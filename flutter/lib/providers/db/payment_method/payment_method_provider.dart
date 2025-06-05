@@ -1,3 +1,6 @@
+// Note: This provider manages the state of payment methods, which are presented as
+// "Withdrawal Methods" in the UI for better user experience. The underlying data
+// structure and database collection remain as "payment_methods".
 // providers/payment_method_provider.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
@@ -8,41 +11,41 @@ import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/repositories/firestore/payment_method/payment_method_repository.dart';
 
 // State enum for payment methods
-enum PaymentMethodsState { initial, loading, loaded, error }
+enum WithdrawalMethodsState { initial, loading, loaded, error }
 
 // State model for payment methods
 // providers/payment_method_provider.dart
 
 // State model for payment methods
-class PaymentMethodsStateModel {
-  final List<PaymentMethod> paymentMethods;
-  final PaymentMethodsState state;
+class WithdrawalMethodsStateModel {
+  final List<WithdrawalMethod> withdrawalMethods;
+  final WithdrawalMethodsState state;
   final String? errorMessage;
   final Timestamp? lastUpdated;
 
-  PaymentMethodsStateModel({
-    this.paymentMethods = const [],
-    this.state = PaymentMethodsState.initial,
+  WithdrawalMethodsStateModel({
+    this.withdrawalMethods = const [],
+    this.state = WithdrawalMethodsState.initial,
     this.errorMessage,
     this.lastUpdated,
   });
 
   // Check if there are any payment methods
-  bool get hasPaymentMethods => paymentMethods.isNotEmpty;
+  bool get hasWithdrawalMethods => withdrawalMethods.isNotEmpty;
 
   // Get payment method by ID
-  PaymentMethod? getPaymentMethodById(String id) {
+  WithdrawalMethod? getWithdrawalMethodById(String id) {
     try {
-      return paymentMethods.firstWhere((method) => method.id == id);
+      return withdrawalMethods.firstWhere((method) => method.id == id);
     } catch (_) {
       return null;
     }
   }
 
   // Get payment method by wallet address
-  PaymentMethod? getPaymentMethodByWalletAddress(String walletAddress) {
+  WithdrawalMethod? getWithdrawalMethodByWalletAddress(String walletAddress) {
     try {
-      return paymentMethods.firstWhere(
+      return withdrawalMethods.firstWhere(
         (method) => method.walletAddress == walletAddress,
       );
     } catch (_) {
@@ -51,24 +54,24 @@ class PaymentMethodsStateModel {
   }
 
   // Get payment methods by type/name
-  List<PaymentMethod> getPaymentMethodsByType(String name) {
-    return paymentMethods.where((method) => method.name == name).toList();
+  List<WithdrawalMethod> getWithdrawalMethodsByType(String name) {
+    return withdrawalMethods.where((method) => method.name == name).toList();
   }
 
   // Get primary payment method (the first in the list)
-  PaymentMethod? get primaryPaymentMethod {
-    return paymentMethods.isNotEmpty ? paymentMethods.first : null;
+  WithdrawalMethod? get primaryPaymentMethod {
+    return withdrawalMethods.isNotEmpty ? withdrawalMethods.first : null;
   }
 
   // Copy with method
-  PaymentMethodsStateModel copyWith({
-    List<PaymentMethod>? paymentMethods,
-    PaymentMethodsState? state,
+  WithdrawalMethodsStateModel copyWith({
+    List<WithdrawalMethod>? withdrawalMethods,
+    WithdrawalMethodsState? state,
     String? errorMessage,
     Timestamp? lastUpdated,
   }) {
-    return PaymentMethodsStateModel(
-      paymentMethods: paymentMethods ?? this.paymentMethods,
+    return WithdrawalMethodsStateModel(
+      withdrawalMethods: withdrawalMethods ?? this.withdrawalMethods,
       state: state ?? this.state,
       errorMessage: errorMessage,
       lastUpdated: lastUpdated ?? this.lastUpdated,
@@ -77,12 +80,12 @@ class PaymentMethodsStateModel {
 }
 
 // Payment Methods Notifier
-class PaymentMethodsNotifier extends Notifier<PaymentMethodsStateModel> {
-  late final PaymentMethodRepository _repository;
+class WithdrawalMethodsNotifier extends Notifier<WithdrawalMethodsStateModel> {
+  late final WithdrawalMethodRepository _repository;
 
   @override
-  PaymentMethodsStateModel build() {
-    _repository = ref.watch(paymentMethodRepositoryProvider);
+  WithdrawalMethodsStateModel build() {
+    _repository = ref.watch(withdrawalMethodRepositoryProvider);
 
     // Set up auth state listener
     ref.listen(authProvider, (previous, next) {
@@ -107,14 +110,14 @@ class PaymentMethodsNotifier extends Notifier<PaymentMethodsStateModel> {
       Future.microtask(() => fetchPaymentMethods(authState.user.uid));
     }
 
-    return PaymentMethodsStateModel();
+    return WithdrawalMethodsStateModel();
   }
 
   // Fetch all payment methods for a user
   Future<void> fetchPaymentMethods(String userId) async {
     try {
       // Set loading state
-      state = state.copyWith(state: PaymentMethodsState.loading);
+      state = state.copyWith(state: WithdrawalMethodsState.loading);
 
       // Fetch payment methods from repository
       final methods = await _repository.getPaymentMethodsForParticipant(userId);
@@ -130,8 +133,8 @@ class PaymentMethodsNotifier extends Notifier<PaymentMethodsStateModel> {
 
       // Update state with fetched methods
       state = state.copyWith(
-        paymentMethods: methods,
-        state: PaymentMethodsState.loaded,
+        withdrawalMethods: methods,
+        state: WithdrawalMethodsState.loaded,
         lastUpdated: Timestamp.now(),
       );
     } catch (e) {
@@ -140,17 +143,17 @@ class PaymentMethodsNotifier extends Notifier<PaymentMethodsStateModel> {
       }
       // Update state with error
       state = state.copyWith(
-        state: PaymentMethodsState.error,
+        state: WithdrawalMethodsState.error,
         errorMessage: 'Failed to load payment methods: ${e.toString()}',
       );
     }
   }
 
   // Add a new payment method
-  Future<bool> addPaymentMethod(PaymentMethod paymentMethod) async {
+  Future<bool> addPaymentMethod(WithdrawalMethod paymentMethod) async {
     try {
       // Set loading state
-      state = state.copyWith(state: PaymentMethodsState.loading);
+      state = state.copyWith(state: WithdrawalMethodsState.loading);
 
       // Add payment method to repository
       await _repository.createPaymentMethod(
@@ -171,7 +174,7 @@ class PaymentMethodsNotifier extends Notifier<PaymentMethodsStateModel> {
       }
       // Update state with error
       state = state.copyWith(
-        state: PaymentMethodsState.error,
+        state: WithdrawalMethodsState.error,
         errorMessage: 'Failed to add payment method: ${e.toString()}',
       );
       return false;
@@ -185,7 +188,7 @@ class PaymentMethodsNotifier extends Notifier<PaymentMethodsStateModel> {
   ) async {
     try {
       // Set loading state
-      state = state.copyWith(state: PaymentMethodsState.loading);
+      state = state.copyWith(state: WithdrawalMethodsState.loading);
 
       // Remove payment method from repository
       await _repository.deletePaymentMethod(paymentMethodId);
@@ -200,7 +203,7 @@ class PaymentMethodsNotifier extends Notifier<PaymentMethodsStateModel> {
       }
       // Update state with error
       state = state.copyWith(
-        state: PaymentMethodsState.error,
+        state: WithdrawalMethodsState.error,
         errorMessage: 'Failed to remove payment method: ${e.toString()}',
       );
       return false;
@@ -214,7 +217,7 @@ class PaymentMethodsNotifier extends Notifier<PaymentMethodsStateModel> {
   ) async {
     try {
       // Set loading state
-      state = state.copyWith(state: PaymentMethodsState.loading);
+      state = state.copyWith(state: WithdrawalMethodsState.loading);
 
       // Update the payment method in repository
       await _repository.updatePaymentMethod(paymentMethodId, {
@@ -231,7 +234,7 @@ class PaymentMethodsNotifier extends Notifier<PaymentMethodsStateModel> {
       }
       // Update state with error
       state = state.copyWith(
-        state: PaymentMethodsState.error,
+        state: WithdrawalMethodsState.error,
         errorMessage: 'Failed to set default payment method: ${e.toString()}',
       );
       return false;
@@ -241,8 +244,8 @@ class PaymentMethodsNotifier extends Notifier<PaymentMethodsStateModel> {
   // Clear payment methods (used when signing out)
   void clearPaymentMethods() {
     state = state.copyWith(
-      paymentMethods: [],
-      state: PaymentMethodsState.initial,
+      withdrawalMethods: [],
+      state: WithdrawalMethodsState.initial,
       errorMessage: null,
     );
   }
@@ -254,45 +257,46 @@ class PaymentMethodsNotifier extends Notifier<PaymentMethodsStateModel> {
 }
 
 // Provider for the payment method repository
-final paymentMethodRepositoryProvider = Provider<PaymentMethodRepository>((
-  ref,
-) {
-  return PaymentMethodRepository();
-});
+final withdrawalMethodRepositoryProvider = Provider<WithdrawalMethodRepository>(
+  (ref) {
+    return WithdrawalMethodRepository();
+  },
+);
 
 // NotifierProvider for payment methods state
-final paymentMethodsProvider =
-    NotifierProvider<PaymentMethodsNotifier, PaymentMethodsStateModel>(() {
-      return PaymentMethodsNotifier();
-    });
+final withdrawalMethodsProvider =
+    NotifierProvider<WithdrawalMethodsNotifier, WithdrawalMethodsStateModel>(
+      () {
+        return WithdrawalMethodsNotifier();
+      },
+    );
 
 // Provider to get a specific payment method by ID
-final paymentMethodByIdProvider = Provider.family<PaymentMethod?, String>((
-  ref,
-  id,
-) {
-  final methodsState = ref.watch(paymentMethodsProvider);
-  return methodsState.getPaymentMethodById(id);
-});
+final withdrawalMethodByIdProvider = Provider.family<WithdrawalMethod?, String>(
+  (ref, id) {
+    final methodsState = ref.watch(withdrawalMethodsProvider);
+    return methodsState.getWithdrawalMethodById(id);
+  },
+);
 
 // Provider to check if a wallet address is already used
 final isWalletAddressUsedProvider = Provider.family<bool, String>((
   ref,
   walletAddress,
 ) {
-  final methodsState = ref.watch(paymentMethodsProvider);
-  return methodsState.getPaymentMethodByWalletAddress(walletAddress) != null;
+  final methodsState = ref.watch(withdrawalMethodsProvider);
+  return methodsState.getWithdrawalMethodByWalletAddress(walletAddress) != null;
 });
 
 // Provider to get all payment methods of a specific type
 final paymentMethodsByTypeProvider =
-    Provider.family<List<PaymentMethod>, String>((ref, type) {
-      final methodsState = ref.watch(paymentMethodsProvider);
-      return methodsState.getPaymentMethodsByType(type);
+    Provider.family<List<WithdrawalMethod>, String>((ref, type) {
+      final methodsState = ref.watch(withdrawalMethodsProvider);
+      return methodsState.getWithdrawalMethodsByType(type);
     });
 
 // Provider to get default payment method
-final primaryPaymentMethodProvider = Provider<PaymentMethod?>((ref) {
-  final methodsState = ref.watch(paymentMethodsProvider);
+final primaryPaymentMethodProvider = Provider<WithdrawalMethod?>((ref) {
+  final methodsState = ref.watch(withdrawalMethodsProvider);
   return methodsState.primaryPaymentMethod;
 });

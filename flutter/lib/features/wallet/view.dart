@@ -72,7 +72,7 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Available Payment Methods',
+                    'Available Withdrawal Methods',
                     style: TextStyle(fontSize: 20),
                   ).withPadding(bottom: 8),
                   Column(
@@ -103,4 +103,7 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
 // Widget build(BuildContext context) {
 //   return 
 // }
+
+// Note: The UI presents these as "Withdrawal Methods" for better user experience,
+// while the underlying data structure and database collection remain as "payment_methods".
 

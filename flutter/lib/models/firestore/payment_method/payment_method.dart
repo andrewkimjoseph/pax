@@ -1,6 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class PaymentMethod {
+// Note: While the UI refers to these as "Withdrawal Methods" for better user experience,
+// the database stores them as "payment_methods". This class bridges that gap by providing
+// a WithdrawalMethod model that maps to the payment_methods collection.
+
+class WithdrawalMethod {
   final String id;
   final int predefinedId;
   final String participantId;
@@ -10,7 +14,7 @@ class PaymentMethod {
   final Timestamp? timeCreated;
   final Timestamp? timeUpdated;
 
-  PaymentMethod({
+  WithdrawalMethod({
     required this.id,
     this.predefinedId = 1,
     required this.participantId,
@@ -36,11 +40,11 @@ class PaymentMethod {
   }
 
   // Create from Firestore data
-  factory PaymentMethod.fromMap(
+  factory WithdrawalMethod.fromMap(
     Map<String, dynamic> map, {
     required String id,
   }) {
-    return PaymentMethod(
+    return WithdrawalMethod(
       id: id,
       predefinedId: map['predefinedId'] ?? 1,
       participantId: map['participantId'] ?? '',

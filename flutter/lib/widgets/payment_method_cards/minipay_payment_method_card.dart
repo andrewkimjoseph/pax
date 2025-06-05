@@ -13,7 +13,7 @@ class MiniPayPaymentMethodCard extends ConsumerWidget {
   });
 
   final VoidCallback callBack;
-  final PaymentMethod? minipay;
+  final WithdrawalMethod? minipay;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

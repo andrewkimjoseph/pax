@@ -6,7 +6,7 @@ class WithdrawContext {
   final int tokenId;
   final num balance;
   final num? amountToWithdraw;
-  final PaymentMethod?
+  final WithdrawalMethod?
   selectedPaymentMethod; // Store the actual PaymentMethod object
 
   WithdrawContext({
@@ -21,7 +21,7 @@ class WithdrawContext {
     int? tokenId,
     num? balance,
     num? amountToWithdraw,
-    PaymentMethod? selectedPaymentMethod,
+    WithdrawalMethod? selectedPaymentMethod,
   }) {
     return WithdrawContext(
       tokenId: tokenId ?? this.tokenId,
@@ -54,7 +54,7 @@ class WithdrawContextNotifier extends Notifier<WithdrawContext?> {
   }
 
   // Set the selected payment method
-  void setSelectedPaymentMethod(PaymentMethod? method) {
+  void setSelectedPaymentMethod(WithdrawalMethod? method) {
     if (state == null) return;
 
     state = WithdrawContext(
