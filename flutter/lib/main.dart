@@ -2,7 +2,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:pax/widgets/wrappers/connectivity_wrapper.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Consumer;
 
 import 'package:pax/env/env.dart';
@@ -118,9 +117,7 @@ class _AppState extends ConsumerState<App> {
                 return Stack(
                   fit: StackFit.expand,
                   children: [
-                    ConnectivityWrapper(
-                      child: child ?? const CircularProgressIndicator(),
-                    ),
+                    child ?? const CircularProgressIndicator(),
                     appVersionConfigAsync.when(
                       data: (config) {
                         if (_currentVersion == null) {
