@@ -158,7 +158,7 @@ export const createPaxAccountV1Proxy = onCall(FUNCTION_RUNTIME_OPTS, async (requ
       hash: userOpTxnHash,
     });
 
-    if (!userOpReceipt.success || userOpReceipt.receipt.status !== "success") { 
+    if (!userOpReceipt.success) { 
       throw new HttpsError(
         "internal",
         "User operation failed"
