@@ -190,6 +190,13 @@ export const screenParticipantProxy = onCall(FUNCTION_RUNTIME_OPTS, async (reque
       hash: userOpTxnHash,
     });
 
+    if (!userOpReceipt.success) {
+      throw new HttpsError(
+        "internal",
+        "User operation failed"
+      );
+    }
+
     const txnHash = userOpReceipt.receipt.transactionHash;
     logger.info("Transaction confirmed", { txnHash });
 
