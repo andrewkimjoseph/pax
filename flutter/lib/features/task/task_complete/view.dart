@@ -14,6 +14,7 @@ import 'package:pax/theming/colors.dart';
 import 'package:pax/providers/local/task_context/main_task_context_provider.dart';
 import 'package:pax/providers/local/task_completion_state_provider.dart';
 import 'package:pax/utils/currency_symbol.dart';
+import 'package:pax/utils/token_balance_util.dart';
 import 'package:pax/widgets/account/account_option_card.dart';
 import 'package:pax/widgets/help_and_support.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
@@ -139,7 +140,9 @@ class _TaskCompleteViewState extends ConsumerState<TaskCompleteView> {
 
                         children: [
                           Text(
-                            rewardAmount,
+                            TokenBalanceUtil.getLocaleFormattedAmount(
+                              num.parse(rewardAmount),
+                            ),
                             textAlign: TextAlign.left,
                             style: TextStyle(
                               fontSize: 28,

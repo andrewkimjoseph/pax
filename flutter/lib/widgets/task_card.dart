@@ -27,7 +27,8 @@ class TaskCard extends ConsumerWidget {
     if (task.deadline != null) {
       final difference = task.deadline!.toDate().difference(DateTime.now());
       final days = difference.inDays;
-      daysRemaining = days > 0 ? '$days days' : 'Expired';
+      daysRemaining =
+          days > 0 ? '$days ${days == 1 ? 'day' : 'days'}' : 'Expired';
     }
 
     // Format reward amount
@@ -66,17 +67,18 @@ class TaskCard extends ConsumerWidget {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 task.title ?? 'Untitled Task',
                 style: TextStyle(
                   fontWeight: FontWeight.normal,
-                  fontSize: 20,
+                  fontSize: 18,
                   color: PaxColors.black,
                 ),
-              ).withPadding(bottom: 8),
+              ).withPadding(bottom: 8, right: 16).expanded(),
 
-              Spacer(),
+              // Spacer(),
               Text(
                 TokenBalanceUtil.getLocaleFormattedAmount(
                   num.parse(rewardAmount),
@@ -106,7 +108,7 @@ class TaskCard extends ConsumerWidget {
                     estimatedTime,
                     style: TextStyle(
                       fontWeight: FontWeight.normal,
-                      fontSize: 16,
+                      fontSize: 13,
                       color: PaxColors.black,
                     ),
                   ),
@@ -121,7 +123,7 @@ class TaskCard extends ConsumerWidget {
                     difficultyLevel,
                     style: TextStyle(
                       fontWeight: FontWeight.normal,
-                      fontSize: 16,
+                      fontSize: 13,
                       color: PaxColors.black,
                     ),
                   ),
@@ -137,7 +139,7 @@ class TaskCard extends ConsumerWidget {
                     daysRemaining,
                     style: TextStyle(
                       fontWeight: FontWeight.normal,
-                      fontSize: 16,
+                      fontSize: 13,
                       color: PaxColors.black,
                     ),
                   ),
@@ -244,7 +246,7 @@ class TaskCard extends ConsumerWidget {
                   fontSize: 14,
                   color:
                       screening?.txnHash != null
-                          ? PaxColors.black
+                          ? PaxColors.white
                           : PaxColors.white,
                 ),
               ),
