@@ -68,7 +68,7 @@ class OtherTaskCard extends ConsumerWidget {
                 task?.title ?? 'Untitled Task',
                 style: TextStyle(
                   fontWeight: FontWeight.normal,
-                  fontSize: 20,
+                  fontSize: 18,
                   color: PaxColors.black,
                 ),
               ).withPadding(bottom: 8),
@@ -79,7 +79,7 @@ class OtherTaskCard extends ConsumerWidget {
                   num.parse(rewardAmount),
                 ),
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   color: PaxColors.green,
                   fontWeight: FontWeight.bold,
                 ),
@@ -103,7 +103,7 @@ class OtherTaskCard extends ConsumerWidget {
                     estimatedTime,
                     style: TextStyle(
                       fontWeight: FontWeight.normal,
-                      fontSize: 16,
+                      fontSize: 13,
                       color: PaxColors.black,
                     ),
                   ),
@@ -118,7 +118,7 @@ class OtherTaskCard extends ConsumerWidget {
                     difficultyLevel,
                     style: TextStyle(
                       fontWeight: FontWeight.normal,
-                      fontSize: 16,
+                      fontSize: 13,
                       color: PaxColors.black,
                     ),
                   ),
@@ -134,7 +134,7 @@ class OtherTaskCard extends ConsumerWidget {
                     daysRemaining,
                     style: TextStyle(
                       fontWeight: FontWeight.normal,
-                      fontSize: 16,
+                      fontSize: 13,
                       color: PaxColors.black,
                     ),
                   ),

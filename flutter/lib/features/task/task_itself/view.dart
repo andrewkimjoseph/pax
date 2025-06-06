@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart' show InkWell;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/local/task_context/screening_context_provider.dart';
@@ -54,7 +55,7 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
               },
               onNavigationRequest: (NavigationRequest request) {
                 // Check if the URL is a callback from the task
-                if (request.url.startsWith('pax://')) {
+                if (request.url.startsWith('thepaxtask://')) {
                   // Handle the callback - mark task as complete
                   _handleTaskCompletion();
                   return NavigationDecision.prevent;
@@ -271,10 +272,9 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
           backgroundColor: PaxColors.white,
           child: Row(
             children: [
-              GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onPanDown: (details) {
-                  context.pop();
+              InkWell(
+                onTap: () {
+                  context.go('/home');
                 },
                 child: SvgPicture.asset('lib/assets/svgs/arrow_left_long.svg'),
               ),
