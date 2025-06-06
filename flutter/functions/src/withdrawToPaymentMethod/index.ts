@@ -216,14 +216,14 @@ export const withdrawToPaymentMethod = onCall(FUNCTION_RUNTIME_OPTS, async (requ
       hash: userOpTxnHash,
     });
 
-    if (!userOpReceipt.success) {
+    if (!userOpReceipt.success || userOpReceipt.receipt.status !== "success") {
       throw new HttpsError(
         "internal",
         "User operation failed"
       );
     }
 
-    const txnHash = userOpReceipt.receipt.transactionHash;
+    const txnHash = userOpReceipt.userOpHash;
     logger.info("Transaction confirmed", { txnHash });
 
     // Create withdrawal record

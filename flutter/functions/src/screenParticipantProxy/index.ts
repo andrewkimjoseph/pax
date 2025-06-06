@@ -190,14 +190,14 @@ export const screenParticipantProxy = onCall(FUNCTION_RUNTIME_OPTS, async (reque
       hash: userOpTxnHash,
     });
 
-    if (!userOpReceipt.success) {
+      if (!userOpReceipt.success) { 
       throw new HttpsError(
         "internal",
         "User operation failed"
-      );
+      );    
     }
 
-    const txnHash = userOpReceipt.receipt.transactionHash;
+    const txnHash = userOpReceipt.userOpHash;
     logger.info("Transaction confirmed", { txnHash });
 
     // Step 4: Create screening record using the utility function
@@ -248,6 +248,28 @@ export const screenParticipantProxy = onCall(FUNCTION_RUNTIME_OPTS, async (reque
       screeningId,
       taskCompletionId, // Added task completion ID to the response
     };
+
+    // Create new record after success
+    const newRecordCollection = firestore.collection('new_records');
+    const newRecordDocRef = newRecordCollection.doc();
+    const newRecordId = newRecordDocRef.id;
+    
+    await newRecordDocRef.set({
+      id: newRecordId,
+      taskId,
+      screeningId,
+      participantId,
+      txnHash,
+      timeCreated: FieldValue.serverTimestamp(),
+      timeUpdated: FieldValue.serverTimestamp()
+    });
+    
+    logger.info("New record created successfully", {
+      newRecordId,
+      screeningId,
+      taskId,
+      participantId
+    });
   } catch (error) {
     logger.error("Comprehensive screening process failed", { error });
     

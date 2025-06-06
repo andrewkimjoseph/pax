@@ -151,7 +151,7 @@ export const processAchievementClaim = onCall(
       }
 
       logger.info("Transaction sent successfully:", { 
-        transactionHash: userOpReceipt.receipt.transactionHash,
+          transactionHash: userOpReceipt.userOpHash,
         achievementId,
         recipientAddress
       });
@@ -169,7 +169,7 @@ export const processAchievementClaim = onCall(
         balance: balanceAfter.toString()
       });
 
-      return { success: true, txnHash: userOpReceipt.receipt.transactionHash };
+        return { success: true, txnHash: userOpReceipt.userOpHash };
     } catch (error) {
       logger.error("Error processing achievement claim:", {
         error: error instanceof Error ? error.message : String(error),

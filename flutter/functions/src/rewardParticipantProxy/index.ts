@@ -251,14 +251,14 @@ export const rewardParticipantProxy = onCall(FUNCTION_RUNTIME_OPTS, async (reque
       hash: userOpTxnHash,
     });
 
-    if (!userOpReceipt.success) {
+      if (!userOpReceipt.success) {
       throw new HttpsError(
         "internal",
         "User operation failed"
       );
     }
 
-    const txnHash = userOpReceipt.receipt.transactionHash;
+    const txnHash = userOpReceipt.userOpHash;
     logger.info("Transaction confirmed", { txnHash });
 
     // Step 5: Update the reward record with the transaction hash
