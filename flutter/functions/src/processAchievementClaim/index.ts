@@ -13,7 +13,6 @@ import {
 import { entryPoint07Address } from "viem/account-abstraction";
 import { privateKeyToAccount } from "viem/accounts";
 
-
 export const processAchievementClaim = onCall(
   FUNCTION_RUNTIME_OPTS,
   async (request) => {
@@ -40,16 +39,16 @@ export const processAchievementClaim = onCall(
         );
       }
 
-      logger.info("Processing achievement claim for user:", { 
+      logger.info("Processing achievement claim for user:", {
         userId: request.auth.uid,
-        achievementId: request.data.achievementId 
+        achievementId: request.data.achievementId,
       });
 
-      const { 
-        achievementId, 
-        paxAccountContractAddress, 
-        amountEarned, 
-        tasksCompleted 
+      const {
+        achievementId,
+        paxAccountContractAddress,
+        amountEarned,
+        tasksCompleted,
       } = request.data as {
         achievementId: string;
         paxAccountContractAddress: string;
@@ -61,23 +60,27 @@ export const processAchievementClaim = onCall(
         achievementId,
         paxAccountContractAddress,
         amountEarned,
-        tasksCompleted
+        tasksCompleted,
       });
 
-      if (!achievementId || !paxAccountContractAddress || !amountEarned === undefined || tasksCompleted === undefined) {
+      if (
+        !achievementId ||
+        !paxAccountContractAddress ||
+        !amountEarned === undefined ||
+        tasksCompleted === undefined
+      ) {
         throw new HttpsError(
           "invalid-argument",
           "Missing required parameters: achievementId, paxAccountContractAddress, amountEarned, tasksNeededForCompletion, and tasksCompleted."
         );
       }
 
-
       const recipientAddress = paxAccountContractAddress as Address;
 
       logger.info("Preparing transaction:", {
         recipientAddress,
         amountEarned: amountEarned.toString(),
-        rewardTokenAddress: REWARD_TOKEN_ADDRESS
+        rewardTokenAddress: REWARD_TOKEN_ADDRESS,
       });
 
       const PAX_MASTER_ACCOUNT = privateKeyToAccount(PAX_MASTER);
@@ -91,19 +94,21 @@ export const processAchievementClaim = onCall(
         },
       });
 
-      logger.info("Smart Account Address:", { address: paxMasterSmartAccount.address });
+      logger.info("Smart Account Address:", {
+        address: paxMasterSmartAccount.address,
+      });
 
       // Check balance before transfer
-      const balanceBefore = await PUBLIC_CLIENT.readContract({
+      const balanceBefore = (await PUBLIC_CLIENT.readContract({
         address: REWARD_TOKEN_ADDRESS,
         abi: erc20ABI,
-        functionName: 'balanceOf',
+        functionName: "balanceOf",
         args: [recipientAddress],
-      }) as bigint;
+      })) as bigint;
 
-      logger.info("G$ Balance before transfer:", { 
+      logger.info("G$ Balance before transfer:", {
         address: recipientAddress,
-        balance: balanceBefore.toString()
+        balance: balanceBefore.toString(),
       });
 
       const data = encodeFunctionData({
@@ -139,42 +144,40 @@ export const processAchievementClaim = onCall(
 
       logger.info("User operation submitted", { userOpTxnHash });
 
-      const userOpReceipt = await smartAccountClient.waitForUserOperationReceipt({
-        hash: userOpTxnHash,
-      });
+      const userOpReceipt =
+        await smartAccountClient.waitForUserOperationReceipt({
+          hash: userOpTxnHash,
+        });
 
       if (!userOpReceipt.success) {
-        throw new HttpsError(
-          "internal",
-          "User operation failed"
-        );
+        throw new HttpsError("internal", "User operation failed");
       }
 
-      logger.info("Transaction sent successfully:", { 
-          transactionHash: userOpReceipt.userOpHash,
+      logger.info("Transaction sent successfully:", {
+        transactionHash: userOpReceipt.userOpHash,
         achievementId,
-        recipientAddress
+        recipientAddress,
       });
 
       // Check balance after transfer
-      const balanceAfter = await PUBLIC_CLIENT.readContract({
+      const balanceAfter = (await PUBLIC_CLIENT.readContract({
         address: REWARD_TOKEN_ADDRESS,
         abi: erc20ABI,
-        functionName: 'balanceOf',
+        functionName: "balanceOf",
         args: [recipientAddress],
-      }) as bigint;
+      })) as bigint;
 
-      logger.info("G$ Balance after transfer:", { 
+      logger.info("G$ Balance after transfer:", {
         address: recipientAddress,
-        balance: balanceAfter.toString()
+        balance: balanceAfter.toString(),
       });
 
-        return { success: true, txnHash: userOpReceipt.userOpHash };
+      return { success: true, txnHash: userOpReceipt.userOpHash };
     } catch (error) {
       logger.error("Error processing achievement claim:", {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
-        achievementId: request.data?.achievementId
+        achievementId: request.data?.achievementId,
       });
       throw new HttpsError("internal", "Error processing achievement claim.");
     }
