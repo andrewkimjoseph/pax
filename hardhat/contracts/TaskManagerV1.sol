@@ -383,6 +383,18 @@ contract TaskManagerV1 is Ownable, Pausable, EIP712 {
     }
 
     /**
+     * @notice Ensures the number of screened participants hasn't reached the target
+     * @dev Prevents screening more participants than the target number
+     */
+    modifier onlyWhenTargetNumberOfParticipantProxiesNotIsNotReached() {
+        require(
+            numberOfScreenedParticipantProxies < targetNumberOfParticipantProxies,
+            "Maximum number of participantProxies have been screened"
+        );
+        _;
+    }
+
+    /**
      * @notice Ensures the target number of participantProxies hasn't been reached
      * @dev Controls the total number of rewards that can be distributed
      */
@@ -489,6 +501,7 @@ contract TaskManagerV1 is Ownable, Pausable, EIP712 {
         )
         onlyIfGivenScreeningSignatureIsUnused(signature)
         onlyIfContractHasEnoughRewardTokensForAllPotentialRewards
+        onlyWhenTargetNumberOfParticipantProxiesNotIsNotReached
     {
         require(participantProxy != address(0), "Zero address passed");
 

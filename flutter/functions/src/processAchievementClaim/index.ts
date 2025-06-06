@@ -82,7 +82,7 @@ export const processAchievementClaim = onCall(
 
       const PAX_MASTER_ACCOUNT = privateKeyToAccount(PAX_MASTER);
 
-      const smartAccount = await toSimpleSmartAccount({
+      const paxMasterSmartAccount = await toSimpleSmartAccount({
         client: PUBLIC_CLIENT,
         owner: PAX_MASTER_ACCOUNT,
         entryPoint: {
@@ -91,7 +91,7 @@ export const processAchievementClaim = onCall(
         },
       });
 
-      logger.info("Smart Account Address:", { address: smartAccount.address });
+      logger.info("Smart Account Address:", { address: paxMasterSmartAccount.address });
 
       // Check balance before transfer
       const balanceBefore = await PUBLIC_CLIENT.readContract({
@@ -116,7 +116,7 @@ export const processAchievementClaim = onCall(
 
       // Create a smart account client
       const smartAccountClient = createSmartAccountClient({
-        account: smartAccount,
+        account: paxMasterSmartAccount,
         chain: celo,
         bundlerTransport: http(PIMLICO_URL),
         paymaster: PIMLICO_CLIENT,
@@ -128,13 +128,30 @@ export const processAchievementClaim = onCall(
       });
 
       // Send the transaction
-      const hash = await smartAccountClient.sendTransaction({
-        to: REWARD_TOKEN_ADDRESS,
-        data,
+      const userOpTxnHash = await smartAccountClient.sendUserOperation({
+        calls: [
+          {
+            to: REWARD_TOKEN_ADDRESS,
+            data,
+          },
+        ],
       });
 
+      logger.info("User operation submitted", { userOpTxnHash });
+
+      const userOpReceipt = await smartAccountClient.waitForUserOperationReceipt({
+        hash: userOpTxnHash,
+      });
+
+      if (!userOpReceipt.success) {
+        throw new HttpsError(
+          "internal",
+          "User operation failed"
+        );
+      }
+
       logger.info("Transaction sent successfully:", { 
-        transactionHash: hash,
+        transactionHash: userOpReceipt.receipt.transactionHash,
         achievementId,
         recipientAddress
       });
@@ -152,7 +169,7 @@ export const processAchievementClaim = onCall(
         balance: balanceAfter.toString()
       });
 
-      return { success: true, txnHash: hash };
+      return { success: true, txnHash: userOpReceipt.receipt.transactionHash };
     } catch (error) {
       logger.error("Error processing achievement claim:", {
         error: error instanceof Error ? error.message : String(error),

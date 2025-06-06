@@ -143,22 +143,25 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
       barrierDismissible: false,
       context: context,
       builder: (dialogContext) {
-        return AlertDialog(
-          title: Text('Screening failed'),
-          content: Text(
-            errorMessage,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                context.pop();
-                context.pop();
-              },
-              child: Text('OK'),
+        return PopScope(
+          canPop: false,
+          child: AlertDialog(
+            title: Text('Screening failed'),
+            content: Text(
+              errorMessage,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
             ),
-          ],
+            actions: [
+              TextButton(
+                onPressed: () {
+                  context.pop();
+                  context.pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          ),
         );
       },
     );
