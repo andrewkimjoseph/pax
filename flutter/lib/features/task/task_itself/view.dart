@@ -30,6 +30,7 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
     super.initState();
     // Reset task completion state
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       ref.read(taskCompletionProvider.notifier).reset();
       ref.read(rewardStateProvider.notifier).reset();
     });

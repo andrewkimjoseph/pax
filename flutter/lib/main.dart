@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Consumer;
+import 'package:flutter/services.dart';
 
 import 'package:pax/env/env.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
@@ -19,6 +20,7 @@ import 'package:pax/widgets/update_dialog.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await AppInitializer().initialize();
   runApp(ProviderScope(child: App()));
 }
@@ -78,14 +80,23 @@ class _AppState extends ConsumerState<App> {
       }
 
       if (path != null && path.isNotEmpty) {
-        router.go("/home");
-        // router.push(path);
+        if (kDebugMode) {
+          print('[:_handleDeepLink] Path from Deep Link:  $path');
+        }
       } else {
-        router.go("/home");
+        if (kDebugMode) {
+          print('[:_handleDeepLink] No path from Deep Link');
+        }
       }
     } else {
-      router.go("/home");
+      if (kDebugMode) {
+        print('[:_handleDeepLink] No +clicked_branch_link from Deep Link');
+      }
     }
+    if (kDebugMode) {
+      print('[:_handleDeepLink] Navigating to home');
+    }
+    router.go("/home");
   }
 
   @override
