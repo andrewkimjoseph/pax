@@ -79,7 +79,7 @@ describe("1. Initial Setup Tests", function () {
     // Deploy TaskManager with default parameters
     taskManagerAddress = await deployTaskManager(
       wallets.TASK_MANAGER,
-      parseEther("3000"), // 0.01 cUSD per participant
+      parseEther("0.25"), // 0.01 cUSD per participant
       1n // 5 target participants
     );
 

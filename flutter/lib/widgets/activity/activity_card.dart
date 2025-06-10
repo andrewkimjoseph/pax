@@ -30,55 +30,51 @@ class ActivityCard extends ConsumerWidget {
           FaIcon(
             activity.getIcon(),
             color: PaxColors.lilac,
-          ).withPadding(left: 4, right: 12),
+          ).withPadding(left: 4, right: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.75,
-
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Text(
                         '${activity.type.singularName} ',
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 16,
                           color: PaxColors.black,
                         ),
+                        overflow: TextOverflow.ellipsis,
                       ),
+                    ),
+                    Visibility(
+                      visible:
+                          activity.reward != null ||
+                          activity.withdrawal != null,
+                      child: Row(
+                        children: [
+                          Text(
+                            activity.getAmount() ?? '0',
+                            style: TextStyle(
+                              fontWeight: FontWeight.normal,
+                              fontSize: 14,
+                              color: Colors.black,
+                            ),
+                          ).withPadding(right: 4),
 
-                      Spacer(),
-
-                      Visibility(
-                        visible:
-                            activity.reward != null ||
-                            activity.withdrawal != null,
-                        child: Row(
-                          children: [
-                            Text(
-                              activity.getAmount() ?? '0',
-                              style: TextStyle(
-                                fontWeight: FontWeight.normal,
-                                fontSize: 14,
-                                color: Colors.black,
-                              ),
-                            ).withPadding(right: 2),
-
-                            if (activity.getCurrencyId() != null)
-                              SvgPicture.asset(
-                                'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(activity.getCurrencyId())}.svg',
-                                height: 20,
-                              ),
-                          ],
-                        ),
+                          if (activity.getCurrencyId() != null)
+                            SvgPicture.asset(
+                              'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(activity.getCurrencyId())}.svg',
+                              height: activity.getCurrencyId() == 1 ? 20 : 16,
+                            ),
+                        ],
                       ),
-                    ],
-                  ).withPadding(bottom: 8),
-                ),
+                    ),
+                  ],
+                ).withPadding(bottom: 8),
 
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

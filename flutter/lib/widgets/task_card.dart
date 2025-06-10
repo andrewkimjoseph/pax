@@ -26,9 +26,14 @@ class TaskCard extends ConsumerWidget {
     String daysRemaining = '-- days';
     if (task.deadline != null) {
       final difference = task.deadline!.toDate().difference(DateTime.now());
-      final days = difference.inDays;
-      daysRemaining =
-          days > 0 ? '$days ${days == 1 ? 'day' : 'days'}' : 'Expired';
+      if (difference.inSeconds > 0 && difference.inDays < 1) {
+        daysRemaining = '1 day';
+      } else if (difference.inDays >= 1) {
+        daysRemaining =
+            '${difference.inDays} ${difference.inDays == 1 ? 'day' : 'days'}';
+      } else {
+        daysRemaining = 'Expired';
+      }
     }
 
     // Format reward amount

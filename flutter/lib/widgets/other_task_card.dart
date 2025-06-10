@@ -17,13 +17,16 @@ class OtherTaskCard extends ConsumerWidget {
     String daysRemaining = '-- days';
     if (task?.deadline != null) {
       final difference = task?.deadline!.toDate().difference(DateTime.now());
-      final days = difference?.inDays;
-      daysRemaining =
-          days != null
-              ? days > 0
-                  ? '$days days'
-                  : 'Expired'
-              : '-- days';
+      if (difference != null &&
+          difference.inSeconds > 0 &&
+          difference.inDays < 1) {
+        daysRemaining = '1 day';
+      } else if (difference != null && difference.inDays >= 1) {
+        daysRemaining =
+            '${difference.inDays} ${difference.inDays == 1 ? 'day' : 'days'}';
+      } else if (difference != null && difference.inSeconds <= 0) {
+        daysRemaining = 'Expired';
+      }
     }
 
     // Format reward amount

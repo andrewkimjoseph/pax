@@ -192,7 +192,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                             fontWeight: FontWeight.bold,
                           ),
                           textAlign: TextAlign.center,
-                        ),
+                        ).withPadding(right: 4),
                         SvgPicture.asset(
                           'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(tokenId)}.svg',
                           height: 25,
@@ -262,7 +262,10 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
               overflow: TextOverflow.ellipsis,
             ),
             actions: [
-              OutlineButton(onPressed: () => context.pop(), child: Text('OK')),
+              OutlineButton(
+                onPressed: () => context.go("/home"),
+                child: Text('OK'),
+              ),
             ],
           ),
         );
