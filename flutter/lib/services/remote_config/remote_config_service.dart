@@ -47,8 +47,9 @@ class RemoteConfigService {
         }),
         'feature_flags': json.encode({
           'is_wallet_available': true,
-          'is_achievements_available': true,
+          'are_achievements_available': true,
           'are_tasks_available': true,
+          'are_tasks_completions_available': true,
         }),
       });
 
@@ -259,8 +260,9 @@ class RemoteConfigService {
         // Return default config if no remote config is available
         return {
           'is_wallet_available': true,
-          'is_achievements_available': true,
+          'are_achievements_available': true,
           'are_tasks_available': true,
+          'are_tasks_completions_available': true,
         };
       }
 
@@ -271,9 +273,11 @@ class RemoteConfigService {
 
       return {
         'is_wallet_available': configMap['is_wallet_available'] ?? true,
-        'is_achievements_available':
+        'are_achievements_available':
             configMap['is_achievements_available'] ?? true,
         'are_tasks_available': configMap['are_tasks_available'] ?? true,
+        'are_tasks_completions_available':
+            configMap['are_tasks_completions_available'] ?? true,
       };
     } catch (e) {
       if (kDebugMode) {
@@ -282,8 +286,9 @@ class RemoteConfigService {
       // Return default config on error
       return {
         'is_wallet_available': true,
-        'is_achievements_available': true,
+        'are_achievements_available': true,
         'are_tasks_available': true,
+        'are_tasks_completions_available': true,
       };
     }
   }
