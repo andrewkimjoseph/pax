@@ -1,4 +1,5 @@
 // lib/views/activity/activity_view.dart
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/models/local/activity_model.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
@@ -67,7 +68,8 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
           ).withPadding(bottom: 8),
           subtitle: featureFlags.when(
             data: (flags) {
-              final showTaskCompletions =
+              bool showTaskCompletions =
+                  kDebugMode ||
                   flags['are_tasks_completions_available'] == true;
               return Row(
                 children: [
@@ -196,9 +198,9 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
 
       child: featureFlags.when(
         data: (flags) {
-          final showTaskCompletions =
-              flags['are_tasks_completions_available'] == true;
-          // If the selected index is 0 (Task Completions) but the flag is false, show nothing
+          bool showTaskCompletions =
+              kDebugMode || flags['are_tasks_completions_available'] == true;
+
           if (selectedIndex == 0 && !showTaskCompletions) {
             return const SizedBox.shrink();
           }
