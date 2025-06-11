@@ -140,7 +140,7 @@ class _WithdrawViewState extends ConsumerState<WithdrawView> {
             }
           }
         },
-        child: GestureDetector(
+        child: InkWell(
           onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,

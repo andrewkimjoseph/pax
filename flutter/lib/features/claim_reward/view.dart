@@ -140,7 +140,7 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
       );
     } catch (e) {
       if (!context.mounted) return;
-      Navigator.of(context, rootNavigator: true).pop(); // Close loading dialog
+      context.pop(); // Close loading dialog
       ref.read(analyticsProvider).claimRewardFailed({
         "taskId": taskId,
         "screeningId": screeningId,
@@ -210,7 +210,10 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
                 height: 48,
                 child: Button(
                   style: ButtonStyle.primary(),
-                  onPressed: (isClaiming) ? null : () => _claimReward(context),
+                  onPressed:
+                      (isClaiming || (txnHash != null && txnHash.isNotEmpty))
+                          ? null
+                          : () => _claimReward(context),
                   child:
                       isClaiming
                           ? const CircularProgressIndicator()
