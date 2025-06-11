@@ -55,22 +55,16 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
                 final amount = matchingReward?.reward?.amountReceived;
                 final tokenId = matchingReward?.reward?.rewardCurrencyId;
 
-                if (taskId != null &&
-                    screeningId != null &&
-                    taskCompletionId != null &&
-                    amount != null &&
-                    tokenId != null) {
-                  ref
-                      .read(claimRewardContextProvider.notifier)
-                      .setContext(
-                        screeningId: screeningId,
-                        taskId: taskId,
-                        taskCompletionId: taskCompletionId,
-                        amount: amount,
-                        tokenId: tokenId,
-                        txnHash: matchingReward?.reward?.txnHash,
-                      );
-                }
+                ref
+                    .read(claimRewardContextProvider.notifier)
+                    .setContext(
+                      screeningId: screeningId,
+                      taskId: taskId,
+                      taskCompletionId: taskCompletionId,
+                      amount: amount,
+                      tokenId: tokenId,
+                      txnHash: matchingReward?.reward?.txnHash,
+                    );
 
                 context.push("/claim-reward");
 
