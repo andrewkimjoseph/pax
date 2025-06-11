@@ -219,6 +219,16 @@ class AnalyticsProvider {
 
   Future<void> okMaintenanceTapped([Map<String, dynamic>? properties]) =>
       _logEvent('ok_maintenance_tapped', properties: properties);
+
+  Future<void> unrewardedTaskCompletionTapped(Map<String, String?> map) =>
+      _logEvent('unrewarded_task_completion_tapped', properties: map);
+
+  Future<void> claimRewardTapped(Map<String, String?> map) =>
+      _logEvent('claim_reward_tapped', properties: map);
+  Future<void> claimRewardComplete(Map<String, String?> map) =>
+      _logEvent('claim_reward_complete', properties: map);
+  Future<void> claimRewardFailed(Map<String, String?> map) =>
+      _logEvent('claim_reward_failed', properties: map);
 }
 
 final analyticsProvider = Provider<AnalyticsProvider>((ref) {

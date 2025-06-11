@@ -22,10 +22,19 @@ class WithdrawView extends ConsumerStatefulWidget {
 class _WithdrawViewState extends ConsumerState<WithdrawView> {
   // Define a key for the amount field
   final _withdrawalAmountKey = const TextFieldKey(#amount);
+  late final TextEditingController _amountController;
+  num? _lastAmountToWithdraw;
 
   @override
   void initState() {
     super.initState();
+    _amountController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    super.dispose();
   }
 
   @override
@@ -33,6 +42,18 @@ class _WithdrawViewState extends ConsumerState<WithdrawView> {
     final withdrawContext = ref.watch(withdrawContextProvider);
     final balance = withdrawContext?.balance ?? 0;
     final tokenId = withdrawContext?.tokenId ?? 0;
+
+    // Update the controller if the balance changes
+    if (withdrawContext != null && balance != _lastAmountToWithdraw) {
+      if (balance == 0) {
+        _amountController.text = '';
+      } else if (balance % 1 == 0) {
+        _amountController.text = balance.toInt().toString();
+      } else {
+        _amountController.text = balance.toString();
+      }
+      _lastAmountToWithdraw = balance;
+    }
 
     // Create a proper validator using ValidatorBuilder
 
@@ -146,6 +167,7 @@ class _WithdrawViewState extends ConsumerState<WithdrawView> {
                   validator: amountValidator,
                   showErrors: const {FormValidationMode.submitted},
                   child: TextField(
+                    controller: _amountController,
                     keyboardType: TextInputType.numberWithOptions(
                       decimal: true,
                     ),

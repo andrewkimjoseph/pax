@@ -7,6 +7,7 @@ import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/widgets/activity/activity_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import '../../theming/colors.dart' show PaxColors;
+import 'package:pax/providers/auth/auth_provider.dart';
 
 class ActivityView extends ConsumerStatefulWidget {
   const ActivityView({super.key});
@@ -16,12 +17,18 @@ class ActivityView extends ConsumerStatefulWidget {
 }
 
 class _ActivityViewState extends ConsumerState<ActivityView> {
-  int index = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize activities on startup
+  int get selectedIndex {
+    final filterType = ref.watch(activityNotifierProvider).filterType;
+    switch (filterType) {
+      case ActivityType.taskCompletion:
+        return 0;
+      case ActivityType.reward:
+        return 1;
+      case ActivityType.withdrawal:
+        return 2;
+      default:
+        return 0;
+    }
   }
 
   @override
@@ -29,8 +36,13 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
     // Get the activity notifier to set filters
     final activityNotifier = ref.watch(activityNotifierProvider.notifier);
 
+    // Get the userId
+    final userId = ref.watch(authProvider).user.uid;
+
     // Watch for activities based on the current filter
     final activitiesAsync = ref.watch(filteredActivitiesProvider);
+    // Watch for all activities (unfiltered)
+    final allActivitiesAsync = ref.watch(allActivitiesProvider(userId));
 
     return Scaffold(
       headers: [
@@ -56,29 +68,29 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
                 style: const ButtonStyle.primary(density: ButtonDensity.dense)
                     .withBackgroundColor(
                       color:
-                          index == 0
+                          selectedIndex == 0
                               ? PaxColors.deepPurple
                               : Colors.transparent,
                     )
                     .withBorder(
                       border: Border.all(
                         color:
-                            index == 0 ? PaxColors.deepPurple : PaxColors.lilac,
+                            selectedIndex == 0
+                                ? PaxColors.deepPurple
+                                : PaxColors.lilac,
                         width: 2,
                       ),
                     )
                     .withBorderRadius(borderRadius: BorderRadius.circular(7)),
                 onPressed: () {
-                  setState(() {
-                    index = 0;
-                  });
                   activityNotifier.setFilterType(ActivityType.taskCompletion);
                   ref.read(analyticsProvider).taskCompletionsTapped();
                 },
                 child: Text(
                   'Task Completions',
                   style: TextStyle(
-                    color: index == 0 ? PaxColors.white : PaxColors.black,
+                    color:
+                        selectedIndex == 0 ? PaxColors.white : PaxColors.black,
                   ),
                 ),
               ).withPadding(right: 8),
@@ -87,29 +99,29 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
                 style: const ButtonStyle.primary(density: ButtonDensity.dense)
                     .withBackgroundColor(
                       color:
-                          index == 1
+                          selectedIndex == 1
                               ? PaxColors.deepPurple
                               : Colors.transparent,
                     )
                     .withBorder(
                       border: Border.all(
                         color:
-                            index == 1 ? PaxColors.deepPurple : PaxColors.lilac,
+                            selectedIndex == 1
+                                ? PaxColors.deepPurple
+                                : PaxColors.lilac,
                         width: 2,
                       ),
                     )
                     .withBorderRadius(borderRadius: BorderRadius.circular(7)),
                 onPressed: () {
-                  setState(() {
-                    index = 1;
-                  });
                   activityNotifier.setFilterType(ActivityType.reward);
                   ref.read(analyticsProvider).rewardsTapped();
                 },
                 child: Text(
                   'Rewards',
                   style: TextStyle(
-                    color: index == 1 ? PaxColors.white : PaxColors.black,
+                    color:
+                        selectedIndex == 1 ? PaxColors.white : PaxColors.black,
                   ),
                 ),
               ).withPadding(right: 8),
@@ -118,29 +130,29 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
                 style: const ButtonStyle.primary(density: ButtonDensity.dense)
                     .withBackgroundColor(
                       color:
-                          index == 2
+                          selectedIndex == 2
                               ? PaxColors.deepPurple
                               : Colors.transparent,
                     )
                     .withBorder(
                       border: Border.all(
                         color:
-                            index == 2 ? PaxColors.deepPurple : PaxColors.lilac,
+                            selectedIndex == 2
+                                ? PaxColors.deepPurple
+                                : PaxColors.lilac,
                         width: 2,
                       ),
                     )
                     .withBorderRadius(borderRadius: BorderRadius.circular(7)),
                 onPressed: () {
-                  setState(() {
-                    index = 2;
-                  });
                   activityNotifier.setFilterType(ActivityType.withdrawal);
                   ref.read(analyticsProvider).withdrawalsTapped();
                 },
                 child: Text(
                   'Withdrawals',
                   style: TextStyle(
-                    color: index == 2 ? PaxColors.white : PaxColors.black,
+                    color:
+                        selectedIndex == 2 ? PaxColors.white : PaxColors.black,
                   ),
                 ),
               ),
@@ -153,40 +165,61 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
       child: activitiesAsync.when(
         skipLoadingOnRefresh: false,
         data: (activities) {
-          return SingleChildScrollView(
-            child: Builder(
-              builder: (context) {
-                if (activities.isEmpty) {
-                  return SizedBox(
-                    height:
-                        MediaQuery.of(context).size.height /
-                        2, // Account for header height
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            index == 0
-                                ? 'No task completions'
-                                : index == 1
-                                ? 'No rewards'
-                                : 'No withdrawals',
-                            style: TextStyle(color: PaxColors.darkGrey),
+          return allActivitiesAsync.when(
+            data: (allActivities) {
+              return SingleChildScrollView(
+                child: Builder(
+                  builder: (context) {
+                    if (activities.isEmpty) {
+                      return SizedBox(
+                        height:
+                            MediaQuery.of(context).size.height /
+                            2, // Account for header height
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                selectedIndex == 0
+                                    ? 'No task completions'
+                                    : selectedIndex == 1
+                                    ? 'No rewards'
+                                    : 'No withdrawals',
+                                style: TextStyle(color: PaxColors.darkGrey),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
+                      );
+                    }
+                    return Column(
+                      children: [
+                        for (var activity in activities)
+                          ActivityCard(
+                            activity,
+                            allActivities: allActivities,
+                          ).withPadding(all: 8),
+                      ],
+                    );
+                  },
+                ),
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error:
+                (error, stackTrace) => Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Error loading all activities',
+                        style: TextStyle(color: PaxColors.darkGrey),
                       ),
-                    ),
-                  );
-                }
-                return Column(
-                  children: [
-                    for (var activity in activities)
-                      ActivityCard(activity).withPadding(all: 8),
-                  ],
-                );
-              },
-            ),
+                      SizedBox(height: 8),
+                    ],
+                  ),
+                ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),

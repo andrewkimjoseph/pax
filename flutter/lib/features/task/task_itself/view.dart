@@ -50,9 +50,9 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
                 setState(() {
                   isLoading = false;
                 });
-                ref.read(analyticsProvider).taskLoadingComplete({
-                  "taskUrl": url,
-                });
+                // ref.read(analyticsProvider).taskLoadingComplete({
+                //   "taskUrl": url,
+                // });
               },
               onNavigationRequest: (NavigationRequest request) {
                 // Check if the URL is a callback from the task
@@ -252,12 +252,18 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
       barrierDismissible: false,
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text('Task Error'),
-          content: Text(errorMessage),
-          actions: [
-            TextButton(onPressed: () => context.pop(), child: Text('OK')),
-          ],
+        return PopScope(
+          canPop: false,
+          child: AlertDialog(
+            title: Text('Task Error'),
+            content: Text(errorMessage),
+            actions: [
+              OutlineButton(
+                onPressed: () => context.go("/home"),
+                child: Text('OK'),
+              ),
+            ],
+          ),
         );
       },
     );

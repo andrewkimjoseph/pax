@@ -153,7 +153,7 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
               overflow: TextOverflow.ellipsis,
             ),
             actions: [
-              TextButton(
+              OutlineButton(
                 onPressed: () {
                   context.pop();
                   context.pop();

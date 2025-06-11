@@ -158,7 +158,7 @@ class _TaskCompleteViewState extends ConsumerState<TaskCompleteView> {
                     // Display task completion ID if available (optional)
                     if (taskCompletion.result?.taskCompletionId != null)
                       Text(
-                        "Completion ID: ${taskCompletion.result!.taskCompletionId.substring(0, 8)}...",
+                        "Task Completion ID: ${taskCompletion.result!.taskCompletionId.substring(0, 8)}...",
                         style: TextStyle(
                           fontSize: 12,
                           color: PaxColors.darkGrey,
