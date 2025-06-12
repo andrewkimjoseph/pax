@@ -1,11 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pax/exports/views.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/remote_config/remote_config_provider.dart';
 import 'package:pax/utils/remote_config_constants.dart';
 import 'package:flutter/foundation.dart';
+import 'package:pax/providers/db/participant/participant_provider.dart';
+import 'package:pax/providers/db/tasks/task_provider.dart';
 
-import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' hide Consumer;
 
 import '../../theming/colors.dart' show PaxColors;
 
@@ -108,45 +111,173 @@ class _HomeViewState extends ConsumerState<HomeView> {
                             kDebugMode ||
                                     flags[RemoteConfigKeys.areTasksAvailable] ==
                                         true
-                                ? Button(
-                                  style: const ButtonStyle.primary(
-                                        density: ButtonDensity.dense,
-                                      )
-                                      .withBackgroundColor(
-                                        color:
-                                            index == 1
-                                                ? PaxColors.deepPurple
-                                                : Colors.transparent,
-                                      )
-                                      .withBorder(
-                                        border: Border.all(
-                                          color:
-                                              index == 1
-                                                  ? PaxColors.deepPurple
-                                                  : PaxColors.lilac,
-                                          width: 2,
-                                        ),
-                                      )
-                                      .withBorderRadius(
-                                        borderRadius: BorderRadius.circular(7),
+                                ? Consumer(
+                                  builder: (context, ref, child) {
+                                    final participant =
+                                        ref
+                                            .watch(participantProvider)
+                                            .participant;
+                                    final tasksStream = ref.watch(
+                                      availableTasksStreamProvider(
+                                        participant?.id,
                                       ),
-                                  onPressed: () {
-                                    setState(() {
-                                      screenName = 'Tasks';
-                                      index = 1;
-                                    });
-                                    ref.read(analyticsProvider).tasksTapped();
+                                    );
+
+                                    return tasksStream.when(
+                                      data:
+                                          (tasks) => Button(
+                                            style: const ButtonStyle.primary(
+                                                  density: ButtonDensity.dense,
+                                                )
+                                                .withBackgroundColor(
+                                                  color:
+                                                      index == 1
+                                                          ? PaxColors.deepPurple
+                                                          : Colors.transparent,
+                                                )
+                                                .withBorder(
+                                                  border: Border.all(
+                                                    color:
+                                                        index == 1
+                                                            ? PaxColors
+                                                                .deepPurple
+                                                            : tasks.isEmpty
+                                                            ? PaxColors.lilac
+                                                            : PaxColors
+                                                                .otherBlue,
+                                                    width: 2,
+                                                  ),
+                                                )
+                                                .withBorderRadius(
+                                                  borderRadius:
+                                                      BorderRadius.circular(7),
+                                                ),
+                                            onPressed: () {
+                                              setState(() {
+                                                screenName = 'Tasks';
+                                                index = 1;
+                                              });
+                                              ref
+                                                  .read(analyticsProvider)
+                                                  .tasksTapped();
+                                            },
+                                            child: Row(
+                                              children: [
+                                                Text(
+                                                  'Tasks',
+                                                  style: TextStyle(
+                                                    color:
+                                                        index == 1
+                                                            ? PaxColors.white
+                                                            : PaxColors.black,
+                                                  ),
+                                                ).withPadding(
+                                                  right:
+                                                      tasks.isNotEmpty ? 8 : 0,
+                                                ),
+                                                tasks.isNotEmpty
+                                                    ? FaIcon(
+                                                      FontAwesomeIcons
+                                                          .solidCircle,
+                                                      size: 12,
+                                                      color:
+                                                          PaxColors.otherBlue,
+                                                    )
+                                                    : const SizedBox.shrink(),
+                                              ],
+                                            ),
+                                          ).withPadding(right: 8),
+                                      loading:
+                                          () => Button(
+                                            style: const ButtonStyle.primary(
+                                                  density: ButtonDensity.dense,
+                                                )
+                                                .withBackgroundColor(
+                                                  color:
+                                                      index == 1
+                                                          ? PaxColors.deepPurple
+                                                          : Colors.transparent,
+                                                )
+                                                .withBorder(
+                                                  border: Border.all(
+                                                    color:
+                                                        index == 1
+                                                            ? PaxColors
+                                                                .deepPurple
+                                                            : PaxColors.lilac,
+                                                    width: 2,
+                                                  ),
+                                                )
+                                                .withBorderRadius(
+                                                  borderRadius:
+                                                      BorderRadius.circular(7),
+                                                ),
+                                            onPressed: () {
+                                              setState(() {
+                                                screenName = 'Tasks';
+                                                index = 1;
+                                              });
+                                              ref
+                                                  .read(analyticsProvider)
+                                                  .tasksTapped();
+                                            },
+                                            child: Text(
+                                              'Tasks',
+                                              style: TextStyle(
+                                                color:
+                                                    index == 1
+                                                        ? PaxColors.white
+                                                        : PaxColors.black,
+                                              ),
+                                            ),
+                                          ).withPadding(right: 8),
+                                      error:
+                                          (_, __) => Button(
+                                            style: const ButtonStyle.primary(
+                                                  density: ButtonDensity.dense,
+                                                )
+                                                .withBackgroundColor(
+                                                  color:
+                                                      index == 1
+                                                          ? PaxColors.deepPurple
+                                                          : Colors.transparent,
+                                                )
+                                                .withBorder(
+                                                  border: Border.all(
+                                                    color:
+                                                        index == 1
+                                                            ? PaxColors
+                                                                .deepPurple
+                                                            : PaxColors.lilac,
+                                                    width: 2,
+                                                  ),
+                                                )
+                                                .withBorderRadius(
+                                                  borderRadius:
+                                                      BorderRadius.circular(7),
+                                                ),
+                                            onPressed: () {
+                                              setState(() {
+                                                screenName = 'Tasks';
+                                                index = 1;
+                                              });
+                                              ref
+                                                  .read(analyticsProvider)
+                                                  .tasksTapped();
+                                            },
+                                            child: Text(
+                                              'Tasks',
+                                              style: TextStyle(
+                                                color:
+                                                    index == 1
+                                                        ? PaxColors.white
+                                                        : PaxColors.black,
+                                              ),
+                                            ),
+                                          ).withPadding(right: 8),
+                                    );
                                   },
-                                  child: Text(
-                                    'Tasks',
-                                    style: TextStyle(
-                                      color:
-                                          index == 1
-                                              ? PaxColors.white
-                                              : PaxColors.black,
-                                    ),
-                                  ),
-                                ).withPadding(right: 8)
+                                )
                                 : const SizedBox.shrink(),
                     loading: () => const SizedBox.shrink(),
                     error: (_, __) => const SizedBox.shrink(),
