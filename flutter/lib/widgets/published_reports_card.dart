@@ -115,7 +115,7 @@ class _ForumReportCardState extends ConsumerState<ForumReportCard> {
                             fontSize: 12,
                             color: PaxColors.black,
                           ),
-                          maxLines: 3,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),

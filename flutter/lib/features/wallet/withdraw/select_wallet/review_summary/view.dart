@@ -127,9 +127,15 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Processing your withdrawal...'),
+                CircularProgressIndicator().withPadding(bottom: 24),
+                Text(
+                  'Processing your withdrawal...',
+                  style: TextStyle(
+                    color: PaxColors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
               ],
             ),
           ),

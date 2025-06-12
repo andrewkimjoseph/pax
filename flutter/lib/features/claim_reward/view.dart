@@ -48,9 +48,7 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  SizedBox(height: 8),
+                  CircularProgressIndicator().withPadding(bottom: 24),
                   Text(
                     'Please wait while we process your claim...',
                     style: TextStyle(

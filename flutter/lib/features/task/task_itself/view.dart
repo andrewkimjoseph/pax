@@ -236,9 +236,15 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text(message),
+                CircularProgressIndicator().withPadding(bottom: 24),
+                Text(
+                  message,
+                  style: TextStyle(
+                    color: PaxColors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
               ],
             ),
           );
