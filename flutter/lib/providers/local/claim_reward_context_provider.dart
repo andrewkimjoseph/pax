@@ -7,6 +7,7 @@ class ClaimRewardContext {
   final num? amount;
   final int? tokenId;
   final String? txnHash;
+  bool? taskIsCompleted = false;
 
   ClaimRewardContext({
     this.screeningId,
@@ -15,6 +16,7 @@ class ClaimRewardContext {
     this.amount,
     this.tokenId,
     this.txnHash,
+    this.taskIsCompleted,
   });
 
   ClaimRewardContext copyWith({
@@ -24,6 +26,7 @@ class ClaimRewardContext {
     num? amount,
     int? tokenId,
     String? txnHash,
+    bool? taskIsCompleted,
   }) {
     return ClaimRewardContext(
       screeningId: screeningId ?? this.screeningId,
@@ -32,6 +35,7 @@ class ClaimRewardContext {
       amount: amount ?? this.amount,
       tokenId: tokenId ?? this.tokenId,
       txnHash: txnHash ?? this.txnHash,
+      taskIsCompleted: taskIsCompleted ?? this.taskIsCompleted,
     );
   }
 }
@@ -49,6 +53,7 @@ class ClaimRewardContextNotifier extends Notifier<ClaimRewardContext?> {
     num? amount,
     int? tokenId,
     String? txnHash,
+    bool? taskIsCompleted,
   }) {
     state = ClaimRewardContext(
       screeningId: screeningId,
@@ -57,6 +62,7 @@ class ClaimRewardContextNotifier extends Notifier<ClaimRewardContext?> {
       amount: amount,
       tokenId: tokenId,
       txnHash: txnHash,
+      taskIsCompleted: taskIsCompleted,
     );
   }
 

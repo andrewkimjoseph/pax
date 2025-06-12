@@ -229,6 +229,12 @@ class AnalyticsProvider {
       _logEvent('claim_reward_complete', properties: map);
   Future<void> claimRewardFailed(Map<String, String?> map) =>
       _logEvent('claim_reward_failed', properties: map);
+
+  Future<void> incompleteTaskCompletionTapped(Map<String, String?> map) =>
+      _logEvent('incomplete_task_tapped', properties: map);
+
+  Future<void> goHomeToCompleteTaskTapped(Map<String, String?> map) =>
+      _logEvent('go_home_to_complete_task_tapped', properties: map);
 }
 
 final analyticsProvider = Provider<AnalyticsProvider>((ref) {
