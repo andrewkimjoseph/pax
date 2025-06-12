@@ -10,6 +10,7 @@ import 'package:pax/providers/db/payment_method/payment_method_provider.dart';
 import 'package:pax/repositories/firestore/payment_method/payment_method_repository.dart';
 import 'package:pax/services/minipay/minipay_service.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
+import 'package:pax/utils/achievement_constants.dart';
 
 final paymentMethodRepositoryProvider = Provider<WithdrawalMethodRepository>((
   ref,
@@ -326,15 +327,16 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
             .createAchievement(
               timeCreated: Timestamp.now(),
               participantId: userId,
-              name: 'Payout Connector',
-              tasksNeededForCompletion: 1,
+              name: AchievementConstants.payoutConnector,
+              tasksNeededForCompletion:
+                  AchievementConstants.payoutConnectorTasksNeeded,
               tasksCompleted: 1,
               timeCompleted: Timestamp.now(),
-              amountEarned: 500,
+              amountEarned: AchievementConstants.payoutConnectorAmount,
             );
         ref.read(analyticsProvider).achievementCreated({
-          'achievementName': 'Payout Connector',
-          'amountEarned': 500,
+          'achievementName': AchievementConstants.payoutConnector,
+          'amountEarned': AchievementConstants.payoutConnectorAmount,
         });
         final fcmToken = await ref.read(fcmTokenProvider.future);
         if (fcmToken != null) {
@@ -343,8 +345,8 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
               .sendAchievementEarnedNotification(
                 token: fcmToken,
                 achievementData: {
-                  'achievementName': 'Payout Connector',
-                  'amountEarned': 500,
+                  'achievementName': AchievementConstants.payoutConnector,
+                  'amountEarned': AchievementConstants.payoutConnectorAmount,
                 },
               );
         }
@@ -354,15 +356,16 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
             .createAchievement(
               timeCreated: Timestamp.now(),
               participantId: userId,
-              name: 'Verified Human',
-              tasksNeededForCompletion: 1,
+              name: AchievementConstants.verifiedHuman,
+              tasksNeededForCompletion:
+                  AchievementConstants.verifiedHumanTasksNeeded,
               tasksCompleted: 1,
               timeCompleted: Timestamp.now(),
-              amountEarned: 500,
+              amountEarned: AchievementConstants.verifiedHumanAmount,
             );
         ref.read(analyticsProvider).achievementCreated({
-          'achievementName': 'Verified Human',
-          'amountEarned': 500,
+          'achievementName': AchievementConstants.verifiedHuman,
+          'amountEarned': AchievementConstants.verifiedHumanAmount,
         });
         if (fcmToken != null) {
           ref
@@ -370,8 +373,8 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
               .sendAchievementEarnedNotification(
                 token: fcmToken,
                 achievementData: {
-                  'achievementName': 'Verified Human',
-                  'amountEarned': 500,
+                  'achievementName': AchievementConstants.verifiedHuman,
+                  'amountEarned': AchievementConstants.verifiedHumanAmount,
                 },
               );
         }

@@ -8,6 +8,7 @@ import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/achievement/achievement_provider.dart';
 import 'package:pax/repositories/firestore/participant/participants_repository.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
+import 'package:pax/utils/achievement_constants.dart';
 
 // State for the participant provider
 enum ParticipantState { initial, loading, loaded, error }
@@ -152,11 +153,12 @@ class ParticipantNotifier extends Notifier<ParticipantStateModel> {
             .createAchievement(
               timeCreated: Timestamp.now(),
               participantId: state.participant!.id,
-              name: 'Profile Perfectionist',
-              tasksNeededForCompletion: 1,
+              name: AchievementConstants.profilePerfectionist,
+              tasksNeededForCompletion:
+                  AchievementConstants.profilePerfectionistTasksNeeded,
               tasksCompleted: 1,
               timeCompleted: Timestamp.now(),
-              amountEarned: 400,
+              amountEarned: AchievementConstants.profilePerfectionistAmount,
             );
         ref.read(analyticsProvider).achievementCreated({
           'achievementName': 'Profile Perfectionist',
@@ -169,8 +171,9 @@ class ParticipantNotifier extends Notifier<ParticipantStateModel> {
               .sendAchievementEarnedNotification(
                 token: fcmToken,
                 achievementData: {
-                  'achievementName': 'Profile Perfectionist',
-                  'amountEarned': 500,
+                  'achievementName': AchievementConstants.profilePerfectionist,
+                  'amountEarned':
+                      AchievementConstants.profilePerfectionistAmount,
                 },
               );
         }
