@@ -245,6 +245,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
   // Error dialog
   void _showErrorDialog(String errorMessage) {
     showDialog(
+      barrierDismissible: false,
       context: context,
       builder: (context) {
         return PopScope(
@@ -264,7 +265,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
             ),
             content: Text(
               errorMessage,
-              maxLines: 5,
+              maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
             actions: [

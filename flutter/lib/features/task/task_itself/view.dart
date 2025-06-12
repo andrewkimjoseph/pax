@@ -24,6 +24,7 @@ class TaskItselfView extends ConsumerStatefulWidget {
 class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
   late final WebViewController controller;
   bool isLoading = true;
+  bool _isCompleting = false; // Add flag to track completion state
 
   @override
   void initState() {
@@ -104,42 +105,48 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
 
   // Handle task completion
   void _handleTaskCompletion() {
-    final taskContext = ref.read(taskContextProvider);
-    final currentTask = taskContext?.task;
+    // Prevent multiple completion calls
+    if (_isCompleting) return;
+    _isCompleting = true;
 
-    final screening = ref.read(screeningContextProvider)?.screening;
+    try {
+      final taskContext = ref.read(taskContextProvider);
+      final currentTask = taskContext?.task;
+      final screening = ref.read(screeningContextProvider)?.screening;
 
-    if (currentTask == null) {
-      _showErrorDialog('Task not found');
-      return;
-    }
+      if (currentTask == null) {
+        throw Exception('Task not found');
+      }
 
-    if (screening == null) {
-      _showErrorDialog('Screening not found');
-      return;
-    }
+      if (screening == null) {
+        throw Exception('Screening not found');
+      }
 
-    // Show dialog and start the completion process
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder:
-          (dialogContext) => _buildCompletionDialog(
-            dialogContext,
-            screening.id,
-            currentTask.id,
-          ),
-    );
+      // Show dialog and start the completion process
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder:
+            (dialogContext) => _buildCompletionDialog(
+              dialogContext,
+              screening.id,
+              currentTask.id,
+            ),
+      );
 
-    // Start the task completion process
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Start the task completion process
       ref
           .read(taskCompletionServiceProvider)
           .markTaskAsComplete(
             screeningId: screening.id,
             taskId: currentTask.id,
           );
-    });
+    } catch (e) {
+      _isCompleting = false; // Reset flag on error
+      if (mounted) {
+        _showErrorDialog(e.toString());
+      }
+    }
   }
 
   // Dialog showing completion and rewarding process
@@ -262,7 +269,11 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
           canPop: false,
           child: AlertDialog(
             title: Text('Task Error'),
-            content: Text(errorMessage),
+            content: Text(
+              errorMessage,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
             actions: [
               OutlineButton(
                 onPressed: () => context.go("/home"),

@@ -52,8 +52,8 @@ class _RootViewState extends ConsumerState<RootView> {
 
   NavigationItem buildButton(String label, bool isSelected) {
     return NavigationItem(
-      style: const ButtonStyle.muted(density: ButtonDensity.icon),
-      selectedStyle: const ButtonStyle.fixed(density: ButtonDensity.icon),
+      style: const ButtonStyle.ghost(density: ButtonDensity.icon),
+      selectedStyle: const ButtonStyle.ghost(density: ButtonDensity.icon),
       label: Text(
         label,
         style: TextStyle(
