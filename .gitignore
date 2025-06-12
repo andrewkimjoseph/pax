@@ -16,3 +16,4 @@ flutter/.env
 # Branch keys
 flutter/android/app/src/main/res/values/branch_keys.xml
 flutter/lib/utils/secret_constants.dart
+flutter/android/.kotlin/sessions/kotlin-compiler-1739357723184447824.salive
