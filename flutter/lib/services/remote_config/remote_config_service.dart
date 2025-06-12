@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:pax/models/remote_config/app_version_config.dart';
 import 'package:pax/models/remote_config/maintenance_config.dart';
+import 'package:pax/utils/remote_config_constants.dart';
 import 'dart:convert';
 
 class RemoteConfigService {
@@ -33,23 +34,24 @@ class RemoteConfigService {
 
       // Set default values before fetching
       await _remoteConfig.setDefaults({
-        'app_version_config': json.encode({
-          'minimum_version': '1.0.0',
-          'current_version': '1.0.0',
-          'force_update': false,
-          'update_message': 'A new version is available',
-          'update_url':
+        RemoteConfigKeys.appVersionConfig: json.encode({
+          RemoteConfigKeys.minimumVersion: '1.0.0',
+          RemoteConfigKeys.currentVersion: '1.0.0',
+          RemoteConfigKeys.forceUpdate: false,
+          RemoteConfigKeys.updateMessage: 'A new version is available',
+          RemoteConfigKeys.updateUrl:
               'https://play.google.com/store/apps/details?id=app.thepax.android',
         }),
-        'maintenance_config': json.encode({
-          'is_under_maintenance': false,
-          'maintenance_message': 'The app is currently under maintenance',
+        RemoteConfigKeys.maintenanceConfig: json.encode({
+          RemoteConfigKeys.isUnderMaintenance: false,
+          RemoteConfigKeys.maintenanceMessage:
+              'The app is currently under maintenance',
         }),
-        'feature_flags': json.encode({
-          'is_wallet_available': true,
-          'are_achievements_available': true,
-          'are_tasks_available': true,
-          'are_tasks_completions_available': true,
+        RemoteConfigKeys.featureFlags: json.encode({
+          RemoteConfigKeys.isWalletAvailable: true,
+          RemoteConfigKeys.areAchievementsAvailable: true,
+          RemoteConfigKeys.areTasksAvailable: true,
+          RemoteConfigKeys.areTasksCompletionsAvailable: true,
         }),
       });
 
@@ -94,7 +96,9 @@ class RemoteConfigService {
         );
       }
 
-      final jsonString = _remoteConfig.getString('app_version_config');
+      final jsonString = _remoteConfig.getString(
+        RemoteConfigKeys.appVersionConfig,
+      );
       if (kDebugMode) {
         print('Remote Config Service: Raw config string: $jsonString');
       }
@@ -150,7 +154,9 @@ class RemoteConfigService {
         );
       }
 
-      final jsonString = _remoteConfig.getString('maintenance_config');
+      final jsonString = _remoteConfig.getString(
+        RemoteConfigKeys.maintenanceConfig,
+      );
       if (kDebugMode) {
         print(
           'Remote Config Service: Raw maintenance config string: $jsonString',
@@ -251,7 +257,7 @@ class RemoteConfigService {
     }
 
     try {
-      final jsonString = _remoteConfig.getString('feature_flags');
+      final jsonString = _remoteConfig.getString(RemoteConfigKeys.featureFlags);
       if (kDebugMode) {
         print('Remote Config Service: Raw feature flags string: $jsonString');
       }
@@ -259,10 +265,10 @@ class RemoteConfigService {
       if (jsonString.isEmpty) {
         // Return default config if no remote config is available
         return {
-          'is_wallet_available': true,
-          'are_achievements_available': true,
-          'are_tasks_available': true,
-          'are_tasks_completions_available': true,
+          RemoteConfigKeys.isWalletAvailable: true,
+          RemoteConfigKeys.areAchievementsAvailable: true,
+          RemoteConfigKeys.areTasksAvailable: true,
+          RemoteConfigKeys.areTasksCompletionsAvailable: true,
         };
       }
 
@@ -272,12 +278,14 @@ class RemoteConfigService {
       }
 
       return {
-        'is_wallet_available': configMap['is_wallet_available'] ?? true,
-        'are_achievements_available':
-            configMap['is_achievements_available'] ?? true,
-        'are_tasks_available': configMap['are_tasks_available'] ?? true,
-        'are_tasks_completions_available':
-            configMap['are_tasks_completions_available'] ?? true,
+        RemoteConfigKeys.isWalletAvailable:
+            configMap[RemoteConfigKeys.isWalletAvailable] ?? true,
+        RemoteConfigKeys.areAchievementsAvailable:
+            configMap[RemoteConfigKeys.areAchievementsAvailable] ?? true,
+        RemoteConfigKeys.areTasksAvailable:
+            configMap[RemoteConfigKeys.areTasksAvailable] ?? true,
+        RemoteConfigKeys.areTasksCompletionsAvailable:
+            configMap[RemoteConfigKeys.areTasksCompletionsAvailable] ?? true,
       };
     } catch (e) {
       if (kDebugMode) {
@@ -285,10 +293,10 @@ class RemoteConfigService {
       }
       // Return default config on error
       return {
-        'is_wallet_available': true,
-        'are_achievements_available': true,
-        'are_tasks_available': true,
-        'are_tasks_completions_available': true,
+        RemoteConfigKeys.isWalletAvailable: true,
+        RemoteConfigKeys.areAchievementsAvailable: true,
+        RemoteConfigKeys.areTasksAvailable: true,
+        RemoteConfigKeys.areTasksCompletionsAvailable: true,
       };
     }
   }

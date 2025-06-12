@@ -13,6 +13,7 @@ import 'package:pax/providers/remote_config/remote_config_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/currency_symbol.dart';
 import 'package:pax/utils/gradient_border.dart';
+import 'package:pax/utils/remote_config_constants.dart';
 import 'package:pax/utils/token_balance_util.dart';
 import 'package:pax/widgets/select_currency_button.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -147,7 +148,7 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
                   .when(
                     data: (flags) {
                       final isWalletAvailable =
-                          flags['is_wallet_available'] ?? false;
+                          flags[RemoteConfigKeys.isWalletAvailable] ?? false;
                       if (!isWalletAvailable) return const SizedBox.shrink();
 
                       return Button(
