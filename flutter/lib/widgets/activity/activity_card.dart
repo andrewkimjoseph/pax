@@ -10,6 +10,7 @@ import 'package:pax/providers/local/task_context/repository_providers.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/activity_type.dart';
 import 'package:pax/utils/currency_symbol.dart';
+import 'package:pax/utils/gradient_border.dart';
 import 'package:pax/utils/time_formatter.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:collection/collection.dart';
@@ -25,10 +26,15 @@ class ActivityCard extends ConsumerStatefulWidget {
 }
 
 class _ActivityCardState extends ConsumerState<ActivityCard> {
+  late bool activityIsRewarded;
+
+  late bool isTaskComplete;
+
   @override
-  Widget build(BuildContext context) {
-    final ref = this.ref;
-    final activityIsRewarded =
+  void initState() {
+    super.initState();
+
+    activityIsRewarded =
         widget.activity.taskCompletion != null &&
         widget.allActivities.any(
           (activity) =>
@@ -38,62 +44,88 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
                   widget.activity.taskCompletion?.id,
         );
 
+    isTaskComplete =
+        widget.activity.taskCompletion != null && !widget.activity.isComplete;
+  }
+
+  void _callBackFn() async {
+    final taskId = widget.activity.taskCompletion?.taskId;
+    final screeningId = widget.activity.taskCompletion?.screeningId;
+    final taskCompletionId = widget.activity.taskCompletion?.id;
+
+    // Find the matching reward in allActivities
+    final matchingReward = widget.allActivities.firstWhereOrNull(
+      (a) =>
+          a.reward != null &&
+          a.reward?.taskCompletionId == taskCompletionId &&
+          a.reward?.txnHash != null,
+    );
+
+    final task = await ref.read(tasksRepositoryProvider).getTaskById(taskId);
+
+    final amount = task?.rewardAmountPerParticipant;
+    final tokenId = task?.rewardCurrencyId;
+
+    ref
+        .read(claimRewardContextProvider.notifier)
+        .setContext(
+          screeningId: screeningId,
+          taskId: taskId,
+          taskCompletionId: taskCompletionId,
+          amount: amount,
+          tokenId: tokenId,
+          txnHash: matchingReward?.reward?.txnHash,
+          taskIsCompleted: widget.activity.isComplete,
+        );
+
+    if (!isTaskComplete) {
+      ref.read(analyticsProvider).incompleteTaskCompletionTapped({
+        "taskId": taskId,
+        "screeningId": screeningId,
+      });
+    }
+
+    if (!activityIsRewarded) {
+      ref.read(analyticsProvider).unrewardedTaskCompletionTapped({
+        "taskId": taskId,
+        "screeningId": screeningId,
+        "taskCompletionId": taskCompletionId,
+      });
+    }
+
+    if (mounted) {
+      context.push("/claim-reward");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return InkWell(
       onTap:
-          widget.activity.taskCompletion != null
-              ? () async {
-                final taskId = widget.activity.taskCompletion?.taskId;
-                final screeningId = widget.activity.taskCompletion?.screeningId;
-                final taskCompletionId = widget.activity.taskCompletion?.id;
-
-                // Find the matching reward in allActivities
-                final matchingReward = widget.allActivities.firstWhereOrNull(
-                  (a) =>
-                      a.reward != null &&
-                      a.reward?.taskCompletionId == taskCompletionId &&
-                      a.reward?.txnHash != null,
-                );
-
-                final task = await ref
-                    .read(tasksRepositoryProvider)
-                    .getTaskById(taskId);
-
-                final amount = task?.rewardAmountPerParticipant;
-                final tokenId = task?.rewardCurrencyId;
-
-                ref
-                    .read(claimRewardContextProvider.notifier)
-                    .setContext(
-                      screeningId: screeningId,
-                      taskId: taskId,
-                      taskCompletionId: taskCompletionId,
-                      amount: amount,
-                      tokenId: tokenId,
-                      txnHash: matchingReward?.reward?.txnHash,
-                    );
-
-                if (!activityIsRewarded) {
-                  ref.read(analyticsProvider).unrewardedTaskCompletionTapped({
-                    "taskId": taskId,
-                    "screeningId": screeningId,
-                    "taskCompletionId": taskCompletionId,
-                  });
-                }
-
-                if (context.mounted) {
-                  context.push("/claim-reward");
-                }
-              }
-              : null,
+          widget.activity.taskCompletion != null ? () => _callBackFn() : null,
       child: Container(
         width: MediaQuery.of(context).size.width,
 
         padding: EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: PaxColors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: PaxColors.lightLilac, width: 1),
-        ),
+        decoration:
+            isTaskComplete && !activityIsRewarded
+                ? ShapeDecoration(
+                  shape: GradientBorder(
+                    gradient: LinearGradient(
+                      colors: PaxColors.orangeToPinkGradient,
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    width: 1,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  color: Colors.white,
+                )
+                : BoxDecoration(
+                  color: PaxColors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: PaxColors.lightLilac, width: 1),
+                ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

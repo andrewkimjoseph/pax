@@ -352,6 +352,7 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
       ref.read(analyticsProvider).claimAchievementFailed({
         'achievementId': widget.achievement.id,
         'achievementName': widget.achievement.name,
+        'error': e.toString(),
       });
       // Show error dialog
       showDialog(
