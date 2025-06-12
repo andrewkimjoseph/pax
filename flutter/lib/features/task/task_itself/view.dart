@@ -206,6 +206,7 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
               "taskId": taskId,
               "screeningId": screeningId,
               "taskCompletionId": taskCompletionId,
+              "error": rewardState.errorMessage,
             });
 
             // Dismiss the dialog after a short delay

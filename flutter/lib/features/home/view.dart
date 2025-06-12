@@ -7,9 +7,8 @@ import 'package:pax/utils/remote_config_constants.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/db/tasks/task_provider.dart';
-
+import 'package:pax/providers/route/home_selected_index_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Consumer;
-
 import '../../theming/colors.dart' show PaxColors;
 
 class HomeView extends ConsumerStatefulWidget {
@@ -20,17 +19,12 @@ class HomeView extends ConsumerStatefulWidget {
 }
 
 class _HomeViewState extends ConsumerState<HomeView> {
-  int index = 0;
   String? screenName;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
     final featureFlags = ref.watch(featureFlagsProvider);
+    final index = ref.watch(homeSelectedIndexProvider);
 
     return Scaffold(
       headers: [
@@ -94,8 +88,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     onPressed: () {
                       setState(() {
                         screenName = 'Dashboard';
-                        index = 0;
                       });
+                      ref.read(homeSelectedIndexProvider.notifier).setIndex(0);
                       ref.read(analyticsProvider).dashboardTapped();
                     },
                     child: Text(
@@ -143,8 +137,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                                                 .deepPurple
                                                             : tasks.isEmpty
                                                             ? PaxColors.lilac
-                                                            : PaxColors
-                                                                .otherBlue,
+                                                            : PaxColors.green,
                                                     width: 2,
                                                   ),
                                                 )
@@ -155,8 +148,13 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                             onPressed: () {
                                               setState(() {
                                                 screenName = 'Tasks';
-                                                index = 1;
                                               });
+                                              ref
+                                                  .read(
+                                                    homeSelectedIndexProvider
+                                                        .notifier,
+                                                  )
+                                                  .setIndex(1);
                                               ref
                                                   .read(analyticsProvider)
                                                   .tasksTapped();
@@ -180,8 +178,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                                       FontAwesomeIcons
                                                           .solidCircle,
                                                       size: 12,
-                                                      color:
-                                                          PaxColors.otherBlue,
+                                                      color: PaxColors.green,
                                                     )
                                                     : const SizedBox.shrink(),
                                               ],
@@ -215,8 +212,13 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                             onPressed: () {
                                               setState(() {
                                                 screenName = 'Tasks';
-                                                index = 1;
                                               });
+                                              ref
+                                                  .read(
+                                                    homeSelectedIndexProvider
+                                                        .notifier,
+                                                  )
+                                                  .setIndex(1);
                                               ref
                                                   .read(analyticsProvider)
                                                   .tasksTapped();
@@ -259,8 +261,13 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                             onPressed: () {
                                               setState(() {
                                                 screenName = 'Tasks';
-                                                index = 1;
                                               });
+                                              ref
+                                                  .read(
+                                                    homeSelectedIndexProvider
+                                                        .notifier,
+                                                  )
+                                                  .setIndex(1);
                                               ref
                                                   .read(analyticsProvider)
                                                   .tasksTapped();
@@ -314,8 +321,12 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                   onPressed: () {
                                     setState(() {
                                       screenName = 'Achievements';
-                                      index = 2;
                                     });
+                                    ref
+                                        .read(
+                                          homeSelectedIndexProvider.notifier,
+                                        )
+                                        .setIndex(2);
                                   },
                                   child: Text(
                                     'Achievements',
@@ -338,32 +349,54 @@ class _HomeViewState extends ConsumerState<HomeView> {
         ),
         Divider(color: PaxColors.lightGrey),
       ],
-      child: IndexedStack(
-        index: index,
-        children: [
-          DashboardView(),
-          featureFlags.when(
-            data:
-                (flags) =>
-                    kDebugMode ||
-                            flags[RemoteConfigKeys.areTasksAvailable] == true
-                        ? TasksView()
-                        : const SizedBox.shrink(),
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
-          featureFlags.when(
-            data:
-                (flags) =>
-                    kDebugMode ||
-                            flags[RemoteConfigKeys.areAchievementsAvailable] ==
-                                true
-                        ? AchievementsView()
-                        : const SizedBox.shrink(),
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
-        ],
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        child:
+            index == 0
+                ? DashboardView(key: const ValueKey('dashboard'))
+                : index == 1
+                ? featureFlags.when(
+                  data:
+                      (flags) =>
+                          kDebugMode ||
+                                  flags[RemoteConfigKeys.areTasksAvailable] ==
+                                      true
+                              ? TasksView(key: const ValueKey('tasks'))
+                              : const SizedBox.shrink(
+                                key: ValueKey('empty_tasks'),
+                              ),
+                  loading:
+                      () =>
+                          const SizedBox.shrink(key: ValueKey('loading_tasks')),
+                  error:
+                      (_, __) =>
+                          const SizedBox.shrink(key: ValueKey('error_tasks')),
+                )
+                : featureFlags.when(
+                  data:
+                      (flags) =>
+                          kDebugMode ||
+                                  flags[RemoteConfigKeys
+                                          .areAchievementsAvailable] ==
+                                      true
+                              ? AchievementsView(
+                                key: const ValueKey('achievements'),
+                              )
+                              : const SizedBox.shrink(
+                                key: ValueKey('empty_achievements'),
+                              ),
+                  loading:
+                      () => const SizedBox.shrink(
+                        key: ValueKey('loading_achievements'),
+                      ),
+                  error:
+                      (_, __) => const SizedBox.shrink(
+                        key: ValueKey('error_achievements'),
+                      ),
+                ),
       ),
     );
   }

@@ -121,6 +121,7 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
         "taskId": currentTask.id,
         "taskManagerContractAddress": taskManagerContractAddress,
         "taskMasterServerWalletId": taskMasterServerWalletId,
+        "error": e.toString(),
       });
 
       if (context.mounted) {

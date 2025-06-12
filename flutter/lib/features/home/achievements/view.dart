@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/achievement/achievement_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/theming/colors.dart';
@@ -20,15 +19,15 @@ class AchievementsView extends ConsumerStatefulWidget {
 class _AchievementsViewState extends ConsumerState<AchievementsView> {
   int index = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    // Load achievements when the page is initialized
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final participantId = ref.read(authProvider).user.uid;
-      ref.read(achievementProvider.notifier).fetchAchievements(participantId);
-    });
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   // Load achievements when the page is initialized
+  //   WidgetsBinding.instance.addPostFrameCallback((_) {
+  //     final participantId = ref.read(authProvider).user.uid;
+  //     ref.read(achievementProvider.notifier).fetchAchievements(participantId);
+  //   });
+  // }
 
   bool _isProfileComplete(Participant? participant) {
     if (participant == null) return false;

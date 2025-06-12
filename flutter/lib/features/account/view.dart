@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/local/activity_providers.dart';
-import 'package:pax/providers/route/selected_index_provider.dart';
+import 'package:pax/providers/route/root_selected_index_provider.dart';
 import 'package:pax/utils/token_balance_util.dart';
 import 'package:pax/widgets/account/account_option_card.dart';
 import 'package:pax/widgets/toast.dart';
@@ -377,7 +377,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
                         ref.read(authProvider.notifier).signOut();
 
                         ref.read(analyticsProvider).logoutComplete();
-                        ref.read(selectedIndexProvider.notifier).reset();
+                        ref.read(rootSelectedIndexProvider.notifier).reset();
                       },
                       child: Text(
                         'Yes, Logout',

@@ -13,7 +13,7 @@ import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/account/account_deletion_provider.dart';
-import 'package:pax/providers/route/selected_index_provider.dart';
+import 'package:pax/providers/route/root_selected_index_provider.dart';
 import 'package:pax/widgets/account/account_and_security_card.dart';
 import 'package:pax/widgets/account/account_option_card.dart';
 import 'package:pax/widgets/help_and_support.dart';
@@ -155,7 +155,7 @@ class _DeleteAccountDrawerState extends ConsumerState<DeleteAccountDrawer> {
       ref.read(analyticsProvider).accountDeletionComplete();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         // Reset the selected index
-        ref.read(selectedIndexProvider.notifier).reset();
+        ref.read(rootSelectedIndexProvider.notifier).reset();
 
         showToast(
           context: context,

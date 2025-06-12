@@ -2,6 +2,8 @@ import 'package:flutter/material.dart' show Divider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
+import 'package:pax/providers/route/home_selected_index_provider.dart';
+import 'package:pax/providers/route/root_selected_index_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/services/reward_service.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
@@ -179,6 +181,19 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
     );
   }
 
+  void _goHome(BuildContext context) {
+    final claimContext = ref.read(claimRewardContextProvider);
+    final taskCompletionId = claimContext?.taskCompletionId;
+
+    ref.read(analyticsProvider).goHomeToCompleteTaskTapped({
+      "taskCompletionId": taskCompletionId,
+    });
+    ref.read(rootSelectedIndexProvider.notifier).setIndex(0);
+    ref.read(claimRewardContextProvider.notifier).clear();
+    ref.read(homeSelectedIndexProvider.notifier).setIndex(1);
+    context.go("/home");
+  }
+
   @override
   Widget build(BuildContext context) {
     final claimContext = ref.watch(claimRewardContextProvider);
@@ -186,8 +201,8 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
     final amount = claimContext?.amount;
     final tokenId = claimContext?.tokenId;
     final txnHash = claimContext?.txnHash;
+    final taskIsCompleted = claimContext?.taskIsCompleted;
 
-    // For now, we don't have the reward amount or currency, so just show the SVG and completion ID
     return Scaffold(
       resizeToAvoidBottomInset: false,
       headers: [
@@ -209,16 +224,24 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
                 child: Button(
                   style: ButtonStyle.primary(),
                   onPressed:
-                      (isClaiming || (txnHash != null && txnHash.isNotEmpty))
+                      (isClaiming ||
+                              (txnHash != null && txnHash.isNotEmpty) ||
+                              taskIsCompleted == true)
                           ? null
+                          : taskIsCompleted == false
+                          ? () => _goHome(context)
                           : () => _claimReward(context),
                   child:
                       isClaiming
                           ? const CircularProgressIndicator()
                           : Text(
-                            (txnHash != null && txnHash.isNotEmpty)
+                            taskIsCompleted == false
+                                ? 'Complete Task'
+                                : (txnHash != null && txnHash.isNotEmpty)
                                 ? 'Claimed'
-                                : 'Claim',
+                                : isClaiming
+                                ? 'Claiming...'
+                                : 'Claim Reward',
                             style: Theme.of(context).typography.base.copyWith(
                               fontWeight: FontWeight.normal,
                               fontSize: 14,
@@ -245,7 +268,9 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        "You earned",
+                        taskIsCompleted == false
+                            ? "You will earn"
+                            : "You earned",
                         textAlign: TextAlign.left,
                         style: TextStyle(
                           fontSize: 16,

@@ -1,10 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:pax/exports/views.dart';
-import 'package:pax/providers/route/selected_index_provider.dart';
-
+import 'package:pax/providers/route/root_selected_index_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-
 import '../../theming/colors.dart' show PaxColors;
 
 class RootView extends ConsumerStatefulWidget {
@@ -17,7 +15,7 @@ class RootView extends ConsumerStatefulWidget {
 class _RootViewState extends ConsumerState<RootView> {
   @override
   Widget build(BuildContext context) {
-    final selected = ref.watch(selectedIndexProvider);
+    final selected = ref.watch(rootSelectedIndexProvider);
 
     return Scaffold(
       footers: [
@@ -30,7 +28,7 @@ class _RootViewState extends ConsumerState<RootView> {
               expanded: true,
               expands: false,
               onSelected: (index) {
-                ref.read(selectedIndexProvider.notifier).setIndex(index);
+                ref.read(rootSelectedIndexProvider.notifier).setIndex(index);
               },
               index: selected,
               children: [
@@ -42,10 +40,17 @@ class _RootViewState extends ConsumerState<RootView> {
           ),
         ),
       ],
-
-      child: IndexedStack(
-        index: selected,
-        children: [HomeView(), ActivityView(), AccountView()],
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        child:
+            selected == 0
+                ? HomeView(key: const ValueKey('home'))
+                : selected == 1
+                ? ActivityView(key: const ValueKey('activity'))
+                : AccountView(key: const ValueKey('account')),
       ),
     );
   }
