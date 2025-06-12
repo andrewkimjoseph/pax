@@ -3,6 +3,7 @@ import 'package:amplitude_flutter/configuration.dart';
 import 'package:amplitude_flutter/default_tracking.dart';
 import 'package:amplitude_flutter/events/base_event.dart';
 import 'package:amplitude_flutter/events/identify.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -12,6 +13,8 @@ class AnalyticsService {
   factory AnalyticsService() => _instance;
 
   late final Amplitude _amplitude;
+
+  late final FirebaseAnalytics _firebaseAnalytics;
   bool _isInitialized = false;
 
   AnalyticsService._internal();
@@ -49,6 +52,8 @@ class AnalyticsService {
           defaultTracking: DefaultTrackingOptions.all(),
         ),
       );
+
+      _firebaseAnalytics = FirebaseAnalytics.instance;
       _isInitialized = await _amplitude.isBuilt;
       if (kDebugMode) print('Analytics Service: Successfully initialized');
     } catch (e) {
@@ -60,6 +65,7 @@ class AnalyticsService {
   Future<void> setUserId(String participantId) async {
     if (!_isInitialized) return;
     await _amplitude.setUserId(participantId);
+    await _firebaseAnalytics.setUserId(id: participantId);
   }
 
   /// Logs an event with optional properties.
@@ -76,6 +82,10 @@ class AnalyticsService {
 
     await _amplitude.track(
       BaseEvent(eventName, eventProperties: convertedProperties),
+    );
+    await _firebaseAnalytics.logEvent(
+      name: eventName,
+      parameters: convertedProperties,
     );
   }
 
