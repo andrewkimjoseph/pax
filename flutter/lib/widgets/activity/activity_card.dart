@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pax/models/local/activity_model.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/local/claim_reward_context_provider.dart';
+import 'package:pax/providers/local/task_context/repository_providers.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/activity_type.dart';
 import 'package:pax/utils/currency_symbol.dart';
@@ -40,7 +41,7 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
     return InkWell(
       onTap:
           widget.activity.taskCompletion != null
-              ? () {
+              ? () async {
                 final taskId = widget.activity.taskCompletion?.taskId;
                 final screeningId = widget.activity.taskCompletion?.screeningId;
                 final taskCompletionId = widget.activity.taskCompletion?.id;
@@ -52,8 +53,13 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
                       a.reward?.taskCompletionId == taskCompletionId &&
                       a.reward?.txnHash != null,
                 );
-                final amount = matchingReward?.reward?.amountReceived;
-                final tokenId = matchingReward?.reward?.rewardCurrencyId;
+
+                final task = await ref
+                    .read(tasksRepositoryProvider)
+                    .getTaskById(taskId);
+
+                final amount = task?.rewardAmountPerParticipant;
+                final tokenId = task?.rewardCurrencyId;
 
                 ref
                     .read(claimRewardContextProvider.notifier)
@@ -66,14 +72,16 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
                       txnHash: matchingReward?.reward?.txnHash,
                     );
 
-                context.push("/claim-reward");
-
                 if (!activityIsRewarded) {
                   ref.read(analyticsProvider).unrewardedTaskCompletionTapped({
                     "taskId": taskId,
                     "screeningId": screeningId,
                     "taskCompletionId": taskCompletionId,
                   });
+                }
+
+                if (context.mounted) {
+                  context.push("/claim-reward");
                 }
               }
               : null,

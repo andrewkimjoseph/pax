@@ -21,7 +21,7 @@ import 'package:pax/providers/local/task_context/repository_providers.dart';
 /// It uses the tasks repository to fetch and maintain the task data.
 final taskProvider = StreamProvider.family<Task?, String>((ref, taskId) {
   final repository = ref.watch(tasksRepositoryProvider);
-  return repository.getTaskById(taskId);
+  return repository.streamTaskById(taskId);
 });
 
 /// Provider to check if a task is currently selected.

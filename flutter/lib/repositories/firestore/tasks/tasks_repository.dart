@@ -167,7 +167,7 @@ class TasksRepository {
   }
 
   // Get a single task by ID
-  Stream<Task?> getTaskById(String taskId) {
+  Stream<Task?> streamTaskById(String? taskId) {
     return _tasksCollection.doc(taskId).snapshots().map((doc) {
       if (doc.exists) {
         return Task.fromFirestore(doc);
@@ -175,6 +175,23 @@ class TasksRepository {
         return null;
       }
     });
+  }
+
+  // Get a single task by ID (Future)
+  Future<Task?> getTaskById(String? taskId) async {
+    try {
+      final doc = await _tasksCollection.doc(taskId).get();
+      if (doc.exists) {
+        return Task.fromFirestore(doc);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error retrieving task by id: $e');
+      }
+      return null;
+    }
   }
 
   // Get the server wallet ID for a task master
