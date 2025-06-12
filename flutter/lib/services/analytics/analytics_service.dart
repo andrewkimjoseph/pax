@@ -7,7 +7,6 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// A service class that handles all analytics events using Amplitude.
 class AnalyticsService {
   static final AnalyticsService _instance = AnalyticsService._internal();
   factory AnalyticsService() => _instance;
@@ -100,6 +99,14 @@ class AnalyticsService {
       identity.set(property, value);
     });
     await _amplitude.identify(identity);
+
+    // Set each property in Firebase Analytics
+    for (final entry in convertedProperties.entries) {
+      await _firebaseAnalytics.setUserProperty(
+        name: entry.key,
+        value: entry.value,
+      );
+    }
   }
 
   /// Resets the user ID and clears all user properties.
