@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pax/models/firestore/achievement/achievement_model.dart';
 
 class AchievementRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFunctions _functions = FirebaseFunctions.instance;
   final String collectionName = 'achievements';
 
   // Create a new achievement
@@ -97,6 +99,48 @@ class AchievementRepository {
         print('Error updating achievement: $e');
       }
       rethrow;
+    }
+  }
+
+  /// Processes an achievement claim by calling the cloud function and updating the achievement with the transaction hash.
+  ///
+  /// Parameters:
+  /// - achievementId: The ID of the achievement to claim
+  /// - paxAccountContractAddress: The user's PAX account contract address
+  /// - amountEarned: The amount earned for this achievement
+  /// - tasksCompleted: The number of tasks completed for this achievement
+  ///
+  /// Returns the transaction hash of the claim.
+  Future<String> processAchievementClaim({
+    required String achievementId,
+    required String paxAccountContractAddress,
+    required num amountEarned,
+    required int tasksCompleted,
+  }) async {
+    try {
+      final result = await _functions
+          .httpsCallable('processAchievementClaim')
+          .call({
+            'achievementId': achievementId,
+            'paxAccountContractAddress': paxAccountContractAddress,
+            'amountEarned': amountEarned,
+            'tasksCompleted': tasksCompleted,
+          });
+
+      final txnHash = result.data['txnHash'] as String;
+
+      // Update the achievement with the transaction hash
+      await _firestore.collection(collectionName).doc(achievementId).update({
+        'txnHash': txnHash,
+        'timeClaimed': Timestamp.now(),
+      });
+
+      return txnHash;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error processing achievement claim: $e');
+      }
+      throw Exception('Failed to process achievement claim: $e');
     }
   }
 }
