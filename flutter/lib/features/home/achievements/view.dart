@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/achievement/achievement_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/theming/colors.dart';
@@ -20,19 +19,6 @@ class AchievementsView extends ConsumerStatefulWidget {
 class _AchievementsViewState extends ConsumerState<AchievementsView> {
   int index = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final participantId = ref.read(authProvider).user.uid;
-      final achievementState = ref.read(achievementProvider);
-
-      if (achievementState.state == AchievementState.initial) {
-        ref.read(achievementProvider.notifier).fetchAchievements(participantId);
-      }
-    });
-  }
-
   bool _isProfileComplete(Participant? participant) {
     if (participant == null) return false;
     return participant.displayName != null &&
@@ -46,27 +32,6 @@ class _AchievementsViewState extends ConsumerState<AchievementsView> {
     final achievementState = ref.watch(achievementProvider);
     final participant = ref.watch(participantProvider).participant;
     final isProfileComplete = _isProfileComplete(participant);
-
-    List<Achievement> filterAchievements(List<Achievement> achievements) {
-      switch (index) {
-        case 0: // All
-          return achievements;
-        case 1: // Earned
-          return achievements
-              .where((a) => a.status == AchievementStatus.earned)
-              .toList();
-        case 2: // In Progress
-          return achievements
-              .where((a) => a.status == AchievementStatus.inProgress)
-              .toList();
-        case 3: // Claimed
-          return achievements
-              .where((a) => a.status == AchievementStatus.claimed)
-              .toList();
-        default:
-          return achievements;
-      }
-    }
 
     return Scaffold(
       child: SingleChildScrollView(
@@ -212,5 +177,26 @@ class _AchievementsViewState extends ConsumerState<AchievementsView> {
         ).withPadding(all: 8),
       ),
     );
+  }
+
+  List<Achievement> filterAchievements(List<Achievement> achievements) {
+    switch (index) {
+      case 0: // All
+        return achievements;
+      case 1: // Earned
+        return achievements
+            .where((a) => a.status == AchievementStatus.earned)
+            .toList();
+      case 2: // In Progress
+        return achievements
+            .where((a) => a.status == AchievementStatus.inProgress)
+            .toList();
+      case 3: // Claimed
+        return achievements
+            .where((a) => a.status == AchievementStatus.claimed)
+            .toList();
+      default:
+        return achievements;
+    }
   }
 }

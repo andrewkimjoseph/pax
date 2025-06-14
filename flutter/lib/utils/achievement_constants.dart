@@ -1,11 +1,11 @@
 // Achievement names and amounts constants
 class AchievementConstants {
   // Achievement Names
-  static const String taskStarter = 'Task Starter';
-  static const String taskExpert = 'Task Expert';
-  static const String profilePerfectionist = 'Profile Perfectionist';
-  static const String payoutConnector = 'Payout Connector';
-  static const String verifiedHuman = 'Verified Human';
+  static const String taskStarter = "Task Starter";
+  static const String taskExpert = "Task Expert";
+  static const String profilePerfectionist = "Profile Perfectionist";
+  static const String payoutConnector = "Payout Connector";
+  static const String verifiedHuman = "Verified Human";
 
   // Achievement Amounts
   static const int taskStarterAmount = 100;

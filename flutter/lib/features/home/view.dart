@@ -2,6 +2,8 @@ import 'package:flutter/material.dart' show Badge;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/exports/views.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
+import 'package:pax/providers/auth/auth_provider.dart';
+import 'package:pax/providers/db/achievement/achievement_provider.dart';
 import 'package:pax/providers/remote_config/remote_config_provider.dart';
 import 'package:pax/utils/remote_config_constants.dart';
 import 'package:flutter/foundation.dart';
@@ -20,6 +22,19 @@ class HomeView extends ConsumerStatefulWidget {
 
 class _HomeViewState extends ConsumerState<HomeView> {
   String? screenName;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final participantId = ref.read(authProvider).user.uid;
+      final achievementState = ref.read(achievementProvider);
+
+      if (achievementState.state == AchievementState.initial) {
+        ref.read(achievementProvider.notifier).fetchAchievements(participantId);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

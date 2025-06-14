@@ -42,7 +42,7 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
     final userId = ref.watch(authProvider).user.uid;
 
     // Watch for activities based on the current filter
-    final activitiesAsync = ref.watch(filteredActivitiesProvider);
+    final filteredActivitiesAsync = ref.watch(filteredActivitiesProvider);
     // Watch for all activities (unfiltered)
     final allActivitiesAsync = ref.watch(allActivitiesProvider(userId));
     // Watch feature flags
@@ -204,7 +204,7 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
           if (selectedIndex == 0 && !showTaskCompletions) {
             return const SizedBox.shrink();
           }
-          return activitiesAsync.when(
+          return filteredActivitiesAsync.when(
             skipLoadingOnRefresh: false,
             data: (activities) {
               return allActivitiesAsync.when(

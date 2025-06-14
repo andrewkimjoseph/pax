@@ -53,7 +53,6 @@ class TaskCompletionService {
       // Create achievements
       final authState = ref.read(authProvider);
 
-      // Get existing achievements
       final achievements = ref.read(achievementProvider).achievements;
       final hasTaskStarter = achievements.any(
         (a) =>
@@ -154,9 +153,7 @@ class TaskCompletionService {
         });
       }
 
-      await ref
-          .read(achievementProvider.notifier)
-          .fetchAchievements(authState.user.uid);
+      ref.invalidate(achievementProvider);
 
       ref.invalidate(activityRepositoryProvider);
 

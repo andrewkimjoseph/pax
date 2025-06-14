@@ -43,7 +43,6 @@ class AchievementNotifier extends Notifier<AchievementStateModel> {
 
   @override
   AchievementStateModel build() {
-    ref.keepAlive();
     _repository = ref.watch(achievementRepositoryProvider);
     return AchievementStateModel();
   }
@@ -72,9 +71,6 @@ class AchievementNotifier extends Notifier<AchievementStateModel> {
         timeCompleted: timeCompleted,
         amountEarned: amountEarned,
       );
-
-      // Refresh achievements
-      await fetchAchievements(participantId);
     } catch (e) {
       state = state.copyWith(
         state: AchievementState.error,
@@ -134,6 +130,6 @@ class AchievementNotifier extends Notifier<AchievementStateModel> {
 
 // Provider for achievement state
 final achievementProvider =
-    NotifierProvider.autoDispose<AchievementNotifier, AchievementStateModel>(
+    NotifierProvider<AchievementNotifier, AchievementStateModel>(
       () => AchievementNotifier(),
     );
