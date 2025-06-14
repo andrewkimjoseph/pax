@@ -1,13 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:pax/data/forum_reports.dart';
-import 'package:pax/extensions/tooltip.dart';
-import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/theming/colors.dart';
-import 'package:pax/utils/url_handler.dart';
 import 'package:pax/widgets/current_balance_card.dart';
 import 'package:pax/widgets/published_reports_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:pax/widgets/x_follow_card.dart';
 
 class DashboardView extends ConsumerStatefulWidget {
   const DashboardView({super.key});
@@ -34,89 +32,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
           children: [
             const CurrentBalanceCard('/wallet').withPadding(bottom: 8),
 
-            Container(
-              height: 120,
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: PaxColors.black,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: SvgPicture.asset(
-                      'lib/assets/svgs/x_white.svg',
-                      colorFilter: ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.srcIn,
-                      ),
-                      height: 32,
-                    ),
-                  ).withPadding(right: 12),
-
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Join the tribe!',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            fontSize: 18,
-                            color: PaxColors.white,
-                          ),
-                        ).withPadding(bottom: 8),
-
-                        Text(
-                          "Our X followers get early access to 30% more high-paying surveys.",
-                          style: TextStyle(
-                            fontWeight: FontWeight.normal,
-                            fontSize: 14,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: Button(
-                      onPressed: () {
-                        ref.read(analyticsProvider).xFollowTapped();
-                        UrlHandler.launchInExternalBrowser(
-                          'https://x.com/thecanvassing',
-                        );
-                      },
-                      disableHoverEffect: true,
-                      disableTransition: true,
-                      style: ButtonStyle.outline(density: ButtonDensity.dense)
-                          .withBorder(border: Border.all(color: Colors.white))
-                          .withBorderRadius(
-                            borderRadius: BorderRadius.circular(20),
-                            hoverBorderRadius: BorderRadius.circular(20),
-                          ),
-                      trailing: SvgPicture.asset(
-                        'lib/assets/svgs/arrow_icon.svg',
-                        colorFilter: ColorFilter.mode(
-                          Colors.white,
-                          BlendMode.srcIn,
-                        ),
-                        height: 16,
-                      ),
-                      child: const Text(
-                        "Follow",
-                        style: TextStyle(color: PaxColors.white),
-                      ),
-                    ).withToolTip('Follow us on X.'),
-                  ),
-                ],
-              ),
-            ).withPadding(bottom: 8),
+            const XFollowCard().withPadding(bottom: 8),
 
             SizedBox(
               height: MediaQuery.of(context).size.width / 2,
