@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/local/activity_providers.dart';
+import 'package:pax/providers/route/home_selected_index_provider.dart';
 import 'package:pax/providers/route/root_selected_index_provider.dart';
 import 'package:pax/utils/token_balance_util.dart';
 import 'package:pax/widgets/account/account_option_card.dart';
@@ -302,7 +303,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
       context: context,
       transformBackdrop: false,
       expands: false,
-      builder: (context) {
+      builder: (drawerContext) {
         return Container(
           padding: const EdgeInsets.all(4),
           child: Column(
@@ -371,12 +372,16 @@ class _AccountViewState extends ConsumerState<AccountView> {
                     height: 48,
                     child: PrimaryButton(
                       onPressed: () async {
-                        closeDrawer(context);
+                        closeDrawer(drawerContext);
+                        await Future.delayed(const Duration(milliseconds: 500));
+                        if (!context.mounted) return;
                         showSuccessToast(context);
                         await Future.delayed(const Duration(milliseconds: 300));
+                        if (!context.mounted) return;
                         ref.read(authProvider.notifier).signOut();
 
                         ref.read(analyticsProvider).logoutComplete();
+                        ref.read(homeSelectedIndexProvider.notifier).reset();
                         ref.read(rootSelectedIndexProvider.notifier).reset();
                       },
                       child: Text(
@@ -401,7 +406,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
 
   void showSuccessToast(BuildContext toastContext) {
     showToast(
-      context: context,
+      context: toastContext,
       location: ToastLocation.topCenter,
       builder:
           (context, overlay) => Toast(
