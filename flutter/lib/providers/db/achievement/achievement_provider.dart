@@ -43,6 +43,7 @@ class AchievementNotifier extends Notifier<AchievementStateModel> {
 
   @override
   AchievementStateModel build() {
+    ref.keepAlive();
     _repository = ref.watch(achievementRepositoryProvider);
     return AchievementStateModel();
   }
@@ -133,6 +134,6 @@ class AchievementNotifier extends Notifier<AchievementStateModel> {
 
 // Provider for achievement state
 final achievementProvider =
-    NotifierProvider<AchievementNotifier, AchievementStateModel>(() {
-      return AchievementNotifier();
-    });
+    NotifierProvider.autoDispose<AchievementNotifier, AchievementStateModel>(
+      () => AchievementNotifier(),
+    );

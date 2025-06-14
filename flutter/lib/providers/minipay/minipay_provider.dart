@@ -448,7 +448,7 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
     } catch (e) {
       ref.read(analyticsProvider).minipayConnectionFailed({
         "primaryPaymentMethod": primaryPaymentMethod,
-        "error": e.toString(),
+        "error": e.toString().substring(0, e.toString().length.clamp(0, 99)),
       });
       state = state.copyWith(
         state: MiniPayConnectionState.error,

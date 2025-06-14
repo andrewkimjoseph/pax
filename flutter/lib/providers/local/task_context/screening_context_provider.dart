@@ -125,22 +125,20 @@ final screeningContextProvider =
 /// Stream provider for real-time updates to a screening.
 /// This provider streams updates for a specific screening document.
 /// Returns null if the screening doesn't exist or if there's an error.
-final screeningStreamProvider = StreamProvider.family<Screening?, String>((
-  ref,
-  screeningId,
-) {
-  if (screeningId.isEmpty) {
-    return Stream.value(null);
-  }
+final screeningStreamProvider = StreamProvider.family
+    .autoDispose<Screening?, String>((ref, screeningId) {
+      if (screeningId.isEmpty) {
+        return Stream.value(null);
+      }
 
-  return FirebaseFirestore.instance
-      .collection('screenings')
-      .doc(screeningId)
-      .snapshots()
-      .map((snapshot) {
-        if (!snapshot.exists) {
-          return null;
-        }
-        return Screening.fromFirestore(snapshot);
-      });
-});
+      return FirebaseFirestore.instance
+          .collection('screenings')
+          .doc(screeningId)
+          .snapshots()
+          .map((snapshot) {
+            if (!snapshot.exists) {
+              return null;
+            }
+            return Screening.fromFirestore(snapshot);
+          });
+    });

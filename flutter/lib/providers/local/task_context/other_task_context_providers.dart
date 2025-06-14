@@ -19,7 +19,10 @@ import 'package:pax/providers/local/task_context/repository_providers.dart';
 /// StreamProvider for a single task by ID.
 /// This provider streams real-time updates for a specific task.
 /// It uses the tasks repository to fetch and maintain the task data.
-final taskProvider = StreamProvider.family<Task?, String>((ref, taskId) {
+final taskProvider = StreamProvider.family.autoDispose<Task?, String>((
+  ref,
+  taskId,
+) {
   final repository = ref.watch(tasksRepositoryProvider);
   return repository.streamTaskById(taskId);
 });

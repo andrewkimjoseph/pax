@@ -96,11 +96,12 @@ final rewardStateProvider =
       return RewardStateNotifier();
     });
 
-final rewardsStreamProvider = StreamProvider.family<List<Reward>, String?>((
-  ref,
-  participantId,
-) {
+final rewardsStreamProvider = StreamProvider.family.autoDispose<
+  List<Reward>,
+  String?
+>((ref, participantId) {
   // Use the rewards repository to get the stream of rewards for the participant
   final rewardsRepository = ref.watch(rewardRepositoryProvider);
+
   return rewardsRepository.streamRewardsForParticipant(participantId);
 });

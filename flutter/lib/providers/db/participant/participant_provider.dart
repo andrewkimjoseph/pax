@@ -191,7 +191,9 @@ class ParticipantNotifier extends Notifier<ParticipantStateModel> {
           .fetchAchievements(authState.user.uid);
     } catch (e) {
       // Handle error
-      ref.read(analyticsProvider).profileUpdateFailed({"error": e.toString()});
+      ref.read(analyticsProvider).profileUpdateFailed({
+        "error": e.toString().substring(0, e.toString().length.clamp(0, 99)),
+      });
       state = state.copyWith(
         state: ParticipantState.error,
         errorMessage: e.toString(),
