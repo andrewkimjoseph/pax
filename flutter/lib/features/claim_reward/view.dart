@@ -145,7 +145,7 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
         "taskId": taskId,
         "screeningId": screeningId,
         "taskCompletionId": taskCompletionId,
-        "error": e.toString(),
+        "error": e.toString().substring(0, e.toString().length.clamp(0, 99)),
       });
       _showErrorDialog('Failed to claim reward: $e');
     } finally {
@@ -224,13 +224,17 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
                 child: Button(
                   style: ButtonStyle.primary(),
                   onPressed:
-                      (isClaiming ||
-                              (txnHash != null && txnHash.isNotEmpty) ||
-                              taskIsCompleted == true)
+                      (txnHash != null && txnHash.isNotEmpty)
                           ? null
-                          : taskIsCompleted == false
-                          ? () => _goHome(context)
-                          : () => _claimReward(context),
+                          : () {
+                            if (isClaiming) return;
+
+                            if (taskIsCompleted == false) {
+                              _goHome(context);
+                            } else {
+                              _claimReward(context);
+                            }
+                          },
                   child:
                       isClaiming
                           ? const CircularProgressIndicator()
@@ -239,8 +243,6 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
                                 ? 'Complete Task'
                                 : (txnHash != null && txnHash.isNotEmpty)
                                 ? 'Claimed'
-                                : isClaiming
-                                ? 'Claiming...'
                                 : 'Claim Reward',
                             style: Theme.of(context).typography.base.copyWith(
                               fontWeight: FontWeight.normal,

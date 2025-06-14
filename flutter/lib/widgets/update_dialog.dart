@@ -7,6 +7,7 @@ import 'package:pax/utils/version_util.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Colors;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:pax/theming/colors.dart';
 
 class UpdateDialog extends ConsumerWidget {
   const UpdateDialog({super.key});
@@ -40,6 +41,10 @@ class UpdateDialog extends ConsumerWidget {
 
             return Stack(
               children: [
+                const ModalBarrier(
+                  dismissible: false,
+                  color: PaxColors.semiBlack,
+                ),
                 Container(
                   padding: EdgeInsets.all(28),
                   child: AlertDialog(

@@ -67,7 +67,11 @@ class AchievementRepository {
               .collection(collectionName)
               .where('participantId', isEqualTo: participantId)
               .get();
-
+      if (kDebugMode) {
+        print(
+          'Achievements fetched: ${querySnapshot.docs.length} for participant: $participantId',
+        );
+      }
       return querySnapshot.docs
           .map((doc) => Achievement.fromFirestore(doc))
           .toList();

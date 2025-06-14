@@ -25,7 +25,11 @@ class _AchievementsViewState extends ConsumerState<AchievementsView> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final participantId = ref.read(authProvider).user.uid;
-      ref.read(achievementProvider.notifier).fetchAchievements(participantId);
+      final achievementState = ref.read(achievementProvider);
+
+      if (achievementState.state == AchievementState.initial) {
+        ref.read(achievementProvider.notifier).fetchAchievements(participantId);
+      }
     });
   }
 
@@ -171,32 +175,31 @@ class _AchievementsViewState extends ConsumerState<AchievementsView> {
                 ),
               )
             else if (achievementState.state == AchievementState.loading)
-              const Center(child: CircularProgressIndicator())
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [CircularProgressIndicator()],
+              ).sized(height: 200, width: double.infinity)
             else if (achievementState.state == AchievementState.error)
-              Center(child: Text('Error: ${achievementState.errorMessage}'))
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [Text('Error: ${achievementState.errorMessage}')],
+              ).sized(height: 200, width: double.infinity)
             else
               Column(
                 children: [
                   if (filterAchievements(achievementState.achievements).isEmpty)
-                    SizedBox(
-                      height: 200,
-                      width: double.infinity,
-                      child: Center(
-                        child: Text(
-                          index == 0
-                              ? 'No achievements yet'
-                              : 'No ${index == 1
-                                  ? 'earned'
-                                  : index == 2
-                                  ? 'in progress'
-                                  : 'claimed'} achievements',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: PaxColors.black,
-                          ),
-                        ),
+                    Center(
+                      child: Text(
+                        index == 0
+                            ? 'No achievements yet'
+                            : 'No ${index == 1
+                                ? 'earned'
+                                : index == 2
+                                ? 'in progress'
+                                : 'claimed'} achievements',
+                        style: TextStyle(fontSize: 16, color: PaxColors.black),
                       ),
-                    )
+                    ).sized(height: 200, width: double.infinity)
                   else
                     ...filterAchievements(achievementState.achievements).map(
                       (achievement) => AchievementCard(

@@ -26,15 +26,13 @@ class ActivityCard extends ConsumerStatefulWidget {
 }
 
 class _ActivityCardState extends ConsumerState<ActivityCard> {
-  late bool activityIsRewarded;
-
-  late bool isTaskComplete;
-
   @override
   void initState() {
     super.initState();
+  }
 
-    activityIsRewarded =
+  void _callBackFn() async {
+    final activityIsRewarded =
         widget.activity.taskCompletion != null &&
         widget.allActivities.any(
           (activity) =>
@@ -44,11 +42,7 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
                   widget.activity.taskCompletion?.id,
         );
 
-    isTaskComplete =
-        widget.activity.taskCompletion != null && !widget.activity.isComplete;
-  }
-
-  void _callBackFn() async {
+    final isTaskComplete = widget.activity.isComplete;
     final taskId = widget.activity.taskCompletion?.taskId;
     final screeningId = widget.activity.taskCompletion?.screeningId;
     final taskCompletionId = widget.activity.taskCompletion?.id;
@@ -75,7 +69,7 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
           amount: amount,
           tokenId: tokenId,
           txnHash: matchingReward?.reward?.txnHash,
-          taskIsCompleted: widget.activity.isComplete,
+          taskIsCompleted: isTaskComplete,
         );
 
     if (!isTaskComplete) {
@@ -83,9 +77,7 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
         "taskId": taskId,
         "screeningId": screeningId,
       });
-    }
-
-    if (!activityIsRewarded) {
+    } else if (!activityIsRewarded) {
       ref.read(analyticsProvider).unrewardedTaskCompletionTapped({
         "taskId": taskId,
         "screeningId": screeningId,
@@ -100,15 +92,26 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
 
   @override
   Widget build(BuildContext context) {
+    final activityIsRewarded =
+        widget.activity.taskCompletion != null &&
+        widget.allActivities.any(
+          (activity) =>
+              activity.reward != null &&
+              activity.reward?.txnHash != null &&
+              activity.reward?.taskCompletionId ==
+                  widget.activity.taskCompletion?.id,
+        );
+
+    final isTaskComplete = widget.activity.isComplete;
+    final isTaskCompletion = widget.activity.taskCompletion != null;
+
     return InkWell(
-      onTap:
-          widget.activity.taskCompletion != null ? () => _callBackFn() : null,
+      onTap: isTaskCompletion ? () => _callBackFn() : null,
       child: Container(
         width: MediaQuery.of(context).size.width,
-
         padding: EdgeInsets.all(10),
         decoration:
-            isTaskComplete && !activityIsRewarded
+            isTaskCompletion && isTaskComplete && !activityIsRewarded
                 ? ShapeDecoration(
                   shape: GradientBorder(
                     gradient: LinearGradient(
@@ -179,42 +182,32 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
                         ),
                       ),
                       Visibility(
-                        visible: widget.activity.taskCompletion != null,
+                        visible: isTaskCompletion,
                         child: Row(
                           children: [
-                            if (widget.activity.taskCompletion != null) ...[
-                              (() {
-                                if (activityIsRewarded) {
-                                  return OutlineBadge(
-                                    child: Row(
-                                      children: [
-                                        Text('Rewarded').withPadding(right: 4),
-                                        FaIcon(
-                                          FontAwesomeIcons.solidCircleCheck,
-                                          size: 16,
-                                          color: PaxColors.green,
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                } else {
-                                  return OutlineBadge(
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          'Unrewarded',
-                                        ).withPadding(right: 4),
-                                        FaIcon(
-                                          FontAwesomeIcons.solidCircleXmark,
-                                          size: 16,
-                                          color: PaxColors.red,
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }
-                              })(),
-                            ],
+                            OutlineBadge(
+                              child: Row(
+                                children: [
+                                  Text(
+                                    activityIsRewarded
+                                        ? 'Rewarded'
+                                        : isTaskComplete
+                                        ? 'Unrewarded'
+                                        : 'Incomplete',
+                                  ).withPadding(right: 4),
+                                  FaIcon(
+                                    activityIsRewarded
+                                        ? FontAwesomeIcons.solidCircleCheck
+                                        : FontAwesomeIcons.solidCircleXmark,
+                                    size: 16,
+                                    color:
+                                        activityIsRewarded
+                                            ? PaxColors.green
+                                            : PaxColors.red,
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -225,8 +218,8 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.activity.taskCompletion != null
-                            ? widget.activity.isComplete
+                        isTaskCompletion
+                            ? isTaskComplete
                                 ? 'You have completed a task'
                                 : 'You have an incomplete task'
                             : widget.activity.reward != null

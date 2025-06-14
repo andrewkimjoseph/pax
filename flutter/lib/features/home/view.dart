@@ -1,5 +1,5 @@
+import 'package:flutter/material.dart' show Badge;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pax/exports/views.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/remote_config/remote_config_provider.dart';
@@ -44,9 +44,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 ),
               ),
 
-              // GestureDetector(
-              //   onPanDown:
-              //       (details) => Navigator.push(
+              // InkWell(
+              //   onTap:
+              //       () => Navigator.push(
               //         context,
               //         MaterialPageRoute(
               //           builder: (context) => NotificationsView(),
@@ -63,42 +63,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
             children: [
               Row(
                 children: [
-                  Button(
-                    style: const ButtonStyle.primary(
-                          density: ButtonDensity.dense,
-                        )
-                        .withBackgroundColor(
-                          color:
-                              index == 0
-                                  ? PaxColors.deepPurple
-                                  : Colors.transparent,
-                        )
-                        .withBorder(
-                          border: Border.all(
-                            color:
-                                index == 0
-                                    ? PaxColors.deepPurple
-                                    : PaxColors.lilac,
-                            width: 2,
-                          ),
-                        )
-                        .withBorderRadius(
-                          borderRadius: BorderRadius.circular(7),
-                        ),
-                    onPressed: () {
-                      setState(() {
-                        screenName = 'Dashboard';
-                      });
-                      ref.read(homeSelectedIndexProvider.notifier).setIndex(0);
-                      ref.read(analyticsProvider).dashboardTapped();
-                    },
-                    child: Text(
-                      'Dashboard',
-                      style: TextStyle(
-                        color: index == 0 ? PaxColors.white : PaxColors.black,
-                      ),
-                    ),
-                  ).withPadding(right: 8),
+                  _homeTabButton(
+                    label: 'Dashboard',
+                    isActive: index == 0,
+                    onPressed: _onDashboardPressed,
+                  ),
                   featureFlags.when(
                     data:
                         (flags) =>
@@ -119,169 +88,26 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
                                     return tasksStream.when(
                                       data:
-                                          (tasks) => Button(
-                                            style: const ButtonStyle.primary(
-                                                  density: ButtonDensity.dense,
-                                                )
-                                                .withBackgroundColor(
-                                                  color:
-                                                      index == 1
-                                                          ? PaxColors.deepPurple
-                                                          : Colors.transparent,
-                                                )
-                                                .withBorder(
-                                                  border: Border.all(
-                                                    color:
-                                                        index == 1
-                                                            ? PaxColors
-                                                                .deepPurple
-                                                            : tasks.isEmpty
-                                                            ? PaxColors.lilac
-                                                            : PaxColors.green,
-                                                    width: 2,
-                                                  ),
-                                                )
-                                                .withBorderRadius(
-                                                  borderRadius:
-                                                      BorderRadius.circular(7),
-                                                ),
-                                            onPressed: () {
-                                              setState(() {
-                                                screenName = 'Tasks';
-                                              });
-                                              ref
-                                                  .read(
-                                                    homeSelectedIndexProvider
-                                                        .notifier,
-                                                  )
-                                                  .setIndex(1);
-                                              ref
-                                                  .read(analyticsProvider)
-                                                  .tasksTapped();
-                                            },
-                                            child: Row(
-                                              children: [
-                                                Text(
-                                                  'Tasks',
-                                                  style: TextStyle(
-                                                    color:
-                                                        index == 1
-                                                            ? PaxColors.white
-                                                            : PaxColors.black,
-                                                  ),
-                                                ).withPadding(
-                                                  right:
-                                                      tasks.isNotEmpty ? 8 : 0,
-                                                ),
-                                                tasks.isNotEmpty
-                                                    ? FaIcon(
-                                                      FontAwesomeIcons
-                                                          .solidCircle,
-                                                      size: 12,
-                                                      color: PaxColors.green,
-                                                    )
-                                                    : const SizedBox.shrink(),
-                                              ],
-                                            ),
-                                          ).withPadding(right: 8),
+                                          (tasks) => _homeTabButton(
+                                            label: 'Tasks',
+                                            isActive: index == 1,
+                                            onPressed: _onTasksPressed,
+                                            badgeCount: tasks.length,
+                                          ),
                                       loading:
-                                          () => Button(
-                                            style: const ButtonStyle.primary(
-                                                  density: ButtonDensity.dense,
-                                                )
-                                                .withBackgroundColor(
-                                                  color:
-                                                      index == 1
-                                                          ? PaxColors.deepPurple
-                                                          : Colors.transparent,
-                                                )
-                                                .withBorder(
-                                                  border: Border.all(
-                                                    color:
-                                                        index == 1
-                                                            ? PaxColors
-                                                                .deepPurple
-                                                            : PaxColors.lilac,
-                                                    width: 2,
-                                                  ),
-                                                )
-                                                .withBorderRadius(
-                                                  borderRadius:
-                                                      BorderRadius.circular(7),
-                                                ),
-                                            onPressed: () {
-                                              setState(() {
-                                                screenName = 'Tasks';
-                                              });
-                                              ref
-                                                  .read(
-                                                    homeSelectedIndexProvider
-                                                        .notifier,
-                                                  )
-                                                  .setIndex(1);
-                                              ref
-                                                  .read(analyticsProvider)
-                                                  .tasksTapped();
-                                            },
-                                            child: Text(
-                                              'Tasks',
-                                              style: TextStyle(
-                                                color:
-                                                    index == 1
-                                                        ? PaxColors.white
-                                                        : PaxColors.black,
-                                              ),
-                                            ),
-                                          ).withPadding(right: 8),
+                                          () => _homeTabButton(
+                                            label: 'Tasks',
+                                            isActive: index == 1,
+                                            isLoading: true,
+                                            onPressed: _onTasksPressed,
+                                          ),
                                       error:
-                                          (_, __) => Button(
-                                            style: const ButtonStyle.primary(
-                                                  density: ButtonDensity.dense,
-                                                )
-                                                .withBackgroundColor(
-                                                  color:
-                                                      index == 1
-                                                          ? PaxColors.deepPurple
-                                                          : Colors.transparent,
-                                                )
-                                                .withBorder(
-                                                  border: Border.all(
-                                                    color:
-                                                        index == 1
-                                                            ? PaxColors
-                                                                .deepPurple
-                                                            : PaxColors.lilac,
-                                                    width: 2,
-                                                  ),
-                                                )
-                                                .withBorderRadius(
-                                                  borderRadius:
-                                                      BorderRadius.circular(7),
-                                                ),
-                                            onPressed: () {
-                                              setState(() {
-                                                screenName = 'Tasks';
-                                              });
-                                              ref
-                                                  .read(
-                                                    homeSelectedIndexProvider
-                                                        .notifier,
-                                                  )
-                                                  .setIndex(1);
-                                              ref
-                                                  .read(analyticsProvider)
-                                                  .tasksTapped();
-                                            },
-                                            child: Text(
-                                              'Tasks',
-                                              style: TextStyle(
-                                                color:
-                                                    index == 1
-                                                        ? PaxColors.white
-                                                        : PaxColors.black,
-                                              ),
-                                            ),
-                                          ).withPadding(right: 8),
+                                          (_, __) => _homeTabButton(
+                                            label: 'Tasks',
+                                            isActive: index == 1,
+                                            isError: true,
+                                            onPressed: _onTasksPressed,
+                                          ),
                                     );
                                   },
                                 )
@@ -296,48 +122,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                     flags[RemoteConfigKeys
                                             .areAchievementsAvailable] ==
                                         true
-                                ? Button(
-                                  style: const ButtonStyle.primary(
-                                        density: ButtonDensity.dense,
-                                      )
-                                      .withBackgroundColor(
-                                        color:
-                                            index == 2
-                                                ? PaxColors.deepPurple
-                                                : Colors.transparent,
-                                      )
-                                      .withBorder(
-                                        border: Border.all(
-                                          color:
-                                              index == 2
-                                                  ? PaxColors.deepPurple
-                                                  : PaxColors.lilac,
-                                          width: 2,
-                                        ),
-                                      )
-                                      .withBorderRadius(
-                                        borderRadius: BorderRadius.circular(7),
-                                      ),
-                                  onPressed: () {
-                                    setState(() {
-                                      screenName = 'Achievements';
-                                    });
-                                    ref
-                                        .read(
-                                          homeSelectedIndexProvider.notifier,
-                                        )
-                                        .setIndex(2);
-                                  },
-                                  child: Text(
-                                    'Achievements',
-                                    style: TextStyle(
-                                      color:
-                                          index == 2
-                                              ? PaxColors.white
-                                              : PaxColors.black,
-                                    ),
-                                  ),
-                                ).withPadding(right: 8)
+                                ? _homeTabButton(
+                                  label: 'Achievements',
+                                  isActive: index == 2,
+                                  onPressed: _onAchievementsPressed,
+                                )
                                 : const SizedBox.shrink(),
                     loading: () => const SizedBox.shrink(),
                     error: (_, __) => const SizedBox.shrink(),
@@ -401,7 +190,82 @@ class _HomeViewState extends ConsumerState<HomeView> {
     );
   }
 
-  // Widget buildToast(BuildContext context, ToastOverlay overlay) {
+  void _onTasksPressed() {
+    setState(() {
+      screenName = 'Tasks';
+    });
+    ref.read(homeSelectedIndexProvider.notifier).setIndex(1);
+    ref.read(analyticsProvider).tasksTapped();
+  }
 
-  // }
+  void _onAchievementsPressed() {
+    setState(() {
+      screenName = 'Achievements';
+    });
+    ref.read(homeSelectedIndexProvider.notifier).setIndex(2);
+  }
+
+  void _onDashboardPressed() {
+    setState(() {
+      screenName = 'Dashboard';
+    });
+    ref.read(homeSelectedIndexProvider.notifier).setIndex(0);
+    ref.read(analyticsProvider).dashboardTapped();
+  }
+
+  Widget _homeTabButton({
+    required String label,
+    required bool isActive,
+    required VoidCallback onPressed,
+    int? badgeCount,
+    Color? activeColor,
+    bool isLoading = false,
+    bool isError = false,
+  }) {
+    final button = Button(
+      style: const ButtonStyle.primary(density: ButtonDensity.dense)
+          .withBackgroundColor(
+            color:
+                isActive
+                    ? (activeColor ?? PaxColors.deepPurple)
+                    : Colors.transparent,
+          )
+          .withBorder(
+            border: Border.all(
+              color:
+                  isActive
+                      ? (activeColor ?? PaxColors.deepPurple)
+                      : badgeCount != null && badgeCount > 0
+                      ? PaxColors.green
+                      : PaxColors.lilac,
+              width: 2,
+            ),
+          )
+          .withBorderRadius(borderRadius: BorderRadius.circular(7)),
+      onPressed: onPressed,
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: isActive ? PaxColors.white : PaxColors.black,
+            ),
+          ),
+        ],
+      ),
+    ).withPadding(right: 8);
+
+    if (isLoading || isError) {
+      return button;
+    }
+    if (badgeCount != null && badgeCount > 0) {
+      return Badge.count(
+        offset: const Offset(-5, -5),
+        backgroundColor: PaxColors.green,
+        count: badgeCount,
+        child: button,
+      );
+    }
+    return button;
+  }
 }

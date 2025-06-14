@@ -71,6 +71,9 @@ class PaxColors {
   /// White with 20% opacity - used for highlights on dark backgrounds
   static const Color whiteWithOpacity = Color(0x33FFFFFF); // 20% opacity
 
+  /// Modal barrier color - used for modal overlays to block interaction
+  static const Color semiBlack = Color(0x80000000); // 50% opacity black
+
   /// Gradients
   /// Predefined color combinations for gradient effects
 
