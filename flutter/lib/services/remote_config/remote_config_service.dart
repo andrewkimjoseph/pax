@@ -300,4 +300,8 @@ class RemoteConfigService {
       };
     }
   }
+
+  // Expose the real-time config update stream
+  Stream<RemoteConfigUpdate> get onConfigUpdated =>
+      _remoteConfig.onConfigUpdated;
 }

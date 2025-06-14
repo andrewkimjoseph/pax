@@ -17,12 +17,13 @@ import 'package:pax/utils/version_util.dart';
 import 'package:pax/widgets/app_lifecycle_handler.dart';
 import 'package:pax/widgets/maintenance_dialog.dart';
 import 'package:pax/widgets/update_dialog.dart';
+import 'package:pax/widgets/remote_config_listener.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await AppInitializer().initialize();
-  runApp(ProviderScope(child: App()));
+  runApp(ProviderScope(child: RemoteConfigListener(child: App())));
 }
 
 class App extends ConsumerStatefulWidget {
