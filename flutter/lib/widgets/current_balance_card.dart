@@ -94,10 +94,16 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
                                 .syncBalancesFromBlockchain();
                           },
                   density: ButtonDensity.icon,
-                  icon: const FaIcon(
-                    FontAwesomeIcons.arrowsRotate,
-                    color: PaxColors.deepPurple,
-                  ),
+                  icon:
+                      paxAccount.state == PaxAccountState.syncing
+                          ? const FaIcon(
+                            FontAwesomeIcons.spinner,
+                            color: PaxColors.deepPurple,
+                          )
+                          : const FaIcon(
+                            FontAwesomeIcons.arrowsRotate,
+                            color: PaxColors.deepPurple,
+                          ),
                 ).withToolTip(
                   lastRefreshTime == null
                       ? "You can refresh now"
@@ -251,7 +257,7 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
                             color: PaxColors.white,
                           ),
                         ),
-                      ).withToolTip('Your wallet.');
+                      ).withToolTip('Your wallet');
                     },
                     loading: () => const SizedBox.shrink(),
                     error: (_, __) => const SizedBox.shrink(),
