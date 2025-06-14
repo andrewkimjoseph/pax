@@ -54,24 +54,20 @@ class AccountDeletionNotifier extends Notifier<AccountDeletionStateModel> {
       // Add a delay to show the checking balance state
       await Future.delayed(const Duration(seconds: 1));
 
-      // Get the current PaxAccount
-      final paxAccount = ref.read(paxAccountProvider).account;
+      // Get the current balances from the provider
+      final balances = ref.read(paxAccountProvider).balances;
 
-      if (paxAccount != null) {
-        // Check if any balance is non-zero
-        bool hasNonZeroBalance = paxAccount.balances.values.any(
-          (balance) => balance > 0,
+      // Check if any balance is non-zero
+      bool hasNonZeroBalance = balances.values.any((balance) => balance > 0);
+
+      if (hasNonZeroBalance) {
+        state = state.copyWith(
+          state: AccountDeletionState.error,
+          errorMessage:
+              "Please withdraw all funds first before deleting your account.",
+          isDeleting: false,
         );
-
-        if (hasNonZeroBalance) {
-          state = state.copyWith(
-            state: AccountDeletionState.error,
-            errorMessage:
-                "Please withdraw all funds first before deleting your account.",
-            isDeleting: false,
-          );
-          return;
-        }
+        return;
       }
 
       // Start deletion process

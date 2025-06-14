@@ -1,5 +1,6 @@
 // lib/views/tasks/tasks_view.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lottie/lottie.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
 import 'package:pax/providers/db/tasks/task_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
@@ -72,9 +73,17 @@ class _TaskViewState extends ConsumerState<TasksView> {
               : tasksStream.when(
                 data: (tasks) {
                   if (tasks.isEmpty) {
-                    return const Center(
-                      child: Text('No tasks available at the moment'),
-                    );
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Lottie.asset(
+                          'lib/assets/lottie/no_tasks.json',
+                          fit: BoxFit.contain,
+                          reverse: false,
+                        ),
+                        Text('No tasks available at the moment'),
+                      ],
+                    ).withAlign(Alignment.center);
                   }
 
                   return screeningsStream.when(

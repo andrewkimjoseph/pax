@@ -6,6 +6,7 @@ import 'package:pax/models/firestore/pax_account/pax_account_model.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/repositories/firestore/pax_account/pax_account_repository.dart';
 import 'package:pax/services/blockchain/blockchain_service.dart';
+import 'package:pax/utils/local_db_helper.dart';
 
 // State for the pax account provider
 enum PaxAccountState {
@@ -19,13 +20,14 @@ enum PaxAccountState {
 // Account state model
 class PaxAccountStateModel {
   final PaxAccount? account;
+  final Map<int, num> balances;
   final PaxAccountState state;
   final String? errorMessage;
-  final bool
-  isBalanceSynced; // Flag to indicate if balances are synced from blockchain
+  final bool isBalanceSynced;
 
   PaxAccountStateModel({
     this.account,
+    required this.balances,
     required this.state,
     this.errorMessage,
     this.isBalanceSynced = false,
@@ -33,18 +35,20 @@ class PaxAccountStateModel {
 
   // Initial state factory
   factory PaxAccountStateModel.initial() {
-    return PaxAccountStateModel(state: PaxAccountState.initial);
+    return PaxAccountStateModel(state: PaxAccountState.initial, balances: {});
   }
 
   // Copy with method
   PaxAccountStateModel copyWith({
     PaxAccount? account,
+    Map<int, num>? balances,
     PaxAccountState? state,
     String? errorMessage,
     bool? isBalanceSynced,
   }) {
     return PaxAccountStateModel(
       account: account ?? this.account,
+      balances: balances ?? this.balances,
       state: state ?? this.state,
       errorMessage: errorMessage ?? this.errorMessage,
       isBalanceSynced: isBalanceSynced ?? this.isBalanceSynced,
@@ -104,8 +108,15 @@ class PaxAccountNotifier extends Notifier<PaxAccountStateModel> {
       // Handle signup - create or get account
       final account = await _repository.handleUserSignup(authState!.user.uid);
 
-      // Update state with loaded account
-      state = state.copyWith(account: account, state: PaxAccountState.loaded);
+      // Fetch balances from local DB
+      final balances = await LocalDBHelper().getBalances(account.id);
+
+      // Update state with loaded account and balances
+      state = state.copyWith(
+        account: account,
+        balances: balances,
+        state: PaxAccountState.loaded,
+      );
 
       // Try to fetch balances from blockchain if contract address exists
       if (account.contractAddress != null &&
@@ -125,30 +136,16 @@ class PaxAccountNotifier extends Notifier<PaxAccountStateModel> {
   // Update balance for a token
   Future<void> updateBalance(int tokenId, num amount) async {
     final authState = ref.read(authProvider);
-
     try {
-      // Ensure user is authenticated and we have an account
       if (authState.state != AuthState.authenticated || state.account == null) {
         throw Exception('User must be authenticated to update balance');
       }
-
-      // Set loading state
       state = state.copyWith(state: PaxAccountState.loading);
-
-      // Update balance in repository
-      final updatedAccount = await _repository.updateBalance(
-        authState.user.uid,
-        tokenId,
-        amount,
-      );
-
-      // Update state with updated account
-      state = state.copyWith(
-        account: updatedAccount,
-        state: PaxAccountState.loaded,
-      );
+      await _repository.updateBalance(authState.user.uid, tokenId, amount);
+      // Fetch balances from local DB using current account id
+      final balances = await LocalDBHelper().getBalances(state.account!.id);
+      state = state.copyWith(balances: balances, state: PaxAccountState.loaded);
     } catch (e) {
-      // Handle error
       state = state.copyWith(
         state: PaxAccountState.error,
         errorMessage: e.toString(),
@@ -159,29 +156,22 @@ class PaxAccountNotifier extends Notifier<PaxAccountStateModel> {
   // Update account fields
   Future<void> updateAccount(Map<String, dynamic> data) async {
     final authState = ref.read(authProvider);
-
     try {
-      // Ensure user is authenticated and we have an account
       if (authState.state != AuthState.authenticated || state.account == null) {
         throw Exception('User must be authenticated to update account');
       }
-
-      // Set loading state
       state = state.copyWith(state: PaxAccountState.loading);
-
-      // Update account in repository
       final updatedAccount = await _repository.updateAccount(
         authState.user.uid,
         data,
       );
-
-      // Update state with updated account
+      final balances = await LocalDBHelper().getBalances(updatedAccount.id);
       state = state.copyWith(
         account: updatedAccount,
+        balances: balances,
         state: PaxAccountState.loaded,
       );
     } catch (e) {
-      // Handle error
       state = state.copyWith(
         state: PaxAccountState.error,
         errorMessage: e.toString(),
@@ -192,29 +182,19 @@ class PaxAccountNotifier extends Notifier<PaxAccountStateModel> {
   // Fetch and sync balances from blockchain
   Future<void> syncBalancesFromBlockchain() async {
     final authState = ref.read(authProvider);
-
     try {
-      // Ensure user is authenticated and we have an account
       if (authState.state != AuthState.authenticated || state.account == null) {
         throw Exception('User must be authenticated to sync balances');
       }
-
-      // Set syncing state
       state = state.copyWith(state: PaxAccountState.syncing);
-
-      // Sync balances in repository
-      final updatedAccount = await _repository.syncBalancesFromBlockchain(
-        authState.user.uid,
-      );
-
-      // Update state with updated account
+      await _repository.syncBalancesFromBlockchain(authState.user.uid);
+      final balances = await LocalDBHelper().getBalances(state.account!.id);
       state = state.copyWith(
-        account: updatedAccount,
+        balances: balances,
         state: PaxAccountState.loaded,
         isBalanceSynced: true,
       );
     } catch (e) {
-      // Handle error
       state = state.copyWith(
         state: PaxAccountState.error,
         errorMessage: e.toString(),
@@ -244,11 +224,7 @@ class PaxAccountNotifier extends Notifier<PaxAccountStateModel> {
 
   // Get formatted balance for a token
   String getFormattedBalance(int tokenId) {
-    if (state.account == null) {
-      return BlockchainService.formatBalance(0, tokenId);
-    }
-
-    final balance = state.account!.balances[tokenId]?.toDouble() ?? 0.0;
+    final balance = state.balances[tokenId]?.toDouble() ?? 0.0;
     return BlockchainService.formatBalance(balance, tokenId);
   }
 
@@ -269,8 +245,15 @@ class PaxAccountNotifier extends Notifier<PaxAccountStateModel> {
       final account = await _repository.getAccount(authState.user.uid);
 
       if (account != null) {
-        // Update state with refreshed account
-        state = state.copyWith(account: account, state: PaxAccountState.loaded);
+        // Fetch balances from local DB
+        final balances = await LocalDBHelper().getBalances(account.id);
+
+        // Update state with refreshed account and balances
+        state = state.copyWith(
+          account: account,
+          balances: balances,
+          state: PaxAccountState.loaded,
+        );
       } else {
         // Account not found, create a new one
         await syncWithAuthState();

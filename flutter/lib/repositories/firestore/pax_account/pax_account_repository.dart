@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pax/models/firestore/pax_account/pax_account_model.dart';
 import 'package:pax/services/blockchain/blockchain_service.dart';
+import 'package:pax/utils/local_db_helper.dart';
+import 'package:pax/utils/token_balance_util.dart';
 
 class PaxAccountRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -47,27 +49,24 @@ class PaxAccountRepository {
     try {
       final now = Timestamp.now();
 
-      // Create basic account with default balances
-      final Map<int, num> defaultBalances = {
-        1: 0, // GoodDollar
-        2: 0, // Celo Dollar
-        3: 0, // Tether USD
-        4: 0, // USD Coin
-      };
-
-      // Create basic account
+      // Create basic account without balances
       final newAccount = PaxAccount(
         id: userId,
         timeCreated: now,
         timeUpdated: now,
-        balances: defaultBalances,
       );
 
-      // Save to Firestore
-      await _firestore
-          .collection(collectionName)
-          .doc(userId)
-          .set(newAccount.toMap());
+      // Convert to map and remove balances before saving to Firestore
+      final accountMap = newAccount.toMap();
+      accountMap.remove('balances');
+
+      // Save to Firestore (without balances)
+      await _firestore.collection(collectionName).doc(userId).set(accountMap);
+
+      // Upsert default zero balances for all supported tokens in local DB
+      for (final token in TokenBalanceUtil.getAllTokens()) {
+        await LocalDBHelper().upsertBalance(userId, token.id, 0);
+      }
 
       return newAccount;
     } catch (e) {
@@ -128,31 +127,15 @@ class PaxAccountRepository {
   }
 
   // Update balance for a specific token
-  Future<PaxAccount> updateBalance(
-    String userId,
-    int tokenId, // Changed from String to int to match model
-    num amount,
-  ) async {
+  Future<void> updateBalance(String userId, int tokenId, num amount) async {
     try {
-      // Get current account
+      // Ensure account exists
       final account = await getAccount(userId);
-
       if (account == null) {
         throw Exception('Account not found');
       }
-
-      // Update balance for the token
-      final updatedBalances = Map<int, num>.from(account.balances);
-      updatedBalances[tokenId] = amount;
-
-      // Convert Map<int, num> to Map<String, num> for Firestore
-      final firestoreBalances = <String, num>{};
-      updatedBalances.forEach((key, value) {
-        firestoreBalances[key.toString()] = value;
-      });
-
-      // Update account with new balances
-      return await updateAccount(userId, {'balances': firestoreBalances});
+      // Update balance in local DB only
+      await LocalDBHelper().upsertBalance(userId, tokenId, amount);
     } catch (e) {
       if (kDebugMode) {
         print('Error updating balance: $e');
@@ -162,65 +145,58 @@ class PaxAccountRepository {
   }
 
   // Fetch and sync balances from blockchain
-  Future<PaxAccount> syncBalancesFromBlockchain(String userId) async {
+  Future<void> syncBalancesFromBlockchain(String participantId) async {
     try {
       // Get current account
-      final account = await getAccount(userId);
-
+      final account = await getAccount(participantId);
       if (account == null) {
         throw Exception('Account not found');
       }
-
       // Check if contract address exists
       if (account.contractAddress == null || account.contractAddress!.isEmpty) {
         if (kDebugMode) {
           print('No contract address found, using balances from database');
         }
-        return account;
+        // Nothing to sync, just return
+        return;
       }
-
       // Fetch balances from blockchain for all tokens
       final paxAccountContractAddress = account.contractAddress!;
       final updatedBalances = await BlockchainService.fetchAllTokenBalances(
         paxAccountContractAddress,
       );
-
-      // Convert to Firestore format (string keys)
-      final firestoreBalances = <String, num>{};
-      updatedBalances.forEach((key, value) {
-        firestoreBalances[key.toString()] = value as num;
-      });
-
-      // Update account with new balances
-      return await updateAccount(userId, {'balances': firestoreBalances});
+      // Store balances in local DB
+      for (final entry in updatedBalances.entries) {
+        await LocalDBHelper().upsertBalance(
+          participantId,
+          entry.key,
+          entry.value as num,
+        );
+      }
     } catch (e) {
       if (kDebugMode) {
         print('Error syncing balances from blockchain: $e');
       }
-      // Return current account without updating if sync fails
-      final account = await getAccount(userId);
-      return account!;
+      rethrow;
     }
   }
 
-  // Fetch single token balance from blockchain
+  // Fetch single token balance from blockchain or local DB
   Future<double> fetchTokenBalance(String userId, int tokenId) async {
     try {
       // Get current account
       final account = await getAccount(userId);
-
       if (account == null) {
         throw Exception('Account not found');
       }
-
       // Check if contract address exists
       if (account.contractAddress == null || account.contractAddress!.isEmpty) {
         if (kDebugMode) {
-          print('No contract address found, using balance from database');
+          print('No contract address found, using balance from local DB');
         }
-        return account.balances[tokenId]?.toDouble() ?? 0.0;
+        final balances = await LocalDBHelper().getBalances(userId);
+        return balances[tokenId]?.toDouble() ?? 0.0;
       }
-
       // Fetch balance from blockchain
       final walletAddress = account.contractAddress!;
       return await BlockchainService.fetchTokenBalance(walletAddress, tokenId);

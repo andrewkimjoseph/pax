@@ -64,11 +64,20 @@ class _WithdrawViewState extends ConsumerState<WithdrawView> {
       }
 
       try {
-        // Check for more than 6 decimal places
+        // Check for more than 2 decimal places
         if (value.contains('.')) {
           final decimalPart = value.split('.')[1];
-          if (decimalPart.length > 6) {
-            return false; // Invalid: more than 6 decimal places
+          if (decimalPart.length > 2) {
+            // If more than 2 decimals, check if all after 2nd are zeros
+            final extraDecimals = decimalPart.substring(2);
+            final allZeros = extraDecimals.split('').every((c) => c == '0');
+            if (!allZeros) {
+              return false; // Invalid: more than 2 non-zero decimal places
+            }
+
+            if (decimalPart.length > 4) {
+              return false; // Invalid: more than 2 non-zero decimal places
+            }
           }
         }
 
