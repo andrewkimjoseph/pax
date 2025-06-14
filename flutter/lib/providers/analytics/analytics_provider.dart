@@ -235,6 +235,9 @@ class AnalyticsProvider {
 
   Future<void> goHomeToCompleteTaskTapped(Map<String, String?> map) =>
       _logEvent('go_home_to_complete_task_tapped', properties: map);
+
+  Future<void> refreshBalancesTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('refresh_balances_tapped', properties: properties);
 }
 
 final analyticsProvider = Provider<AnalyticsProvider>((ref) {
