@@ -148,7 +148,8 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
                   .when(
                     data: (flags) {
                       final isWalletAvailable =
-                          flags[RemoteConfigKeys.isWalletAvailable] ?? false;
+                          kDebugMode ||
+                          flags[RemoteConfigKeys.isWalletAvailable] == true;
                       if (!isWalletAvailable) return const SizedBox.shrink();
 
                       return Button(
