@@ -4,6 +4,7 @@ import 'package:pax/exports/views.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/achievement/achievement_provider.dart';
+import 'package:pax/providers/db/payment_method/payment_method_provider.dart';
 import 'package:pax/providers/remote_config/remote_config_provider.dart';
 import 'package:pax/utils/remote_config_constants.dart';
 import 'package:flutter/foundation.dart';
@@ -40,6 +41,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
   Widget build(BuildContext context) {
     final featureFlags = ref.watch(featureFlagsProvider);
     final index = ref.watch(homeSelectedIndexProvider);
+    ref.watch(primaryPaymentMethodProvider);
 
     return Scaffold(
       headers: [
