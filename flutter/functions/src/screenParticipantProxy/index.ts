@@ -193,7 +193,7 @@ export const screenParticipantProxy = onCall(FUNCTION_RUNTIME_OPTS, async (reque
       if (!userOpReceipt.success) { 
       throw new HttpsError(
         "internal",
-        "User operation failed"
+        `User operation failed: ${JSON.stringify(userOpReceipt)}`
       );    
     }
 
@@ -248,28 +248,6 @@ export const screenParticipantProxy = onCall(FUNCTION_RUNTIME_OPTS, async (reque
       screeningId,
       taskCompletionId, // Added task completion ID to the response
     };
-
-    // Create new record after success
-    const newRecordCollection = firestore.collection('new_records');
-    const newRecordDocRef = newRecordCollection.doc();
-    const newRecordId = newRecordDocRef.id;
-    
-    await newRecordDocRef.set({
-      id: newRecordId,
-      taskId,
-      screeningId,
-      participantId,
-      txnHash,
-      timeCreated: FieldValue.serverTimestamp(),
-      timeUpdated: FieldValue.serverTimestamp()
-    });
-    
-    logger.info("New record created successfully", {
-      newRecordId,
-      screeningId,
-      taskId,
-      participantId
-    });
   } catch (error) {
     logger.error("Comprehensive screening process failed", { error });
     

@@ -246,17 +246,6 @@ export const rewardParticipantProxy = onCall(
         },
       });
 
-      // First, create a pending reward record
-      const rewardRecordId = await createRewardRecord({
-        taskId,
-        participantId,
-        taskCompletionId,
-        signature,
-        nonce: nonceString,
-        amount: rewardAmountPerParticipant,
-        rewardCurrencyId,
-      });
-
       // Encode the function call to processRewardClaimByParticipantProxy
       const rewardClaimData = encodeFunctionData({
         abi: taskManagerV1ABI,
@@ -290,16 +279,31 @@ export const rewardParticipantProxy = onCall(
         });
 
       if (!userOpReceipt.success) {
-        throw new HttpsError("internal", "User operation failed");
+        logger.error("User operation failed", { userOpReceipt });
+        throw new HttpsError(
+          "internal",
+          `User operation failed: ${JSON.stringify(userOpReceipt)}`
+        );
       }
 
       const txnHash = userOpReceipt.userOpHash;
       logger.info("Transaction confirmed", { txnHash });
 
-      // Step 5: Update the reward record with the transaction hash
+      // Create reward record only after successful transaction
+      const rewardRecordId = await createRewardRecord({
+        taskId,
+        participantId,
+        taskCompletionId,
+        signature,
+        nonce: nonceString,
+        amount: rewardAmountPerParticipant,
+        rewardCurrencyId,
+      });
+
+      // Update the reward record with the transaction hash
       await updateRewardWithTxnHash(rewardRecordId, txnHash);
 
-      logger.info("Reward record updated with transaction hash", {
+      logger.info("Reward record created and updated with transaction hash", {
         rewardRecordId,
         txnHash,
       });

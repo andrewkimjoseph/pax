@@ -160,7 +160,11 @@ export const createPaxAccountV1Proxy = onCall(
         });
 
       if (!userOpReceipt.success) {
-        throw new HttpsError("internal", "User operation failed");
+        logger.error("User operation failed", { userOpReceipt });
+        throw new HttpsError(
+          "internal",
+          `User operation failed: ${JSON.stringify(userOpReceipt)}`
+        );
       }
 
       const txnHash = userOpReceipt.userOpHash;
