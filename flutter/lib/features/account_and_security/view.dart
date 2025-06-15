@@ -91,7 +91,7 @@ class _AccountAndSecurityView extends ConsumerState<AccountAndSecurityView> {
                 spacing: 24,
                 children: [
                   InkWell(
-                    onTap: showDeleteAccountDrawer,
+                    // onTap: showDeleteAccountDrawer,
                     child: AccountAndSecurityCard('Delete Account'),
                   ),
                 ],
