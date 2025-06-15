@@ -3,16 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/local/activity_providers.dart';
-import 'package:pax/providers/route/home_selected_index_provider.dart';
-import 'package:pax/providers/route/root_selected_index_provider.dart';
 import 'package:pax/utils/token_balance_util.dart';
 import 'package:pax/widgets/account/account_option_card.dart';
+import 'package:pax/widgets/logout/logout_drawer.dart';
 import 'package:pax/widgets/toast.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
 import 'package:pax/providers/analytics/analytics_provider.dart';
+import 'package:pax/providers/auth/auth_provider.dart';
 
 import '../../theming/colors.dart' show PaxColors;
 
@@ -24,6 +23,8 @@ class AccountView extends ConsumerStatefulWidget {
 }
 
 class _AccountViewState extends ConsumerState<AccountView> {
+  bool isLoggingOut = false;
+
   @override
   void initState() {
     super.initState();
@@ -31,7 +32,8 @@ class _AccountViewState extends ConsumerState<AccountView> {
 
   @override
   Widget build(BuildContext context) {
-    final participant = ref.watch(participantProvider).participant;
+    final participantState = ref.watch(participantProvider);
+    final participant = participantState.participant;
     final tasksCount = ref.watch(totalTaskCompletionsProvider);
     final totalGoodDollars = ref.watch(totalGoodDollarTokensEarnedProvider);
 
@@ -252,16 +254,16 @@ class _AccountViewState extends ConsumerState<AccountView> {
                       true,
                     ).withPadding(bottom: 28),
                   ),
-                  // InkWell(
-                  //   onTap: () {
-                  //     ref.read(analyticsProvider).accountAndSecurityTapped();
-                  //     context.push('/account-and-security');
-                  //   },
-                  //   child: AccountOptionCard(
-                  //     'account',
-                  //     true,
-                  //   ).withPadding(bottom: 28),
-                  // ),
+                  InkWell(
+                    onTap: () {
+                      ref.read(analyticsProvider).accountAndSecurityTapped();
+                      context.push('/account-and-security');
+                    },
+                    child: AccountOptionCard(
+                      'account',
+                      true,
+                    ).withPadding(bottom: 28),
+                  ),
                   InkWell(
                     onTap: () {
                       ref.read(analyticsProvider).paymentMethodsTapped();
@@ -285,7 +287,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
                   InkWell(
                     onTap: () {
                       ref.read(analyticsProvider).logoutTapped();
-                      open(context, 0);
+                      _showLogoutDrawer(context);
                     },
                     child: AccountOptionCard('logout', true),
                   ),
@@ -298,107 +300,23 @@ class _AccountViewState extends ConsumerState<AccountView> {
     );
   }
 
-  void open(BuildContext context, int count) {
+  void _showLogoutDrawer(BuildContext rootContext) {
     openDrawer(
-      context: context,
+      context: rootContext,
       transformBackdrop: false,
       expands: false,
+      barrierDismissible: false,
       builder: (drawerContext) {
-        return Container(
-          padding: const EdgeInsets.all(4),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Logout",
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ).withPadding(bottom: 8),
-                  Divider().withPadding(top: 8, bottom: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Are you sure you want to log out?",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                          fontWeight: FontWeight.normal,
-                        ),
-                      ),
-                    ],
-                  ).withPadding(top: 8, bottom: 32),
-                  Divider().withPadding(top: 8, bottom: 8),
-                ],
-              ).withPadding(left: 16, right: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.4,
-                    height: 48,
-                    child: Button(
-                      style: const ButtonStyle.outline()
-                          .withBackgroundColor(color: PaxColors.lightGrey)
-                          .withBorder(
-                            border: Border.all(color: Colors.transparent),
-                          ),
-                      onPressed: () {
-                        closeDrawer(context);
-                      },
-                      child: Text(
-                        'Cancel',
-                        style: Theme.of(context).typography.base.copyWith(
-                          fontWeight: FontWeight.normal,
-                          fontSize: 14,
-                          color: PaxColors.deepPurple,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.4,
-                    height: 48,
-                    child: PrimaryButton(
-                      onPressed: () async {
-                        closeDrawer(drawerContext);
-                        await Future.delayed(const Duration(milliseconds: 500));
-                        if (!context.mounted) return;
-                        showSuccessToast(context);
-                        await Future.delayed(const Duration(milliseconds: 300));
-                        if (!context.mounted) return;
-                        ref.read(authProvider.notifier).signOut();
-
-                        ref.read(analyticsProvider).logoutComplete();
-                        ref.read(homeSelectedIndexProvider.notifier).reset();
-                        ref.read(rootSelectedIndexProvider.notifier).reset();
-                      },
-                      child: Text(
-                        'Yes, Logout',
-                        style: Theme.of(context).typography.base.copyWith(
-                          fontWeight: FontWeight.normal,
-                          fontSize: 14,
-                          color: PaxColors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ).withPadding(bottom: 32);
+        return LogOutDrawer(
+          onClose: () => closeDrawer(drawerContext),
+          rootContext: rootContext,
+          onLogoutConfirmed: () async {
+            showSuccessToast(rootContext);
+            await Future.delayed(const Duration(milliseconds: 2000));
+            await ref.read(authProvider.notifier).signOut();
+            ref.read(analyticsProvider).logoutComplete();
+          },
+        );
       },
       position: OverlayPosition.bottom,
     );
