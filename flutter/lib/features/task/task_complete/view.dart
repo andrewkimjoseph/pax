@@ -1,25 +1,16 @@
-// ignore_for_file: unused_import
-
 import 'package:flutter/material.dart' show Divider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
-import 'package:pax/features/home/dashboard/view.dart';
-import 'package:pax/features/home/tasks/view.dart';
-import 'package:pax/features/onboarding/view_model.dart';
+
 import 'package:pax/providers/analytics/analytics_provider.dart';
-import 'package:pax/providers/db/participant/participant_provider.dart';
-import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/theming/colors.dart';
-import 'package:pax/providers/local/task_context/main_task_context_provider.dart';
+import 'package:pax/providers/local/task_context/task_context_provider.dart';
 import 'package:pax/providers/local/task_completion_state_provider.dart';
 import 'package:pax/utils/currency_symbol.dart';
 import 'package:pax/utils/token_balance_util.dart';
-import 'package:pax/widgets/account/account_option_card.dart';
-import 'package:pax/widgets/help_and_support.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:url_launcher/url_launcher.dart';
+
 import 'package:flutter_confetti/flutter_confetti.dart';
 
 class TaskCompleteView extends ConsumerStatefulWidget {

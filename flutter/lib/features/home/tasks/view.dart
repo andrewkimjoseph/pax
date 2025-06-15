@@ -18,7 +18,8 @@ class TasksView extends ConsumerStatefulWidget {
 class _TaskViewState extends ConsumerState<TasksView> {
   @override
   Widget build(BuildContext context) {
-    final participant = ref.watch(participantProvider).participant;
+    final participantState = ref.watch(participantProvider);
+    final participant = participantState.participant;
 
     // Watch the tasks stream
     final tasksStream = ref.watch(

@@ -7,7 +7,8 @@ import 'package:pax/providers/db/participant/participant_provider.dart';
 // Provider for participant's screenings only
 final participantScreeningsStreamProvider =
     StreamProvider.autoDispose<List<Screening>>((ref) {
-      final participant = ref.watch(participantProvider).participant;
+      final participantState = ref.read(participantProvider);
+      final participant = participantState.participant;
       if (participant == null || participant.id.isEmpty) {
         return Stream.value([]);
       }

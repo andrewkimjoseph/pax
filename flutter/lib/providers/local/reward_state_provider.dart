@@ -1,7 +1,7 @@
 // lib/providers/local/reward_state_provider.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pax/models/firestore/reward/reward_model.dart';
-import 'package:pax/providers/local/activity_providers.dart';
+// import 'package:pax/models/firestore/reward/reward_model.dart';
+// import 'package:pax/providers/local/activity_providers.dart';
 
 enum RewardState { initial, rewarding, complete, error }
 
@@ -96,12 +96,12 @@ final rewardStateProvider =
       return RewardStateNotifier();
     });
 
-final rewardsStreamProvider = StreamProvider.family.autoDispose<
-  List<Reward>,
-  String?
->((ref, participantId) {
-  // Use the rewards repository to get the stream of rewards for the participant
-  final rewardsRepository = ref.watch(rewardRepositoryProvider);
+// final rewardsStreamProvider = StreamProvider.family.autoDispose<
+//   List<Reward>,
+//   String?
+// >((ref, participantId) {
+//   // Use the rewards repository to get the stream of rewards for the participant
+//   final rewardsRepository = ref.watch(rewardRepositoryProvider);
 
-  return rewardsRepository.streamRewardsForParticipant(participantId);
-});
+//   return rewardsRepository.streamRewardsForParticipant(participantId);
+// });

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
-import 'package:pax/providers/local/task_context/main_task_context_provider.dart';
+import 'package:pax/providers/local/task_context/task_context_provider.dart';
 import 'package:pax/providers/local/task_master_server_id_provider.dart';
 import 'package:pax/providers/local/screening_state_provider.dart';
 import 'package:pax/services/screening_service.dart';

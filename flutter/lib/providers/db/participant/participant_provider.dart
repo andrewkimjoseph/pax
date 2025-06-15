@@ -185,10 +185,7 @@ class ParticipantNotifier extends Notifier<ParticipantStateModel> {
         state: ParticipantState.loaded,
       );
 
-      // Refresh achievements
-      await ref
-          .read(achievementProvider.notifier)
-          .fetchAchievements(authState.user.uid);
+      ref.invalidate(achievementProvider);
     } catch (e) {
       // Handle error
       ref.read(analyticsProvider).profileUpdateFailed({

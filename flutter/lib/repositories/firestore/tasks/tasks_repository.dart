@@ -6,20 +6,20 @@ import 'package:pax/models/firestore/task_completion/task_completion_model.dart'
 import 'package:rxdart/rxdart.dart';
 
 class TasksRepository {
-  final FirebaseFirestore _firestore;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Collection reference for tasks
-  late final CollectionReference _tasksCollection;
-  late final CollectionReference _taskCompletionsCollection;
-  late final CollectionReference _screeningsCollection;
+  late final CollectionReference _tasksCollection = _firestore.collection(
+    'tasks',
+  );
+  late final CollectionReference _taskCompletionsCollection = _firestore
+      .collection('task_completions');
+  late final CollectionReference _screeningsCollection = _firestore.collection(
+    'screenings',
+  );
 
   // Constructor
-  TasksRepository({FirebaseFirestore? firestore})
-    : _firestore = firestore ?? FirebaseFirestore.instance {
-    _tasksCollection = _firestore.collection('tasks');
-    _taskCompletionsCollection = _firestore.collection('task_completions');
-    _screeningsCollection = _firestore.collection('screenings');
-  }
+  TasksRepository();
 
   // Stream of all tasks
   Stream<List<Task>> getTasks() {

@@ -3,16 +3,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pax/models/firestore/screening/screening_model.dart';
 
 class ScreeningsRepository {
-  final FirebaseFirestore _firestore;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Collection reference for screenings
-  late final CollectionReference _screeningsCollection;
+  late final CollectionReference _screeningsCollection = _firestore.collection(
+    'screenings',
+  );
 
   // Constructor
-  ScreeningsRepository({FirebaseFirestore? firestore})
-    : _firestore = firestore ?? FirebaseFirestore.instance {
-    _screeningsCollection = _firestore.collection('screenings');
-  }
+  ScreeningsRepository();
 
   Stream<Screening?> getScreeningByParticipantAndTask(
     String participantId,

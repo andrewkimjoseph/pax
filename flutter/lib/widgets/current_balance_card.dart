@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pax/extensions/tooltip.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
-import 'package:pax/providers/local/balance_update_provider.dart';
+// import 'package:pax/providers/local/balance_update_provider.dart';
 import 'package:pax/providers/local/reward_currency_context.dart';
 import 'package:pax/providers/local/withdraw_context_provider.dart';
 import 'package:pax/providers/remote_config/remote_config_provider.dart';
@@ -36,12 +36,7 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
         ref.watch(rewardCurrencyContextProvider).selectedCurrency;
     final tokenId = TokenBalanceUtil.getTokenIdForCurrency(selectedCurrency);
     final currentBalance = paxAccount.balances[tokenId];
-    final participantId = paxAccount.account?.id;
 
-    // Use the balance update provider
-    ref.watch(balanceUpdateProvider(participantId));
-
-    // Use the refresh time provider
     final lastRefreshTime = ref.watch(refreshTimeProvider);
     final canRefresh =
         lastRefreshTime == null ||

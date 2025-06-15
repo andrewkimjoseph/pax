@@ -5,6 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/models/auth/auth_user_model.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
+import 'package:pax/providers/db/achievement/achievement_provider.dart';
+import 'package:pax/providers/route/home_selected_index_provider.dart';
+import 'package:pax/providers/route/root_selected_index_provider.dart';
 import 'package:pax/repositories/auth/auth_repository.dart';
 
 class AuthNotifier extends Notifier<AuthStateModel> {
@@ -197,6 +200,11 @@ class AuthNotifier extends Notifier<AuthStateModel> {
   Future<void> signOut() async {
     try {
       await _repository.signOut();
+
+      ref.read(homeSelectedIndexProvider.notifier).reset();
+      ref.read(rootSelectedIndexProvider.notifier).reset();
+      ref.invalidate(achievementProvider);
+
       state = state.copyWith(
         user: AuthUser.empty(),
         state: AuthState.unauthenticated,

@@ -125,9 +125,9 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
 
   @override
   Widget build(BuildContext context) {
-    final participant = ref.watch(participantProvider).participant;
-    final participantState = ref.watch(participantProvider).state;
-    final isLoading = participantState == ParticipantState.loading;
+    final participantState = ref.watch(participantProvider);
+    final participant = participantState.participant;
+    final isLoading = participantState.state == ParticipantState.loading;
     final paxAccount = ref.watch(paxAccountProvider).account;
     final hasPaymentMethod = paxAccount?.contractAddress != null;
 

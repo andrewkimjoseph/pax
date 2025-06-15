@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:pax/providers/local/task_context/main_task_context_provider.dart';
+import 'package:pax/providers/local/task_context/task_context_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/currency_symbol.dart';
 import 'package:pax/utils/token_balance_util.dart';

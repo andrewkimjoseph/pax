@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart' show InkWell;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
-import 'package:pax/providers/local/task_context/screening_context_provider.dart';
+import 'package:pax/providers/local/screening_context/screening_context_provider.dart';
 import 'package:pax/providers/local/reward_state_provider.dart';
 import 'package:pax/services/reward_service.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Consumer;
@@ -9,7 +9,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:pax/theming/colors.dart';
-import 'package:pax/providers/local/task_context/main_task_context_provider.dart';
+import 'package:pax/providers/local/task_context/task_context_provider.dart';
 import 'package:pax/providers/local/task_completion_state_provider.dart';
 import 'package:pax/services/task_completion_service.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
