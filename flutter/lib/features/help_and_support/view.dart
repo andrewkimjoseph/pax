@@ -78,7 +78,7 @@ class _HelpAndSupportViewState extends ConsumerState<HelpAndSupportView> {
                 children: [
                   InkWell(
                     onTap: _onFaqTapped,
-                    child: HelpAndSupportCard('FAQ'),
+                    child: HelpAndSupportCard('FAQs'),
                   ),
 
                   InkWell(
@@ -120,7 +120,7 @@ class _HelpAndSupportViewState extends ConsumerState<HelpAndSupportView> {
     ref.read(analyticsProvider).privacyPolicyTapped();
     UrlHandler.launchInAppWebView(
       context,
-      "https://canvassing.notion.site/Privacy-Policy-9446d085f6f3473087868007d931247c?pvs=74",
+      "https://canvassing.notion.site/Pax-PRIVACY-POLICY-2145e1ccc593803e87cdc48c334dc4de?pvs=74",
     );
   }
 
@@ -128,7 +128,7 @@ class _HelpAndSupportViewState extends ConsumerState<HelpAndSupportView> {
     ref.read(analyticsProvider).termsOfServiceTapped();
     UrlHandler.launchInAppWebView(
       context,
-      "https://canvassing.notion.site/Terms-of-Service-1285e1ccc593808f8d1df0b444c36b85?pvs=74",
+      "https://canvassing.notion.site/Pax-TERMS-OF-SERVICE-2145e1ccc593803d8c44e6ec05c695e7",
     );
   }
 

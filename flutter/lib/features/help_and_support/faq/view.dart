@@ -43,7 +43,7 @@ class _FAQViewState extends ConsumerState<FAQView> {
               ),
               const Spacer(),
               const Text(
-                "FAQ",
+                "FAQs",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 20),
               ).withPadding(right: 16),
