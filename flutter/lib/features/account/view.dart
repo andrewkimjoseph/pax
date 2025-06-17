@@ -37,6 +37,14 @@ class _AccountViewState extends ConsumerState<AccountView> {
     final tasksCount = ref.watch(totalTaskCompletionsProvider);
     final totalGoodDollars = ref.watch(totalGoodDollarTokensEarnedProvider);
 
+    // final version = ref
+    //     .watch(appVersionConfigProvider)
+    //     .when(
+    //       data: (data) => data.currentVersion,
+    //       loading: () => '...',
+    //       error: (_, __) => '...',
+    //     );
+
     return Scaffold(
       headers: [
         AppBar(
@@ -294,6 +302,15 @@ class _AccountViewState extends ConsumerState<AccountView> {
                 ],
               ),
             ),
+
+            // Text(
+            //   "Pax - v$version",
+            //   style: TextStyle(
+            //     fontWeight: FontWeight.normal,
+            //     fontSize: 12,
+            //     color: PaxColors.black,
+            //   ),
+            // ).withPadding(top: 8).withAlign(Alignment.centerLeft),
           ],
         ),
       ).withPadding(horizontal: 8, bottom: 8),

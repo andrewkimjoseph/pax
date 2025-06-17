@@ -31,7 +31,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
       final participantId = ref.read(authProvider).user.uid;
       final achievementState = ref.read(achievementProvider);
 
-      if (achievementState.state == AchievementState.initial) {
+      if (achievementState.state != AchievementState.loaded) {
         ref.read(achievementProvider.notifier).fetchAchievements(participantId);
       }
     });
@@ -253,7 +253,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   isActive
                       ? (activeColor ?? PaxColors.deepPurple)
                       : badgeCount != null && badgeCount > 0
-                      ? PaxColors.green
+                      ? PaxColors.lilac
                       : PaxColors.lilac,
               width: 2,
             ),
@@ -278,7 +278,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
     if (badgeCount != null && badgeCount > 0) {
       return Badge.count(
         offset: const Offset(-5, -5),
-        backgroundColor: PaxColors.green,
+        // backgroundColor: PaxColors.green,
+        isLabelVisible: true,
+        backgroundColor: PaxColors.red,
         count: badgeCount,
         child: button,
       );

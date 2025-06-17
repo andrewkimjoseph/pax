@@ -171,9 +171,9 @@ class OtherTaskCard extends ConsumerWidget {
                 enableFeedback: false,
                 style: const ButtonStyle.outline(density: ButtonDensity.dense)
                     .withBackgroundColor(
-                      color: PaxColors.otherBlue.withValues(alpha: 0.2),
+                      color: PaxColors.blue.withValues(alpha: 0.2),
                     )
-                    .withBorder(border: Border.all(color: PaxColors.otherBlue))
+                    .withBorder(border: Border.all(color: PaxColors.blue))
                     .withBorderRadius(borderRadius: BorderRadius.circular(20)),
                 // onPressed: () {},
                 child: Text(
@@ -181,7 +181,7 @@ class OtherTaskCard extends ConsumerWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.w900,
                     fontSize: 12,
-                    color: PaxColors.otherBlue,
+                    color: PaxColors.blue,
                   ),
                 ),
               ),

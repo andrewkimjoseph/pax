@@ -1,9 +1,12 @@
+import 'package:flutter/material.dart' show Badge;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:pax/exports/views.dart';
+import 'package:pax/providers/db/achievement/achievement_provider.dart';
 import 'package:pax/providers/route/root_selected_index_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import '../../theming/colors.dart' show PaxColors;
+import 'package:pax/utils/achievement_constants.dart';
 
 class RootView extends ConsumerStatefulWidget {
   const RootView({super.key});
@@ -56,6 +59,23 @@ class _RootViewState extends ConsumerState<RootView> {
   }
 
   NavigationItem buildButton(String label, bool isSelected) {
+    final achievementState = ref.watch(achievementProvider);
+
+    // Check for the presence of all three required achievements
+    final requiredAchievements = [
+      AchievementConstants.payoutConnector,
+      AchievementConstants.profilePerfectionist,
+      AchievementConstants.verifiedHuman,
+    ];
+    final userAchievementNames =
+        achievementState.achievements
+            .map((a) => a.name)
+            .whereType<String>()
+            .toSet();
+    final hasAllRequired = requiredAchievements.every(
+      (ach) => userAchievementNames.contains(ach),
+    );
+
     return NavigationItem(
       style: const ButtonStyle.ghost(density: ButtonDensity.icon),
       selectedStyle: const ButtonStyle.ghost(density: ButtonDensity.icon),
@@ -67,11 +87,19 @@ class _RootViewState extends ConsumerState<RootView> {
           fontWeight: FontWeight.w900,
         ),
       ),
-      child: SvgPicture.asset(
-        isSelected
-            ? 'lib/assets/svgs/${label.toLowerCase()}_selected.svg'
-            : 'lib/assets/svgs/${label.toLowerCase()}_unselected.svg',
-        height: 24,
+      child: Badge(
+        isLabelVisible: label == 'Account' && !hasAllRequired,
+        offset: const Offset(10, -5),
+        label: Text(""),
+        backgroundColor: PaxColors.red,
+
+        smallSize: 10,
+        child: SvgPicture.asset(
+          isSelected
+              ? 'lib/assets/svgs/${label.toLowerCase()}_selected.svg'
+              : 'lib/assets/svgs/${label.toLowerCase()}_unselected.svg',
+          height: 24,
+        ),
       ),
     );
   }

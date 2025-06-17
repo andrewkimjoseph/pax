@@ -172,14 +172,22 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
                       (context) => SelectPopup(
                         items: SelectItemList(
                           children: [
-                            SelectCurrencyButton('good_dollar'),
+                            SelectCurrencyButton(
+                              'good_dollar',
+                              selectedCurrency == 'good_dollar',
+                            ),
                             SelectCurrencyButton(
                               'celo_dollar',
+                              selectedCurrency == 'celo_dollar',
+                            ),
+                            SelectCurrencyButton(
+                              'tether_usd',
+                              selectedCurrency == 'tether_usd',
+                            ),
+                            SelectCurrencyButton(
+                              'usd_coin',
+                              selectedCurrency == 'usd_coin',
                             ).withPadding(bottom: kIsWeb ? 0 : 30),
-                            // SelectCurrencyButton('tether_usd'),
-                            // SelectCurrencyButton(
-                            //   'usd_coin',
-                            // ),
                           ],
                         ),
                       ),
