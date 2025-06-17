@@ -37,6 +37,7 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
 
   // Method to handle screening process
   Future<void> _processScreening(BuildContext context) async {
+    if (_isProcessingScreening) return;
     if (!mounted) return;
 
     ref.read(analyticsProvider).continueWithTaskTapped();
