@@ -41,7 +41,7 @@ class BranchService {
     _linkDataStreamSubscription = FlutterBranchSdk.listSession().listen(
       (linkData) {
         if (kDebugMode) {
-          print('BranchService: Deep link received: $linkData');
+          print('BranchService: Deep link being listened to: $linkData');
         }
         // Only handle deep links if they contain actual link data
         if (linkData.isNotEmpty && linkData['+clicked_branch_link'] == true) {
