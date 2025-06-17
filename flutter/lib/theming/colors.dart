@@ -37,8 +37,7 @@ class PaxColors {
   /// Blue accent - used for links and informational elements
   static const Color blue = Color(0xFF94B9FF);
 
-  static const Color otherBlue = Color(0xFF94B9FF);
-
+  static const Color linkBlue = Color(0xFF1A0DAB);
   static const Color green = Color(0xFF34A853);
 
   /// Neutral Colors

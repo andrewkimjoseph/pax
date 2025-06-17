@@ -22,6 +22,13 @@ import 'package:pax/widgets/remote_config_listener.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+      statusBarBrightness: Brightness.light,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarColor: Colors.transparent,
+    ),
+  );
   await AppInitializer().initialize();
   runApp(ProviderScope(child: RemoteConfigListener(child: App())));
 }
