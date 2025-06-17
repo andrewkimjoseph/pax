@@ -21,24 +21,35 @@ class TasksRepository {
   // Constructor
   TasksRepository();
 
-  // Stream of all tasks
-  Stream<List<Task>> getTasks() {
-    return _tasksCollection
-        .orderBy('timeCreated', descending: true)
-        .snapshots()
-        .map((snapshot) {
-          return snapshot.docs.map((doc) => Task.fromFirestore(doc)).toList();
-        });
-  }
+  // // Stream of all tasks
+  // Stream<List<Task>> getTasks() {
+  //   return _tasksCollection
+  //       .orderBy('timeCreated', descending: true)
+  //       .snapshots()
+  //       .map((snapshot) {
+  //         return snapshot.docs.map((doc) => Task.fromFirestore(doc)).toList();
+  //       });
+  // }
 
   Stream<List<Task>> getAvailableTasks(String? participantId) {
+    // Build the base query
+    Query tasksQuery;
+    if (kDebugMode) {
+      tasksQuery = _tasksCollection
+          .where('isAvailable', isEqualTo: false)
+          .where('isTest', isEqualTo: true);
+    } else {
+      tasksQuery = _tasksCollection
+          .where('isTest', isEqualTo: false)
+          .where('isAvailable', isEqualTo: true);
+    }
+
     // Get all available tasks
-    Stream<List<Task>> availableTasksStream = _tasksCollection
-        .where('isAvailable', isEqualTo: true)
-        .snapshots()
-        .map((snapshot) {
-          return snapshot.docs.map((doc) => Task.fromFirestore(doc)).toList();
-        });
+    Stream<List<Task>> availableTasksStream = tasksQuery.snapshots().map((
+      snapshot,
+    ) {
+      return snapshot.docs.map((doc) => Task.fromFirestore(doc)).toList();
+    });
 
     // Get all task completions for this participant
     Stream<List<TaskCompletion>> completionsStream = _taskCompletionsCollection

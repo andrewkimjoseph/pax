@@ -9,10 +9,10 @@ final tasksRepositoryProvider = Provider<TasksRepository>((ref) {
 });
 
 // Stream provider for all tasks
-final tasksStreamProvider = StreamProvider.autoDispose<List<Task>>((ref) {
-  final repository = ref.watch(tasksRepositoryProvider);
-  return repository.getTasks();
-});
+// final tasksStreamProvider = StreamProvider.autoDispose<List<Task>>((ref) {
+//   final repository = ref.watch(tasksRepositoryProvider);
+//   return repository.getTasks();
+// });
 
 // Stream provider for available tasks only
 final availableTasksStreamProvider = StreamProvider.family
