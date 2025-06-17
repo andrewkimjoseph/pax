@@ -189,7 +189,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
           !hasPaymentMethod
               ? Center(
                 child: Text(
-                  'Please connect a payment method to view your profile.',
+                  'Please connect a withdrawal method to view your profile.',
                   textAlign: TextAlign.center,
                 ).withPadding(all: 16),
               )

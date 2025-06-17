@@ -50,7 +50,7 @@ class _TaskViewState extends ConsumerState<TasksView> {
                   Row(
                     children: [
                       Text(
-                        'Please connect a payment method to see available tasks.',
+                        'Please connect a withdrawal method to see available tasks.',
                         textAlign: TextAlign.center,
                       ).withPadding(all: 16).expanded(),
                     ],
