@@ -45,6 +45,7 @@ export const rewardParticipantProxy = onCall(
       });
       // Ensure the user is authenticated
       if (!request.auth) {
+        logger.error("Unauthenticated request to rewardParticipantProxy", { requestAuth: request.auth });
         throw new HttpsError(
           "unauthenticated",
           "The function must be called by an authenticated user."
@@ -56,6 +57,7 @@ export const rewardParticipantProxy = onCall(
       };
 
       if (!taskCompletionId) {
+        logger.error("Missing taskCompletionId in rewardParticipantProxy", { taskCompletionId });
         throw new HttpsError(
           "invalid-argument",
           "Missing taskCompletionId parameter."
@@ -70,17 +72,20 @@ export const rewardParticipantProxy = onCall(
         .get();
 
       if (!taskCompletionDoc.exists) {
+        logger.error("Task completion not found in rewardParticipantProxy", { taskCompletionId });
         throw new HttpsError("not-found", "Task completion not found");
       }
 
       const taskCompletionData = taskCompletionDoc.data();
       if (!taskCompletionData) {
+        logger.error("Task completion data is empty in rewardParticipantProxy", { taskCompletionId });
         throw new HttpsError("not-found", "Task completion data is empty");
       }
 
       // Extract required data from the task completion
       const { taskId, participantId } = taskCompletionData;
       if (!taskId || !participantId) {
+        logger.error("Task completion missing required fields in rewardParticipantProxy", { taskCompletionId, taskId, participantId });
         throw new HttpsError(
           "invalid-argument",
           "Task completion missing required fields"
@@ -97,6 +102,7 @@ export const rewardParticipantProxy = onCall(
       // Get task data for reward details
       const taskDoc = await firestore.collection("tasks").doc(taskId).get();
       if (!taskDoc.exists) {
+        logger.error("Task not found in rewardParticipantProxy", { taskId });
         throw new HttpsError("not-found", "Task not found");
       }
 
@@ -108,6 +114,7 @@ export const rewardParticipantProxy = onCall(
         !taskData.managerContractAddress ||
         !taskData.taskMasterId
       ) {
+        logger.error("Task missing required reward data in rewardParticipantProxy", { taskId, taskData });
         throw new HttpsError(
           "invalid-argument",
           "Task missing required reward data"
@@ -126,6 +133,7 @@ export const rewardParticipantProxy = onCall(
         .doc(participantId)
         .get();
       if (!participantPaxAccountDoc.exists) {
+        logger.error("PaxAccount record not found for participant in rewardParticipantProxy", { participantId });
         throw new HttpsError(
           "not-found",
           "PaxAccount record not found for participant"
@@ -138,6 +146,7 @@ export const rewardParticipantProxy = onCall(
         !participantPaxAccountData.contractAddress ||
         !participantPaxAccountData.serverWalletId
       ) {
+        logger.error("Participant PaxAccount missing required data in rewardParticipantProxy", { participantId, participantPaxAccountData });
         throw new HttpsError(
           "invalid-argument",
           "Participant PaxAccount missing required data"
@@ -154,6 +163,7 @@ export const rewardParticipantProxy = onCall(
         .doc(taskMasterId)
         .get();
       if (!taskMasterPaxAccountDoc.exists) {
+        logger.error("PaxAccount record not found for task master in rewardParticipantProxy", { taskMasterId });
         throw new HttpsError(
           "not-found",
           "PaxAccount record not found for task master"
@@ -165,6 +175,7 @@ export const rewardParticipantProxy = onCall(
         !taskMasterPaxAccountData ||
         !taskMasterPaxAccountData.serverWalletId
       ) {
+        logger.error("Task master PaxAccount missing serverWalletId in rewardParticipantProxy", { taskMasterId, taskMasterPaxAccountData });
         throw new HttpsError(
           "invalid-argument",
           "Task master PaxAccount missing serverWalletId"
@@ -180,10 +191,12 @@ export const rewardParticipantProxy = onCall(
       ]);
 
       if (!serverWallet) {
+        logger.error("Server wallet not found in rewardParticipantProxy", { serverWalletId });
         throw new HttpsError("not-found", "Server wallet not found");
       }
 
       if (!taskMasterWallet) {
+        logger.error("Task master wallet not found in rewardParticipantProxy", { taskMasterServerWalletId });
         throw new HttpsError("not-found", "Task master wallet not found");
       }
 
@@ -227,6 +240,7 @@ export const rewardParticipantProxy = onCall(
       );
 
       if (!signaturePackage.isValid) {
+        logger.error("Signature validation failed in rewardParticipantProxy", { signaturePackage });
         throw new HttpsError("internal", "Signature validation failed");
       }
 
@@ -279,7 +293,7 @@ export const rewardParticipantProxy = onCall(
         });
 
       if (!userOpReceipt.success) {
-        logger.error("User operation failed", { userOpReceipt });
+        logger.error("User operation failed in rewardParticipantProxy", { userOpReceipt });
         throw new HttpsError(
           "internal",
           `User operation failed: ${JSON.stringify(userOpReceipt)}`

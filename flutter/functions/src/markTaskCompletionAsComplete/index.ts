@@ -23,6 +23,7 @@ export const markTaskCompletionAsComplete = onCall(FUNCTION_RUNTIME_OPTS, async 
   try {
     // Ensure the user is authenticated
     if (!request.auth) {
+      logger.error("Unauthenticated request to markTaskCompletionAsComplete", { requestAuth: request.auth });
       throw new HttpsError(
         "unauthenticated",
         "The function must be called by an authenticated user."
@@ -40,6 +41,7 @@ export const markTaskCompletionAsComplete = onCall(FUNCTION_RUNTIME_OPTS, async 
 
     // Validate required parameters
     if (!screeningId || !taskId) {
+      logger.error("Missing required parameters in markTaskCompletionAsComplete", { screeningId, taskId });
       throw new HttpsError(
         "invalid-argument",
         "Missing required parameters. Please provide screeningId and taskId."
@@ -64,6 +66,7 @@ export const markTaskCompletionAsComplete = onCall(FUNCTION_RUNTIME_OPTS, async 
       .get();
       
     if (querySnapshot.empty) {
+      logger.error("No task completion found with the provided screeningId and taskId in markTaskCompletionAsComplete", { screeningId, taskId });
       throw new HttpsError(
         "not-found",
         "No task completion found with the provided screeningId and taskId."

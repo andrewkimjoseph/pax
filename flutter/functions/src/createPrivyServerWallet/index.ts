@@ -21,6 +21,7 @@ export const createPrivyServerWallet = onCall(
       const { toSimpleSmartAccount } = await import("permissionless/accounts");
       // Ensure the user is authenticated
       if (!request.auth) {
+        logger.error("Unauthenticated request to createPrivyServerWallet", { requestAuth: request.auth });
         throw new HttpsError(
           "unauthenticated",
           "The function must be called by an authenticated user."

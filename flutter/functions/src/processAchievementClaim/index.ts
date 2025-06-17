@@ -33,6 +33,7 @@ export const processAchievementClaim = onCall(
 
       // Ensure the user is authenticated
       if (!request.auth) {
+        logger.error("Unauthenticated request to processAchievementClaim", { requestAuth: request.auth });
         throw new HttpsError(
           "unauthenticated",
           "The function must be called by an authenticated user."
@@ -69,6 +70,12 @@ export const processAchievementClaim = onCall(
         !amountEarned === undefined ||
         tasksCompleted === undefined
       ) {
+        logger.error("Missing required parameters in processAchievementClaim", {
+          achievementId,
+          paxAccountContractAddress,
+          amountEarned,
+          tasksCompleted
+        });
         throw new HttpsError(
           "invalid-argument",
           "Missing required parameters: achievementId, paxAccountContractAddress, amountEarned, tasksNeededForCompletion, and tasksCompleted."
@@ -150,7 +157,7 @@ export const processAchievementClaim = onCall(
         });
 
       if (!userOpReceipt.success) {
-        logger.error("User operation failed", { userOpReceipt });
+        logger.error("User operation failed in processAchievementClaim", { userOpReceipt });
         throw new HttpsError(
           "internal",
           `User operation failed: ${JSON.stringify(userOpReceipt)}`

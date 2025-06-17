@@ -52,6 +52,7 @@ export const createPaxAccountV1Proxy = onCall(
       });
       // Ensure the user is authenticated
       if (!request.auth) {
+        logger.error("Unauthenticated request to createPaxAccountV1Proxy", { requestAuth: request.auth });
         throw new HttpsError(
           "unauthenticated",
           "The function must be called by an authenticated user."
@@ -65,6 +66,7 @@ export const createPaxAccountV1Proxy = onCall(
       };
 
       if (!_primaryPaymentMethod) {
+        logger.error("Missing required parameter: walletAddress in createPaxAccountV1Proxy", { _primaryPaymentMethod });
         throw new HttpsError(
           "invalid-argument",
           "Missing required parameter: walletAddress"
@@ -72,6 +74,7 @@ export const createPaxAccountV1Proxy = onCall(
       }
 
       if (!serverWalletId) {
+        logger.error("Missing required parameter: serverWalletId in createPaxAccountV1Proxy", { serverWalletId });
         throw new HttpsError(
           "invalid-argument",
           "Missing required parameter: serverWalletId"
@@ -90,6 +93,7 @@ export const createPaxAccountV1Proxy = onCall(
       });
 
       if (!wallet) {
+        logger.error("Server wallet not found with the provided ID in createPaxAccountV1Proxy", { serverWalletId });
         throw new HttpsError(
           "not-found",
           "Server wallet not found with the provided ID"
@@ -160,7 +164,7 @@ export const createPaxAccountV1Proxy = onCall(
         });
 
       if (!userOpReceipt.success) {
-        logger.error("User operation failed", { userOpReceipt });
+        logger.error("User operation failed in createPaxAccountV1Proxy", { userOpReceipt });
         throw new HttpsError(
           "internal",
           `User operation failed: ${JSON.stringify(userOpReceipt)}`
@@ -174,6 +178,7 @@ export const createPaxAccountV1Proxy = onCall(
       const proxyAddress = await getDeployedProxyContractAddress(txnHash);
 
       if (!proxyAddress) {
+        logger.error("Failed to retrieve proxy contract address from transaction logs in createPaxAccountV1Proxy", { txnHash });
         throw new HttpsError(
           "internal",
           "Failed to retrieve proxy contract address from transaction logs"
