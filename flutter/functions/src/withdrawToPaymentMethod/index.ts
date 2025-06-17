@@ -40,6 +40,7 @@ export const withdrawToPaymentMethod = onCall(FUNCTION_RUNTIME_OPTS, async (requ
       },
     });
     if (!request.auth) {
+      logger.error("Unauthenticated request to withdrawToPaymentMethod", { requestAuth: request.auth });
       throw new HttpsError(
         "unauthenticated",
         "The function must be called by an authenticated user."
@@ -69,6 +70,7 @@ export const withdrawToPaymentMethod = onCall(FUNCTION_RUNTIME_OPTS, async (requ
 
     // Validate required parameters
     if (!serverWalletId) {
+      logger.error("Missing required parameter: serverWalletId in withdrawToPaymentMethod", { serverWalletId });
       throw new HttpsError(
         "invalid-argument",
         "Missing required parameter: serverWalletId"
@@ -76,6 +78,7 @@ export const withdrawToPaymentMethod = onCall(FUNCTION_RUNTIME_OPTS, async (requ
     }
 
     if (!paxAccountAddress) {
+      logger.error("Missing required parameter: paxAccountAddress in withdrawToPaymentMethod", { paxAccountAddress });
       throw new HttpsError(
         "invalid-argument",
         "Missing required parameter: paxAccountAddress"
@@ -83,6 +86,7 @@ export const withdrawToPaymentMethod = onCall(FUNCTION_RUNTIME_OPTS, async (requ
     }
 
     if (!amountRequested) {
+      logger.error("Missing required parameter: amountRequested in withdrawToPaymentMethod", { amountRequested });
       throw new HttpsError(
         "invalid-argument",
         "Missing required parameter: amountRequested"
@@ -90,6 +94,7 @@ export const withdrawToPaymentMethod = onCall(FUNCTION_RUNTIME_OPTS, async (requ
     }
 
     if (!currency) {
+      logger.error("Missing required parameter: currency in withdrawToPaymentMethod", { currency });
       throw new HttpsError(
         "invalid-argument",
         "Missing required parameter: currency"
@@ -97,6 +102,7 @@ export const withdrawToPaymentMethod = onCall(FUNCTION_RUNTIME_OPTS, async (requ
     }
 
     if (tokenId === undefined) {
+      logger.error("Missing required parameter: tokenId in withdrawToPaymentMethod", { tokenId });
       throw new HttpsError(
         "invalid-argument",
         "Missing required parameter: tokenId"
@@ -104,6 +110,7 @@ export const withdrawToPaymentMethod = onCall(FUNCTION_RUNTIME_OPTS, async (requ
     }
 
     if (!withdrawalPaymentMethodId) {
+      logger.error("Missing required parameter: withdrawalPaymentMethodId in withdrawToPaymentMethod", { withdrawalPaymentMethodId });
       throw new HttpsError(
         "invalid-argument",
         "Missing required parameter: withdrawalPaymentMethodId"
@@ -147,6 +154,7 @@ export const withdrawToPaymentMethod = onCall(FUNCTION_RUNTIME_OPTS, async (requ
     });
 
     if (!wallet) {
+      logger.error("Server wallet not found with the provided ID in withdrawToPaymentMethod", { serverWalletId });
       throw new HttpsError(
         "not-found",
         "Server wallet not found with the provided ID"
@@ -217,6 +225,7 @@ export const withdrawToPaymentMethod = onCall(FUNCTION_RUNTIME_OPTS, async (requ
     });
 
       if (!userOpReceipt.success) {
+      logger.error("User operation failed in withdrawToPaymentMethod", { userOpReceipt });
       throw new HttpsError(
         "internal",
         "User operation failed"
