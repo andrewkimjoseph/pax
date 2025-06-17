@@ -1,11 +1,17 @@
+import 'package:flutter/material.dart' show Badge;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/exports/views.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
+import 'package:pax/providers/auth/auth_provider.dart';
+import 'package:pax/providers/db/achievement/achievement_provider.dart';
+import 'package:pax/providers/db/payment_method/payment_method_provider.dart';
 import 'package:pax/providers/remote_config/remote_config_provider.dart';
+import 'package:pax/utils/remote_config_constants.dart';
 import 'package:flutter/foundation.dart';
-
-import 'package:shadcn_flutter/shadcn_flutter.dart';
-
+import 'package:pax/providers/db/participant/participant_provider.dart';
+import 'package:pax/providers/db/tasks/task_provider.dart';
+import 'package:pax/providers/route/home_selected_index_provider.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' hide Consumer;
 import '../../theming/colors.dart' show PaxColors;
 
 class HomeView extends ConsumerStatefulWidget {
@@ -16,17 +22,26 @@ class HomeView extends ConsumerStatefulWidget {
 }
 
 class _HomeViewState extends ConsumerState<HomeView> {
-  int index = 0;
   String? screenName;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final participantId = ref.read(authProvider).user.uid;
+      final achievementState = ref.read(achievementProvider);
+
+      if (achievementState.state != AchievementState.loaded) {
+        ref.read(achievementProvider.notifier).fetchAchievements(participantId);
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final featureFlags = ref.watch(featureFlagsProvider);
+    final index = ref.watch(homeSelectedIndexProvider);
+    ref.watch(primaryPaymentMethodProvider);
 
     return Scaffold(
       headers: [
@@ -46,9 +61,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 ),
               ),
 
-              // GestureDetector(
-              //   onPanDown:
-              //       (details) => Navigator.push(
+              // InkWell(
+              //   onTap:
+              //       () => Navigator.push(
               //         context,
               //         MaterialPageRoute(
               //           builder: (context) => NotificationsView(),
@@ -65,85 +80,54 @@ class _HomeViewState extends ConsumerState<HomeView> {
             children: [
               Row(
                 children: [
-                  Button(
-                    style: const ButtonStyle.primary(
-                          density: ButtonDensity.dense,
-                        )
-                        .withBackgroundColor(
-                          color:
-                              index == 0
-                                  ? PaxColors.deepPurple
-                                  : Colors.transparent,
-                        )
-                        .withBorder(
-                          border: Border.all(
-                            color:
-                                index == 0
-                                    ? PaxColors.deepPurple
-                                    : PaxColors.lilac,
-                            width: 2,
-                          ),
-                        )
-                        .withBorderRadius(
-                          borderRadius: BorderRadius.circular(7),
-                        ),
-                    onPressed: () {
-                      setState(() {
-                        screenName = 'Dashboard';
-                        index = 0;
-                      });
-                      ref.read(analyticsProvider).dashboardTapped();
-                    },
-                    child: Text(
-                      'Dashboard',
-                      style: TextStyle(
-                        color: index == 0 ? PaxColors.white : PaxColors.black,
-                      ),
-                    ),
-                  ).withPadding(right: 8),
+                  _homeTabButton(
+                    label: 'Dashboard',
+                    isActive: index == 0,
+                    onPressed: _onDashboardPressed,
+                  ),
                   featureFlags.when(
                     data:
                         (flags) =>
-                            kDebugMode || flags['are_tasks_available'] == true
-                                ? Button(
-                                  style: const ButtonStyle.primary(
-                                        density: ButtonDensity.dense,
-                                      )
-                                      .withBackgroundColor(
-                                        color:
-                                            index == 1
-                                                ? PaxColors.deepPurple
-                                                : Colors.transparent,
-                                      )
-                                      .withBorder(
-                                        border: Border.all(
-                                          color:
-                                              index == 1
-                                                  ? PaxColors.deepPurple
-                                                  : PaxColors.lilac,
-                                          width: 2,
-                                        ),
-                                      )
-                                      .withBorderRadius(
-                                        borderRadius: BorderRadius.circular(7),
+                            kDebugMode ||
+                                    flags[RemoteConfigKeys.areTasksAvailable] ==
+                                        true
+                                ? Consumer(
+                                  builder: (context, ref, child) {
+                                    final participant =
+                                        ref
+                                            .watch(participantProvider)
+                                            .participant;
+                                    final tasksStream = ref.watch(
+                                      availableTasksStreamProvider(
+                                        participant?.id,
                                       ),
-                                  onPressed: () {
-                                    setState(() {
-                                      screenName = 'Tasks';
-                                      index = 1;
-                                    });
-                                    ref.read(analyticsProvider).tasksTapped();
+                                    );
+
+                                    return tasksStream.when(
+                                      data:
+                                          (tasks) => _homeTabButton(
+                                            label: 'Tasks',
+                                            isActive: index == 1,
+                                            onPressed: _onTasksPressed,
+                                            badgeCount: tasks.length,
+                                          ),
+                                      loading:
+                                          () => _homeTabButton(
+                                            label: 'Tasks',
+                                            isActive: index == 1,
+                                            isLoading: true,
+                                            onPressed: _onTasksPressed,
+                                          ),
+                                      error:
+                                          (_, __) => _homeTabButton(
+                                            label: 'Tasks',
+                                            isActive: index == 1,
+                                            isError: true,
+                                            onPressed: _onTasksPressed,
+                                          ),
+                                    );
                                   },
-                                  child: Text(
-                                    'Tasks',
-                                    style: TextStyle(
-                                      color:
-                                          index == 1
-                                              ? PaxColors.white
-                                              : PaxColors.black,
-                                    ),
-                                  ),
-                                ).withPadding(right: 8)
+                                )
                                 : const SizedBox.shrink(),
                     loading: () => const SizedBox.shrink(),
                     error: (_, __) => const SizedBox.shrink(),
@@ -152,45 +136,14 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     data:
                         (flags) =>
                             kDebugMode ||
-                                    flags['is_achievements_available'] == true
-                                ? Button(
-                                  style: const ButtonStyle.primary(
-                                        density: ButtonDensity.dense,
-                                      )
-                                      .withBackgroundColor(
-                                        color:
-                                            index == 2
-                                                ? PaxColors.deepPurple
-                                                : Colors.transparent,
-                                      )
-                                      .withBorder(
-                                        border: Border.all(
-                                          color:
-                                              index == 2
-                                                  ? PaxColors.deepPurple
-                                                  : PaxColors.lilac,
-                                          width: 2,
-                                        ),
-                                      )
-                                      .withBorderRadius(
-                                        borderRadius: BorderRadius.circular(7),
-                                      ),
-                                  onPressed: () {
-                                    setState(() {
-                                      screenName = 'Achievements';
-                                      index = 2;
-                                    });
-                                  },
-                                  child: Text(
-                                    'Achievements',
-                                    style: TextStyle(
-                                      color:
-                                          index == 2
-                                              ? PaxColors.white
-                                              : PaxColors.black,
-                                    ),
-                                  ),
-                                ).withPadding(right: 8)
+                                    flags[RemoteConfigKeys
+                                            .areAchievementsAvailable] ==
+                                        true
+                                ? _homeTabButton(
+                                  label: 'Achievements',
+                                  isActive: index == 2,
+                                  onPressed: _onAchievementsPressed,
+                                )
                                 : const SizedBox.shrink(),
                     loading: () => const SizedBox.shrink(),
                     error: (_, __) => const SizedBox.shrink(),
@@ -202,34 +155,136 @@ class _HomeViewState extends ConsumerState<HomeView> {
         ),
         Divider(color: PaxColors.lightGrey),
       ],
-      child: IndexedStack(
-        index: index,
-        children: [
-          DashboardView(),
-          featureFlags.when(
-            data:
-                (flags) =>
-                    kDebugMode || flags['are_tasks_available'] == true
-                        ? TasksView()
-                        : const SizedBox.shrink(),
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
-          featureFlags.when(
-            data:
-                (flags) =>
-                    kDebugMode || flags['is_achievements_available'] == true
-                        ? AchievementsView()
-                        : const SizedBox.shrink(),
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
-        ],
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        child:
+            index == 0
+                ? DashboardView(key: const ValueKey('dashboard'))
+                : index == 1
+                ? featureFlags.when(
+                  data:
+                      (flags) =>
+                          kDebugMode ||
+                                  flags[RemoteConfigKeys.areTasksAvailable] ==
+                                      true
+                              ? TasksView(key: const ValueKey('tasks'))
+                              : const SizedBox.shrink(
+                                key: ValueKey('empty_tasks'),
+                              ),
+                  loading:
+                      () =>
+                          const SizedBox.shrink(key: ValueKey('loading_tasks')),
+                  error:
+                      (_, __) =>
+                          const SizedBox.shrink(key: ValueKey('error_tasks')),
+                )
+                : featureFlags.when(
+                  data:
+                      (flags) =>
+                          kDebugMode ||
+                                  flags[RemoteConfigKeys
+                                          .areAchievementsAvailable] ==
+                                      true
+                              ? AchievementsView(
+                                key: const ValueKey('achievements'),
+                              )
+                              : const SizedBox.shrink(
+                                key: ValueKey('empty_achievements'),
+                              ),
+                  loading:
+                      () => const SizedBox.shrink(
+                        key: ValueKey('loading_achievements'),
+                      ),
+                  error:
+                      (_, __) => const SizedBox.shrink(
+                        key: ValueKey('error_achievements'),
+                      ),
+                ),
       ),
     );
   }
 
-  // Widget buildToast(BuildContext context, ToastOverlay overlay) {
+  void _onTasksPressed() {
+    setState(() {
+      screenName = 'Tasks';
+    });
+    ref.read(homeSelectedIndexProvider.notifier).setIndex(1);
+    ref.read(analyticsProvider).tasksTapped();
+  }
 
-  // }
+  void _onAchievementsPressed() {
+    setState(() {
+      screenName = 'Achievements';
+    });
+    ref.read(homeSelectedIndexProvider.notifier).setIndex(2);
+  }
+
+  void _onDashboardPressed() {
+    setState(() {
+      screenName = 'Dashboard';
+    });
+    ref.read(homeSelectedIndexProvider.notifier).setIndex(0);
+    ref.read(analyticsProvider).dashboardTapped();
+  }
+
+  Widget _homeTabButton({
+    required String label,
+    required bool isActive,
+    required VoidCallback onPressed,
+    int? badgeCount,
+    Color? activeColor,
+    bool isLoading = false,
+    bool isError = false,
+  }) {
+    final button = Button(
+      style: const ButtonStyle.primary(density: ButtonDensity.dense)
+          .withBackgroundColor(
+            color:
+                isActive
+                    ? (activeColor ?? PaxColors.deepPurple)
+                    : Colors.transparent,
+          )
+          .withBorder(
+            border: Border.all(
+              color:
+                  isActive
+                      ? (activeColor ?? PaxColors.deepPurple)
+                      : badgeCount != null && badgeCount > 0
+                      ? PaxColors.lilac
+                      : PaxColors.lilac,
+              width: 2,
+            ),
+          )
+          .withBorderRadius(borderRadius: BorderRadius.circular(7)),
+      onPressed: onPressed,
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: isActive ? PaxColors.white : PaxColors.black,
+            ),
+          ),
+        ],
+      ),
+    ).withPadding(right: 8);
+
+    if (isLoading || isError) {
+      return button;
+    }
+    if (badgeCount != null && badgeCount > 0) {
+      return Badge.count(
+        offset: const Offset(-5, -5),
+        // backgroundColor: PaxColors.green,
+        isLabelVisible: true,
+        backgroundColor: PaxColors.red,
+        count: badgeCount,
+        child: button,
+      );
+    }
+    return button;
+  }
 }

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:pax/utils/achievement_constants.dart';
 
 enum AchievementStatus { inProgress, earned, claimed }
 
@@ -10,6 +11,7 @@ class Achievement {
   final int tasksNeededForCompletion;
   final Timestamp? timeCreated;
   final Timestamp? timeCompleted;
+  final Timestamp? timeClaimed;
   final num? amountEarned;
   final String? txnHash;
 
@@ -21,6 +23,7 @@ class Achievement {
     required this.tasksNeededForCompletion,
     this.timeCreated,
     this.timeCompleted,
+    this.timeClaimed,
     this.amountEarned,
     this.txnHash,
   });
@@ -39,23 +42,23 @@ class Achievement {
         status == AchievementStatus.earned ||
         status == AchievementStatus.claimed;
     switch (name) {
-      case 'Payout Connector':
+      case AchievementConstants.payoutConnector:
         return isCompleted
             ? 'Connected a payment method'
             : 'Connect a payment method';
-      case 'Verified Human':
+      case AchievementConstants.verifiedHuman:
         return isCompleted
             ? 'Verified humanness on your connected payment method'
             : 'Verify humanness on your connected payment method';
-      case 'Profile Perfectionist':
+      case AchievementConstants.profilePerfectionist:
         return isCompleted
             ? 'Filled in your phone number, gender, and date of birth'
             : 'Fill in your phone number, gender, and date of birth';
-      case 'Task Starter':
+      case AchievementConstants.taskStarter:
         return isCompleted
             ? 'Completed $tasksNeededForCompletion task${tasksNeededForCompletion == 1 ? '' : 's'}'
             : 'Complete $tasksNeededForCompletion task${tasksNeededForCompletion == 1 ? '' : 's'}';
-      case 'Task Expert':
+      case AchievementConstants.taskExpert:
         return isCompleted ? 'Completed 10 tasks' : 'Complete 10 tasks';
       default:
         return '';
@@ -64,15 +67,15 @@ class Achievement {
 
   String get svgAssetName {
     switch (name) {
-      case 'Payout Connector':
+      case AchievementConstants.payoutConnector:
         return 'payout_connector';
-      case 'Verified Human':
+      case AchievementConstants.verifiedHuman:
         return 'verified_human';
-      case 'Profile Perfectionist':
+      case AchievementConstants.profilePerfectionist:
         return 'profile_perfectionist';
-      case 'Task Starter':
+      case AchievementConstants.taskStarter:
         return 'task_starter';
-      case 'Task Expert':
+      case AchievementConstants.taskExpert:
         return 'task_expert';
       default:
         return '';
@@ -86,23 +89,6 @@ class Achievement {
     }
     return '$tasksCompleted/$tasksNeededForCompletion';
   }
-
-  // num get amountAwarded {
-  //   switch (name) {
-  //     case 'Payout Connector':
-  //       return 100;
-  //     case 'Verified Human':
-  //       return 100;
-  //     case 'Profile Perfectionist':
-  //       return 100;
-  //     case 'Task Starter':
-  //       return 100;
-  //     case 'Task Expert':
-  //       return 1000;
-  //     default:
-  //       return 0;
-  //   }
-  // }
 
   // Factory method to create an Achievement from Firestore document
   factory Achievement.fromFirestore(DocumentSnapshot doc) {
@@ -124,6 +110,7 @@ class Achievement {
       tasksNeededForCompletion: data['tasksNeededForCompletion'] ?? 1,
       timeCreated: data['timeCreated'],
       timeCompleted: data['timeCompleted'],
+      timeClaimed: data['timeClaimed'],
       amountEarned: data['amountEarned'],
       txnHash: data['txnHash'],
     );
@@ -138,6 +125,7 @@ class Achievement {
       'tasksNeededForCompletion': tasksNeededForCompletion,
       'timeCreated': timeCreated,
       'timeCompleted': timeCompleted,
+      'timeClaimed': timeClaimed,
       'amountEarned': amountEarned,
       'txnHash': txnHash,
     };
@@ -152,6 +140,7 @@ class Achievement {
     int? tasksNeededForCompletion,
     Timestamp? timeCreated,
     Timestamp? timeCompleted,
+    Timestamp? timeClaimed,
     num? amountEarned,
     String? txnHash,
   }) {
@@ -164,6 +153,7 @@ class Achievement {
           tasksNeededForCompletion ?? this.tasksNeededForCompletion,
       timeCreated: timeCreated ?? this.timeCreated,
       timeCompleted: timeCompleted ?? this.timeCompleted,
+      timeClaimed: timeClaimed ?? this.timeClaimed,
       amountEarned: amountEarned ?? this.amountEarned,
       txnHash: txnHash ?? this.txnHash,
     );

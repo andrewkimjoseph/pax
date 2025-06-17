@@ -26,6 +26,7 @@ export const deleteParticipantOnRequest = onCall(FUNCTION_RUNTIME_OPTS, async (r
   try {
     // Ensure the user is authenticated
     if (!request.auth) {
+      logger.error("Unauthenticated request to deleteParticipantOnRequest", { requestAuth: request.auth });
       throw new HttpsError(
         "unauthenticated",
         "The function must be called by an authenticated user."

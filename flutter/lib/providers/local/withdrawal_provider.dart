@@ -146,11 +146,11 @@ final withdrawProvider = NotifierProvider<WithdrawNotifier, WithdrawStateModel>(
 );
 
 // Stream provider for withdrawals
-final withdrawalsStreamProvider = StreamProvider.family<
-  List<Withdrawal>,
-  String?
->((ref, participantId) {
-  // Use the withdrawal repository to get the stream of withdrawals for the participant
-  final withdrawalRepository = ref.watch(withdrawalRepositoryProvider);
-  return withdrawalRepository.streamWithdrawalsForParticipant(participantId);
-});
+final withdrawalsStreamProvider = StreamProvider.family
+    .autoDispose<List<Withdrawal>, String?>((ref, participantId) {
+      final withdrawalRepository = ref.watch(withdrawalRepositoryProvider);
+
+      return withdrawalRepository.streamWithdrawalsForParticipant(
+        participantId,
+      );
+    });

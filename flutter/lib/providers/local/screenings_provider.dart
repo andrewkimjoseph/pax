@@ -5,25 +5,26 @@ import 'package:pax/models/firestore/screening/screening_model.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 
 // Provider for participant's screenings only
-final participantScreeningsStreamProvider = StreamProvider<List<Screening>>((
-  ref,
-) {
-  final participant = ref.watch(participantProvider).participant;
+final participantScreeningsStreamProvider =
+    StreamProvider.autoDispose<List<Screening>>((ref) {
+      final participantState = ref.read(participantProvider);
+      final participant = participantState.participant;
+      if (participant == null || participant.id.isEmpty) {
+        return Stream.value([]);
+      }
 
-  if (participant == null || participant.id.isEmpty) {
-    return Stream.value([]);
-  }
-
-  return FirebaseFirestore.instance
-      .collection('screenings')
-      .where('participantId', isEqualTo: participant.id)
-      .orderBy('timeCreated', descending: true)
-      .snapshots()
-      .map(
-        (snapshot) =>
-            snapshot.docs.map((doc) => Screening.fromFirestore(doc)).toList(),
-      );
-});
+      return FirebaseFirestore.instance
+          .collection('screenings')
+          .where('participantId', isEqualTo: participant.id)
+          .orderBy('timeCreated', descending: true)
+          .snapshots()
+          .map(
+            (snapshot) =>
+                snapshot.docs
+                    .map((doc) => Screening.fromFirestore(doc))
+                    .toList(),
+          );
+    });
 
 // Provider for a specific task's screening for the current participant
 final taskScreeningProvider = Provider.family<Screening?, String>((

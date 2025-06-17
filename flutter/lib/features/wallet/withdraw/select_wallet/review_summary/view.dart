@@ -127,9 +127,15 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Processing your withdrawal...'),
+                CircularProgressIndicator().withPadding(bottom: 24),
+                Text(
+                  'Processing your withdrawal...',
+                  style: TextStyle(
+                    color: PaxColors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
               ],
             ),
           ),
@@ -192,7 +198,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                             fontWeight: FontWeight.bold,
                           ),
                           textAlign: TextAlign.center,
-                        ),
+                        ).withPadding(right: 4),
                         SvgPicture.asset(
                           'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(tokenId)}.svg',
                           height: 25,
@@ -239,6 +245,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
   // Error dialog
   void _showErrorDialog(String errorMessage) {
     showDialog(
+      barrierDismissible: false,
       context: context,
       builder: (context) {
         return PopScope(
@@ -258,11 +265,14 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
             ),
             content: Text(
               errorMessage,
-              maxLines: 5,
+              maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
             actions: [
-              OutlineButton(onPressed: () => context.pop(), child: Text('OK')),
+              OutlineButton(
+                onPressed: () => context.go("/home"),
+                child: Text('OK'),
+              ),
             ],
           ),
         );

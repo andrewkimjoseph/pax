@@ -2,13 +2,14 @@ import 'package:pax/exports/shadcn.dart';
 import 'package:pax/theming/colors.dart';
 
 extension WithTooltip on Widget {
-  Widget withToolTip(String tip) {
+  Widget withToolTip(String tip, {bool showTooltip = true}) {
+    if (!showTooltip) return this;
     return Tooltip(
       tooltip:
           (context) => Container(
             decoration: BoxDecoration(
               // border: Border.all(),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(12),
               gradient: LinearGradient(colors: PaxColors.orangeToPinkGradient),
             ),
             child: Text(

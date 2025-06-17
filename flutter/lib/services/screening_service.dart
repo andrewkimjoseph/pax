@@ -10,7 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/providers/local/screening_state_provider.dart';
-import 'package:pax/providers/local/task_context/screening_context_provider.dart';
+import 'package:pax/providers/local/screening_context/screening_context_provider.dart';
 
 class ScreeningService {
   final Ref ref;

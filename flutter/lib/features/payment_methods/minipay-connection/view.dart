@@ -1,5 +1,5 @@
 // views/minipay_connection_view.dart (refactored to use provider)
-import 'package:flutter/material.dart' show Divider;
+import 'package:flutter/material.dart' show Divider, InkWell;
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
@@ -46,6 +46,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
   }
 
   void _connectWallet() {
+    FocusManager.instance.primaryFocus?.unfocus();
     ref.read(analyticsProvider).connectMinipayTapped();
     final miniPayWalletAddress = _walletAddressController.text.trim();
     final authState = ref.read(authProvider);
@@ -281,6 +282,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
         ).withPadding(bottom: 32),
       ],
       resizeToAvoidBottomInset: false,
+      loadingProgressIndeterminate: connectionState.isConnecting,
       headers: [
         AppBar(
           padding: const EdgeInsets.all(8),
@@ -310,7 +312,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
 
       // Use Column as the main container
       child: SingleChildScrollView(
-        child: GestureDetector(
+        child: InkWell(
           onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
           child: Column(
             children: [
@@ -357,7 +359,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                               FaIcon(
                                 FontAwesomeIcons.triangleExclamation,
                                 color: PaxColors.otherOrange,
-                                size: 25,
+                                size: 20,
                               ).withPadding(right: 8),
                               // SvgPicture.asset(
                               //   'lib/assets/svgs/verification_required.svg',
@@ -368,31 +370,45 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                           Expanded(
                             child: Column(
                               children: [
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'GoodDollar',
-                                      style: TextStyle(
-                                        color: PaxColors.deepPurple,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
+                                InkWell(
+                                  onTap:
+                                      () => UrlHandler.launchInAppWebView(
+                                        context,
+                                        'https://www.gooddollar.org/blog-posts/face-verification-challenge-identity',
                                       ),
-                                    ),
-                                    SvgPicture.asset(
-                                      'lib/assets/svgs/currencies/good_dollar.svg',
-                                      height: 20,
-                                    ),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
 
-                                    const Text(
-                                      ' Face Verification Required',
-                                      style: TextStyle(
-                                        color: PaxColors.deepPurple,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
+                                    children: [
+                                      const Text(
+                                        'GoodDollar',
+                                        style: TextStyle(
+                                          color: PaxColors.deepPurple,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                      SvgPicture.asset(
+                                        'lib/assets/svgs/currencies/good_dollar.svg',
+                                        height: 20,
+                                      ),
+
+                                      const Text(
+                                        ' Face Verification Required',
+                                        style: TextStyle(
+                                          color: PaxColors.deepPurple,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ).withPadding(right: 8),
+
+                                      SvgPicture.asset(
+                                        'lib/assets/svgs/redirect_window.svg',
+                                        height: 15,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                                 // .withPadding(bottom: 8),
                                 // Row(
@@ -415,7 +431,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                           ),
                         ],
                       ),
-                    ).withPadding(bottom: 12).animate().fadeIn(),
+                    ).withPadding(bottom: 20),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -423,10 +439,10 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                           "Wallet address (0x..)",
                           textAlign: TextAlign.left,
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 16,
                             fontWeight: FontWeight.normal,
                           ),
-                        ).withPadding(bottom: 16),
+                        ).withPadding(bottom: 20),
                         TextField(
                           controller: _walletAddressController,
                           onChanged: (value) {
@@ -469,7 +485,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                           ],
                         ),
                       ],
-                    ).withPadding(bottom: 16),
+                    ).withPadding(bottom: 20),
 
                     Row(
                       children: [
@@ -478,15 +494,14 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                           textAlign: TextAlign.left,
                           style: TextStyle(
                             color: PaxColors.black,
-                            fontSize: 12,
+                            fontSize: 13,
                             fontWeight: FontWeight.normal,
                           ),
                         ).withPadding(right: 2),
-                        GestureDetector(
-                          onPanDown:
-                              (details) => UrlHandler.launchInAppWebView(
-                                context,
-                                'https://www.minipay.to/',
+                        InkWell(
+                          onTap:
+                              () => UrlHandler.launchInExternalBrowser(
+                                'https://play.google.com/store/apps/details?id=com.opera.minipay&hl=en',
                               ),
                           child: Row(
                             children: [
@@ -495,7 +510,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                                 textAlign: TextAlign.left,
                                 style: TextStyle(
                                   color: PaxColors.black,
-                                  fontSize: 12,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.normal,
                                   decoration: TextDecoration.underline,
                                 ),
@@ -515,7 +530,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                           "How to do GoodDollar",
                           textAlign: TextAlign.left,
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 17,
                             fontWeight: FontWeight.w900,
                           ),
                         ),
@@ -525,10 +540,10 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                           height: 20,
                         ),
                         const Text(
-                          " verification:",
+                          " Face Verification:",
                           textAlign: TextAlign.left,
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 17,
                             fontWeight: FontWeight.w900,
                           ),
                         ),

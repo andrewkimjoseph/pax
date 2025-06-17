@@ -37,8 +37,7 @@ class PaxColors {
   /// Blue accent - used for links and informational elements
   static const Color blue = Color(0xFF94B9FF);
 
-  static const Color otherBlue = Color(0xFF94B9FF);
-
+  static const Color linkBlue = Color(0xFF1A0DAB);
   static const Color green = Color(0xFF34A853);
 
   /// Neutral Colors
@@ -70,6 +69,9 @@ class PaxColors {
 
   /// White with 20% opacity - used for highlights on dark backgrounds
   static const Color whiteWithOpacity = Color(0x33FFFFFF); // 20% opacity
+
+  /// Modal barrier color - used for modal overlays to block interaction
+  static const Color semiBlack = Color(0x80000000); // 50% opacity black
 
   /// Gradients
   /// Predefined color combinations for gradient effects

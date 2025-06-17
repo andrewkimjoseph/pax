@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart' show InkWell;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
-import 'package:pax/providers/local/task_context/screening_context_provider.dart';
+import 'package:pax/providers/local/screening_context/screening_context_provider.dart';
 import 'package:pax/providers/local/reward_state_provider.dart';
 import 'package:pax/services/reward_service.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Consumer;
@@ -9,7 +9,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:pax/theming/colors.dart';
-import 'package:pax/providers/local/task_context/main_task_context_provider.dart';
+import 'package:pax/providers/local/task_context/task_context_provider.dart';
 import 'package:pax/providers/local/task_completion_state_provider.dart';
 import 'package:pax/services/task_completion_service.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
@@ -24,12 +24,14 @@ class TaskItselfView extends ConsumerStatefulWidget {
 class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
   late final WebViewController controller;
   bool isLoading = true;
+  bool _isCompleting = false; // Add flag to track completion state
 
   @override
   void initState() {
     super.initState();
     // Reset task completion state
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       ref.read(taskCompletionProvider.notifier).reset();
       ref.read(rewardStateProvider.notifier).reset();
     });
@@ -49,9 +51,9 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
                 setState(() {
                   isLoading = false;
                 });
-                ref.read(analyticsProvider).taskLoadingComplete({
-                  "taskUrl": url,
-                });
+                // ref.read(analyticsProvider).taskLoadingComplete({
+                //   "taskUrl": url,
+                // });
               },
               onNavigationRequest: (NavigationRequest request) {
                 // Check if the URL is a callback from the task
@@ -103,42 +105,48 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
 
   // Handle task completion
   void _handleTaskCompletion() {
-    final taskContext = ref.read(taskContextProvider);
-    final currentTask = taskContext?.task;
+    // Prevent multiple completion calls
+    if (_isCompleting) return;
+    _isCompleting = true;
 
-    final screening = ref.read(screeningContextProvider)?.screening;
+    try {
+      final taskContext = ref.read(taskContextProvider);
+      final currentTask = taskContext?.task;
+      final screening = ref.read(screeningContextProvider)?.screening;
 
-    if (currentTask == null) {
-      _showErrorDialog('Task not found');
-      return;
-    }
+      if (currentTask == null) {
+        throw Exception('Task not found');
+      }
 
-    if (screening == null) {
-      _showErrorDialog('Screening not found');
-      return;
-    }
+      if (screening == null) {
+        throw Exception('Screening not found');
+      }
 
-    // Show dialog and start the completion process
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder:
-          (dialogContext) => _buildCompletionDialog(
-            dialogContext,
-            screening.id,
-            currentTask.id,
-          ),
-    );
+      // Show dialog and start the completion process
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder:
+            (dialogContext) => _buildCompletionDialog(
+              dialogContext,
+              screening.id,
+              currentTask.id,
+            ),
+      );
 
-    // Start the task completion process
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Start the task completion process
       ref
           .read(taskCompletionServiceProvider)
           .markTaskAsComplete(
             screeningId: screening.id,
             taskId: currentTask.id,
           );
-    });
+    } catch (e) {
+      _isCompleting = false; // Reset flag on error
+      if (mounted) {
+        _showErrorDialog(e.toString());
+      }
+    }
   }
 
   // Dialog showing completion and rewarding process
@@ -198,6 +206,7 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
               "taskId": taskId,
               "screeningId": screeningId,
               "taskCompletionId": taskCompletionId,
+              "error": rewardState.errorMessage,
             });
 
             // Dismiss the dialog after a short delay
@@ -235,9 +244,15 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text(message),
+                CircularProgressIndicator().withPadding(bottom: 24),
+                Text(
+                  message,
+                  style: TextStyle(
+                    color: PaxColors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
               ],
             ),
           );
@@ -251,12 +266,22 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
       barrierDismissible: false,
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text('Task Error'),
-          content: Text(errorMessage),
-          actions: [
-            TextButton(onPressed: () => context.pop(), child: Text('OK')),
-          ],
+        return PopScope(
+          canPop: false,
+          child: AlertDialog(
+            title: Text('Task Error'),
+            content: Text(
+              errorMessage,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+            actions: [
+              OutlineButton(
+                onPressed: () => context.go("/home"),
+                child: Text('OK'),
+              ),
+            ],
+          ),
         );
       },
     );

@@ -10,17 +10,19 @@ import 'package:pax/providers/db/payment_method/payment_method_provider.dart';
 import 'package:pax/repositories/firestore/payment_method/payment_method_repository.dart';
 import 'package:pax/services/minipay/minipay_service.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
+import 'package:pax/utils/achievement_constants.dart';
+import 'package:pax/utils/user_property_constants.dart';
 
-final paymentMethodRepositoryProvider = Provider<WithdrawalMethodRepository>((
-  ref,
-) {
-  return WithdrawalMethodRepository();
-});
+final withdrawalMethodRepositoryProvider = Provider<WithdrawalMethodRepository>(
+  (ref) {
+    return WithdrawalMethodRepository();
+  },
+);
 
 final miniPayServiceProvider = Provider<MiniPayService>((ref) {
   return MiniPayService(
     paxAccountRepository: ref.watch(paxAccountRepositoryProvider),
-    paymentMethodRepository: ref.watch(paymentMethodRepositoryProvider),
+    paymentMethodRepository: ref.watch(withdrawalMethodRepositoryProvider),
   );
 });
 
@@ -326,15 +328,16 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
             .createAchievement(
               timeCreated: Timestamp.now(),
               participantId: userId,
-              name: 'Payout Connector',
-              tasksNeededForCompletion: 1,
+              name: AchievementConstants.payoutConnector,
+              tasksNeededForCompletion:
+                  AchievementConstants.payoutConnectorTasksNeeded,
               tasksCompleted: 1,
               timeCompleted: Timestamp.now(),
-              amountEarned: 500,
+              amountEarned: AchievementConstants.payoutConnectorAmount,
             );
         ref.read(analyticsProvider).achievementCreated({
-          'achievementName': 'Payout Connector',
-          'amountEarned': 500,
+          'achievementName': AchievementConstants.payoutConnector,
+          'amountEarned': AchievementConstants.payoutConnectorAmount,
         });
         final fcmToken = await ref.read(fcmTokenProvider.future);
         if (fcmToken != null) {
@@ -343,8 +346,8 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
               .sendAchievementEarnedNotification(
                 token: fcmToken,
                 achievementData: {
-                  'achievementName': 'Payout Connector',
-                  'amountEarned': 500,
+                  'achievementName': AchievementConstants.payoutConnector,
+                  'amountEarned': AchievementConstants.payoutConnectorAmount,
                 },
               );
         }
@@ -354,15 +357,16 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
             .createAchievement(
               timeCreated: Timestamp.now(),
               participantId: userId,
-              name: 'Verified Human',
-              tasksNeededForCompletion: 1,
+              name: AchievementConstants.verifiedHuman,
+              tasksNeededForCompletion:
+                  AchievementConstants.verifiedHumanTasksNeeded,
               tasksCompleted: 1,
               timeCompleted: Timestamp.now(),
-              amountEarned: 500,
+              amountEarned: AchievementConstants.verifiedHumanAmount,
             );
         ref.read(analyticsProvider).achievementCreated({
-          'achievementName': 'Verified Human',
-          'amountEarned': 500,
+          'achievementName': AchievementConstants.verifiedHuman,
+          'amountEarned': AchievementConstants.verifiedHumanAmount,
         });
         if (fcmToken != null) {
           ref
@@ -370,8 +374,8 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
               .sendAchievementEarnedNotification(
                 token: fcmToken,
                 achievementData: {
-                  'achievementName': 'Verified Human',
-                  'amountEarned': 500,
+                  'achievementName': AchievementConstants.verifiedHuman,
+                  'amountEarned': AchievementConstants.verifiedHumanAmount,
                 },
               );
         }
@@ -392,29 +396,37 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
             .minipayConnectionComplete(withdrawalMethod.first.toMap());
 
         ref.read(analyticsProvider).identifyUser({
-          '[Pax] Participant Id': participant.participant?.id,
-          '[Pax] Display Name': participant.participant?.displayName,
-          '[Pax] Email Address': participant.participant?.emailAddress,
-          '[Pax] Phone Number': participant.participant?.phoneNumber,
-          '[Pax] Gender': participant.participant?.gender,
-          '[Pax] Country': participant.participant?.country,
-          '[Pax] Date of Birth': participant.participant?.dateOfBirth,
-          '[Pax] Profile Picture URI':
+          UserPropertyConstants.participantId: participant.participant?.id,
+          UserPropertyConstants.displayName:
+              participant.participant?.displayName,
+          UserPropertyConstants.emailAddress:
+              participant.participant?.emailAddress,
+          UserPropertyConstants.phoneNumber:
+              participant.participant?.phoneNumber,
+          UserPropertyConstants.gender: participant.participant?.gender,
+          UserPropertyConstants.country: participant.participant?.country,
+          UserPropertyConstants.dateOfBirth:
+              participant.participant?.dateOfBirth,
+          UserPropertyConstants.profilePictureURI:
               participant.participant?.profilePictureURI,
-          '[Pax] GoodDollar Identity Time Last Authenticated':
+          UserPropertyConstants.goodDollarIdentityTimeLastAuthenticated:
               participant.participant?.goodDollarIdentityTimeLastAuthenticated,
-          '[Pax] GoodDollar Identity Expiry Date':
+          UserPropertyConstants.goodDollarIdentityExpiryDate:
               participant.participant?.goodDollarIdentityExpiryDate,
-          '[Pax] Time Created': participant.participant?.timeCreated,
-          '[Pax] Time Updated': participant.participant?.timeUpdated,
-          '[Pax] MiniPay Wallet Address': primaryPaymentMethod,
-          '[Pax] Privy Server Wallet Id': paxAccount.serverWalletId,
-          '[Pax] Privy Server Wallet Address': paxAccount.serverWalletAddress,
-          '[Pax] Smart Account Wallet Address':
+          UserPropertyConstants.timeCreated:
+              participant.participant?.timeCreated,
+          UserPropertyConstants.timeUpdated:
+              participant.participant?.timeUpdated,
+          UserPropertyConstants.miniPayWalletAddress: primaryPaymentMethod,
+          UserPropertyConstants.privyServerWalletId: paxAccount.serverWalletId,
+          UserPropertyConstants.privyServerWalletAddress:
+              paxAccount.serverWalletAddress,
+          UserPropertyConstants.smartAccountWalletAddress:
               paxAccount.smartAccountWalletAddress,
-          '[Pax] PaxAccount Id': paxAccount.id,
-          '[Pax] PaxAccount Contract Address': paxAccount.contractAddress,
-          '[Pax] PaxAccount Contract Creation Txn Hash':
+          UserPropertyConstants.paxAccountId: paxAccount.id,
+          UserPropertyConstants.paxAccountContractAddress:
+              paxAccount.contractAddress,
+          UserPropertyConstants.paxAccountContractCreationTxnHash:
               paxAccount.contractCreationTxnHash,
         });
 
@@ -436,6 +448,7 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
     } catch (e) {
       ref.read(analyticsProvider).minipayConnectionFailed({
         "primaryPaymentMethod": primaryPaymentMethod,
+        "error": e.toString().substring(0, e.toString().length.clamp(0, 99)),
       });
       state = state.copyWith(
         state: MiniPayConnectionState.error,

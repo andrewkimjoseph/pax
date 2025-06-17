@@ -5,7 +5,7 @@ import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/achievement/achievement_provider.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
-import 'package:pax/services/achievement_service.dart';
+import 'package:pax/repositories/firestore/achievement/achievement_repository.dart';
 import 'package:pax/services/blockchain/blockchain_service.dart';
 import 'package:pax/services/notifications/notification_service.dart';
 import 'package:pax/utils/secret_constants.dart';
@@ -38,7 +38,7 @@ class AchievementStateModel {
 }
 
 class AchievementNotifier extends Notifier<AchievementStateModel> {
-  final AchievementService _achievementService = AchievementService();
+  final AchievementRepository _achievementRepository = AchievementRepository();
   final NotificationService _notificationService = NotificationService();
 
   @override
@@ -69,7 +69,7 @@ class AchievementNotifier extends Notifier<AchievementStateModel> {
 
       // Check if the claiming address has sufficient balance
       final hasBalance = await BlockchainService.hasSufficientBalance(
-        paxMasterAddressSmartAccount,
+        paxMasterAddressSmartAccountWalletAddress,
         BlockchainService.supportedTokens[1]!.address,
         achievement.amountEarned?.toDouble() ?? 0,
         18,
@@ -88,7 +88,7 @@ class AchievementNotifier extends Notifier<AchievementStateModel> {
       }
 
       // Call the cloud function
-      final txnHash = await _achievementService.processAchievementClaim(
+      final txnHash = await _achievementRepository.processAchievementClaim(
         achievementId: achievement.id,
         paxAccountContractAddress: paxAccountContractAddress,
         amountEarned: achievement.amountEarned ?? 0,

@@ -9,13 +9,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/achievement/achievement_provider.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
 import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/providers/local/task_completion_state_provider.dart';
+import 'package:pax/utils/achievement_constants.dart';
 
 class TaskCompletionService {
   final Ref ref;
@@ -50,114 +50,117 @@ class TaskCompletionService {
         completedAt: DateTime.now(),
       );
 
-      // Update state to complete with the result
-      ref
-          .read(taskCompletionProvider.notifier)
-          .completeTask(taskCompletionResult);
-
       // Create achievements
       final authState = ref.read(authProvider);
-      if (authState.state == AuthState.authenticated) {
-        // Get existing achievements
-        final achievements = ref.read(achievementProvider).achievements;
-        final hasTaskStarter = achievements.any(
-          (a) => a.name == 'Task Starter',
-        );
-        final taskExpert =
-            achievements.where((a) => a.name == 'Task Expert').firstOrNull;
 
-        // Only create Task Starter if it's their first task
-        if (!hasTaskStarter) {
-          await ref
-              .read(achievementProvider.notifier)
-              .createAchievement(
-                timeCreated: Timestamp.now(),
-                participantId: authState.user.uid,
-                name: 'Task Starter',
-                tasksNeededForCompletion: 1,
-                tasksCompleted: 1,
-                timeCompleted: Timestamp.now(),
-                amountEarned: 100,
-              );
-          ref.read(analyticsProvider).achievementCreated({
-            'achievementName': 'Task Starter',
-            'amountEarned': 100,
+      final achievements = ref.read(achievementProvider).achievements;
+      final hasTaskStarter = achievements.any(
+        (a) =>
+            a.name == AchievementConstants.taskStarter &&
+            a.timeCompleted != null,
+      );
+      final taskExpert =
+          achievements
+              .where((a) => a.name == AchievementConstants.taskExpert)
+              .firstOrNull;
+
+      // Only create Task Starter if it's their first task
+      if (!hasTaskStarter) {
+        await ref
+            .read(achievementProvider.notifier)
+            .createAchievement(
+              timeCreated: Timestamp.now(),
+              participantId: authState.user.uid,
+              name: AchievementConstants.taskStarter,
+              tasksNeededForCompletion:
+                  AchievementConstants.taskStarterTasksNeeded,
+              tasksCompleted: 1,
+              timeCompleted: Timestamp.now(),
+              amountEarned: AchievementConstants.taskStarterAmount,
+            );
+        ref.read(analyticsProvider).achievementCreated({
+          'achievementName': AchievementConstants.taskStarter,
+          'amountEarned': AchievementConstants.taskStarterAmount,
+        });
+        final fcmToken = await ref.read(fcmTokenProvider.future);
+        ref
+            .read(notificationServiceProvider)
+            .sendAchievementEarnedNotification(
+              token: fcmToken!,
+              achievementData: {
+                'achievementName': AchievementConstants.taskStarter,
+                'amountEarned': AchievementConstants.taskStarterAmount,
+              },
+            );
+      }
+
+      // Handle Task Expert achievement
+      if (taskExpert == null) {
+        // Create new Task Expert achievement if they don't have it
+        await ref
+            .read(achievementProvider.notifier)
+            .createAchievement(
+              timeCreated: Timestamp.now(),
+              participantId: authState.user.uid,
+              name: AchievementConstants.taskExpert,
+              tasksNeededForCompletion:
+                  AchievementConstants.taskExpertTasksNeeded,
+              tasksCompleted: 1,
+              amountEarned: AchievementConstants.taskExpertAmount,
+            );
+        ref.read(analyticsProvider).achievementCreated({
+          'achievementName': AchievementConstants.taskExpert,
+          'amountEarned': AchievementConstants.taskExpertAmount,
+        });
+      } else if (taskExpert.tasksCompleted <
+          taskExpert.tasksNeededForCompletion) {
+        // Update existing Task Expert achievement
+        final newTasksCompleted = taskExpert.tasksCompleted + 1;
+        final Map<String, dynamic> updateData = {
+          'tasksCompleted': newTasksCompleted,
+        };
+
+        // Only set timeCompleted if tasks are now completed
+        if (newTasksCompleted >= taskExpert.tasksNeededForCompletion) {
+          updateData['timeCompleted'] = Timestamp.now();
+          updateData['timeUpdated'] = Timestamp.now();
+
+          ref.read(analyticsProvider).achievementComplete({
+            'achievementName': AchievementConstants.taskExpert,
+            'tasksCompleted': newTasksCompleted,
+            'tasksNeededForCompletion': taskExpert.tasksNeededForCompletion,
           });
+
           final fcmToken = await ref.read(fcmTokenProvider.future);
           ref
               .read(notificationServiceProvider)
               .sendAchievementEarnedNotification(
                 token: fcmToken!,
                 achievementData: {
-                  'achievementName': 'Task Starter',
-                  'amountEarned': 100,
+                  'achievementName': AchievementConstants.taskExpert,
+                  'amountEarned': AchievementConstants.taskExpertAmount,
                 },
               );
         }
 
-        // Handle Task Expert achievement
-        if (taskExpert == null) {
-          // Create new Task Expert achievement if they don't have it
-          await ref
-              .read(achievementProvider.notifier)
-              .createAchievement(
-                timeCreated: Timestamp.now(),
-                participantId: authState.user.uid,
-                name: 'Task Expert',
-                tasksNeededForCompletion: 10,
-                tasksCompleted: 1,
-                amountEarned: 1000,
-              );
-          ref.read(analyticsProvider).achievementCreated({
-            'achievementName': 'Task Expert',
-            'amountEarned': 1000,
-          });
-        } else if (taskExpert.tasksCompleted <
-            taskExpert.tasksNeededForCompletion) {
-          // Update existing Task Expert achievement
-          final newTasksCompleted = taskExpert.tasksCompleted + 1;
-          final Map<String, dynamic> updateData = {
-            'tasksCompleted': newTasksCompleted,
-          };
-
-          // Only set timeCompleted if tasks are now completed
-          if (newTasksCompleted >= taskExpert.tasksNeededForCompletion) {
-            updateData['timeCompleted'] = Timestamp.now();
-
-            ref.read(analyticsProvider).achievementComplete({
-              'achievementName': 'Task Expert',
-              'tasksCompleted': newTasksCompleted,
-              'tasksNeededForCompletion': taskExpert.tasksNeededForCompletion,
-            });
-
-            final fcmToken = await ref.read(fcmTokenProvider.future);
-            ref
-                .read(notificationServiceProvider)
-                .sendAchievementEarnedNotification(
-                  token: fcmToken!,
-                  achievementData: {
-                    'achievementName': 'Task Expert',
-                    'amountEarned': 1000,
-                  },
-                );
-          }
-
-          await ref
-              .read(achievementProvider.notifier)
-              .updateAchievement(taskExpert.id, updateData);
-          ref.read(analyticsProvider).achievementUpdated({
-            'achievementName': 'Task Expert',
-            'tasksCompleted': newTasksCompleted,
-            'tasksNeededForCompletion': taskExpert.tasksNeededForCompletion,
-          });
-        }
-
         await ref
             .read(achievementProvider.notifier)
-            .fetchAchievements(authState.user.uid);
-
-        ref.invalidate(activityRepositoryProvider);
+            .updateAchievement(taskExpert.id, updateData);
+        ref.read(analyticsProvider).achievementUpdated({
+          'achievementName': AchievementConstants.taskExpert,
+          'tasksCompleted': newTasksCompleted,
+          'tasksNeededForCompletion': taskExpert.tasksNeededForCompletion,
+        });
       }
+
+      ref.invalidate(achievementProvider);
+
+      ref.invalidate(activityRepositoryProvider);
+
+      // Update state to complete with the result after all achievement operations
+      ref
+          .read(taskCompletionProvider.notifier)
+          .completeTask(taskCompletionResult);
     } catch (e) {
       // Update state to error with error message
       ref.read(taskCompletionProvider.notifier).setError(e.toString());

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pax/exports/views.dart';
 import 'package:pax/features/account_and_security/view.dart';
+import 'package:pax/features/claim_reward/view.dart';
 import 'package:pax/features/report_page/view.dart';
 import 'package:pax/features/task/task_itself/view.dart';
 import 'package:pax/features/webview/view.dart';
@@ -10,6 +11,7 @@ import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/route/route_notifier_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'routes.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 final routerProvider = Provider((ref) {
   final notifier = ref.watch(routerNotifierProvider);
@@ -17,13 +19,16 @@ final routerProvider = Provider((ref) {
   return GoRouter(
     refreshListenable: notifier,
     initialLocation: Routes.home,
+    observers: [
+      FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),
+    ],
     errorBuilder: (context, state) {
       final authState = ref.read(authStateForRouterProvider);
 
       // Only redirect if there's an actual routing error
       if (state.error != null) {
-        return StatefulBuilder(
-          builder: (context, setState) {
+        return Builder(
+          builder: (context) {
             Future.microtask(() {
               if (context.mounted) {
                 final route =
@@ -179,6 +184,11 @@ final routerProvider = Provider((ref) {
                     MiniPayConnectionView(),
           ),
         ],
+      ),
+      GoRoute(
+        path: "/claim-reward",
+        builder:
+            (BuildContext context, GoRouterState state) => ClaimRewardView(),
       ),
     ],
   );

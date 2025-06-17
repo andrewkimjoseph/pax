@@ -41,7 +41,7 @@ class MiniPayPaymentMethodCard extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    minipay?.name ?? "",
+                    minipay?.name ?? "MiniPay",
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 18,

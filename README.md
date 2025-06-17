@@ -240,9 +240,6 @@ npm test
 4. Ensure all tests pass
 5. Submit a pull request
 
-## License
-
-This project is proprietary and confidential. All rights reserved.
 
 ## Support
 

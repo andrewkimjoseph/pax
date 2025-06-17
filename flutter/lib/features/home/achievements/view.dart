@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/achievement/achievement_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/theming/colors.dart';
@@ -20,16 +19,6 @@ class AchievementsView extends ConsumerStatefulWidget {
 class _AchievementsViewState extends ConsumerState<AchievementsView> {
   int index = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    // Load achievements when the page is initialized
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final participantId = ref.read(authProvider).user.uid;
-      ref.read(achievementProvider.notifier).fetchAchievements(participantId);
-    });
-  }
-
   bool _isProfileComplete(Participant? participant) {
     if (participant == null) return false;
     return participant.displayName != null &&
@@ -41,29 +30,9 @@ class _AchievementsViewState extends ConsumerState<AchievementsView> {
   @override
   Widget build(BuildContext context) {
     final achievementState = ref.watch(achievementProvider);
-    final participant = ref.watch(participantProvider).participant;
+    final participantState = ref.watch(participantProvider);
+    final participant = participantState.participant;
     final isProfileComplete = _isProfileComplete(participant);
-
-    List<Achievement> filterAchievements(List<Achievement> achievements) {
-      switch (index) {
-        case 0: // All
-          return achievements;
-        case 1: // Earned
-          return achievements
-              .where((a) => a.status == AchievementStatus.earned)
-              .toList();
-        case 2: // In Progress
-          return achievements
-              .where((a) => a.status == AchievementStatus.inProgress)
-              .toList();
-        case 3: // Claimed
-          return achievements
-              .where((a) => a.status == AchievementStatus.claimed)
-              .toList();
-        default:
-          return achievements;
-      }
-    }
 
     return Scaffold(
       child: SingleChildScrollView(
@@ -172,32 +141,31 @@ class _AchievementsViewState extends ConsumerState<AchievementsView> {
                 ),
               )
             else if (achievementState.state == AchievementState.loading)
-              const Center(child: CircularProgressIndicator())
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [CircularProgressIndicator()],
+              ).sized(height: 200, width: double.infinity)
             else if (achievementState.state == AchievementState.error)
-              Center(child: Text('Error: ${achievementState.errorMessage}'))
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [Text('Error: ${achievementState.errorMessage}')],
+              ).sized(height: 200, width: double.infinity)
             else
               Column(
                 children: [
                   if (filterAchievements(achievementState.achievements).isEmpty)
-                    SizedBox(
-                      height: 200,
-                      width: double.infinity,
-                      child: Center(
-                        child: Text(
-                          index == 0
-                              ? 'No achievements yet'
-                              : 'No ${index == 1
-                                  ? 'earned'
-                                  : index == 2
-                                  ? 'in progress'
-                                  : 'claimed'} achievements',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: PaxColors.black,
-                          ),
-                        ),
+                    Center(
+                      child: Text(
+                        index == 0
+                            ? 'No achievements yet'
+                            : 'No ${index == 1
+                                ? 'earned'
+                                : index == 2
+                                ? 'in progress'
+                                : 'claimed'} achievements',
+                        style: TextStyle(fontSize: 16, color: PaxColors.black),
                       ),
-                    )
+                    ).sized(height: 200, width: double.infinity)
                   else
                     ...filterAchievements(achievementState.achievements).map(
                       (achievement) => AchievementCard(
@@ -210,5 +178,26 @@ class _AchievementsViewState extends ConsumerState<AchievementsView> {
         ).withPadding(all: 8),
       ),
     );
+  }
+
+  List<Achievement> filterAchievements(List<Achievement> achievements) {
+    switch (index) {
+      case 0: // All
+        return achievements;
+      case 1: // Earned
+        return achievements
+            .where((a) => a.status == AchievementStatus.earned)
+            .toList();
+      case 2: // In Progress
+        return achievements
+            .where((a) => a.status == AchievementStatus.inProgress)
+            .toList();
+      case 3: // Claimed
+        return achievements
+            .where((a) => a.status == AchievementStatus.claimed)
+            .toList();
+      default:
+        return achievements;
+    }
   }
 }

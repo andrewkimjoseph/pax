@@ -53,12 +53,18 @@ export async function deployTaskManager(
     userOpHash
   );
 
-  const txHash = receipt.receipt.transactionHash;
-  console.log("Transaction hash:", txHash);
+    const aaBundleHash = receipt.receipt.transactionHash;
+  console.log("AA Bundle transaction hash:", aaBundleHash);
+
+
+
+  const aaHash = receipt.userOpHash;
+  console.log("AA transaction hash:", aaHash);
+
 
   // Retrieve contract address from logs
   const contractAddress = await findContractAddressFromLogs(
-    txHash,
+    aaBundleHash,
     "TaskManagerCreated(address,address,address)"
   );
 

@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/remote_config/remote_config_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Colors;
+import 'package:pax/theming/colors.dart';
 
 class MaintenanceDialog extends ConsumerWidget {
   const MaintenanceDialog({super.key});
@@ -36,6 +37,7 @@ class MaintenanceDialog extends ConsumerWidget {
 
         return Stack(
           children: [
+            const ModalBarrier(dismissible: false, color: PaxColors.semiBlack),
             Container(
               padding: EdgeInsets.all(28),
               child: AlertDialog(

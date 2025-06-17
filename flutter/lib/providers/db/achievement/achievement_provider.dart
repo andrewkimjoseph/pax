@@ -71,9 +71,6 @@ class AchievementNotifier extends Notifier<AchievementStateModel> {
         timeCompleted: timeCompleted,
         amountEarned: amountEarned,
       );
-
-      // Refresh achievements
-      await fetchAchievements(participantId);
     } catch (e) {
       state = state.copyWith(
         state: AchievementState.error,
@@ -133,6 +130,6 @@ class AchievementNotifier extends Notifier<AchievementStateModel> {
 
 // Provider for achievement state
 final achievementProvider =
-    NotifierProvider<AchievementNotifier, AchievementStateModel>(() {
-      return AchievementNotifier();
-    });
+    NotifierProvider<AchievementNotifier, AchievementStateModel>(
+      () => AchievementNotifier(),
+    );

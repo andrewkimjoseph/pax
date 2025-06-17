@@ -6,39 +6,50 @@ import 'package:pax/models/firestore/task_completion/task_completion_model.dart'
 import 'package:rxdart/rxdart.dart';
 
 class TasksRepository {
-  final FirebaseFirestore _firestore;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Collection reference for tasks
-  late final CollectionReference _tasksCollection;
-  late final CollectionReference _taskCompletionsCollection;
-  late final CollectionReference _screeningsCollection;
+  late final CollectionReference _tasksCollection = _firestore.collection(
+    'tasks',
+  );
+  late final CollectionReference _taskCompletionsCollection = _firestore
+      .collection('task_completions');
+  late final CollectionReference _screeningsCollection = _firestore.collection(
+    'screenings',
+  );
 
   // Constructor
-  TasksRepository({FirebaseFirestore? firestore})
-    : _firestore = firestore ?? FirebaseFirestore.instance {
-    _tasksCollection = _firestore.collection('tasks');
-    _taskCompletionsCollection = _firestore.collection('task_completions');
-    _screeningsCollection = _firestore.collection('screenings');
-  }
+  TasksRepository();
 
-  // Stream of all tasks
-  Stream<List<Task>> getTasks() {
-    return _tasksCollection
-        .orderBy('timeCreated', descending: true)
-        .snapshots()
-        .map((snapshot) {
-          return snapshot.docs.map((doc) => Task.fromFirestore(doc)).toList();
-        });
-  }
+  // // Stream of all tasks
+  // Stream<List<Task>> getTasks() {
+  //   return _tasksCollection
+  //       .orderBy('timeCreated', descending: true)
+  //       .snapshots()
+  //       .map((snapshot) {
+  //         return snapshot.docs.map((doc) => Task.fromFirestore(doc)).toList();
+  //       });
+  // }
 
   Stream<List<Task>> getAvailableTasks(String? participantId) {
+    // Build the base query
+    Query tasksQuery;
+    if (kDebugMode) {
+      tasksQuery = _tasksCollection
+          .where('isAvailable', isEqualTo: false)
+          .where('isTest', isEqualTo: true);
+    } else {
+      tasksQuery = _tasksCollection
+          .where('isTest', isEqualTo: false)
+          .where('isAvailable', isEqualTo: true);
+    }
+
     // Get all available tasks
-    Stream<List<Task>> availableTasksStream = _tasksCollection
-        .where('isAvailable', isEqualTo: true)
-        .snapshots()
-        .map((snapshot) {
-          return snapshot.docs.map((doc) => Task.fromFirestore(doc)).toList();
-        });
+    Stream<List<Task>> availableTasksStream = tasksQuery.snapshots().map((
+      snapshot,
+    ) {
+      return snapshot.docs.map((doc) => Task.fromFirestore(doc)).toList();
+    });
 
     // Get all task completions for this participant
     Stream<List<TaskCompletion>> completionsStream = _taskCompletionsCollection
@@ -167,7 +178,7 @@ class TasksRepository {
   }
 
   // Get a single task by ID
-  Stream<Task?> getTaskById(String taskId) {
+  Stream<Task?> streamTaskById(String? taskId) {
     return _tasksCollection.doc(taskId).snapshots().map((doc) {
       if (doc.exists) {
         return Task.fromFirestore(doc);
@@ -175,6 +186,23 @@ class TasksRepository {
         return null;
       }
     });
+  }
+
+  // Get a single task by ID (Future)
+  Future<Task?> getTaskById(String? taskId) async {
+    try {
+      final doc = await _tasksCollection.doc(taskId).get();
+      if (doc.exists) {
+        return Task.fromFirestore(doc);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error retrieving task by id: $e');
+      }
+      return null;
+    }
   }
 
   // Get the server wallet ID for a task master

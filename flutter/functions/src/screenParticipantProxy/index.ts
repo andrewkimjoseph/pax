@@ -54,6 +54,7 @@ export const screenParticipantProxy = onCall(FUNCTION_RUNTIME_OPTS, async (reque
     const { toSimpleSmartAccount } = await import("permissionless/accounts");
     // Ensure the user is authenticated
     if (!request.auth) {
+      logger.error("Unauthenticated request to screenParticipantProxy", { requestAuth: request.auth });
       throw new HttpsError(
         "unauthenticated",
         "The function must be called by an authenticated user."
@@ -78,6 +79,13 @@ export const screenParticipantProxy = onCall(FUNCTION_RUNTIME_OPTS, async (reque
     // Validate required parameters
     if (!serverWalletId || !taskId || !participantId || 
         !taskManagerContractAddress || !taskMasterServerWalletId) {
+      logger.error("Missing required parameters in screenParticipantProxy", {
+        serverWalletId,
+        taskId,
+        participantId,
+        taskManagerContractAddress,
+        taskMasterServerWalletId
+      });
       throw new HttpsError(
         "invalid-argument",
         "Missing required parameters. Please provide serverWalletId, taskId, participantId, taskManagerContractAddress, and taskMasterServerWalletId."
@@ -97,10 +105,12 @@ export const screenParticipantProxy = onCall(FUNCTION_RUNTIME_OPTS, async (reque
     ]);
 
     if (!serverWallet) {
+      logger.error("Server wallet not found in screenParticipantProxy", { serverWalletId });
       throw new HttpsError("not-found", "Server wallet not found");
     }
 
     if (!taskMasterWallet) {
+      logger.error("Task master wallet not found in screenParticipantProxy", { taskMasterServerWalletId });
       throw new HttpsError("not-found", "Task master wallet not found");
     }
 
@@ -142,6 +152,7 @@ export const screenParticipantProxy = onCall(FUNCTION_RUNTIME_OPTS, async (reque
     );
 
     if (!signaturePackage.isValid) {
+      logger.error("Generated signature failed verification in screenParticipantProxy", { signaturePackage });
       throw new HttpsError("internal", "Generated signature failed verification");
     }
 
@@ -190,7 +201,15 @@ export const screenParticipantProxy = onCall(FUNCTION_RUNTIME_OPTS, async (reque
       hash: userOpTxnHash,
     });
 
-    const txnHash = userOpReceipt.receipt.transactionHash;
+      if (!userOpReceipt.success) { 
+      logger.error("User operation failed in screenParticipantProxy", { userOpReceipt });
+      throw new HttpsError(
+        "internal",
+        `User operation failed: ${JSON.stringify(userOpReceipt)}`
+      );    
+    }
+
+    const txnHash = userOpReceipt.userOpHash;
     logger.info("Transaction confirmed", { txnHash });
 
     // Step 4: Create screening record using the utility function

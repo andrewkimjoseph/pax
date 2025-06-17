@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
-import 'package:pax/providers/local/task_context/main_task_context_provider.dart';
+import 'package:pax/providers/local/task_context/task_context_provider.dart';
 import 'package:pax/providers/local/task_master_server_id_provider.dart';
 import 'package:pax/providers/local/screening_state_provider.dart';
 import 'package:pax/services/screening_service.dart';
@@ -37,6 +37,7 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
 
   // Method to handle screening process
   Future<void> _processScreening(BuildContext context) async {
+    if (_isProcessingScreening) return;
     if (!mounted) return;
 
     ref.read(analyticsProvider).continueWithTaskTapped();
@@ -121,6 +122,7 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
         "taskId": currentTask.id,
         "taskManagerContractAddress": taskManagerContractAddress,
         "taskMasterServerWalletId": taskMasterServerWalletId,
+        "error": e.toString(),
       });
 
       if (context.mounted) {
@@ -143,22 +145,25 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
       barrierDismissible: false,
       context: context,
       builder: (dialogContext) {
-        return AlertDialog(
-          title: Text('Screening failed'),
-          content: Text(
-            errorMessage,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                context.pop();
-                context.pop();
-              },
-              child: Text('OK'),
+        return PopScope(
+          canPop: false,
+          child: AlertDialog(
+            title: Text('Screening failed'),
+            content: Text(
+              errorMessage,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
             ),
-          ],
+            actions: [
+              OutlineButton(
+                onPressed: () {
+                  context.pop();
+                  context.pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          ),
         );
       },
     );

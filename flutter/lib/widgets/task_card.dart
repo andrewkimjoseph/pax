@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:pax/models/firestore/screening/screening_model.dart';
 import 'package:pax/models/firestore/task/task_model.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
-import 'package:pax/providers/local/task_context/main_task_context_provider.dart';
-import 'package:pax/providers/local/task_context/screening_context_provider.dart';
+import 'package:pax/providers/local/task_context/task_context_provider.dart';
+import 'package:pax/providers/local/screening_context/screening_context_provider.dart';
 import 'package:pax/providers/local/task_master_provider.dart';
 import 'package:pax/providers/local/task_master_server_id_provider.dart';
 import 'package:pax/theming/colors.dart';
@@ -26,9 +26,14 @@ class TaskCard extends ConsumerWidget {
     String daysRemaining = '-- days';
     if (task.deadline != null) {
       final difference = task.deadline!.toDate().difference(DateTime.now());
-      final days = difference.inDays;
-      daysRemaining =
-          days > 0 ? '$days ${days == 1 ? 'day' : 'days'}' : 'Expired';
+      if (difference.inSeconds > 0 && difference.inDays < 1) {
+        daysRemaining = '1 day';
+      } else if (difference.inDays >= 1) {
+        daysRemaining =
+            '${difference.inDays} ${difference.inDays == 1 ? 'day' : 'days'}';
+      } else {
+        daysRemaining = 'Expired';
+      }
     }
 
     // Format reward amount
@@ -173,9 +178,9 @@ class TaskCard extends ConsumerWidget {
                 enableFeedback: false,
                 style: const ButtonStyle.outline(density: ButtonDensity.dense)
                     .withBackgroundColor(
-                      color: PaxColors.otherBlue.withValues(alpha: 0.2),
+                      color: PaxColors.blue.withValues(alpha: 0.2),
                     )
-                    .withBorder(border: Border.all(color: PaxColors.otherBlue))
+                    .withBorder(border: Border.all(color: PaxColors.blue))
                     .withBorderRadius(borderRadius: BorderRadius.circular(20)),
                 onPressed: () {},
                 child: Text(
@@ -183,7 +188,7 @@ class TaskCard extends ConsumerWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.w900,
                     fontSize: 12,
-                    color: PaxColors.otherBlue,
+                    color: PaxColors.blue,
                   ),
                 ),
               ),

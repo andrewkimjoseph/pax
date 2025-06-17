@@ -22,10 +22,19 @@ class WithdrawView extends ConsumerStatefulWidget {
 class _WithdrawViewState extends ConsumerState<WithdrawView> {
   // Define a key for the amount field
   final _withdrawalAmountKey = const TextFieldKey(#amount);
+  late final TextEditingController _amountController;
+  num? _lastAmountToWithdraw;
 
   @override
   void initState() {
     super.initState();
+    _amountController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    super.dispose();
   }
 
   @override
@@ -33,6 +42,18 @@ class _WithdrawViewState extends ConsumerState<WithdrawView> {
     final withdrawContext = ref.watch(withdrawContextProvider);
     final balance = withdrawContext?.balance ?? 0;
     final tokenId = withdrawContext?.tokenId ?? 0;
+
+    // Update the controller if the balance changes
+    if (withdrawContext != null && balance != _lastAmountToWithdraw) {
+      if (balance == 0) {
+        _amountController.text = '';
+      } else if (balance % 1 == 0) {
+        _amountController.text = balance.toInt().toString();
+      } else {
+        _amountController.text = balance.toString();
+      }
+      _lastAmountToWithdraw = balance;
+    }
 
     // Create a proper validator using ValidatorBuilder
 
@@ -43,11 +64,20 @@ class _WithdrawViewState extends ConsumerState<WithdrawView> {
       }
 
       try {
-        // Check for more than 6 decimal places
+        // Check for more than 2 decimal places
         if (value.contains('.')) {
           final decimalPart = value.split('.')[1];
-          if (decimalPart.length > 6) {
-            return false; // Invalid: more than 6 decimal places
+          if (decimalPart.length > 2) {
+            // If more than 2 decimals, check if all after 2nd are zeros
+            final extraDecimals = decimalPart.substring(2);
+            final allZeros = extraDecimals.split('').every((c) => c == '0');
+            if (!allZeros) {
+              return false; // Invalid: more than 2 non-zero decimal places
+            }
+
+            if (decimalPart.length > 4) {
+              return false; // Invalid: more than 2 non-zero decimal places
+            }
           }
         }
 
@@ -119,7 +149,7 @@ class _WithdrawViewState extends ConsumerState<WithdrawView> {
             }
           }
         },
-        child: GestureDetector(
+        child: InkWell(
           onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -146,6 +176,7 @@ class _WithdrawViewState extends ConsumerState<WithdrawView> {
                   validator: amountValidator,
                   showErrors: const {FormValidationMode.submitted},
                   child: TextField(
+                    controller: _amountController,
                     keyboardType: TextInputType.numberWithOptions(
                       decimal: true,
                     ),

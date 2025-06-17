@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SelectedIndexNotifier extends Notifier<int> {
+class HomeSelectedIndexNotifier extends Notifier<int> {
   @override
   int build() {
     return 0;
@@ -15,6 +15,7 @@ class SelectedIndexNotifier extends Notifier<int> {
   }
 }
 
-final selectedIndexProvider = NotifierProvider<SelectedIndexNotifier, int>(
-  SelectedIndexNotifier.new,
-);
+final homeSelectedIndexProvider =
+    NotifierProvider<HomeSelectedIndexNotifier, int>(
+      HomeSelectedIndexNotifier.new,
+    );

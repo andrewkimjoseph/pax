@@ -5,7 +5,6 @@ import 'package:pax/features/onboarding/view_model.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
-import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/widgets/toast.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -39,8 +38,6 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
 
     // Combined loading state
     final bool isLoading = isAuthLoading || isParticipantLoading;
-
-    ref.watch(paxAccountProvider);
 
     return Scaffold(
       child: Column(

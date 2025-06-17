@@ -77,7 +77,7 @@ class Activity {
   // Get amount for display
   String? getAmount() {
     final NumberFormat formatter = NumberFormat(
-      '#,###',
+      '#,###.##',
       Intl.getCurrentLocale(),
     );
 

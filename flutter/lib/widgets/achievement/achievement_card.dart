@@ -8,7 +8,7 @@ import 'package:pax/models/firestore/achievement/achievement_model.dart';
 import 'package:pax/utils/token_balance_util.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:pax/providers/local/achievement_provider.dart';
+import 'package:pax/providers/local/achievement_claim_provider.dart';
 import 'package:pax/utils/currency_symbol.dart';
 
 class AchievementCard extends ConsumerStatefulWidget {
@@ -352,6 +352,7 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
       ref.read(analyticsProvider).claimAchievementFailed({
         'achievementId': widget.achievement.id,
         'achievementName': widget.achievement.name,
+        'error': e.toString(),
       });
       // Show error dialog
       showDialog(
