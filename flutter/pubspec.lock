@@ -169,6 +169,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.0"
+  clarity_flutter:
+    dependency: "direct main"
+    description:
+      name: clarity_flutter
+      sha256: "372b457d4c9bab522863b3261d39d27a4d214eb0c744b2da5f7482ae4e9c7351"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   cli_config:
     dependency: transitive
     description:
