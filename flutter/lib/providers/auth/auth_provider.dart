@@ -204,6 +204,7 @@ class AuthNotifier extends Notifier<AuthStateModel> {
       ref.read(homeSelectedIndexProvider.notifier).reset();
       ref.read(rootSelectedIndexProvider.notifier).reset();
       ref.invalidate(achievementProvider);
+      ref.read(analyticsProvider).resetUser();
 
       state = state.copyWith(
         user: AuthUser.empty(),
