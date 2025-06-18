@@ -1,6 +1,6 @@
 # Terms of Service for Pax
 
-**Last Updated: December 16, 2024**
+**Last Updated: June 18, 2025**
 
 ## 1. Introduction and Acceptance
 
@@ -218,6 +218,9 @@ Violations of this Acceptable Use Policy may result in:
 - Platform integrates with third-party services for authentication, analytics, and functionality
 - Third-party services have their own privacy policies and terms
 - Users are encouraged to review third-party terms and policies
+
+### 8.4 Microsoft Clarity and Advertising
+We partner with Microsoft Clarity and Microsoft Advertising to capture how you use and interact with our platform through behavioral metrics, heatmaps, and session replay to improve and market our products/services. Platform usage data is captured using first and third-party cookies and other tracking technologies to determine the popularity of products/services and online activity. Additionally, we use this information for platform optimization, fraud/security purposes, and advertising. For more information about how Microsoft collects and uses your data, visit the Microsoft Privacy Statement.
 
 ## 9. Platform Availability and Modifications
 
