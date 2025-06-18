@@ -1,6 +1,6 @@
 # Privacy Policy for Pax
 
-**Last Updated: December 16, 2024**
+**Last Updated: June 18, 2025**
 
 ## Introduction
 
@@ -92,6 +92,7 @@ We share information with trusted service providers who help us operate the plat
 - **Amplitude**: User analytics and behavior tracking
 - **Celo Network**: Blockchain infrastructure for smart contract operations
 - **Branch.io**: Deep linking and user attribution services
+- **Microsoft Clarity and Microsoft Advertising**: We partner with Microsoft Clarity and Microsoft Advertising to capture how you use and interact with our platform through behavioral metrics, heatmaps, and session replay to improve and market our products/services. Platform usage data is captured using first and third-party cookies and other tracking technologies to determine the popularity of products/services and online activity. Additionally, we use this information for platform optimization, fraud/security purposes, and advertising. For more information about how Microsoft collects and uses your data, visit the Microsoft Privacy Statement.
 
 ### Blockchain Transparency
 Certain information is publicly visible on the Celo blockchain:
@@ -153,6 +154,7 @@ To exercise these rights, contact us at the information provided below.
 - **Firebase Analytics**: Tracks app usage patterns and user engagement
 - **Amplitude**: Provides detailed user behavior analytics
 - **Crashlytics**: Monitors app stability and performance
+- **Microsoft Clarity**: Captures user interactions through behavioral metrics, heatmaps, and session replay for platform improvement and marketing purposes
 
 ### Web-based Task Completion
 When completing tasks through embedded web views:

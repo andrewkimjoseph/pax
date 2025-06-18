@@ -1,7 +1,9 @@
+import 'package:clarity_flutter/clarity_flutter.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:pax/providers/analytics/clarity/clarity_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Consumer;
 import 'package:flutter/services.dart';
 
@@ -17,7 +19,6 @@ import 'package:pax/utils/version_util.dart';
 import 'package:pax/widgets/app_lifecycle_handler.dart';
 import 'package:pax/widgets/maintenance_dialog.dart';
 import 'package:pax/widgets/update_dialog.dart';
-import 'package:pax/widgets/remote_config_listener.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +31,7 @@ Future<void> main() async {
     ),
   );
   await AppInitializer().initialize();
-  runApp(ProviderScope(child: RemoteConfigListener(child: App())));
+  runApp(ProviderScope(child: App()));
 }
 
 class App extends ConsumerStatefulWidget {
@@ -120,63 +121,66 @@ class _AppState extends ConsumerState<App> {
         title: 'Pax',
         theme: ref.watch(themeProvider),
         builder: (context, child) {
-          return MediaQuery(
-            data: MediaQuery.of(
-              context,
-            ).copyWith(textScaler: TextScaler.noScaling),
-            child: Consumer(
-              builder: (context, ref, _) {
-                final appVersionConfigAsync = ref.watch(
-                  appVersionConfigProvider,
-                );
-                final maintenanceConfigAsync = ref.watch(
-                  maintenanceConfigProvider,
-                );
+          return ClarityWidget(
+            clarityConfig: ref.watch(clarityConfigProvider),
+            app: MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: TextScaler.noScaling),
+              child: Consumer(
+                builder: (context, ref, _) {
+                  final appVersionConfigAsync = ref.watch(
+                    appVersionConfigProvider,
+                  );
+                  final maintenanceConfigAsync = ref.watch(
+                    maintenanceConfigProvider,
+                  );
 
-                return Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    child ?? const CircularProgressIndicator(),
-                    appVersionConfigAsync.when(
-                      data: (config) {
-                        if (_currentVersion == null) {
-                          return const SizedBox.shrink();
-                        }
+                  return Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      child ?? const CircularProgressIndicator(),
+                      appVersionConfigAsync.when(
+                        data: (config) {
+                          if (_currentVersion == null) {
+                            return const SizedBox.shrink();
+                          }
 
-                        final needsUpdate =
-                            config.forceUpdate &&
-                            VersionUtil.isVersionLower(
-                              _currentVersion!,
-                              config.minimumVersion,
-                            );
-
-                        if (needsUpdate) return const UpdateDialog();
-
-                        return maintenanceConfigAsync.when(
-                          data: (maintenanceConfig) {
-                            if (!maintenanceConfig.isUnderMaintenance) {
-                              return const SizedBox.shrink();
-                            }
-
-                            if (kDebugMode) {
-                              print(
-                                'MaintenanceDialog - Maintenance config: ${maintenanceConfig.isUnderMaintenance}',
+                          final needsUpdate =
+                              config.forceUpdate &&
+                              VersionUtil.isVersionLower(
+                                _currentVersion!,
+                                config.minimumVersion,
                               );
-                              return const SizedBox.shrink();
-                            }
 
-                            return const MaintenanceDialog();
-                          },
-                          loading: () => const SizedBox.shrink(),
-                          error: (_, __) => const SizedBox.shrink(),
-                        );
-                      },
-                      loading: () => const SizedBox.shrink(),
-                      error: (_, __) => const SizedBox.shrink(),
-                    ),
-                  ],
-                );
-              },
+                          if (needsUpdate) return const UpdateDialog();
+
+                          return maintenanceConfigAsync.when(
+                            data: (maintenanceConfig) {
+                              if (!maintenanceConfig.isUnderMaintenance) {
+                                return const SizedBox.shrink();
+                              }
+
+                              if (kDebugMode) {
+                                print(
+                                  'MaintenanceDialog - Maintenance config: ${maintenanceConfig.isUnderMaintenance}',
+                                );
+                                return const SizedBox.shrink();
+                              }
+
+                              return const MaintenanceDialog();
+                            },
+                            loading: () => const SizedBox.shrink(),
+                            error: (_, __) => const SizedBox.shrink(),
+                          );
+                        },
+                        loading: () => const SizedBox.shrink(),
+                        error: (_, __) => const SizedBox.shrink(),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           );
         },

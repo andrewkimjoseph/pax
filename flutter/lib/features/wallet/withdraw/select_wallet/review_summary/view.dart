@@ -226,9 +226,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                         child: const Text('OK'),
                         onPressed: () {
                           (context).pop();
-                          context.pushReplacement(
-                            "/home",
-                          ); // Go back to previous screen
+                          context.go("/home"); // Go back to previous screen
                         },
                       ),
                     ),
