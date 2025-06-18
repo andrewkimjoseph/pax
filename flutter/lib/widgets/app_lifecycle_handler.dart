@@ -1,6 +1,7 @@
 // app_lifecycle_handler.dart
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/services/branch_service.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
@@ -65,6 +66,18 @@ class _AppLifecycleHandlerState extends ConsumerState<AppLifecycleHandler>
 
   @override
   Widget build(BuildContext context) {
+    // Listen to remote config updates - moved from initState to build
+    ref.listen<AsyncValue<RemoteConfigUpdate>>(remoteConfigUpdateProvider, (
+      previous,
+      next,
+    ) {
+      if (next is AsyncData) {
+        ref.invalidate(appVersionConfigProvider);
+        ref.invalidate(maintenanceConfigProvider);
+        ref.invalidate(featureFlagsProvider);
+      }
+    });
+
     return widget.child;
   }
 }
