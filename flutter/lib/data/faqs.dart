@@ -4,7 +4,7 @@ class FAQs {
   static const List<FAQ> faqs = [
     FAQ(
       question: "How many times does the platform run micro tasks?",
-      answer: "Once every week. So, a total of 4 tasks a month. 1️⃣",
+      answer: "Once 1️⃣ every week. So, a total of 4 tasks a month.",
     ),
     FAQ(
       question: "What time of the day is the micro task made available?",
