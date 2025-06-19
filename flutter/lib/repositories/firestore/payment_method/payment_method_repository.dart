@@ -29,7 +29,7 @@ class WithdrawalMethodRepository {
   }
 
   // Create a new payment method
-  Future<WithdrawalMethod> createPaymentMethod({
+  Future<WithdrawalMethod> createWithdrawalMethod({
     required String participantId,
     required String paxAccountId,
     required String walletAddress,
