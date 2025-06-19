@@ -53,7 +53,7 @@ class TaskCompletionService {
       // Create achievements
       final authState = ref.read(authProvider);
 
-      final achievements = ref.read(achievementProvider).achievements;
+      final achievements = ref.read(achievementsProvider).achievements;
       final hasTaskStarter = achievements.any(
         (a) =>
             a.name == AchievementConstants.taskStarter &&
@@ -67,7 +67,7 @@ class TaskCompletionService {
       // Only create Task Starter if it's their first task
       if (!hasTaskStarter) {
         await ref
-            .read(achievementProvider.notifier)
+            .read(achievementsProvider.notifier)
             .createAchievement(
               timeCreated: Timestamp.now(),
               participantId: authState.user.uid,
@@ -98,7 +98,7 @@ class TaskCompletionService {
       if (taskExpert == null) {
         // Create new Task Expert achievement if they don't have it
         await ref
-            .read(achievementProvider.notifier)
+            .read(achievementsProvider.notifier)
             .createAchievement(
               timeCreated: Timestamp.now(),
               participantId: authState.user.uid,
@@ -144,7 +144,7 @@ class TaskCompletionService {
         }
 
         await ref
-            .read(achievementProvider.notifier)
+            .read(achievementsProvider.notifier)
             .updateAchievement(taskExpert.id, updateData);
         ref.read(analyticsProvider).achievementUpdated({
           'achievementName': AchievementConstants.taskExpert,
@@ -153,7 +153,7 @@ class TaskCompletionService {
         });
       }
 
-      ref.invalidate(achievementProvider);
+      ref.invalidate(achievementsProvider);
 
       ref.invalidate(activityRepositoryProvider);
 

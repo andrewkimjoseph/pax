@@ -205,6 +205,13 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
           if (kDebugMode) {
             print('Error creating server wallet: $e');
           }
+          ref.read(analyticsProvider).minipayConnectionFailed({
+            "primaryPaymentMethod": primaryPaymentMethod,
+            "error": e.toString().substring(
+              0,
+              e.toString().length.clamp(0, 99),
+            ),
+          });
           state = state.copyWith(
             state: MiniPayConnectionState.error,
             errorMessage: 'Failed to create server wallet: ${e.toString()}',
@@ -261,6 +268,13 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
           if (kDebugMode) {
             print('Error deploying contract: $e');
           }
+          ref.read(analyticsProvider).minipayConnectionFailed({
+            "primaryPaymentMethod": primaryPaymentMethod,
+            "error": e.toString().substring(
+              0,
+              e.toString().length.clamp(0, 99),
+            ),
+          });
           state = state.copyWith(
             state: MiniPayConnectionState.error,
             errorMessage: 'Failed to deploy contract: ${e.toString()}',
@@ -324,7 +338,7 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
 
         // Create achievements
         await ref
-            .read(achievementProvider.notifier)
+            .read(achievementsProvider.notifier)
             .createAchievement(
               timeCreated: Timestamp.now(),
               participantId: userId,
@@ -353,7 +367,7 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
         }
 
         await ref
-            .read(achievementProvider.notifier)
+            .read(achievementsProvider.notifier)
             .createAchievement(
               timeCreated: Timestamp.now(),
               participantId: userId,
@@ -381,7 +395,7 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
         }
 
         // Refresh achievements
-        await ref.read(achievementProvider.notifier).fetchAchievements(userId);
+        await ref.read(achievementsProvider.notifier).fetchAchievements(userId);
 
         // Refresh participant data in state
         await ref.read(participantProvider.notifier).refreshParticipant();
@@ -439,6 +453,10 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
         if (kDebugMode) {
           print('Error creating payment method or updating participant: $e');
         }
+        ref.read(analyticsProvider).minipayConnectionFailed({
+          "primaryPaymentMethod": primaryPaymentMethod,
+          "error": e.toString().substring(0, e.toString().length.clamp(0, 99)),
+        });
         state = state.copyWith(
           state: MiniPayConnectionState.error,
           errorMessage: 'Failed to complete wallet connection: ${e.toString()}',

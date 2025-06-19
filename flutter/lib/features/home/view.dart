@@ -13,6 +13,7 @@ import 'package:pax/providers/db/tasks/task_provider.dart';
 import 'package:pax/providers/route/home_selected_index_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Consumer;
 import '../../theming/colors.dart' show PaxColors;
+import 'package:pax/utils/achievement_constants.dart';
 
 class HomeView extends ConsumerStatefulWidget {
   const HomeView({super.key});
@@ -29,10 +30,12 @@ class _HomeViewState extends ConsumerState<HomeView> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final participantId = ref.read(authProvider).user.uid;
-      final achievementState = ref.read(achievementProvider);
+      final achievementState = ref.read(achievementsProvider);
 
       if (achievementState.state != AchievementState.loaded) {
-        ref.read(achievementProvider.notifier).fetchAchievements(participantId);
+        ref
+            .read(achievementsProvider.notifier)
+            .fetchAchievements(participantId);
       }
     });
   }
@@ -139,10 +142,31 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                     flags[RemoteConfigKeys
                                             .areAchievementsAvailable] ==
                                         true
-                                ? _homeTabButton(
-                                  label: 'Achievements',
-                                  isActive: index == 2,
-                                  onPressed: _onAchievementsPressed,
+                                ? Consumer(
+                                  builder: (context, ref, child) {
+                                    final achievementState = ref.watch(
+                                      achievementsProvider,
+                                    );
+                                    final earnedNotClaimedCount =
+                                        achievementState.achievements
+                                            .where(
+                                              (a) =>
+                                                  achievementStatusName(
+                                                    a.status,
+                                                  ) ==
+                                                  AchievementStatusNames.earned,
+                                            )
+                                            .length;
+                                    return _homeTabButton(
+                                      label: 'Achievements',
+                                      isActive: index == 2,
+                                      onPressed: _onAchievementsPressed,
+                                      badgeCount:
+                                          earnedNotClaimedCount > 0
+                                              ? earnedNotClaimedCount
+                                              : null,
+                                    );
+                                  },
                                 )
                                 : const SizedBox.shrink(),
                     loading: () => const SizedBox.shrink(),

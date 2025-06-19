@@ -29,7 +29,7 @@ class _AchievementsViewState extends ConsumerState<AchievementsView> {
 
   @override
   Widget build(BuildContext context) {
-    final achievementState = ref.watch(achievementProvider);
+    final achievementState = ref.watch(achievementsProvider);
     final participantState = ref.watch(participantProvider);
     final participant = participantState.participant;
     final isProfileComplete = _isProfileComplete(participant);

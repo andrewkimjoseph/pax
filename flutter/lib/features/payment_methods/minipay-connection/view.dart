@@ -360,7 +360,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                                 FontAwesomeIcons.triangleExclamation,
                                 color: PaxColors.otherOrange,
                                 size: 20,
-                              ).withPadding(right: 8),
+                              ).withPadding(right: 4),
                               // SvgPicture.asset(
                               //   'lib/assets/svgs/verification_required.svg',
                               // ).withPadding(right: 8),
@@ -385,7 +385,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                                         'GoodDollar',
                                         style: TextStyle(
                                           color: PaxColors.deepPurple,
-                                          fontSize: 15,
+                                          fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -398,15 +398,16 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                                         ' Face Verification Required',
                                         style: TextStyle(
                                           color: PaxColors.deepPurple,
-                                          fontSize: 15,
+                                          fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                         ),
-                                      ).withPadding(right: 8),
-
-                                      SvgPicture.asset(
-                                        'lib/assets/svgs/redirect_window.svg',
-                                        height: 15,
                                       ),
+                                      // .withPadding(right: 8),
+
+                                      // SvgPicture.asset(
+                                      //   'lib/assets/svgs/redirect_window.svg',
+                                      //   height: 15,
+                                      // ),
                                     ],
                                   ),
                                 ),
