@@ -29,6 +29,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
   final TextEditingController _walletAddressController =
       TextEditingController();
   bool _isShowingDialog = false;
+  bool _isConnecting = false;
 
   @override
   void initState() {
@@ -46,6 +47,8 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
   }
 
   void _connectWallet() {
+    if (_isConnecting) return;
+    _isConnecting = true;
     FocusManager.instance.primaryFocus?.unfocus();
     ref.read(analyticsProvider).connectMinipayTapped();
     final miniPayWalletAddress = _walletAddressController.text.trim();
@@ -260,6 +263,13 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
   Widget build(BuildContext context) {
     // Watch the connection state
     final connectionState = ref.watch(miniPayConnectionProvider);
+
+    // Reset _isConnecting flag if not connecting
+    if (connectionState.state == MiniPayConnectionState.initial ||
+        connectionState.state == MiniPayConnectionState.error ||
+        connectionState.state == MiniPayConnectionState.success) {
+      _isConnecting = false;
+    }
 
     // Show success dialog when connection is successful
     if (connectionState.state == MiniPayConnectionState.success) {
