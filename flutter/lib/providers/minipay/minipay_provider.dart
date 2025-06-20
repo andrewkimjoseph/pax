@@ -22,7 +22,7 @@ final withdrawalMethodRepositoryProvider = Provider<WithdrawalMethodRepository>(
 final miniPayServiceProvider = Provider<MiniPayService>((ref) {
   return MiniPayService(
     paxAccountRepository: ref.watch(paxAccountRepositoryProvider),
-    paymentMethodRepository: ref.watch(withdrawalMethodRepositoryProvider),
+    withdrawalMethodRepository: ref.watch(withdrawalMethodRepositoryProvider),
   );
 });
 
@@ -147,7 +147,7 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
       }
 
       // 4. Get the existing PaxAccount
-      final paxAccount = await _miniPayService.getPaxAccount(userId);
+      final paxAccount = ref.read(paxAccountProvider).account;
       if (paxAccount == null) {
         state = state.copyWith(
           state: MiniPayConnectionState.error,
@@ -284,13 +284,16 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
         }
       }
 
+      // ... after all PaxAccount updates are done, before payment method creation
+      await ref.read(paxAccountProvider.notifier).refreshAccount();
+
       // 7. Create payment method and update participant
       state = state.copyWith(
         state: MiniPayConnectionState.creatingPaymentMethod,
       );
 
       try {
-        await _miniPayService.createPaymentMethod(
+        await _miniPayService.createWithdrawalMethod(
           userId: userId,
           paxAccountId: paxAccount.id,
           walletAddress: primaryPaymentMethod,
@@ -409,6 +412,8 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
             .read(analyticsProvider)
             .minipayConnectionComplete(withdrawalMethod.first.toMap());
 
+        final updatedPaxAccount = ref.read(paxAccountProvider).account;
+
         ref.read(analyticsProvider).identifyUser({
           UserPropertyConstants.participantId: participant.participant?.id,
           UserPropertyConstants.displayName:
@@ -432,16 +437,17 @@ class MiniPayConnectionNotifier extends Notifier<MiniPayConnectionStateModel> {
           UserPropertyConstants.timeUpdated:
               participant.participant?.timeUpdated,
           UserPropertyConstants.miniPayWalletAddress: primaryPaymentMethod,
-          UserPropertyConstants.privyServerWalletId: paxAccount.serverWalletId,
+          UserPropertyConstants.privyServerWalletId:
+              updatedPaxAccount?.serverWalletId,
           UserPropertyConstants.privyServerWalletAddress:
-              paxAccount.serverWalletAddress,
+              updatedPaxAccount?.serverWalletAddress,
           UserPropertyConstants.smartAccountWalletAddress:
-              paxAccount.smartAccountWalletAddress,
-          UserPropertyConstants.paxAccountId: paxAccount.id,
+              updatedPaxAccount?.smartAccountWalletAddress,
+          UserPropertyConstants.paxAccountId: updatedPaxAccount?.id,
           UserPropertyConstants.paxAccountContractAddress:
-              paxAccount.contractAddress,
+              updatedPaxAccount?.contractAddress,
           UserPropertyConstants.paxAccountContractCreationTxnHash:
-              paxAccount.contractCreationTxnHash,
+              updatedPaxAccount?.contractCreationTxnHash,
         });
 
         // Set state to success once everything is complete

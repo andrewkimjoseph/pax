@@ -13,7 +13,7 @@ import 'package:pointycastle/digests/keccak.dart';
 class MiniPayService {
   final FirebaseFunctions _functions = FirebaseFunctions.instance;
   final PaxAccountRepository _paxAccountRepository;
-  final WithdrawalMethodRepository _paymentMethodRepository;
+  final WithdrawalMethodRepository _withdrawalMethodRepository;
 
   // API endpoint for RPC calls
   final Uri _rpcUrl = Uri.parse(
@@ -24,9 +24,9 @@ class MiniPayService {
 
   MiniPayService({
     required PaxAccountRepository paxAccountRepository,
-    required WithdrawalMethodRepository paymentMethodRepository,
+    required WithdrawalMethodRepository withdrawalMethodRepository,
   }) : _paxAccountRepository = paxAccountRepository,
-       _paymentMethodRepository = paymentMethodRepository;
+       _withdrawalMethodRepository = withdrawalMethodRepository;
 
   // Get PaxAccount for user
   Future<PaxAccount?> getPaxAccount(String userId) async {
@@ -42,12 +42,12 @@ class MiniPayService {
   }
 
   // Create payment method
-  Future<void> createPaymentMethod({
+  Future<void> createWithdrawalMethod({
     required String userId,
     required String paxAccountId,
     required String walletAddress,
   }) async {
-    await _paymentMethodRepository.createPaymentMethod(
+    await _withdrawalMethodRepository.createWithdrawalMethod(
       participantId: userId,
       paxAccountId: paxAccountId,
       walletAddress: walletAddress,
@@ -64,7 +64,7 @@ class MiniPayService {
 
   // Check if wallet address is already used
   Future<bool> isWalletAddressUsed(String walletAddress) async {
-    return await _paymentMethodRepository.isWalletAddressUsed(walletAddress);
+    return await _withdrawalMethodRepository.isWalletAddressUsed(walletAddress);
   }
 
   // Check if wallet is GoodDollar verified
@@ -226,7 +226,7 @@ class MiniPayService {
       }
 
       // 4. Create payment method
-      await _paymentMethodRepository.createPaymentMethod(
+      await _withdrawalMethodRepository.createWithdrawalMethod(
         participantId: userId,
         paxAccountId: paxAccount.id,
         walletAddress: walletAddress,

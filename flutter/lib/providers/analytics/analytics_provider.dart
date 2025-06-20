@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_branch_sdk/flutter_branch_sdk.dart';
 import 'package:pax/services/analytics/analytics_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pax/utils/regex.dart';
 
 /// A provider class that manages analytics events and user properties.
 class AnalyticsProvider {
@@ -47,8 +49,31 @@ class AnalyticsProvider {
   Future<void> signInWithGoogleTapped([Map<String, dynamic>? properties]) =>
       _logEvent('sign_in_with_google_tapped', properties: properties);
 
-  Future<void> signInWithGoogleComplete([Map<String, dynamic>? properties]) =>
-      _logEvent('sign_in_with_google_complete', properties: properties);
+  Future<void> signInWithGoogleComplete([
+    Map<String, dynamic>? properties,
+  ]) async {
+    Map<dynamic, dynamic> params =
+        await FlutterBranchSdk.getLatestReferringParams();
+
+    // Merge the Branch params with the provided properties
+    Map<String, dynamic> eventProperties = properties ?? {};
+    if (params.isNotEmpty) {
+      // Clean up Branch parameters by removing special characters from keys
+      Map<String, dynamic> cleanedParams = {};
+      params.forEach((key, value) {
+        String cleanedKey = key.toString().replaceAll(branchParamCleaner, '');
+        cleanedParams[cleanedKey] = value;
+      });
+
+      // Add each cleaned parameter individually to the event properties
+      eventProperties.addAll(cleanedParams);
+    }
+
+    return _logEvent(
+      'sign_in_with_google_complete',
+      properties: eventProperties,
+    );
+  }
 
   Future<void> signInWithGoogleIncomplete([Map<String, dynamic>? properties]) =>
       _logEvent('sign_in_with_google_incomplete', properties: properties);
@@ -163,8 +188,31 @@ class AnalyticsProvider {
   Future<void> connectMinipayTapped([Map<String, dynamic>? properties]) =>
       _logEvent('connect_minipay_tapped', properties: properties);
 
-  Future<void> minipayConnectionComplete([Map<String, dynamic>? properties]) =>
-      _logEvent('minipay_connection_complete', properties: properties);
+  Future<void> minipayConnectionComplete([
+    Map<String, dynamic>? properties,
+  ]) async {
+    Map<dynamic, dynamic> params =
+        await FlutterBranchSdk.getFirstReferringParams();
+
+    // Merge the Branch params with the provided properties
+    Map<String, dynamic> eventProperties = properties ?? {};
+    if (params.isNotEmpty) {
+      // Clean up Branch parameters by removing special characters from keys
+      Map<String, dynamic> cleanedParams = {};
+      params.forEach((key, value) {
+        String cleanedKey = key.toString().replaceAll(branchParamCleaner, '');
+        cleanedParams[cleanedKey] = value;
+      });
+
+      // Add each cleaned parameter individually to the event properties
+      eventProperties.addAll(cleanedParams);
+    }
+
+    return _logEvent(
+      'minipay_connection_complete',
+      properties: eventProperties,
+    );
+  }
 
   Future<void> minipayConnectionFailed([Map<String, dynamic>? properties]) =>
       _logEvent('minipay_connection_failed', properties: properties);

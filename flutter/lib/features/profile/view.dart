@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart' show InkWell;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
@@ -226,7 +227,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                   initials: Avatar.getInitials(
                                     participant!.profilePictureURI!,
                                   ),
-                                  provider: NetworkImage(
+                                  provider: CachedNetworkImageProvider(
                                     participant.profilePictureURI!,
                                   ),
                                 ),

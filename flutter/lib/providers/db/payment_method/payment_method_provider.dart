@@ -156,7 +156,7 @@ class WithdrawalMethodsNotifier extends Notifier<WithdrawalMethodsStateModel> {
       state = state.copyWith(state: WithdrawalMethodsState.loading);
 
       // Add payment method to repository
-      await _repository.createPaymentMethod(
+      await _repository.createWithdrawalMethod(
         participantId: paymentMethod.participantId,
         paxAccountId: paymentMethod.paxAccountId,
         walletAddress: paymentMethod.walletAddress,
