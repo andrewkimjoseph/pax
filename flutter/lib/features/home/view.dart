@@ -244,6 +244,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
       screenName = 'Achievements';
     });
     ref.read(homeSelectedIndexProvider.notifier).setIndex(2);
+    ref.read(analyticsProvider).achievementsTapped();
   }
 
   void _onDashboardPressed() {

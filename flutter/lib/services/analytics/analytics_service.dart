@@ -6,6 +6,7 @@ import 'package:amplitude_flutter/events/identify.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_branch_sdk/flutter_branch_sdk.dart';
 
 class AnalyticsService {
   static final AnalyticsService _instance = AnalyticsService._internal();
@@ -14,6 +15,7 @@ class AnalyticsService {
   late final Amplitude _amplitude;
 
   late final FirebaseAnalytics _firebaseAnalytics;
+
   bool _isInitialized = false;
 
   AnalyticsService._internal();
@@ -65,6 +67,7 @@ class AnalyticsService {
     if (!_isInitialized) return;
     await _amplitude.setUserId(participantId);
     await _firebaseAnalytics.setUserId(id: participantId);
+    FlutterBranchSdk.setIdentity(participantId);
   }
 
   /// Logs an event with optional properties.
@@ -82,9 +85,13 @@ class AnalyticsService {
     await _amplitude.track(
       BaseEvent(eventName, eventProperties: convertedProperties),
     );
+
     await _firebaseAnalytics.logEvent(
       name: eventName,
       parameters: convertedProperties,
+    );
+    FlutterBranchSdk.trackContentWithoutBuo(
+      branchEvent: BranchEvent.customEvent(eventName),
     );
   }
 

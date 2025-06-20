@@ -84,6 +84,9 @@ class AnalyticsProvider {
   Future<void> tasksTapped([Map<String, dynamic>? properties]) =>
       _logEvent('tasks_tapped', properties: properties);
 
+  Future<void> achievementsTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('achievements_tapped', properties: properties);
+
   Future<void> publishedReportTapped([Map<String, dynamic>? properties]) =>
       _logEvent('published_report_tapped', properties: properties);
 

@@ -1,6 +1,5 @@
 // views/minipay_connection_view.dart (refactored to use provider)
 import 'package:flutter/material.dart' show Divider, InkWell;
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -107,7 +106,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                 SizedBox(height: 16),
                 Text(_getStateMessage(connectionState.state)),
               ],
-            ).animate().fadeIn(duration: 200.ms);
+            );
           },
         ),
       ),
@@ -168,7 +167,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
               ),
             ],
           ),
-        ).animate().fadeIn(duration: 200.ms);
+        );
       },
     );
   }
@@ -188,7 +187,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
               children: [
                 SvgPicture.asset(
                   'lib/assets/svgs/minipay_connected.svg',
-                ).withPadding(bottom: 8).animate().fadeIn(duration: 300.ms),
+                ).withPadding(bottom: 8),
 
                 const Text(
                   'Success!',
@@ -197,7 +196,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                   ),
-                ).withPadding(bottom: 8).animate().fadeIn(delay: 100.ms),
+                ).withPadding(bottom: 8),
 
                 const Text(
                   'MiniPay Wallet Connected Successfully',
@@ -207,7 +206,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                     fontWeight: FontWeight.normal,
                   ),
                   textAlign: TextAlign.center,
-                ).withPadding(bottom: 8).animate().fadeIn(delay: 200.ms),
+                ).withPadding(bottom: 8),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -227,11 +226,11 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                       ),
                     ),
                   ],
-                ).withPadding(top: 8).animate().fadeIn(delay: 300.ms),
+                ).withPadding(top: 8),
               ],
             ),
           ),
-        ).animate().fadeIn(duration: 200.ms);
+        );
       },
     );
 
