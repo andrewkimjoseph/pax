@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart' show Divider, InkWell;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -224,7 +225,9 @@ class _AccountViewState extends ConsumerState<AccountView> {
                           ),
                           provider:
                               participant != null
-                                  ? NetworkImage(participant.profilePictureURI!)
+                                  ? CachedNetworkImageProvider(
+                                    participant.profilePictureURI!,
+                                  )
                                   : null,
                         ),
                       ).withPadding(right: 8),

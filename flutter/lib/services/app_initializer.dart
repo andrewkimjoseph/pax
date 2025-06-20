@@ -7,6 +7,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_branch_sdk/flutter_branch_sdk.dart';
 import 'package:pax/firebase_options.dart';
@@ -20,6 +21,7 @@ class AppInitializer {
 
   Future<void> initialize() async {
     await _initializeFirebase();
+    // await _initializeAppCheck();
     await _setupErrorHandling();
     await _initializeNotifications();
 
@@ -61,6 +63,13 @@ class AppInitializer {
     );
   }
 
+  // Future<void> _initializeAppCheck() async {
+  //   await FirebaseAppCheck.instance.activate(
+  //     androidProvider:
+  //         kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
+  //   );
+  // }
+
   Future<void> _setupErrorHandling() async {
     FlutterError.onError = (errorDetails) {
       FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
@@ -82,7 +91,10 @@ class AppInitializer {
   }
 
   Future<void> _initializeBranch() async {
-    await FlutterBranchSdk.init(enableLogging: true);
+    await FlutterBranchSdk.init(
+      enableLogging: true,
+      branchAttributionLevel: BranchAttributionLevel.NONE,
+    );
     // Pass your Branch key(s) here, typically from environment variables or a config file
     // branchLinkControlParams: BranchLinkControlParams(live: !kDebugMode),
 
