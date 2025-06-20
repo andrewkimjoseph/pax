@@ -222,8 +222,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                           ref
                               .read(miniPayConnectionProvider.notifier)
                               .resetState();
-                          context.pop();
-                          context.pop(); // Pop the MiniPayConnectionView too
+                          context.go("/home");
                         },
                       ),
                     ),
