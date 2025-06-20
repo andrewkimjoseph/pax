@@ -59,7 +59,7 @@ class _RootViewState extends ConsumerState<RootView> {
   }
 
   NavigationItem buildButton(String label, bool isSelected) {
-    final achievementState = ref.watch(achievementProvider);
+    final achievementState = ref.watch(achievementsProvider);
 
     // Check for the presence of all three required achievements
     final requiredAchievements = [

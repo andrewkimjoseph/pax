@@ -171,7 +171,7 @@ export const createPaxAccountV1Proxy = onCall(
         );
       }
 
-      const txnHash = userOpReceipt.userOpHash;
+      const txnHash = userOpReceipt.receipt.transactionHash;
       logger.info("Transaction confirmed", { txnHash });
 
       // Retrieve proxy address from logs

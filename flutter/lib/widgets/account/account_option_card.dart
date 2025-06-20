@@ -21,7 +21,7 @@ class AccountOptionCard extends ConsumerStatefulWidget {
 class _AccountOptionCardState extends ConsumerState<AccountOptionCard> {
   @override
   Widget build(BuildContext context) {
-    final achievementState = ref.watch(achievementProvider);
+    final achievementState = ref.watch(achievementsProvider);
     final userAchievementNames =
         achievementState.achievements
             .map((a) => a.name)

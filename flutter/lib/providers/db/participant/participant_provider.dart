@@ -149,7 +149,7 @@ class ParticipantNotifier extends Notifier<ParticipantStateModel> {
       if (isFirstTimeCompletingProfile) {
         // Create Profile Perfectionist achievement
         await ref
-            .read(achievementProvider.notifier)
+            .read(achievementsProvider.notifier)
             .createAchievement(
               timeCreated: Timestamp.now(),
               participantId: state.participant!.id,
@@ -185,7 +185,7 @@ class ParticipantNotifier extends Notifier<ParticipantStateModel> {
         state: ParticipantState.loaded,
       );
 
-      ref.invalidate(achievementProvider);
+      ref.invalidate(achievementsProvider);
     } catch (e) {
       // Handle error
       ref.read(analyticsProvider).profileUpdateFailed({

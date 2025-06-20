@@ -119,7 +119,7 @@ class AchievementNotifier extends Notifier<AchievementStateModel> {
         txnHash: txnHash,
       );
 
-      ref.read(achievementProvider.notifier).fetchAchievements(auth.user.uid);
+      ref.read(achievementsProvider.notifier).fetchAchievements(auth.user.uid);
     } catch (e) {
       if (kDebugMode) {
         print('Error claiming achievement: $e');

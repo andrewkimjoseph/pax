@@ -1,3 +1,5 @@
+import 'package:pax/models/firestore/achievement/achievement_model.dart';
+
 // Achievement names and amounts constants
 class AchievementConstants {
   // Achievement Names
@@ -56,4 +58,28 @@ class AchievementConstants {
         return 1;
     }
   }
+}
+
+/// Utility to get the string name of an AchievementStatus enum value
+///
+/// Example:
+///   achievementStatusName(AchievementStatus.earned) // returns 'earned'
+String achievementStatusName(AchievementStatus status) {
+  return status.toString().split('.').last;
+}
+
+/// String constants for AchievementStatus values.
+///
+/// Use these to avoid typos when comparing or displaying status names.
+/// Example:
+///   if (achievementStatusName(a.status) == AchievementStatusNames.earned) { ... }
+class AchievementStatusNames {
+  /// Status for achievements that are in progress (not yet earned)
+  static const inProgress = 'inProgress';
+
+  /// Status for achievements that have been earned but not yet claimed
+  static const earned = 'earned';
+
+  /// Status for achievements that have been claimed
+  static const claimed = 'claimed';
 }

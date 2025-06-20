@@ -4,7 +4,7 @@ import 'package:pax/models/firestore/achievement/achievement_model.dart';
 import 'package:pax/repositories/firestore/achievement/achievement_repository.dart';
 
 // Provider for the achievement repository
-final achievementRepositoryProvider = Provider<AchievementRepository>((ref) {
+final achievementsRepositoryProvider = Provider<AchievementRepository>((ref) {
   return AchievementRepository();
 });
 
@@ -43,7 +43,7 @@ class AchievementNotifier extends Notifier<AchievementStateModel> {
 
   @override
   AchievementStateModel build() {
-    _repository = ref.watch(achievementRepositoryProvider);
+    _repository = ref.watch(achievementsRepositoryProvider);
     return AchievementStateModel();
   }
 
@@ -129,7 +129,7 @@ class AchievementNotifier extends Notifier<AchievementStateModel> {
 }
 
 // Provider for achievement state
-final achievementProvider =
+final achievementsProvider =
     NotifierProvider<AchievementNotifier, AchievementStateModel>(
       () => AchievementNotifier(),
     );

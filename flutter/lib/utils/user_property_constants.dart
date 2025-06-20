@@ -36,14 +36,13 @@ class UserPropertyConstants {
 
   // GoodDollar related
   /// The timestamp of the last GoodDollar identity authentication
-  /// Value: 'pax_gooddollar_identity_last_authenticated'
+  /// Value: 'pax_gd_id_last_auth_time'
   static const String goodDollarIdentityTimeLastAuthenticated =
-      'pax_gooddollar_identity_last_authenticated';
+      'pax_gd_id_last_auth_time';
 
   /// The expiry date of the GoodDollar identity
-  /// Value: 'pax_gooddollar_identity_expiry_date'
-  static const String goodDollarIdentityExpiryDate =
-      'pax_gooddollar_identity_expiry_date';
+  /// Value: 'pax_gd_id_expiry_date'
+  static const String goodDollarIdentityExpiryDate = 'pax_gd_id_expiry_date';
 
   // Timestamps
   /// The timestamp when the participant was created

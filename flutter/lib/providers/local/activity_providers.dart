@@ -196,7 +196,7 @@ final totalTaskCompletionsProvider = Provider<AsyncValue<int>>((ref) {
 final totalGoodDollarTokensEarnedProvider = Provider<AsyncValue<double>>((ref) {
   final userId = ref.watch(authProvider).user.uid;
   final rewardsAsync = ref.watch(rewardActivitiesProvider(userId));
-  final achievementsAsync = ref.watch(achievementProvider);
+  final achievementsAsync = ref.watch(achievementsProvider);
 
   return rewardsAsync.when(
     data: (rewards) {
