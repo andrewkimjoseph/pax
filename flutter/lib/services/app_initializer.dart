@@ -64,10 +64,42 @@ class AppInitializer {
   }
 
   Future<void> _initializeAppCheck() async {
-    await FirebaseAppCheck.instance.activate(
-      androidProvider:
-          kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
-    );
+    int retryCount = 0;
+    const maxRetries = 3;
+    const baseDelay = Duration(seconds: 1);
+
+    while (retryCount < maxRetries) {
+      try {
+        await FirebaseAppCheck.instance.activate(
+          androidProvider:
+              kDebugMode
+                  ? AndroidProvider.debug
+                  : AndroidProvider.playIntegrity,
+        );
+        break; // Success, exit the retry loop
+      } catch (e) {
+        retryCount++;
+        if (kDebugMode) {
+          print('App Check initialization attempt $retryCount failed: $e');
+        }
+
+        if (retryCount >= maxRetries) {
+          if (kDebugMode) {
+            print(
+              'App Check initialization failed after $maxRetries attempts. Continuing without App Check.',
+            );
+          }
+          // Don't rethrow - allow app to continue without App Check
+          break;
+        }
+
+        // Exponential backoff: 1s, 2s, 4s
+        final delay = Duration(
+          seconds: baseDelay.inSeconds * (1 << (retryCount - 1)),
+        );
+        await Future.delayed(delay);
+      }
+    }
   }
 
   Future<void> _setupErrorHandling() async {
