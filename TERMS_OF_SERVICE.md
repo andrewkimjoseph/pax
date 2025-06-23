@@ -1,6 +1,6 @@
 # Terms of Service for Pax
 
-**Last Updated: June 18, 2025**
+**Last Updated: Monday, June 23, 2025**
 
 ## 1. Introduction and Acceptance
 

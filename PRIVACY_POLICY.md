@@ -1,6 +1,6 @@
 # Privacy Policy for Pax
 
-**Last Updated: June 18, 2025**
+**Last Updated: Monday, June 23, 2025**
 
 ## Introduction
 
