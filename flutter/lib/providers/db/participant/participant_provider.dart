@@ -9,6 +9,7 @@ import 'package:pax/providers/db/achievement/achievement_provider.dart';
 import 'package:pax/repositories/firestore/participant/participants_repository.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
 import 'package:pax/utils/achievement_constants.dart';
+import 'package:pax/utils/user_property_constants.dart';
 
 // State for the participant provider
 enum ParticipantState { initial, loading, loaded, error }
@@ -179,13 +180,22 @@ class ParticipantNotifier extends Notifier<ParticipantStateModel> {
         }
       }
 
+      ref.read(analyticsProvider).identifyUser({
+        UserPropertyConstants.phoneNumber: updatedParticipant.phoneNumber,
+        UserPropertyConstants.gender: updatedParticipant.gender,
+        UserPropertyConstants.dateOfBirth: updatedParticipant.dateOfBirth,
+        UserPropertyConstants.country: updatedParticipant.country,
+      });
+
       // Update state with updated participant
       state = state.copyWith(
         participant: updatedParticipant,
         state: ParticipantState.loaded,
       );
 
-      ref.invalidate(achievementsProvider);
+      await ref
+          .read(achievementsProvider.notifier)
+          .fetchAchievements(authState.user.uid);
     } catch (e) {
       // Handle error
       ref.read(analyticsProvider).profileUpdateFailed({

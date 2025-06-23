@@ -21,7 +21,10 @@ class _GoodDollarVerificationStepsState
       direction: Axis.vertical,
       steps: [
         Step(
-          title: const Text('Step 1: MiniPay > Apps (Mini Apps)'),
+          title:
+              const Text(
+                'Step 1: Download MiniPay > Apps (Mini Apps)',
+              ).expanded(),
           contentBuilder: (context) {
             return StepContainer(
               actions: [
@@ -38,7 +41,8 @@ class _GoodDollarVerificationStepsState
           },
         ),
         Step(
-          title: const Text("Step 2: Finance > Universal basic income"),
+          title:
+              const Text("Step 2: Finance > Universal basic income").expanded(),
           contentBuilder: (context) {
             return StepContainer(
               actions: [
@@ -60,7 +64,7 @@ class _GoodDollarVerificationStepsState
           },
         ),
         Step(
-          title: const Text("Step 3: Claim Now > Verify I'm Human"),
+          title: const Text("Step 3: Claim Now > Verify I'm Human").expanded(),
           contentBuilder: (context) {
             return StepContainer(
               actions: [
@@ -82,7 +86,7 @@ class _GoodDollarVerificationStepsState
           },
         ),
         Step(
-          title: const Text("Step 4: Sign message"),
+          title: const Text("Step 4: Sign message").expanded(),
           contentBuilder: (context) {
             return StepContainer(
               actions: [
@@ -104,7 +108,7 @@ class _GoodDollarVerificationStepsState
           },
         ),
         Step(
-          title: const Text("Step 5: Complete face verification"),
+          title: const Text("Step 5: Complete face verification").expanded(),
           contentBuilder: (context) {
             return StepContainer(
               actions: [

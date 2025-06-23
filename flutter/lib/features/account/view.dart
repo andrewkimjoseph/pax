@@ -231,26 +231,28 @@ class _AccountViewState extends ConsumerState<AccountView> {
                                   : null,
                         ),
                       ).withPadding(right: 8),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            participant?.displayName ?? "",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: PaxColors.black,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              participant?.displayName ?? "",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: PaxColors.black,
+                              ),
+                            ).withPadding(bottom: 4),
+                            Text(
+                              participant?.emailAddress ?? "",
+                              style: TextStyle(
+                                fontWeight: FontWeight.normal,
+                                fontSize: 12,
+                                color: PaxColors.black,
+                              ),
                             ),
-                          ).withPadding(bottom: 4),
-                          Text(
-                            participant?.emailAddress ?? "",
-                            style: TextStyle(
-                              fontWeight: FontWeight.normal,
-                              fontSize: 12,
-                              color: PaxColors.black,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ).withPadding(bottom: 8, top: 8),

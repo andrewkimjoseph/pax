@@ -153,7 +153,9 @@ class TaskCompletionService {
         });
       }
 
-      ref.invalidate(achievementsProvider);
+      await ref
+          .read(achievementsProvider.notifier)
+          .fetchAchievements(authState.user.uid);
 
       ref.invalidate(activityRepositoryProvider);
 

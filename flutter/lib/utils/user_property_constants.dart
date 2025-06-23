@@ -1,7 +1,14 @@
 /// Constants for Firebase Analytics user properties.
 /// All properties are prefixed with 'pax_' to identify them in analytics.
+/// Firebase Analytics requires property names to be 1-24 alphanumeric characters.
+///
+/// Usage: These constants are used in analytics tracking to identify user properties
+/// that will be sent to Firebase Analytics and other analytics platforms.
 class UserPropertyConstants {
-  // Participant basic info
+  // ============================================================================
+  // PARTICIPANT BASIC INFORMATION
+  // ============================================================================
+
   /// The unique identifier for the participant
   /// Value: 'pax_participant_id'
   static const String participantId = 'pax_participant_id';
@@ -34,7 +41,10 @@ class UserPropertyConstants {
   /// Value: 'pax_profile_picture_uri'
   static const String profilePictureURI = 'pax_profile_picture_uri';
 
-  // GoodDollar related
+  // ============================================================================
+  // GOODDOLLAR IDENTITY INFORMATION
+  // ============================================================================
+
   /// The timestamp of the last GoodDollar identity authentication
   /// Value: 'pax_gd_id_last_auth_time'
   static const String goodDollarIdentityTimeLastAuthenticated =
@@ -44,7 +54,10 @@ class UserPropertyConstants {
   /// Value: 'pax_gd_id_expiry_date'
   static const String goodDollarIdentityExpiryDate = 'pax_gd_id_expiry_date';
 
-  // Timestamps
+  // ============================================================================
+  // TIMESTAMPS
+  // ============================================================================
+
   /// The timestamp when the participant was created
   /// Value: 'pax_time_created'
   static const String timeCreated = 'pax_time_created';
@@ -53,37 +66,40 @@ class UserPropertyConstants {
   /// Value: 'pax_time_updated'
   static const String timeUpdated = 'pax_time_updated';
 
-  // Wallet related
+  // ============================================================================
+  // WALLET INFORMATION
+  // ============================================================================
+
   /// The MiniPay wallet address of the participant
-  /// Value: 'pax_minipay_wallet_address'
-  static const String miniPayWalletAddress = 'pax_minipay_wallet_address';
+  /// Value: 'pax_minipay_address'
+  static const String miniPayWalletAddress = 'pax_minipay_address';
 
   /// The Privy server wallet ID
-  /// Value: 'pax_privy_server_wallet_id'
-  static const String privyServerWalletId = 'pax_privy_server_wallet_id';
+  /// Value: 'pax_server_wallet_id'
+  static const String privyServerWalletId = 'pax_server_wallet_id';
 
   /// The Privy server wallet address
-  /// Value: 'pax_privy_server_wallet_address'
-  static const String privyServerWalletAddress =
-      'pax_privy_server_wallet_address';
+  /// Value: 'pax_server_address'
+  static const String privyServerWalletAddress = 'pax_server_address';
 
   /// The smart account wallet address
-  /// Value: 'pax_smart_account_wallet_address'
-  static const String smartAccountWalletAddress =
-      'pax_smart_account_wallet_address';
+  /// Value: 'pax_smart_account_address'
+  static const String smartAccountWalletAddress = 'pax_smart_account_address';
 
-  // PaxAccount related
+  // ============================================================================
+  // PAXACCOUNT INFORMATION
+  // ============================================================================
+
   /// The unique identifier for the PaxAccount
   /// Value: 'pax_account_id'
   static const String paxAccountId = 'pax_account_id';
 
   /// The contract address of the PaxAccount
-  /// Value: 'pax_account_contract_address'
-  static const String paxAccountContractAddress =
-      'pax_account_contract_address';
+  /// Value: 'pax_account_address'
+  static const String paxAccountContractAddress = 'pax_account_address';
 
   /// The transaction hash of the PaxAccount contract creation
-  /// Value: 'pax_account_contract_creation_txn_hash'
+  /// Value: 'pax_account_txn_hash'
   static const String paxAccountContractCreationTxnHash =
-      'pax_account_contract_creation_txn_hash';
+      'pax_account_txn_hash';
 }

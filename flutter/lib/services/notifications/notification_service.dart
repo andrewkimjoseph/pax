@@ -328,7 +328,7 @@ class NotificationService {
     await sendRemoteNotification(
       title: 'Withdrawal Successful! 💸',
       body:
-          'Your withdrawal of ${_formatAmount(withdrawalData['amount'])} ${withdrawalData['currencySymbol']} has been processed.',
+          'Your withdrawal of ${_formatAmount(withdrawalData['amount'])} ${withdrawalData['currencySymbol']} has been processed. Check your MiniPay ${withdrawalData['currencySymbol']} balance.',
       token: token,
       data: {'type': 'withdrawal_success', ...withdrawalData},
     );
@@ -342,7 +342,7 @@ class NotificationService {
     await sendRemoteNotification(
       title: 'Reward Received! 🎉',
       body:
-          'You\'ve received ${_formatAmount(rewardData['amount'])} ${rewardData['currencySymbol']} for completing a task.',
+          'You\'ve received ${_formatAmount(rewardData['amount'])} ${rewardData['currencySymbol']} for completing a task. Check your balance at Home > Wallet.',
       token: token,
       data: {'type': 'reward', ...rewardData},
     );
@@ -355,7 +355,7 @@ class NotificationService {
     await sendRemoteNotification(
       title: 'Achievement Unlocked! 🎉',
       body:
-          'You earned ${_formatAmount(achievementData['amountEarned'])} G\$ for completing the ${achievementData['achievementName']} achievement!',
+          'You earned ${_formatAmount(achievementData['amountEarned'])} G\$ for completing the ${achievementData['achievementName']} achievement! Claim it now at Home > Achievements.',
       token: token,
       data: Map<String, dynamic>.from({'type': 'achievementEarned'})
         ..addAll(achievementData),
@@ -369,7 +369,7 @@ class NotificationService {
     await sendRemoteNotification(
       title: 'Achievement Claimed! 💰',
       body:
-          'You\'ve claimed ${_formatAmount(achievementData['amountEarned'])} G\$ for the ${achievementData['achievementName']} achievement!',
+          'You\'ve claimed ${_formatAmount(achievementData['amountEarned'])} G\$ for the ${achievementData['achievementName']} achievement! Check your balance at Home > Wallet',
       token: token,
       data: Map<String, dynamic>.from({'type': 'achievementClaimed'})
         ..addAll(achievementData),

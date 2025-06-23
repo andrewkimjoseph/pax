@@ -132,6 +132,12 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     final paxAccount = ref.watch(paxAccountProvider).account;
     final hasPaymentMethod = paxAccount?.contractAddress != null;
 
+    final bool isProfileComplete =
+        participant != null &&
+        participant.phoneNumber != null &&
+        participant.gender != null &&
+        participant.dateOfBirth != null;
+
     // Initialize phone number from participant if available
     if (participant != null && participant.phoneNumber != null) {
       try {
@@ -482,7 +488,9 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                   height: 48,
                                   child: PrimaryButton(
                                     onPressed:
-                                        (isLoading || isProcessing)
+                                        (isLoading ||
+                                                isProcessing ||
+                                                isProfileComplete)
                                             ? null
                                             : () async {
                                               ref
@@ -603,7 +611,13 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                               }
                                             },
                                     child:
-                                        (isLoading || isProcessing)
+                                        isProfileComplete
+                                            ? FaIcon(
+                                              FontAwesomeIcons.circleCheck,
+                                              size: 20,
+                                              color: PaxColors.white,
+                                            )
+                                            : (isLoading || isProcessing)
                                             ? CircularProgressIndicator(
                                               onSurface: true,
                                             )

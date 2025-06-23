@@ -127,6 +127,8 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
         return 'Setting up payment method...';
       case MiniPayConnectionState.updatingParticipant:
         return 'Syncing account data...';
+      case MiniPayConnectionState.success:
+        return 'Success!';
       default:
         return 'Processing your connection...';
     }
@@ -269,25 +271,17 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
       _isConnecting = false;
     }
 
-    // Show success dialog when connection is successful
-    if (connectionState.state == MiniPayConnectionState.success) {
-      // Use post-frame callback to avoid build phase issues
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showSuccessDialog();
-      });
-    }
-
     return Scaffold(
       footers: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.only(bottom: 16),
           child: Column(
             children: [
               const Divider().withPadding(top: 10, bottom: 10),
               _buildConnectButton(connectionState),
             ],
           ),
-        ).withPadding(bottom: 32),
+        ).withPadding(horizontal: 16, bottom: 32),
       ],
       resizeToAvoidBottomInset: false,
       loadingProgressIndeterminate: connectionState.isConnecting,
@@ -379,11 +373,11 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                             child: Column(
                               children: [
                                 InkWell(
-                                  onTap:
-                                      () => UrlHandler.launchInAppWebView(
-                                        context,
-                                        'https://www.gooddollar.org/blog-posts/face-verification-challenge-identity',
-                                      ),
+                                  // onTap:
+                                  //     () => UrlHandler.launchInAppWebView(
+                                  //       context,
+                                  //       'https://www.gooddollar.org/blog-posts/face-verification-challenge-identity',
+                                  //     ),
                                   child: Row(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
