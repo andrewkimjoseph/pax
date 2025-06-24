@@ -384,7 +384,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
 
                                     children: [
                                       const Text(
-                                        'GoodDollar',
+                                        "GoodDollar",
                                         style: TextStyle(
                                           color: PaxColors.deepPurple,
                                           fontSize: 16,
@@ -397,7 +397,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                                       ),
 
                                       const Text(
-                                        ' Face Verification Required',
+                                        " Face Verification Required",
                                         style: TextStyle(
                                           color: PaxColors.deepPurple,
                                           fontSize: 16,
@@ -467,7 +467,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                           enabled: !connectionState.isConnecting,
                           keyboardType: TextInputType.text,
                           placeholder: const Text(
-                            'Paste address here',
+                            "Paste address here",
                             style: TextStyle(
                               color: PaxColors.black,
                               fontSize: 14,

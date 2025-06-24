@@ -53,7 +53,7 @@ class AnalyticsProvider {
     Map<String, dynamic>? properties,
   ]) async {
     Map<dynamic, dynamic> params =
-        await FlutterBranchSdk.getLatestReferringParams();
+        await FlutterBranchSdk.getFirstReferringParams();
 
     // Merge the Branch params with the provided properties
     Map<String, dynamic> eventProperties = properties ?? {};
