@@ -125,7 +125,7 @@ class AppInitializer {
   Future<void> _initializeBranch() async {
     await FlutterBranchSdk.init(
       enableLogging: true,
-      branchAttributionLevel: BranchAttributionLevel.MINIMAL,
+      branchAttributionLevel: BranchAttributionLevel.FULL,
     );
     // Pass your Branch key(s) here, typically from environment variables or a config file
     // branchLinkControlParams: BranchLinkControlParams(live: !kDebugMode),
