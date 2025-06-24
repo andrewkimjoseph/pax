@@ -108,29 +108,41 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
             ],
           ),
 
-          Row(
-            children: [
-              Text(
-                    TokenBalanceUtil.getFormattedBalanceByCurrency(
-                      paxAccount.balances,
-                      selectedCurrency,
-                    ),
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 26,
-                      color: PaxColors.black,
-                    ),
-                  )
-                  .asSkeleton(
-                    enabled: paxAccount.state == PaxAccountState.syncing,
-                  )
-                  .withPadding(right: 8),
-              SvgPicture.asset(
-                'lib/assets/svgs/currencies/$selectedCurrency.svg',
-                height: tokenId == 1 ? 25 : 20,
-              ),
-            ],
-          ).withPadding(bottom: 16),
+          Builder(
+            builder: (context) {
+              final isLoading =
+                  paxAccount.state == PaxAccountState.initial ||
+                  paxAccount.state == PaxAccountState.loading;
+              final isSyncing = paxAccount.state == PaxAccountState.syncing;
+
+              String currentBalance =
+                  TokenBalanceUtil.getFormattedBalanceByCurrency(
+                    paxAccount.balances,
+                    selectedCurrency,
+                  );
+
+              return Row(
+                children: [
+                  IntrinsicWidth(
+                    child: Text(
+                          currentBalance,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 26,
+                            color: PaxColors.black,
+                          ),
+                        )
+                        .asSkeleton(enabled: isSyncing || isLoading)
+                        .withPadding(right: 8),
+                  ),
+                  SvgPicture.asset(
+                    'lib/assets/svgs/currencies/$selectedCurrency.svg',
+                    height: tokenId == 1 ? 25 : 20,
+                  ).asSkeleton(enabled: isSyncing || isLoading),
+                ],
+              ).withPadding(bottom: 16);
+            },
+          ),
 
           Row(
             children: [
