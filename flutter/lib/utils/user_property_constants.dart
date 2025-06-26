@@ -38,21 +38,21 @@ class UserPropertyConstants {
   static const String dateOfBirth = 'pax_date_of_birth';
 
   /// The URI of the participant's profile picture
-  /// Value: 'pax_profile_picture_uri'
-  static const String profilePictureURI = 'pax_profile_picture_uri';
+  /// Value: 'pax_profile_pic_uri'
+  static const String profilePictureURI = 'pax_profile_pic_uri';
 
   // ============================================================================
   // GOODDOLLAR IDENTITY INFORMATION
   // ============================================================================
 
   /// The timestamp of the last GoodDollar identity authentication
-  /// Value: 'pax_gd_id_last_auth_time'
+  /// Value: 'pax_gd_last_auth_time'
   static const String goodDollarIdentityTimeLastAuthenticated =
-      'pax_gd_id_last_auth_time';
+      'pax_gd_last_auth_time';
 
   /// The expiry date of the GoodDollar identity
-  /// Value: 'pax_gd_id_expiry_date'
-  static const String goodDollarIdentityExpiryDate = 'pax_gd_id_expiry_date';
+  /// Value: 'pax_gd_expiry_date'
+  static const String goodDollarIdentityExpiryDate = 'pax_gd_expiry_date';
 
   // ============================================================================
   // TIMESTAMPS
