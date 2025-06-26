@@ -9,6 +9,7 @@ import {
   PIMLICO_URL,
   PAX_MASTER,
   REWARD_TOKEN_ADDRESS,
+  DB,
 } from "../../shared/config";
 import { entryPoint07Address } from "viem/account-abstraction";
 import { privateKeyToAccount } from "viem/accounts";
@@ -81,6 +82,38 @@ export const processAchievementClaim = onCall(
           "Missing required parameters: achievementId, paxAccountContractAddress, amountEarned, tasksNeededForCompletion, and tasksCompleted."
         );
       }
+
+      // Check if the achievement exists and if it has already been claimed
+      const firestore = DB();
+      const achievementDoc = await firestore.collection("achievements").doc(achievementId).get();
+      
+      if (!achievementDoc.exists) {
+        logger.error("Achievement not found in processAchievementClaim", { achievementId });
+        throw new HttpsError(
+          "not-found",
+          "Achievement not found."
+        );
+      }
+
+      const achievementData = achievementDoc.data();
+      if (achievementData?.txnHash && achievementData?.timeClaimed) {
+        logger.error("Achievement already claimed in processAchievementClaim", { 
+          achievementId, 
+          txnHash: achievementData.txnHash,
+          timeClaimed: achievementData.timeClaimed 
+        });
+        throw new HttpsError(
+          "already-exists",
+          "Achievement has already been claimed."
+        );
+      }
+
+      logger.info("Achievement validation passed:", {
+        achievementId,
+        exists: achievementDoc.exists,
+        txnHash: achievementData?.txnHash,
+        timeClaimed: achievementData?.timeClaimed,
+      });
 
       const recipientAddress = paxAccountContractAddress as Address;
 
