@@ -88,6 +88,7 @@ class _AccountOptionCardState extends ConsumerState<AccountOptionCard> {
                     ),
                     if ((widget.option == "profile" ||
                             widget.option == "payment_methods") &&
+                        achievementState.state == AchievementState.loaded &&
                         missingCount > 0)
                       Badge(
                         isLabelVisible: true,

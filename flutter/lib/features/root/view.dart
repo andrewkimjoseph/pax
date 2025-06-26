@@ -88,7 +88,10 @@ class _RootViewState extends ConsumerState<RootView> {
         ),
       ),
       child: Badge(
-        isLabelVisible: label == 'Account' && !hasAllRequired,
+        isLabelVisible:
+            label == 'Account' &&
+            achievementState.state == AchievementState.loaded &&
+            !hasAllRequired,
         offset: const Offset(10, -5),
         label: Text(""),
         backgroundColor: PaxColors.red,
