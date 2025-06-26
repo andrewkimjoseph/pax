@@ -121,26 +121,29 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
                     selectedCurrency,
                   );
 
-              return Row(
-                children: [
-                  IntrinsicWidth(
-                    child: Text(
-                          currentBalance,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            fontSize: 26,
-                            color: PaxColors.black,
-                          ),
-                        )
-                        .asSkeleton(enabled: isSyncing || isLoading)
-                        .withPadding(right: 8),
-                  ),
-                  SvgPicture.asset(
-                    'lib/assets/svgs/currencies/$selectedCurrency.svg',
-                    height: tokenId == 1 ? 25 : 20,
-                  ).asSkeleton(enabled: isSyncing || isLoading),
-                ],
-              ).withPadding(bottom: 16);
+              return SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                            currentBalance,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 26,
+                              color: PaxColors.black,
+                            ),
+                          )
+                          .asSkeleton(enabled: isSyncing || isLoading)
+                          .withPadding(right: 8),
+                    ),
+                    SvgPicture.asset(
+                      'lib/assets/svgs/currencies/$selectedCurrency.svg',
+                      height: tokenId == 1 ? 25 : 20,
+                    ),
+                  ],
+                ).withPadding(bottom: 16),
+              );
             },
           ),
 
