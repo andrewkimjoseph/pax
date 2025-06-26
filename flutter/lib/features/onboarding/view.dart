@@ -196,9 +196,15 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                                             .resetOnboarding();
                                       }
                                     } catch (error) {
+                                      analytics.signInWithGoogleFailed({
+                                        "error": error.toString().substring(
+                                          0,
+                                          error.toString().length.clamp(0, 99),
+                                        ),
+                                      });
+
                                       if (!context.mounted) return;
 
-                                      analytics.signInWithGoogleIncomplete();
                                       showToast(
                                         context: context,
                                         location: ToastLocation.topCenter,
@@ -207,7 +213,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                                               leadingIcon:
                                                   FontAwesomeIcons.google,
                                               toastColor: PaxColors.red,
-                                              text: 'Google signin incomplete',
+                                              text: 'Google signin failed',
                                               trailingIcon:
                                                   FontAwesomeIcons
                                                       .triangleExclamation,
