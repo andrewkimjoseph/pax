@@ -1,8 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_branch_sdk/flutter_branch_sdk.dart';
 import 'package:pax/services/analytics/analytics_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pax/utils/regex.dart';
+import 'package:pax/utils/branch_param_cleaner.dart';
 
 /// A provider class that manages analytics events and user properties.
 class AnalyticsProvider {
@@ -52,22 +51,10 @@ class AnalyticsProvider {
   Future<void> signInWithGoogleComplete([
     Map<String, dynamic>? properties,
   ]) async {
-    Map<dynamic, dynamic> params =
-        await FlutterBranchSdk.getFirstReferringParams();
-
-    // Merge the Branch params with the provided properties
-    Map<String, dynamic> eventProperties = properties ?? {};
-    if (params.isNotEmpty) {
-      // Clean up Branch parameters by removing special characters from keys
-      Map<String, dynamic> cleanedParams = {};
-      params.forEach((key, value) {
-        String cleanedKey = key.toString().replaceAll(branchParamCleaner, '');
-        cleanedParams[cleanedKey] = value;
-      });
-
-      // Add each cleaned parameter individually to the event properties
-      eventProperties.addAll(cleanedParams);
-    }
+    Map<String, dynamic> eventProperties =
+        await BranchParamCleaner.mergeWithBranchFirstReferringParams(
+          properties,
+        );
 
     return _logEvent(
       'sign_in_with_google_complete',
@@ -194,22 +181,10 @@ class AnalyticsProvider {
   Future<void> minipayConnectionComplete([
     Map<String, dynamic>? properties,
   ]) async {
-    Map<dynamic, dynamic> params =
-        await FlutterBranchSdk.getFirstReferringParams();
-
-    // Merge the Branch params with the provided properties
-    Map<String, dynamic> eventProperties = properties ?? {};
-    if (params.isNotEmpty) {
-      // Clean up Branch parameters by removing special characters from keys
-      Map<String, dynamic> cleanedParams = {};
-      params.forEach((key, value) {
-        String cleanedKey = key.toString().replaceAll(branchParamCleaner, '');
-        cleanedParams[cleanedKey] = value;
-      });
-
-      // Add each cleaned parameter individually to the event properties
-      eventProperties.addAll(cleanedParams);
-    }
+    Map<String, dynamic> eventProperties =
+        await BranchParamCleaner.mergeWithBranchFirstReferringParams(
+          properties,
+        );
 
     return _logEvent(
       'minipay_connection_complete',
