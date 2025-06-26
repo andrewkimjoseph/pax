@@ -181,7 +181,7 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
             width: MediaQuery.of(context).size.width,
             height: 35,
             child: Button(
-              onPressed: isClaiming ? null : _handleClaim,
+              onPressed: (isClaiming || isClaimed) ? null : _handleClaim,
               enabled: isEarned && !isClaimed && !isClaiming,
               style:
                   isEarned && !isClaimed && !isClaiming
