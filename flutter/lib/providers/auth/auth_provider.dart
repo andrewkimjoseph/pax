@@ -144,6 +144,10 @@ class AuthNotifier extends Notifier<AuthStateModel> {
           // Only log out after multiple consecutive failures
           if (_consecutiveValidationFailures >= _maxConsecutiveFailures) {
             // Token is invalid, sign out
+
+            ref.read(analyticsProvider).invalidTokenLogoutComplete({
+              'participantId': currentUser.uid,
+            });
             await _repository.signOut();
             state = state.copyWith(
               user: AuthUser.empty(),
