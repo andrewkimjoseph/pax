@@ -65,6 +65,9 @@ class AnalyticsProvider {
   Future<void> signInWithGoogleFailed([Map<String, dynamic>? properties]) =>
       _logEvent('sign_in_with_google_failed', properties: properties);
 
+  Future<void> invalidTokenLogoutComplete([Map<String, dynamic>? properties]) =>
+      _logEvent('invalid_token_logout_complete', properties: properties);
+
   Future<void> dashboardTapped([Map<String, dynamic>? properties]) =>
       _logEvent('dashboard_tapped', properties: properties);
 
