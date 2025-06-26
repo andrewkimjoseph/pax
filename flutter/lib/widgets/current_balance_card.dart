@@ -42,6 +42,11 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
         lastRefreshTime == null ||
         DateTime.now().difference(lastRefreshTime) > const Duration(minutes: 5);
 
+    final isFetching =
+        paxAccount.state == PaxAccountState.initial ||
+        paxAccount.state == PaxAccountState.loading ||
+        paxAccount.state == PaxAccountState.syncing;
+
     return Container(
       decoration: ShapeDecoration(
         shape: GradientBorder(
@@ -90,11 +95,8 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
                           },
                   density: ButtonDensity.icon,
                   icon:
-                      paxAccount.state == PaxAccountState.syncing
-                          ? const FaIcon(
-                            FontAwesomeIcons.spinner,
-                            color: PaxColors.deepPurple,
-                          )
+                      isFetching
+                          ? const CircularProgressIndicator(size: 25)
                           : const FaIcon(
                             FontAwesomeIcons.arrowsRotate,
                             color: PaxColors.deepPurple,
