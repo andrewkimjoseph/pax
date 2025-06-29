@@ -82,9 +82,9 @@ class UserPropertyConstants {
   /// Value: 'pax_server_address'
   static const String privyServerWalletAddress = 'pax_server_address';
 
-  /// The smart account wallet address
-  /// Value: 'pax_smart_account_address'
-  static const String smartAccountWalletAddress = 'pax_smart_account_address';
+  /// The smart wallet address
+  /// Value: 'pax_smart_address'
+  static const String smartAccountWalletAddress = 'pax_smart_address';
 
   // ============================================================================
   // PAXACCOUNT INFORMATION
