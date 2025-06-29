@@ -10,6 +10,7 @@ import 'package:pax/features/home/tasks/view.dart';
 import 'package:pax/features/onboarding/view_model.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/theming/colors.dart';
+import 'package:pax/utils/secret_constants.dart';
 import 'package:pax/utils/url_handler.dart';
 import 'package:pax/widgets/account/account_option_card.dart';
 import 'package:pax/widgets/contact_support_card.dart';
@@ -101,12 +102,6 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
                     },
                     child: ContactSupportCard('Website', 'website'),
                   ),
-
-                  // InkWell(
-                  //   onTap: () {
-                  //   },
-                  //   child: ContactSupportCard('Whatsapp', 'whatsapp'),
-                  // ),
                   InkWell(
                     onTap: () {
                       UrlHandler.launchInExternalBrowser(
@@ -116,17 +111,19 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
                     child: ContactSupportCard('X', 'x'),
                   ),
 
-                  // GestureDetector(
-                  //   // onPanDown: (details) {
-                  //   //   context.push("/help-and-support/contact-support");
-                  //   // },
-                  //   child: ContactSupportCard('Instagram', 'instagram'),
-                  // ),
+                  InkWell(
+                    onTap: () {
+                      UrlHandler.launchInExternalBrowser(whatsappChannelLink);
+                    },
+                    child: ContactSupportCard('WhatsApp', 'whatsapp'),
+                  ),
 
-                  // HelpAndSupportCard('Contact Support'),
-                  // HelpAndSupportCard('Privacy Policy'),
-                  // HelpAndSupportCard('Terms of Service'),
-                  // HelpAndSupportCard('About Us'),
+                  InkWell(
+                    onTap: () {
+                      UrlHandler.launchInExternalBrowser(telegramChannelLink);
+                    },
+                    child: ContactSupportCard('Telegram', 'telegram'),
+                  ),
                 ],
               ),
             ),
