@@ -13,6 +13,7 @@ import 'package:pax/utils/currency_symbol.dart';
 import 'package:pax/utils/token_address_util.dart';
 import 'package:pax/utils/token_balance_util.dart';
 import 'package:pax/widgets/change_withdrawal_method_card.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider, Consumer;
 
@@ -451,7 +452,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                 featureFlags.when(
                   data: (flags) {
                     final isWalletAvailable =
-                        flags['is_wallet_available'] ?? false;
+                        (flags['is_wallet_available'] ?? false) || kDebugMode;
                     return SizedBox(
                       width: double.infinity,
                       height: 48,

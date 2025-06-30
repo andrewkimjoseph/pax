@@ -99,7 +99,7 @@ class _LogOutDrawerState extends ConsumerState<LogOutDrawer> {
                               await Future.delayed(
                                 const Duration(milliseconds: 300),
                               );
-                              if (!widget.rootContext.mounted) return;
+                              if (!mounted) return;
                               widget.onLogoutConfirmed();
                               setState(() {
                                 isLoggingOut = false;
