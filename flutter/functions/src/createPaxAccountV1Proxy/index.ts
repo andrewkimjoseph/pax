@@ -60,6 +60,16 @@ export const createPaxAccountV1Proxy = onCall(
       }
 
       const userId = request.auth.uid;
+      // Check if the user is disabled
+      const { getAuth } = await import('firebase-admin/auth');
+      const userRecord = await getAuth().getUser(userId);
+      if (userRecord.disabled) {
+        throw new HttpsError(
+          "permission-denied",
+          "This user is disabled."
+        );
+      }
+
       const { _primaryPaymentMethod, serverWalletId } = request.data as {
         _primaryPaymentMethod: string;
         serverWalletId: string;

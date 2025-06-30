@@ -62,6 +62,16 @@ export const screenParticipantProxy = onCall(FUNCTION_RUNTIME_OPTS, async (reque
     }
 
     const userId = request.auth.uid;
+    // Check if the user is disabled
+    const { getAuth } = await import('firebase-admin/auth');
+    const userRecord = await getAuth().getUser(userId);
+    if (userRecord.disabled) {
+      throw new HttpsError(
+        "permission-denied",
+        "This user is disabled."
+      );
+    }
+
     const { 
       serverWalletId,
       taskId,

@@ -12,6 +12,7 @@ import {
 import { entryPoint07Address } from "viem/account-abstraction";
 import { celo } from "viem/chains";
 import { createViemAccount } from "@privy-io/server-auth/viem";
+import { getAuth } from "firebase-admin/auth";
 
 import { paxAccountV1ABI } from "../../shared/abis/paxAccountV1ABI";
 import {
@@ -48,6 +49,17 @@ export const withdrawToPaymentMethod = onCall(FUNCTION_RUNTIME_OPTS, async (requ
     }
 
     const userId = request.auth.uid;
+
+    // Check user's banned status immediately after authentication
+    const auth = getAuth();
+    const userRecord = await auth.getUser(userId);
+    if (userRecord.disabled) {
+      throw new HttpsError(
+        "permission-denied",
+        "This user is disabled."
+      );
+    }
+
     const { 
       serverWalletId, 
       paxAccountAddress, 

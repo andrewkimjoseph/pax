@@ -1,4 +1,4 @@
-import { onCall } from "firebase-functions/v2/https";
+import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { getMessaging } from "firebase-admin/messaging";
 import { FUNCTION_RUNTIME_OPTS } from "../../shared/config";
 
@@ -11,10 +11,22 @@ interface SendNotificationParams {
 
 export const sendNotification = onCall(FUNCTION_RUNTIME_OPTS, async (request) => {
   try {
+    // Ensure the user is authenticated
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Unauthenticated request");
+    }
+    const userId = request.auth.uid;
+    // Check if the user is disabled
+    const { getAuth } = await import('firebase-admin/auth');
+    const userRecord = await getAuth().getUser(userId);
+    if (userRecord.disabled) {
+      throw new HttpsError("permission-denied", "This user is disabled.");
+    }
+
     const { title, body, token, data } = request.data as SendNotificationParams;
 
     if (!title || !body || !token) {
-      throw new Error("Missing required parameters: title, body, and token are required");
+      throw new HttpsError("invalid-argument", "Missing required parameters: title, body, and token are required");
     }
 
     const message = {
@@ -34,6 +46,6 @@ export const sendNotification = onCall(FUNCTION_RUNTIME_OPTS, async (request) =>
     };
   } catch (error) {
     console.error("Error sending notification:", error);
-    throw new Error(`Failed to send notification: ${error instanceof Error ? error.message : "Unknown error"}`);
+    throw new HttpsError("internal", `Failed to send notification: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 }); 

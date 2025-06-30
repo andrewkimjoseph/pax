@@ -41,6 +41,17 @@ export const processAchievementClaim = onCall(
         );
       }
 
+      const userId = request.auth.uid;
+      // Check if the user is disabled
+      const { getAuth } = await import('firebase-admin/auth');
+      const userRecord = await getAuth().getUser(userId);
+      if (userRecord.disabled) {
+        throw new HttpsError(
+          "permission-denied",
+          "This user is disabled."
+        );
+      }
+
       logger.info("Processing achievement claim for user:", {
         userId: request.auth.uid,
         achievementId: request.data.achievementId,
