@@ -224,7 +224,9 @@ class _AccountViewState extends ConsumerState<AccountView> {
                                 "Participant",
                           ),
                           provider:
-                              participant != null
+                              participant != null &&
+                                      participant.profilePictureURI != null &&
+                                      participant.profilePictureURI!.isNotEmpty
                                   ? CachedNetworkImageProvider(
                                     participant.profilePictureURI!,
                                   )

@@ -45,5 +45,11 @@ class FAQs {
       question: "What happens when I book a slot in a task?",
       answer: "You will be let in, and you will be able to complete the task.",
     ),
+    FAQ(
+      question:
+          "I keep getting a message that I have been banned from the platform. What does this mean?",
+      answer:
+          "This means that you have been banned from the platform. You will not be able to complete any tasks and you will not be able to withdraw your funds. Contact support if you think this is a mistake.",
+    ),
   ];
 }
