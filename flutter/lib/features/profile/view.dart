@@ -231,11 +231,22 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                 child: Avatar(
                                   size: 70,
                                   initials: Avatar.getInitials(
-                                    participant!.profilePictureURI!,
+                                    participant?.displayName
+                                            ?.split(" ")
+                                            .first ??
+                                        "Participant",
                                   ),
-                                  provider: CachedNetworkImageProvider(
-                                    participant.profilePictureURI!,
-                                  ),
+                                  provider:
+                                      participant != null &&
+                                              participant.profilePictureURI !=
+                                                  null &&
+                                              participant
+                                                  .profilePictureURI!
+                                                  .isNotEmpty
+                                          ? CachedNetworkImageProvider(
+                                            participant.profilePictureURI!,
+                                          )
+                                          : null,
                                 ),
                               ),
                             ],
@@ -268,13 +279,18 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                     TextField(
                                       enabled: false,
                                       enableInteractiveSelection: true,
-                                      placeholder: Text(
-                                        participant.displayName!,
-                                        style: TextStyle(
-                                          color: PaxColors.mediumPurple,
-                                          fontSize: 14,
-                                        ),
-                                      ),
+                                      placeholder:
+                                          participant != null &&
+                                                  participant.displayName !=
+                                                      null
+                                              ? Text(
+                                                participant.displayName!,
+                                                style: TextStyle(
+                                                  color: PaxColors.mediumPurple,
+                                                  fontSize: 14,
+                                                ),
+                                              )
+                                              : null,
                                       features: [],
                                     ),
                                   ],
@@ -295,13 +311,18 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                     TextField(
                                       enabled: false,
                                       keyboardType: TextInputType.emailAddress,
-                                      placeholder: Text(
-                                        participant.emailAddress!,
-                                        style: TextStyle(
-                                          color: PaxColors.mediumPurple,
-                                          fontSize: 14,
-                                        ),
-                                      ),
+                                      placeholder:
+                                          participant != null &&
+                                                  participant.emailAddress !=
+                                                      null
+                                              ? Text(
+                                                participant.emailAddress!,
+                                                style: TextStyle(
+                                                  color: PaxColors.mediumPurple,
+                                                  fontSize: 14,
+                                                ),
+                                              )
+                                              : null,
                                       features: [
                                         InputFeature.leading(
                                           SvgPicture.asset(
@@ -330,7 +351,8 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                         ),
                                       ).withPadding(bottom: 8),
 
-                                      if (participant.phoneNumber != null)
+                                      if (participant != null &&
+                                          participant.phoneNumber != null)
                                         TextField(
                                           enabled: false,
                                           placeholder: Text(
@@ -340,6 +362,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
 
                                       Visibility(
                                         visible:
+                                            participant != null &&
                                             participant.phoneNumber == null,
                                         child: FittedBox(
                                           fit: BoxFit.fill,
@@ -401,9 +424,10 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                             });
                                           },
                                           value:
-                                              genderValue ?? participant.gender,
+                                              genderValue ??
+                                              participant?.gender,
                                           // Only allow editing if gender hasn't been set
-                                          enabled: participant.gender == null,
+                                          enabled: participant?.gender == null,
                                           placeholder: const Text('Gender'),
                                           popup: (context) {
                                             return SelectPopup(
@@ -444,18 +468,19 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                       child: DatePicker(
                                         // Only allow editing if birthdate hasn't been set
                                         enabled:
-                                            participant.dateOfBirth == null,
+                                            participant?.dateOfBirth == null,
                                         placeholder: Text(
                                           'Select date',
                                           style: TextStyle(color: Colors.black),
                                         ),
                                         value:
                                             dateTime ??
-                                            (participant.dateOfBirth != null
+                                            (participant?.dateOfBirth != null
                                                 ? DateTime.fromMillisecondsSinceEpoch(
                                                   participant
-                                                      .dateOfBirth!
-                                                      .millisecondsSinceEpoch,
+                                                          ?.dateOfBirth
+                                                          ?.millisecondsSinceEpoch ??
+                                                      0,
                                                 )
                                                 : null),
                                         mode: PromptMode.dialog,
@@ -503,7 +528,8 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
 
                                               try {
                                                 // Validate phone number if not already set
-                                                if (participant.phoneNumber ==
+                                                if (participant != null &&
+                                                    participant.phoneNumber ==
                                                         null &&
                                                     !_validatePhoneNumber()) {
                                                   setState(() {
@@ -512,7 +538,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                                   return;
                                                 }
 
-                                                if (participant.gender ==
+                                                if (participant?.gender ==
                                                         null &&
                                                     !_validateGender()) {
                                                   setState(() {
@@ -522,7 +548,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                                 }
 
                                                 // Validate birthdate if not already set
-                                                if (participant.dateOfBirth ==
+                                                if (participant?.dateOfBirth ==
                                                         null &&
                                                     !_validateBirthdate()) {
                                                   setState(() {
@@ -535,7 +561,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                                 updateData = {};
 
                                                 // Only add gender if it's not already set
-                                                if (participant.gender ==
+                                                if (participant?.gender ==
                                                         null &&
                                                     genderValue != null) {
                                                   updateData['gender'] =
@@ -543,7 +569,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                                 }
 
                                                 // Only add birthdate if it's not already set
-                                                if (participant.dateOfBirth ==
+                                                if (participant?.dateOfBirth ==
                                                         null &&
                                                     dateTime != null) {
                                                   updateData['dateOfBirth'] =
@@ -553,7 +579,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                                 }
 
                                                 // Add phone number and country if not already set
-                                                if (participant.phoneNumber ==
+                                                if (participant?.phoneNumber ==
                                                         null &&
                                                     phoneNumber != null) {
                                                   final formattedPhoneNumber =
@@ -561,7 +587,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                                   updateData['phoneNumber'] =
                                                       formattedPhoneNumber;
                                                   updateData['country'] =
-                                                      phoneNumber!.country
+                                                      phoneNumber?.country
                                                           .toString();
                                                 }
 

@@ -29,12 +29,11 @@ class ContactSupportCard extends ConsumerWidget {
                   children: [
                     SvgPicture.asset(
                       'lib/assets/svgs/$icon.svg',
-                      width: 24,
-                      height: 24,
-                    ).withPadding(right: 32),
+                      width: icon == 'telegram' ? 18 : 24,
+                      height: icon == 'telegram' ? 18 : 24,
+                    ).withPadding(right: 16, left: icon == 'telegram' ? 4 : 0),
                     Text(
                       channel,
-
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 18,
