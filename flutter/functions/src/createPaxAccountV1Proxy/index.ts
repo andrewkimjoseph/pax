@@ -14,7 +14,6 @@ import { entryPoint07Address } from "viem/account-abstraction";
 import { celo } from "viem/chains";
 import { createViemAccount } from "@privy-io/server-auth/viem";
 import { randomBytes } from "crypto";
-
 import { paxAccountV1ABI } from "../../shared/abis/paxAccountV1ABI";
 import { erc1967ProxyABI } from "../../shared/abis/erc1967Proxy";
 import { erc1967ByteCode } from "../../shared/bytecode/erc1967";
@@ -26,6 +25,7 @@ import {
   PRIVY_CLIENT,
   PUBLIC_CLIENT,
   PIMLICO_URL,
+  DB,
 } from "../../shared/config";
 
 // Initialize clients
@@ -52,7 +52,9 @@ export const createPaxAccountV1Proxy = onCall(
       });
       // Ensure the user is authenticated
       if (!request.auth) {
-        logger.error("Unauthenticated request to createPaxAccountV1Proxy", { requestAuth: request.auth });
+        logger.error("Unauthenticated request to createPaxAccountV1Proxy", {
+          requestAuth: request.auth,
+        });
         throw new HttpsError(
           "unauthenticated",
           "The function must be called by an authenticated user."
@@ -61,13 +63,10 @@ export const createPaxAccountV1Proxy = onCall(
 
       const userId = request.auth.uid;
       // Check if the user is disabled
-      const { getAuth } = await import('firebase-admin/auth');
+      const { getAuth } = await import("firebase-admin/auth");
       const userRecord = await getAuth().getUser(userId);
       if (userRecord.disabled) {
-        throw new HttpsError(
-          "permission-denied",
-          "This user is disabled."
-        );
+        throw new HttpsError("permission-denied", "This user is disabled.");
       }
 
       const { _primaryPaymentMethod, serverWalletId } = request.data as {
@@ -76,7 +75,10 @@ export const createPaxAccountV1Proxy = onCall(
       };
 
       if (!_primaryPaymentMethod) {
-        logger.error("Missing required parameter: walletAddress in createPaxAccountV1Proxy", { _primaryPaymentMethod });
+        logger.error(
+          "Missing required parameter: walletAddress in createPaxAccountV1Proxy",
+          { _primaryPaymentMethod }
+        );
         throw new HttpsError(
           "invalid-argument",
           "Missing required parameter: walletAddress"
@@ -84,7 +86,10 @@ export const createPaxAccountV1Proxy = onCall(
       }
 
       if (!serverWalletId) {
-        logger.error("Missing required parameter: serverWalletId in createPaxAccountV1Proxy", { serverWalletId });
+        logger.error(
+          "Missing required parameter: serverWalletId in createPaxAccountV1Proxy",
+          { serverWalletId }
+        );
         throw new HttpsError(
           "invalid-argument",
           "Missing required parameter: serverWalletId"
@@ -97,13 +102,43 @@ export const createPaxAccountV1Proxy = onCall(
         serverWalletId,
       });
 
+      // Check if PaxAccount already exists for this user
+      const firestore = DB();
+      const paxAccountDoc = await firestore
+        .collection("pax_accounts")
+        .doc(userId)
+        .get();
+      if (paxAccountDoc.exists) {
+        const paxAccountData = paxAccountDoc.data();
+        if (
+          paxAccountData?.contractAddress &&
+          paxAccountData?.contractCreationTxnHash
+        ) {
+          logger.info("PaxAccountContract already exists for user", {
+            contractAddress: paxAccountData.contractAddress,
+            txnHash: paxAccountData.contractCreationTxnHash,
+          });
+          return {
+            contractAddress: paxAccountData.contractAddress,
+            txnHash: paxAccountData.contractCreationTxnHash,
+          };
+        }
+      } else {
+        logger.info("No PaxAccount contract found for user, creating new one", {
+          userId,
+        });
+      }
+
       // Get the server wallet from Privy
       const wallet = await PRIVY_CLIENT.walletApi.getWallet({
         id: serverWalletId,
       });
 
       if (!wallet) {
-        logger.error("Server wallet not found with the provided ID in createPaxAccountV1Proxy", { serverWalletId });
+        logger.error(
+          "Server wallet not found with the provided ID in createPaxAccountV1Proxy",
+          { serverWalletId }
+        );
         throw new HttpsError(
           "not-found",
           "Server wallet not found with the provided ID"
@@ -174,7 +209,9 @@ export const createPaxAccountV1Proxy = onCall(
         });
 
       if (!userOpReceipt.success) {
-        logger.error("User operation failed in createPaxAccountV1Proxy", { userOpReceipt });
+        logger.error("User operation failed in createPaxAccountV1Proxy", {
+          userOpReceipt,
+        });
         throw new HttpsError(
           "internal",
           `User operation failed: ${JSON.stringify(userOpReceipt)}`
@@ -188,7 +225,10 @@ export const createPaxAccountV1Proxy = onCall(
       const proxyAddress = await getDeployedProxyContractAddress(txnHash);
 
       if (!proxyAddress) {
-        logger.error("Failed to retrieve proxy contract address from transaction logs in createPaxAccountV1Proxy", { txnHash });
+        logger.error(
+          "Failed to retrieve proxy contract address from transaction logs in createPaxAccountV1Proxy",
+          { txnHash }
+        );
         throw new HttpsError(
           "internal",
           "Failed to retrieve proxy contract address from transaction logs"
