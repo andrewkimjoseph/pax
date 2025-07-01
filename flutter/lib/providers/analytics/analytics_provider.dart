@@ -267,6 +267,21 @@ class AnalyticsProvider {
 
   Future<void> refreshBalancesTapped([Map<String, dynamic>? properties]) =>
       _logEvent('refresh_balances_tapped', properties: properties);
+
+  Future<void> raiseTicketTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('raise_ticket_tapped', properties: properties);
+
+  Future<void> websiteTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('website_tapped', properties: properties);
+
+  Future<void> contactSupportXTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('contact_support_x_tapped', properties: properties);
+
+  Future<void> whatsappTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('whatsapp_tapped', properties: properties);
+
+  Future<void> telegramTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('telegram_tapped', properties: properties);
 }
 
 final analyticsProvider = Provider<AnalyticsProvider>((ref) {

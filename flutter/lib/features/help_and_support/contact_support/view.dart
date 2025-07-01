@@ -8,6 +8,7 @@ import 'package:pax/features/home/achievements/view.dart';
 import 'package:pax/features/home/dashboard/view.dart';
 import 'package:pax/features/home/tasks/view.dart';
 import 'package:pax/features/onboarding/view_model.dart';
+import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/secret_constants.dart';
@@ -45,9 +46,8 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
 
           child: Row(
             children: [
-              GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onPanDown: (details) {
+              InkWell(
+                onTap: () {
                   context.pop();
                 },
                 child: SvgPicture.asset('lib/assets/svgs/arrow_left_long.svg'),
@@ -82,6 +82,7 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
                 children: [
                   InkWell(
                     onTap: () {
+                      ref.read(analyticsProvider).raiseTicketTapped();
                       UrlHandler.launchInAppWebView(
                         context,
                         "https://tally.so/r/nGy7V2?authId=${participant?.id}",
@@ -95,6 +96,7 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
 
                   InkWell(
                     onTap: () {
+                      ref.read(analyticsProvider).websiteTapped();
                       UrlHandler.launchInAppWebView(
                         context,
                         "https://thecanvassing.xyz",
@@ -104,6 +106,7 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
                   ),
                   InkWell(
                     onTap: () {
+                      ref.read(analyticsProvider).contactSupportXTapped();
                       UrlHandler.launchInExternalBrowser(
                         "https://x.com/thecanvassing",
                       );
@@ -113,6 +116,7 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
 
                   InkWell(
                     onTap: () {
+                      ref.read(analyticsProvider).whatsappTapped();
                       UrlHandler.launchInExternalBrowser(whatsappChannelLink);
                     },
                     child: ContactSupportCard('WhatsApp', 'whatsapp'),
@@ -120,6 +124,7 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
 
                   InkWell(
                     onTap: () {
+                      ref.read(analyticsProvider).telegramTapped();
                       UrlHandler.launchInExternalBrowser(telegramChannelLink);
                     },
                     child: ContactSupportCard('Telegram', 'telegram'),
