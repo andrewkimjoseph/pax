@@ -1,14 +1,7 @@
 // src/withdrawToPaymentMethod/index.ts
-import {
-  onCall,
-  HttpsError,
-} from "firebase-functions/v2/https";
+import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
-import {
-  Address,
-  encodeFunctionData,
-  http,
-} from "viem";
+import { Address, encodeFunctionData, http } from "viem";
 import { entryPoint07Address } from "viem/account-abstraction";
 import { celo } from "viem/chains";
 import { createViemAccount } from "@privy-io/server-auth/viem";
@@ -26,261 +19,282 @@ import { createWithdrawalRecord } from "../../shared/utils/createWithdrawal";
 /**
  * Cloud function to withdraw tokens to a payment method
  */
-export const withdrawToPaymentMethod = onCall(FUNCTION_RUNTIME_OPTS, async (request) => {
-  try {
-    // Ensure the user is authenticated
-    const { createSmartAccountClient } = await import("permissionless");
-    const { toSimpleSmartAccount } = await import("permissionless/accounts");
-    const { createPimlicoClient } = await import ("permissionless/clients/pimlico");
-
-    const PIMLICO_CLIENT = createPimlicoClient({
-      transport: http(PIMLICO_URL),
-      entryPoint: {
-        address: entryPoint07Address,
-        version: "0.7",
-      },
-    });
-    if (!request.auth) {
-      logger.error("Unauthenticated request to withdrawToPaymentMethod", { requestAuth: request.auth });
-      throw new HttpsError(
-        "unauthenticated",
-        "The function must be called by an authenticated user."
-      );
-    }
-
-    const userId = request.auth.uid;
-
-    // Check user's banned status immediately after authentication
-    const auth = getAuth();
-    const userRecord = await auth.getUser(userId);
-    if (userRecord.disabled) {
-      throw new HttpsError(
-        "permission-denied",
-        "This user is disabled."
-      );
-    }
-
-    const { 
-      serverWalletId, 
-      paxAccountAddress, 
-      paymentMethodId, // This is now the contract payment method ID (predefinedId - 1)
-      withdrawalPaymentMethodId, // This is the string ID for the withdrawal record
-      amountRequested,
-      currency,
-      decimals = 18, // Default to 18 decimals (standard for most ERC20 tokens)
-      tokenId, // Add tokenId to the request data
-    } = request.data as {
-      serverWalletId: string;
-      paxAccountAddress: string;
-      paymentMethodId: number; // Changed to number for contract
-      withdrawalPaymentMethodId: string; // Added for withdrawal record
-      amountRequested: string; // Human-readable amount (e.g., "0.5")
-      currency: string; // ERC20 token address
-      decimals?: number; // Token decimals
-      tokenId: number; // Add tokenId to the type
-    };
-
-    // Validate required parameters
-    if (!serverWalletId) {
-      logger.error("Missing required parameter: serverWalletId in withdrawToPaymentMethod", { serverWalletId });
-      throw new HttpsError(
-        "invalid-argument",
-        "Missing required parameter: serverWalletId"
-      );
-    }
-
-    if (!paxAccountAddress) {
-      logger.error("Missing required parameter: paxAccountAddress in withdrawToPaymentMethod", { paxAccountAddress });
-      throw new HttpsError(
-        "invalid-argument",
-        "Missing required parameter: paxAccountAddress"
-      );
-    }
-
-    if (!amountRequested) {
-      logger.error("Missing required parameter: amountRequested in withdrawToPaymentMethod", { amountRequested });
-      throw new HttpsError(
-        "invalid-argument",
-        "Missing required parameter: amountRequested"
-      );
-    }
-
-    if (!currency) {
-      logger.error("Missing required parameter: currency in withdrawToPaymentMethod", { currency });
-      throw new HttpsError(
-        "invalid-argument",
-        "Missing required parameter: currency"
-      );
-    }
-
-    if (tokenId === undefined) {
-      logger.error("Missing required parameter: tokenId in withdrawToPaymentMethod", { tokenId });
-      throw new HttpsError(
-        "invalid-argument",
-        "Missing required parameter: tokenId"
-      );
-    }
-
-    if (!withdrawalPaymentMethodId) {
-      logger.error("Missing required parameter: withdrawalPaymentMethodId in withdrawToPaymentMethod", { withdrawalPaymentMethodId });
-      throw new HttpsError(
-        "invalid-argument",
-        "Missing required parameter: withdrawalPaymentMethodId"
-      );
-    }
-    
-    // Convert the decimal amount to wei (smallest unit)
-    // Example: 0.5 tokens with 18 decimals = 0.5 * 10^18 = 500000000000000000 wei
-    let amountInWei: bigint;
+export const withdrawToPaymentMethod = onCall(
+  FUNCTION_RUNTIME_OPTS,
+  async (request) => {
     try {
-      // Parse the amount as a floating point number
-      const amountFloat = parseFloat(amountRequested);
-      
-      // Convert to wei by multiplying by 10^decimals
-      const multiplier = BigInt(10) ** BigInt(decimals);
-      amountInWei = BigInt(Math.floor(amountFloat * Number(multiplier)));
-      
-      // For high precision, we could use a library like bignumber.js instead
-      // This approach may have precision limitations for very small numbers
-    } catch (error) {
-      throw new HttpsError(
-        "invalid-argument",
-        "Invalid amountRequested format. Please provide a valid number."
+      // Ensure the user is authenticated
+      const { createSmartAccountClient } = await import("permissionless");
+      const { toSimpleSmartAccount } = await import("permissionless/accounts");
+      const { createPimlicoClient } = await import(
+        "permissionless/clients/pimlico"
       );
-    }
 
-    logger.info("Withdrawing tokens to payment method", {
-      userId,
-      paxAccountAddress,
-      paymentMethodId,
-      amountRequested,
-      amountInWei: amountInWei.toString(),
-      currency,
-      serverWalletId,
-      tokenId,
-    });
-
-    // Get the server wallet from Privy
-    const wallet = await PRIVY_CLIENT.walletApi.getWallet({
-      id: serverWalletId,
-    });
-
-    if (!wallet) {
-      logger.error("Server wallet not found with the provided ID in withdrawToPaymentMethod", { serverWalletId });
-      throw new HttpsError(
-        "not-found",
-        "Server wallet not found with the provided ID"
-      );
-    }
-
-    // Create viem account from Privy wallet
-    const serverWalletAccount = await createViemAccount({
-      walletId: wallet.id,
-      address: wallet.address as Address,
-      privy: PRIVY_CLIENT,
-    });
-
-    // Create the Simple smart account
-    const smartAccount = await toSimpleSmartAccount({
-      client: PUBLIC_CLIENT,
-      owner: serverWalletAccount,
-      entryPoint: {
-        address: entryPoint07Address,
-        version: "0.7",
-      },
-    });
-
-    logger.info("Using Smart Account", {
-      address: smartAccount.address,
-    });
-
-    // Create the smart account client
-    const smartAccountClient = createSmartAccountClient({
-      account: smartAccount,
-      chain: celo,
-      bundlerTransport: http(PIMLICO_URL),
-      paymaster: PIMLICO_CLIENT,
-      userOperation: {
-        estimateFeesPerGas: async () => {
-          return (await PIMLICO_CLIENT.getUserOperationGasPrice()).fast;
+      const PIMLICO_CLIENT = createPimlicoClient({
+        transport: http(PIMLICO_URL),
+        entryPoint: {
+          address: entryPoint07Address,
+          version: "0.7",
         },
-      },
-    });
+      });
+      if (!request.auth) {
+        logger.error("Unauthenticated request to withdrawToPaymentMethod", {
+          requestAuth: request.auth,
+        });
+        throw new HttpsError(
+          "unauthenticated",
+          "The function must be called by an authenticated user."
+        );
+      }
 
-    // Encode the function call to withdrawToPaymentMethod
-    const withdrawData = encodeFunctionData({
-      abi: paxAccountV1ABI,
-      functionName: "withdrawToPaymentMethod",
-      args: [
-        BigInt(paymentMethodId),
-        amountInWei,
-        currency as Address,
-      ],
-    });
+      const userId = request.auth.uid;
 
-    // Send user operation to call withdrawToPaymentMethod
-    const userOpTxnHash = await smartAccountClient.sendUserOperation({
-      calls: [
-        {
-          to: paxAccountAddress as Address,
-          value: BigInt(0),
-          data: withdrawData,
-        },
-      ],
-    });
+      // Check user's banned status immediately after authentication
+      const auth = getAuth();
+      const userRecord = await auth.getUser(userId);
+      if (userRecord.disabled) {
+        throw new HttpsError("permission-denied", "This user is disabled.");
+      }
 
-    logger.info("User operation submitted", { userOpTxnHash });
+      const {
+        serverWalletId,
+        paxAccountAddress,
+        paymentMethodId, // This is now the contract payment method ID (predefinedId - 1)
+        withdrawalPaymentMethodId, // This is the string ID for the withdrawal record
+        amountRequested,
+        currency,
+        decimals = 18, // Default to 18 decimals (standard for most ERC20 tokens)
+        tokenId, // Add tokenId to the request data
+      } = request.data as {
+        serverWalletId: string;
+        paxAccountAddress: string;
+        paymentMethodId: number; // Changed to number for contract
+        withdrawalPaymentMethodId: string; // Added for withdrawal record
+        amountRequested: string; // Human-readable amount (e.g., "0.5")
+        currency: string; // ERC20 token address
+        decimals?: number; // Token decimals
+        tokenId: number; // Add tokenId to the type
+      };
 
-    // Wait for user operation receipt
-    const userOpReceipt = await smartAccountClient.waitForUserOperationReceipt({
-      hash: userOpTxnHash,
-    });
+      // Validate required parameters
+      if (!serverWalletId) {
+        logger.error(
+          "Missing required parameter: serverWalletId in withdrawToPaymentMethod",
+          { serverWalletId }
+        );
+        throw new HttpsError(
+          "invalid-argument",
+          "Missing required parameter: serverWalletId"
+        );
+      }
 
-      if (!userOpReceipt.success) {
-      logger.error("User operation failed in withdrawToPaymentMethod", { userOpReceipt });
-      throw new HttpsError(
-        "internal",
-        "User operation failed"
-      );
-    }
+      if (!paxAccountAddress) {
+        logger.error(
+          "Missing required parameter: paxAccountAddress in withdrawToPaymentMethod",
+          { paxAccountAddress }
+        );
+        throw new HttpsError(
+          "invalid-argument",
+          "Missing required parameter: paxAccountAddress"
+        );
+      }
 
-    const txnHash = userOpReceipt.userOpHash;
-    logger.info("Transaction confirmed", { txnHash });
+      if (!amountRequested) {
+        logger.error(
+          "Missing required parameter: amountRequested in withdrawToPaymentMethod",
+          { amountRequested }
+        );
+        throw new HttpsError(
+          "invalid-argument",
+          "Missing required parameter: amountRequested"
+        );
+      }
 
-    // Create withdrawal record
-    const withdrawalId = await createWithdrawalRecord({
-      participantId: userId,
-      paymentMethodId: withdrawalPaymentMethodId, // Use the string ID for the withdrawal record
-      amountRequested: parseFloat(amountRequested),
-      rewardCurrencyId: tokenId,
-      txnHash,
-    });
+      if (!currency) {
+        logger.error(
+          "Missing required parameter: currency in withdrawToPaymentMethod",
+          { currency }
+        );
+        throw new HttpsError(
+          "invalid-argument",
+          "Missing required parameter: currency"
+        );
+      }
 
-    // Return the transaction hash and details
-    return {
-      success: true,
-      txnHash,
-      withdrawalId,
-      details: {
+      if (tokenId === undefined) {
+        logger.error(
+          "Missing required parameter: tokenId in withdrawToPaymentMethod",
+          { tokenId }
+        );
+        throw new HttpsError(
+          "invalid-argument",
+          "Missing required parameter: tokenId"
+        );
+      }
+
+      if (!withdrawalPaymentMethodId) {
+        logger.error(
+          "Missing required parameter: withdrawalPaymentMethodId in withdrawToPaymentMethod",
+          { withdrawalPaymentMethodId }
+        );
+        throw new HttpsError(
+          "invalid-argument",
+          "Missing required parameter: withdrawalPaymentMethodId"
+        );
+      }
+
+      // Convert the decimal amount to wei (smallest unit)
+      // Example: 0.5 tokens with 18 decimals = 0.5 * 10^18 = 500000000000000000 wei
+      let amountInWei: bigint;
+      try {
+        // Parse the amount as a floating point number
+        const amountFloat = parseFloat(amountRequested);
+
+        // Convert to wei by multiplying by 10^decimals
+        const multiplier = BigInt(10) ** BigInt(decimals);
+        amountInWei = BigInt(Math.floor(amountFloat * Number(multiplier)));
+
+        // For high precision, we could use a library like bignumber.js instead
+        // This approach may have precision limitations for very small numbers
+      } catch (error) {
+        throw new HttpsError(
+          "invalid-argument",
+          "Invalid amountRequested format. Please provide a valid number."
+        );
+      }
+
+      logger.info("Withdrawing tokens to payment method", {
+        userId,
         paxAccountAddress,
         paymentMethodId,
         amountRequested,
         amountInWei: amountInWei.toString(),
         currency,
+        serverWalletId,
         tokenId,
-      },
-    };
-  } catch (error) {
-    logger.error("Error withdrawing tokens", { error });
+      });
 
-    let errorMessage = "Unknown error occurred";
-    if (error instanceof Error) {
-      errorMessage = error.message;
+      // Get the server wallet from Privy
+      const wallet = await PRIVY_CLIENT.walletApi.getWallet({
+        id: serverWalletId,
+      });
+
+      if (!wallet) {
+        logger.error(
+          "Server wallet not found with the provided ID in withdrawToPaymentMethod",
+          { serverWalletId }
+        );
+        throw new HttpsError(
+          "not-found",
+          "Server wallet not found with the provided ID"
+        );
+      }
+
+      // Create viem account from Privy wallet
+      const serverWalletAccount = await createViemAccount({
+        walletId: wallet.id,
+        address: wallet.address as Address,
+        privy: PRIVY_CLIENT,
+      });
+
+      // Create the Simple smart account
+      const smartAccount = await toSimpleSmartAccount({
+        client: PUBLIC_CLIENT,
+        owner: serverWalletAccount,
+        entryPoint: {
+          address: entryPoint07Address,
+          version: "0.7",
+        },
+      });
+
+      logger.info("Using Smart Account", {
+        address: smartAccount.address,
+      });
+
+      // Create the smart account client
+      const smartAccountClient = createSmartAccountClient({
+        account: smartAccount,
+        chain: celo,
+        bundlerTransport: http(PIMLICO_URL),
+        paymaster: PIMLICO_CLIENT,
+        userOperation: {
+          estimateFeesPerGas: async () => {
+            return (await PIMLICO_CLIENT.getUserOperationGasPrice()).fast;
+          },
+        },
+      });
+
+      // Encode the function call to withdrawToPaymentMethod
+      const withdrawData = encodeFunctionData({
+        abi: paxAccountV1ABI,
+        functionName: "withdrawToPaymentMethod",
+        args: [BigInt(paymentMethodId), amountInWei, currency as Address],
+      });
+
+      // Send user operation to call withdrawToPaymentMethod
+      const userOpTxnHash = await smartAccountClient.sendUserOperation({
+        calls: [
+          {
+            to: paxAccountAddress as Address,
+            value: BigInt(0),
+            data: withdrawData,
+          },
+        ],
+      });
+
+      logger.info("User operation submitted", { userOpTxnHash });
+
+      // Wait for user operation receipt
+      const userOpReceipt =
+        await smartAccountClient.waitForUserOperationReceipt({
+          hash: userOpTxnHash,
+        });
+
+      if (!userOpReceipt.success) {
+        logger.error("User operation failed in withdrawToPaymentMethod", {
+          userOpReceipt,
+        });
+        throw new HttpsError("internal", "User operation failed");
+      }
+
+      const txnHash = userOpReceipt.userOpHash;
+      logger.info("Transaction confirmed", { txnHash });
+
+      // Create withdrawal record
+      const withdrawalId = await createWithdrawalRecord({
+        participantId: userId,
+        paymentMethodId: withdrawalPaymentMethodId, // Use the string ID for the withdrawal record
+        amountRequested: parseFloat(amountRequested),
+        rewardCurrencyId: tokenId,
+        txnHash,
+      });
+
+      // Return the transaction hash and details
+      return {
+        success: true,
+        txnHash,
+        withdrawalId,
+        details: {
+          paxAccountAddress,
+          paymentMethodId,
+          amountRequested,
+          amountInWei: amountInWei.toString(),
+          currency,
+          tokenId,
+        },
+      };
+    } catch (error) {
+      logger.error("Error withdrawing tokens", { error });
+
+      let errorMessage = "Unknown error occurred";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      throw new HttpsError(
+        "internal",
+        `Failed to withdraw tokens: ${errorMessage}`
+      );
     }
-
-    throw new HttpsError(
-      "internal",
-      `Failed to withdraw tokens: ${errorMessage}`
-    );
   }
-});
+);

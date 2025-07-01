@@ -34,7 +34,9 @@ export const processAchievementClaim = onCall(
 
       // Ensure the user is authenticated
       if (!request.auth) {
-        logger.error("Unauthenticated request to processAchievementClaim", { requestAuth: request.auth });
+        logger.error("Unauthenticated request to processAchievementClaim", {
+          requestAuth: request.auth,
+        });
         throw new HttpsError(
           "unauthenticated",
           "The function must be called by an authenticated user."
@@ -43,13 +45,10 @@ export const processAchievementClaim = onCall(
 
       const userId = request.auth.uid;
       // Check if the user is disabled
-      const { getAuth } = await import('firebase-admin/auth');
+      const { getAuth } = await import("firebase-admin/auth");
       const userRecord = await getAuth().getUser(userId);
       if (userRecord.disabled) {
-        throw new HttpsError(
-          "permission-denied",
-          "This user is disabled."
-        );
+        throw new HttpsError("permission-denied", "This user is disabled.");
       }
 
       logger.info("Processing achievement claim for user:", {
@@ -86,7 +85,7 @@ export const processAchievementClaim = onCall(
           achievementId,
           paxAccountContractAddress,
           amountEarned,
-          tasksCompleted
+          tasksCompleted,
         });
         throw new HttpsError(
           "invalid-argument",
@@ -96,22 +95,24 @@ export const processAchievementClaim = onCall(
 
       // Check if the achievement exists and if it has already been claimed
       const firestore = DB();
-      const achievementDoc = await firestore.collection("achievements").doc(achievementId).get();
-      
+      const achievementDoc = await firestore
+        .collection("achievements")
+        .doc(achievementId)
+        .get();
+
       if (!achievementDoc.exists) {
-        logger.error("Achievement not found in processAchievementClaim", { achievementId });
-        throw new HttpsError(
-          "not-found",
-          "Achievement not found."
-        );
+        logger.error("Achievement not found in processAchievementClaim", {
+          achievementId,
+        });
+        throw new HttpsError("not-found", "Achievement not found.");
       }
 
       const achievementData = achievementDoc.data();
       if (achievementData?.txnHash && achievementData?.timeClaimed) {
-        logger.error("Achievement already claimed in processAchievementClaim", { 
-          achievementId, 
+        logger.error("Achievement already claimed in processAchievementClaim", {
+          achievementId,
           txnHash: achievementData.txnHash,
-          timeClaimed: achievementData.timeClaimed 
+          timeClaimed: achievementData.timeClaimed,
         });
         throw new HttpsError(
           "already-exists",
@@ -201,7 +202,9 @@ export const processAchievementClaim = onCall(
         });
 
       if (!userOpReceipt.success) {
-        logger.error("User operation failed in processAchievementClaim", { userOpReceipt });
+        logger.error("User operation failed in processAchievementClaim", {
+          userOpReceipt,
+        });
         throw new HttpsError(
           "internal",
           `User operation failed: ${JSON.stringify(userOpReceipt)}`
