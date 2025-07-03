@@ -149,10 +149,11 @@ class OnboardingViewModel extends Notifier<OnboardingModel> {
   }
 
   void resetOnboarding() {
-    // Jump to the first page without animation
-    state.pageController.jumpToPage(0);
-
-    // Update the state
+    // Only jump if the controller is attached
+    if (state.pageController.hasClients) {
+      state.pageController.jumpToPage(0);
+    }
+    // Update the state regardless
     state = state.copyWith(currentPageIndex: 0);
   }
 }

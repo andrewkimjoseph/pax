@@ -70,12 +70,15 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                   ),
                 ).withPadding(bottom: 8),
 
-                GestureDetector(
-                  onTap: () {},
-                  child: SvgPicture.asset(
-                    'lib/assets/svgs/arrow_icon.svg',
-                    // height: 16,
-                    // width: 16,
+                Visibility(
+                  visible: false,
+                  child: GestureDetector(
+                    onTap: () {},
+                    child: SvgPicture.asset(
+                      'lib/assets/svgs/arrow_icon.svg',
+                      // height: 16,
+                      // width: 16,
+                    ),
                   ),
                 ),
               ],

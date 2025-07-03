@@ -154,71 +154,33 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                                   ? null
                                   : () async {
                                     // Handle Google sign in
-                                    final analytics = ref.read(
-                                      analyticsProvider,
+                                    ref
+                                        .read(analyticsProvider)
+                                        .signInWithGoogleTapped();
+
+                                    // try {
+                                    await ref
+                                        .read(authProvider.notifier)
+                                        .signInWithGoogle();
+
+                                    if (!context.mounted) return;
+
+                                    final latestAuthState = ref.read(
+                                      authProvider,
                                     );
-                                    final authNotifier = ref.read(
-                                      authProvider.notifier,
-                                    );
 
-                                    analytics.signInWithGoogleTapped();
+                                    if (latestAuthState.state ==
+                                        AuthState.authenticated) {
+                                      showSuccessToast(context);
+                                      return;
+                                    }
 
-                                    try {
-                                      await authNotifier.signInWithGoogle();
-
-                                      if (!context.mounted) return;
-
-                                      final currentAuthState =
-                                          ref.read(authProvider).state;
-
-                                      if (currentAuthState ==
-                                              AuthState.unauthenticated ||
-                                          currentAuthState == AuthState.error) {
-                                        showErrorToast(context);
-                                        return;
-                                      }
-
-                                      if (currentAuthState ==
-                                          AuthState.authenticated) {
-                                        final user =
-                                            ref.read(authProvider).user;
-                                        analytics.signInWithGoogleComplete(
-                                          user.toMap(),
-                                        );
-                                        showSuccessToast(context);
-
-                                        // Reset onboarding state
-                                        ref
-                                            .read(
-                                              onboardingViewModelProvider
-                                                  .notifier,
-                                            )
-                                            .resetOnboarding();
-                                      }
-                                    } catch (error) {
-                                      analytics.signInWithGoogleFailed({
-                                        "error": error.toString().substring(
-                                          0,
-                                          error.toString().length.clamp(0, 99),
-                                        ),
-                                      });
-
-                                      if (!context.mounted) return;
-
-                                      showToast(
-                                        context: context,
-                                        location: ToastLocation.topCenter,
-                                        builder:
-                                            (context, overlay) => Toast(
-                                              leadingIcon:
-                                                  FontAwesomeIcons.google,
-                                              toastColor: PaxColors.red,
-                                              text: 'Google signin failed',
-                                              trailingIcon:
-                                                  FontAwesomeIcons
-                                                      .triangleExclamation,
-                                            ),
-                                      );
+                                    if (latestAuthState.state ==
+                                            AuthState.unauthenticated ||
+                                        latestAuthState.state ==
+                                            AuthState.error) {
+                                      showErrorToast(context);
+                                      return;
                                     }
                                   },
                           child:
@@ -323,7 +285,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
 
   void showSuccessToast(BuildContext toastContext) {
     showToast(
-      context: context,
+      context: toastContext,
       location: ToastLocation.topCenter,
       builder:
           (context, overlay) => Toast(

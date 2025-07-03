@@ -38,14 +38,6 @@ class _AccountViewState extends ConsumerState<AccountView> {
     final tasksCount = ref.watch(totalTaskCompletionsProvider);
     final totalGoodDollars = ref.watch(totalGoodDollarTokensEarnedProvider);
 
-    // final version = ref
-    //     .watch(appVersionConfigProvider)
-    //     .when(
-    //       data: (data) => data.currentVersion,
-    //       loading: () => '...',
-    //       error: (_, __) => '...',
-    //     );
-
     return Scaffold(
       headers: [
         AppBar(

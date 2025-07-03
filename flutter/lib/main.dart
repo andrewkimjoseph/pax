@@ -22,8 +22,17 @@ import 'package:pax/widgets/update_dialog.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent, // Draw behind status bar
+      statusBarIconBrightness:
+          Brightness.dark, // Use dark icons for light backgrounds
+      statusBarBrightness: Brightness.light, // For iOS
+      systemNavigationBarColor: Colors.white, // Or your app's nav bar color
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
   await AppInitializer().initialize();
   runApp(ProviderScope(child: App()));
 }
