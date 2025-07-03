@@ -195,7 +195,10 @@ class AuthNotifier extends Notifier<AuthStateModel> {
         ref.read(analyticsProvider).signInWithGoogleComplete(user.toMap());
       } else {
         // User cancelled the sign-in flow
-        state = state.copyWith(state: AuthState.unauthenticated);
+        state = state.copyWith(
+          state: AuthState.unauthenticated,
+          errorMessage: 'User cancelled the sign-in flow',
+        );
 
         await ref.read(analyticsProvider).signInWithGoogleFailed({
           "error": "User cancelled the sign-in flow",

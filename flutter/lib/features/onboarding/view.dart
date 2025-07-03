@@ -171,7 +171,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
 
                                     if (latestAuthState.state ==
                                         AuthState.authenticated) {
-                                      showSuccessToast(context);
+                                      showAuthToast(context, isSuccess: true);
                                       return;
                                     }
 
@@ -179,7 +179,11 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                                             AuthState.unauthenticated ||
                                         latestAuthState.state ==
                                             AuthState.error) {
-                                      showErrorToast(context);
+                                      showAuthToast(
+                                        context,
+                                        isSuccess: false,
+                                        message: latestAuthState.errorMessage,
+                                      );
                                       return;
                                     }
                                   },
@@ -269,30 +273,24 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
     );
   }
 
-  void showErrorToast(BuildContext toastContext) {
+  void showAuthToast(
+    BuildContext toastContext, {
+    required bool isSuccess,
+    String? message,
+  }) {
     showToast(
       context: toastContext,
       location: ToastLocation.topCenter,
       builder:
           (context, overlay) => Toast(
             leadingIcon: FontAwesomeIcons.google,
-            toastColor: PaxColors.red,
-            text: 'Sign-in failed',
-            trailingIcon: FontAwesomeIcons.triangleExclamation,
-          ),
-    );
-  }
-
-  void showSuccessToast(BuildContext toastContext) {
-    showToast(
-      context: toastContext,
-      location: ToastLocation.topCenter,
-      builder:
-          (context, overlay) => Toast(
-            leadingIcon: FontAwesomeIcons.google,
-            toastColor: PaxColors.green,
-            text: 'Sign-in complete',
-            trailingIcon: FontAwesomeIcons.solidCircleCheck,
+            toastColor: isSuccess ? PaxColors.green : PaxColors.red,
+            text:
+                message ?? (isSuccess ? 'Sign-in complete' : 'Sign-in failed'),
+            trailingIcon:
+                isSuccess
+                    ? FontAwesomeIcons.circleCheck
+                    : FontAwesomeIcons.circleXmark,
           ),
     );
   }
