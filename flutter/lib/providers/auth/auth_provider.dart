@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pax/features/onboarding/view_model.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/models/auth/auth_user_model.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/db/achievement/achievement_provider.dart';
+import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/providers/route/home_selected_index_provider.dart';
 import 'package:pax/providers/route/root_selected_index_provider.dart';
 import 'package:pax/repositories/auth/auth_repository.dart';
@@ -187,9 +189,17 @@ class AuthNotifier extends Notifier<AuthStateModel> {
         _consecutiveValidationFailures = 0;
 
         ref.read(analyticsProvider).setUserId(user.uid);
+
+        ref.read(onboardingViewModelProvider.notifier).resetOnboarding();
+
+        ref.read(analyticsProvider).signInWithGoogleComplete(user.toMap());
       } else {
         // User cancelled the sign-in flow
         state = state.copyWith(state: AuthState.unauthenticated);
+
+        await ref.read(analyticsProvider).signInWithGoogleFailed({
+          "error": "User cancelled the sign-in flow",
+        });
       }
     } catch (e) {
       // Handle error
@@ -197,6 +207,10 @@ class AuthNotifier extends Notifier<AuthStateModel> {
         state: AuthState.error,
         errorMessage: e.toString(),
       );
+
+      await ref.read(analyticsProvider).signInWithGoogleFailed({
+        "error": e.toString().substring(0, e.toString().length.clamp(0, 99)),
+      });
     }
   }
 
@@ -208,7 +222,8 @@ class AuthNotifier extends Notifier<AuthStateModel> {
       ref.read(homeSelectedIndexProvider.notifier).reset();
       ref.read(rootSelectedIndexProvider.notifier).reset();
       ref.invalidate(achievementsProvider);
-      ref.read(analyticsProvider).resetUser();
+      ref.read(activityNotifierProvider.notifier).clearActivities();
+      await ref.read(analyticsProvider).resetUser();
 
       state = state.copyWith(
         user: AuthUser.empty(),

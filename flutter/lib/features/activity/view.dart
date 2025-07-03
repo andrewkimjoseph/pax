@@ -41,8 +41,9 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
     // Get the userId
     final userId = ref.watch(authProvider).user.uid;
 
-    // Watch for activities based on the current filter
-    final filteredActivitiesAsync = ref.watch(filteredActivitiesProvider);
+    // Get the current filter type
+    final activityState = ref.watch(activityNotifierProvider);
+    final filterType = activityState.filterType;
     // Watch for all activities (unfiltered)
     final allActivitiesAsync = ref.watch(allActivitiesProvider(userId));
     // Watch feature flags
@@ -204,64 +205,49 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
           if (selectedIndex == 0 && !showTaskCompletions) {
             return const SizedBox.shrink();
           }
-          return filteredActivitiesAsync.when(
-            skipLoadingOnRefresh: false,
-            data: (activities) {
-              return allActivitiesAsync.when(
-                data: (allActivities) {
-                  return SingleChildScrollView(
-                    child: Builder(
-                      builder: (context) {
-                        if (activities.isEmpty) {
-                          return SizedBox(
-                            height:
-                                MediaQuery.of(context).size.height /
-                                2, // Account for header height
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    selectedIndex == 0
-                                        ? 'No task completions'
-                                        : selectedIndex == 1
-                                        ? 'No rewards'
-                                        : 'No withdrawals',
-                                    style: TextStyle(color: PaxColors.darkGrey),
-                                  ),
-                                ],
+          return allActivitiesAsync.when(
+            data: (allActivities) {
+              final filteredActivities = filterActivities(
+                allActivities,
+                filterType,
+              );
+              return SingleChildScrollView(
+                child: Builder(
+                  builder: (context) {
+                    if (filteredActivities.isEmpty) {
+                      return SizedBox(
+                        height:
+                            MediaQuery.of(context).size.height /
+                            2, // Account for header height
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                selectedIndex == 0
+                                    ? 'No task completions'
+                                    : selectedIndex == 1
+                                    ? 'No rewards'
+                                    : 'No withdrawals',
+                                style: TextStyle(color: PaxColors.darkGrey),
                               ),
-                            ),
-                          );
-                        }
-                        return Column(
-                          children: [
-                            for (var activity in activities)
-                              ActivityCard(
-                                activity,
-                                allActivities: allActivities,
-                              ).withPadding(all: 8),
-                          ],
-                        );
-                      },
-                    ),
-                  );
-                },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error:
-                    (error, stackTrace) => Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Error loading all activities',
-                            style: TextStyle(color: PaxColors.darkGrey),
+                            ],
                           ),
-                          SizedBox(height: 8),
-                        ],
-                      ),
-                    ),
+                        ),
+                      );
+                    }
+                    return Column(
+                      children: [
+                        for (var activity in filteredActivities)
+                          ActivityCard(
+                            activity,
+                            allActivities: allActivities,
+                          ).withPadding(all: 8),
+                      ],
+                    );
+                  },
+                ),
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),

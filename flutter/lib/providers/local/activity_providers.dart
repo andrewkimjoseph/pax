@@ -1,5 +1,4 @@
 // lib/providers/activity/activity_provider.dart
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/models/local/activity_model.dart';
 import 'package:pax/repositories/firestore/reward/reward_repository.dart';
@@ -137,6 +136,11 @@ class ActivityNotifier extends Notifier<ActivityState> {
       );
     }
   }
+
+  // Clear activities
+  void clearActivities() {
+    state = state.copyWith(activities: []);
+  }
 }
 
 // Provider for ActivityNotifier
@@ -144,41 +148,6 @@ final activityNotifierProvider =
     NotifierProvider<ActivityNotifier, ActivityState>(() {
       return ActivityNotifier();
     });
-
-// UPDATED: Provider for filtered activities based on the current filter
-final filteredActivitiesProvider = Provider<AsyncValue<List<Activity>>>((ref) {
-  final activityState = ref.watch(activityNotifierProvider);
-  final filterType = activityState.filterType;
-  final userId = ref.watch(authProvider).user.uid;
-
-  if (kDebugMode) {
-    print("Current filter type: $filterType");
-  }
-
-  // Use specific activity providers based on filter type
-  switch (filterType) {
-    case ActivityType.taskCompletion:
-      if (kDebugMode) {
-        print("Using task completion provider");
-      }
-      return ref.watch(taskCompletionActivitiesProvider(userId));
-    case ActivityType.reward:
-      if (kDebugMode) {
-        print("Using reward provider");
-      }
-      return ref.watch(rewardActivitiesProvider(userId));
-    case ActivityType.withdrawal:
-      if (kDebugMode) {
-        print("Using withdrawal provider");
-      }
-      return ref.watch(withdrawalActivitiesProvider(userId));
-    case null:
-      if (kDebugMode) {
-        print("No filter type set, using all activities provider");
-      }
-      return ref.watch(allActivitiesProvider(userId));
-  }
-});
 
 // Provider for total number of Task Completions
 final totalTaskCompletionsProvider = Provider<AsyncValue<int>>((ref) {
@@ -226,3 +195,16 @@ final totalGoodDollarTokensEarnedProvider = Provider<AsyncValue<double>>((ref) {
     error: (error, stackTrace) => AsyncValue.error(error, stackTrace),
   );
 });
+
+// --- Helper function for filtering activities by type ---
+List<Activity> filterActivities(
+  List<Activity> activities,
+  ActivityType? filterType,
+) {
+  if (filterType == null) return activities;
+  return activities.where((activity) => activity.type == filterType).toList();
+}
+
+//
+// Usage: In your UI, get all activities (e.g., from allActivitiesProvider or ActivityNotifier),
+// then call filterActivities(activities, filterType) to get the filtered list.
