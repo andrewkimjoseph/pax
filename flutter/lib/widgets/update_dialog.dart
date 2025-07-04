@@ -39,69 +39,72 @@ class UpdateDialog extends ConsumerWidget {
 
             if (!needsUpdate) return const SizedBox.shrink();
 
-            return Stack(
-              children: [
-                const ModalBarrier(
-                  dismissible: false,
-                  color: PaxColors.semiBlack,
-                ),
-                Container(
-                  padding: EdgeInsets.all(28),
-                  child: AlertDialog(
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SvgPicture.asset(
-                          'lib/assets/svgs/canvassing.svg',
-                          height: 48,
-                        ).withPadding(bottom: 16),
-                        const Text(
-                          'Update Required',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ).withPadding(bottom: 16),
-                        Text(
-                          config.updateMessage,
-                          style: const TextStyle(fontSize: 16),
-                          textAlign: TextAlign.center,
-                        ).withPadding(bottom: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const FaIcon(
-                              FontAwesomeIcons.circleArrowRight,
-                              size: 16,
-                            ).withPadding(right: 8),
-                            Text(
-                              '(v${config.minimumVersion})',
-                              style: const TextStyle(fontSize: 16),
-                              textAlign: TextAlign.center,
+            return PopScope(
+              canPop: false,
+              child: Stack(
+                children: [
+                  const ModalBarrier(
+                    dismissible: false,
+                    color: PaxColors.semiBlack,
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(28),
+                    child: AlertDialog(
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SvgPicture.asset(
+                            'lib/assets/svgs/canvassing.svg',
+                            height: 48,
+                          ).withPadding(bottom: 16),
+                          const Text(
+                            'Update Required',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
-                        ).withPadding(top: 12, bottom: 24),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width / 2.5,
-                          child: PrimaryButton(
-                            onPressed: () async {
-                              ref.read(analyticsProvider).updateNowTapped();
-                              final url = Uri.parse(config.updateUrl);
-                              if (await canLaunchUrl(url)) {
-                                await launchUrl(url);
-                              }
-                            },
-                            child: const Text('Update Now'),
+                            textAlign: TextAlign.center,
+                          ).withPadding(bottom: 16),
+                          Text(
+                            config.updateMessage,
+                            style: const TextStyle(fontSize: 16),
+                            textAlign: TextAlign.center,
+                          ).withPadding(bottom: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const FaIcon(
+                                FontAwesomeIcons.circleArrowRight,
+                                size: 16,
+                              ).withPadding(right: 8),
+                              Text(
+                                '(v${config.minimumVersion})',
+                                style: const TextStyle(fontSize: 16),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ).withPadding(top: 12, bottom: 24),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width / 2.5,
+                            child: PrimaryButton(
+                              onPressed: () async {
+                                ref.read(analyticsProvider).updateNowTapped();
+                                final url = Uri.parse(config.updateUrl);
+                                if (await canLaunchUrl(url)) {
+                                  await launchUrl(url);
+                                }
+                              },
+                              child: const Text('Update Now'),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ).withAlign(Alignment.center),
-                ),
-              ],
+                        ],
+                      ),
+                    ).withAlign(Alignment.center),
+                  ),
+                ],
+              ),
             );
           },
         );

@@ -35,47 +35,53 @@ class MaintenanceDialog extends ConsumerWidget {
           print('MaintenanceDialog - Showing maintenance dialog');
         }
 
-        return Stack(
-          children: [
-            const ModalBarrier(dismissible: false, color: PaxColors.semiBlack),
-            Container(
-              padding: EdgeInsets.all(28),
-              child: AlertDialog(
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SvgPicture.asset(
-                      'lib/assets/svgs/canvassing.svg',
-                      height: 48,
-                    ).withPadding(bottom: 16),
-                    const Text(
-                      'Under Maintenance',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+        return PopScope(
+          canPop: false,
+          child: Stack(
+            children: [
+              const ModalBarrier(
+                dismissible: false,
+                color: PaxColors.semiBlack,
+              ),
+              Container(
+                padding: EdgeInsets.all(28),
+                child: AlertDialog(
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        'lib/assets/svgs/canvassing.svg',
+                        height: 48,
+                      ).withPadding(bottom: 16),
+                      const Text(
+                        'Under Maintenance',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ).withPadding(bottom: 16),
+                      Text(
+                        config.message,
+                        style: const TextStyle(fontSize: 16),
+                        textAlign: TextAlign.center,
+                      ).withPadding(bottom: 24),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width / 2.5,
+                        child: PrimaryButton(
+                          onPressed: () {
+                            ref.read(analyticsProvider).okMaintenanceTapped();
+                          },
+                          child: const Text('OK'),
+                        ),
                       ),
-                      textAlign: TextAlign.center,
-                    ).withPadding(bottom: 16),
-                    Text(
-                      config.message,
-                      style: const TextStyle(fontSize: 16),
-                      textAlign: TextAlign.center,
-                    ).withPadding(bottom: 24),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width / 2.5,
-                      child: PrimaryButton(
-                        onPressed: () {
-                          ref.read(analyticsProvider).okMaintenanceTapped();
-                        },
-                        child: const Text('OK'),
-                      ),
-                    ),
-                  ],
-                ),
-              ).withAlign(Alignment.center),
-            ),
-          ],
+                    ],
+                  ),
+                ).withAlign(Alignment.center),
+              ),
+            ],
+          ),
         );
       },
       loading: () {
