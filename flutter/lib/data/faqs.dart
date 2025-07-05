@@ -49,7 +49,7 @@ class FAQs {
       question:
           "I keep getting a message that I have been banned from the platform. What does this mean?",
       answer:
-          "This means that you have been banned from the platform. You will not be able to complete any tasks and you will not be able to withdraw your funds. Contact support if you think this is a mistake.",
+          "This means that your account has been disabled. You will not be able to complete any tasks and you will not be able to withdraw your funds. Contact support if you think this is a mistake.",
     ),
   ];
 }

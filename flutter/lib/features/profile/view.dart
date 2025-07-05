@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart' show InkWell;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
@@ -8,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
+import 'package:pax/widgets/custom_avatar.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import '../../theming/colors.dart' show PaxColors;
@@ -228,26 +228,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                     width: 2.5,
                                   ),
                                 ),
-                                child: Avatar(
-                                  size: 70,
-                                  initials: Avatar.getInitials(
-                                    participant?.displayName
-                                            ?.split(" ")
-                                            .first ??
-                                        "Participant",
-                                  ),
-                                  provider:
-                                      participant != null &&
-                                              participant.profilePictureURI !=
-                                                  null &&
-                                              participant
-                                                  .profilePictureURI!
-                                                  .isNotEmpty
-                                          ? CachedNetworkImageProvider(
-                                            participant.profilePictureURI!,
-                                          )
-                                          : null,
-                                ),
+                                child: CustomAvatar(size: 70),
                               ),
                             ],
                           ).withPadding(bottom: 16, top: 12),

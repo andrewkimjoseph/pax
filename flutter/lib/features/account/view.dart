@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart' show Divider, InkWell;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -8,6 +7,7 @@ import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/utils/token_balance_util.dart';
 import 'package:pax/widgets/account/account_option_card.dart';
+import 'package:pax/widgets/custom_avatar.dart';
 import 'package:pax/widgets/logout/logout_drawer.dart';
 import 'package:pax/widgets/toast.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
@@ -210,20 +210,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
                             width: 2.5,
                           ),
                         ),
-                        child: Avatar(
-                          initials: Avatar.getInitials(
-                            participant?.displayName?.split(" ").first ??
-                                "Participant",
-                          ),
-                          provider:
-                              participant != null &&
-                                      participant.profilePictureURI != null &&
-                                      participant.profilePictureURI!.isNotEmpty
-                                  ? CachedNetworkImageProvider(
-                                    participant.profilePictureURI!,
-                                  )
-                                  : null,
-                        ),
+                        child: CustomAvatar(),
                       ).withPadding(right: 8),
                       Expanded(
                         child: Column(
