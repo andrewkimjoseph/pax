@@ -316,6 +316,8 @@ class _AccountViewState extends ConsumerState<AccountView> {
           onLogoutConfirmed: () async {
             showSuccessToast(rootContext);
             await Future.delayed(const Duration(milliseconds: 2000));
+
+            if (!mounted) return;
             await ref.read(authProvider.notifier).signOut();
             ref.read(analyticsProvider).logoutComplete();
           },
