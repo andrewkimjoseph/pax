@@ -69,6 +69,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
       "amount": amountToWithdraw,
       "tokenId": tokenId,
       "selectedPaymentMethodId": paymentMethod.id,
+      "selectedWalletAddress": paymentMethod.walletAddress,
     });
 
     ref
@@ -79,6 +80,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
           tokenId: tokenId,
           currencyAddress: currencyAddress,
           decimals: decimals,
+          selectedWalletAddress: paymentMethod.walletAddress,
         );
 
     // Show processing dialog

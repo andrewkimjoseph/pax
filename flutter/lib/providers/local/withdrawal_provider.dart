@@ -29,6 +29,7 @@ class WithdrawNotifier extends Notifier<WithdrawStateModel> {
     required double amountToWithdraw,
     required int tokenId,
     required String currencyAddress,
+    required String selectedWalletAddress,
     int decimals = 18,
   }) async {
     if (state.isSubmitting) return; // Prevent multiple submissions
@@ -98,6 +99,7 @@ class WithdrawNotifier extends Notifier<WithdrawStateModel> {
         "selectedPaymentMethodId": paymentMethodId,
         "contractAddress": paxAccount.contractAddress,
         "currencyAddress": currencyAddress,
+        "selectedWalletAddress": selectedWalletAddress,
       });
 
       // Send notification about successful withdrawal
