@@ -268,6 +268,7 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
       });
 
       // Show success dialog
+      if (!mounted) return;
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -355,6 +356,7 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
         'error': e.toString(),
       });
       // Show error dialog
+      if (!mounted) return;
       showDialog(
         context: context,
         builder:
