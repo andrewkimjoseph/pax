@@ -8,3 +8,4 @@ export { deleteParticipantOnRequest } from './deleteParticipantOnRequest';
 export { sendNotification } from './sendNotification';
 export { processAchievementClaim } from './processAchievementClaim';
 export { restrictSignInDuringTheNight } from './restrictSignInDuringTheNight';
+export { notifyPaxTotifierAboutNewUser } from './notifyPaxTotifierAboutNewUser';

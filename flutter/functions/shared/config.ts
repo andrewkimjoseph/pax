@@ -14,6 +14,8 @@ export const PIMLICO_API_KEY = process.env.PIMLICO_API_KEY || '';
 export const DRPC_API_KEY = process.env.DRPC_API_KEY || '';
 export const PAX_MASTER = `0x${process.env.PAX_MASTER}` as Address;
 export const PAXACCOUNT_IMPLEMENTATION_ADDRESS = process.env.PAXACCOUNT_IMPLEMENTATION_ADDRESS as Address;
+export const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
+export const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '';
 
 
 export const FUNCTION_RUNTIME_OPTS: CallableOptions = {
