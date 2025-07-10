@@ -133,12 +133,6 @@ class AchievementRepository {
 
       final txnHash = result.data['txnHash'] as String;
 
-      // Update the achievement with the transaction hash
-      await _firestore.collection(collectionName).doc(achievementId).update({
-        'txnHash': txnHash,
-        'timeClaimed': Timestamp.now(),
-      });
-
       return txnHash;
     } catch (e) {
       if (kDebugMode) {

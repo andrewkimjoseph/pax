@@ -49,6 +49,16 @@ class AchievementNotifier extends Notifier<AchievementStateModel> {
   Future<void> claimAchievement({required Achievement achievement}) async {
     if (state.isClaiming(achievement.id)) return;
 
+    // Additional check: if achievement is already claimed, don't proceed
+    if (achievement.status == AchievementStatus.claimed) {
+      if (kDebugMode) {
+        print(
+          'Achievement ${achievement.id} is already claimed, skipping claim process',
+        );
+      }
+      return;
+    }
+
     // Set claiming state for this specific achievement
     final updatedClaimingStates = Map<String, bool>.from(state.claimingStates);
     updatedClaimingStates[achievement.id] = true;
