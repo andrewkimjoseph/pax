@@ -2,7 +2,7 @@
 import { logger } from "firebase-functions/v2";
 import { FieldValue } from "firebase-admin/firestore";
 
-import { DB } from "../../shared/config";
+import { DB } from "../../utils/config";
 
 /**
  * Function to update a reward record with a transaction hash

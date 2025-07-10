@@ -3,7 +3,7 @@ import { logger } from "firebase-functions/v2";
 import { Hex } from "viem";
 import { FieldValue } from "firebase-admin/firestore";
 
-import { DB } from "../../shared/config";
+import { DB } from "../../utils/config";
 
 // Create reward record interface
 interface RewardParams {

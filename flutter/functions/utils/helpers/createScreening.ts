@@ -4,7 +4,7 @@ import { FieldValue } from "firebase-admin/firestore";
 
 import {
   DB
-} from "../../shared/config";
+} from "../../utils/config";
 
 // Create screening record interface
 interface ScreeningParams {

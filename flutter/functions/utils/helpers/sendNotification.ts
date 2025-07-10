@@ -1,6 +1,6 @@
 // src/utils/sendNotification.ts
 import { logger } from "firebase-functions/v2";
-import { MESSAGING, DB } from "../../shared/config";
+import { MESSAGING, DB } from "../../utils/config";
 
 /**
  * Send an FCM notification to a participant

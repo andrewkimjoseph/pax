@@ -7,7 +7,7 @@ import {
 import { celo } from "viem/chains";
 import { createViemAccount } from "@privy-io/server-auth/viem";
 import { randomBytes } from "crypto";
-import { PRIVY_CLIENT } from "../../shared/config";
+import { PRIVY_CLIENT } from "../../utils/config";
 
 // Generate a random nonce for signatures
 export function generateRandomNonce(): bigint {
