@@ -1,6 +1,8 @@
-import { beforeUserSignedIn } from "firebase-functions/v2/identity";
+import { beforeUserCreated } from "firebase-functions/v2/identity";
 import { logger } from "firebase-functions/v2";
-import { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } from "../../shared/config";
+import { TELEGRAM_CHAT_ID } from "../../utils/config";
+import { sendTelegramMessage } from "../../utils/helpers/sendTelegramMessage";
+import { checkIfParticipantExistsInAuth } from "../../utils/helpers/checkIfParticipantExistsInAuth";
 
 interface TelegramMessage {
   chat_id: string;
@@ -8,56 +10,9 @@ interface TelegramMessage {
   parse_mode?: string;
 }
 
-async function sendTelegramMessage(message: TelegramMessage): Promise<void> {
-  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-    logger.warn("Telegram bot token or chat ID not configured", {
-      hasBotToken: !!TELEGRAM_BOT_TOKEN,
-      hasChatId: !!TELEGRAM_CHAT_ID,
-    });
-    return;
-  }
-
+export const notifyPaxTotifierAboutNewUser = beforeUserCreated(async (event) => {
   try {
-    logger.info("Sending Telegram message", {
-      chatId: TELEGRAM_CHAT_ID,
-      messageLength: message.text.length,
-    });
-
-    const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(message),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      logger.error('Telegram API error', {
-        status: response.status,
-        statusText: response.statusText,
-        errorData,
-      });
-      throw new Error(`Telegram API error: ${response.status} ${response.statusText}`);
-    }
-
-    const result = await response.json();
-    logger.info('Telegram message sent successfully', {
-      messageId: result.result?.message_id,
-      chatId: result.result?.chat?.id,
-    });
-  } catch (error) {
-    logger.error('Failed to send Telegram message', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined,
-    });
-    throw error;
-  }
-}
-
-export const notifyPaxTotifierAboutNewUser = beforeUserSignedIn(async (event) => {
-  try {
-    logger.info("notifyPaxTotifierAboutNewUser triggered", {
+    logger.info("notifyPaxTotifierAboutNewUser triggered for new user creation", {
       eventId: event.eventId,
       eventType: event.eventType,
     });
@@ -68,6 +23,15 @@ export const notifyPaxTotifierAboutNewUser = beforeUserSignedIn(async (event) =>
       logger.warn("No user data in event", {
         eventId: event.eventId,
         eventType: event.eventType,
+      });
+      return;
+    }
+
+    // Check if user already exists in Firestore
+    const userExists = await checkIfParticipantExistsInAuth(user.uid);
+    if (userExists) {
+      logger.info("User already exists in Firestore, skipping notification", {
+        userId: user.uid,
       });
       return;
     }
