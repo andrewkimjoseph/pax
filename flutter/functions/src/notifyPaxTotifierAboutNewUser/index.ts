@@ -27,10 +27,10 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(async (event) => 
       return;
     }
 
-    // Check if user already exists in Firestore
+    // Check if user already exists in Auth
     const userExists = await checkIfParticipantExistsInAuth(user.uid);
     if (userExists) {
-      logger.info("User already exists in Firestore, skipping notification", {
+      logger.info("User already exists in Auth, skipping notification", {
         userId: user.uid,
       });
       return;
@@ -41,7 +41,7 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(async (event) => 
       email: user.email,
       displayName: user.displayName,
       phoneNumber: user.phoneNumber,
-      providerCount: user.providerData?.length || 0,
+      photoURL: user.photoURL,
     });
     
     // Create notification message
@@ -51,9 +51,9 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(async (event) => 
             `*User ID:* \`${user.uid}\`\n` +
             `*Email:* ${user.email || 'Not provided'}\n` +
             `*Display Name:* ${user.displayName || 'Not provided'}\n` +
-            `*Phone:* ${user.phoneNumber || 'Not provided'}\n` +
-            `*Created At:* ${new Date().toLocaleString()}\n` +
-            `*Provider:* ${user.providerData?.map((p: any) => p.providerId).join(', ') || 'Unknown'}`,
+            `*Photo URL:* ${user.photoURL || 'Not provided'}\n` +
+            `*Created At (Kenya):* ${new Date().toLocaleString('en-US', { timeZone: 'Africa/Nairobi' })}\n` +
+            `*Created At (Server):* ${new Date().toLocaleString()}`,
       parse_mode: 'Markdown'
     };
 
