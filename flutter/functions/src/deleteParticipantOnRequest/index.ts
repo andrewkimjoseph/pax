@@ -8,7 +8,7 @@ import * as admin from 'firebase-admin';
 import {
   FUNCTION_RUNTIME_OPTS,
   DB
-} from "../../shared/config";
+} from "../../utils/config";
 import { Timestamp } from "firebase-admin/firestore";
 
 /**

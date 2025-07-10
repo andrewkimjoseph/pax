@@ -8,7 +8,7 @@ import {
   FUNCTION_RUNTIME_OPTS,
   PRIVY_CLIENT,
   PUBLIC_CLIENT,
-} from "../../shared/config";
+} from "../../utils/config";
 import { Address } from "viem";
 
 /**

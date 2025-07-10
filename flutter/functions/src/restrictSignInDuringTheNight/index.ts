@@ -1,6 +1,6 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
-import { FUNCTION_RUNTIME_OPTS } from "../../shared/config";
+import { FUNCTION_RUNTIME_OPTS } from "../../utils/config";
 
 /**
  * Cloud function to restrict account creation during the night (11 PM to 8 AM)

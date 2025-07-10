@@ -1,6 +1,6 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { getMessaging } from "firebase-admin/messaging";
-import { FUNCTION_RUNTIME_OPTS } from "../../shared/config";
+import { FUNCTION_RUNTIME_OPTS } from "../../utils/config";
 
 interface SendNotificationParams {
   title: string;

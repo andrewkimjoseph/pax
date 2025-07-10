@@ -7,14 +7,14 @@ import { celo } from "viem/chains";
 import { createViemAccount } from "@privy-io/server-auth/viem";
 import { getAuth } from "firebase-admin/auth";
 
-import { paxAccountV1ABI } from "../../shared/abis/paxAccountV1ABI";
+import { paxAccountV1ABI } from "../../utils/abis/paxAccountV1ABI";
 import {
   FUNCTION_RUNTIME_OPTS,
   PRIVY_CLIENT,
   PUBLIC_CLIENT,
   PIMLICO_URL,
-} from "../../shared/config";
-import { createWithdrawalRecord } from "../../shared/utils/createWithdrawal";
+} from "../../utils/config";
+import { createWithdrawalRecord } from "../../utils/helpers/createWithdrawal";
 
 /**
  * Cloud function to withdraw tokens to a payment method

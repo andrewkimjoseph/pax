@@ -5,22 +5,22 @@ import { Address, encodeFunctionData, http } from "viem";
 import { entryPoint07Address } from "viem/account-abstraction";
 import { celo } from "viem/chains";
 import { createViemAccount } from "@privy-io/server-auth/viem";
-import { taskManagerV1ABI } from "../../shared/abis/taskManagerV1ABI";
+import { taskManagerV1ABI } from "../../utils/abis/taskManagerV1ABI";
 import {
   FUNCTION_RUNTIME_OPTS,
   PRIVY_CLIENT,
   PUBLIC_CLIENT,
   PIMLICO_URL,
   DB,
-} from "../../shared/config";
+} from "../../utils/config";
 import {
   createRewardClaimSignaturePackage,
   generateRandomNonce,
-} from "../../shared/utils/rewardingSignature";
+} from "../../utils/helpers/rewardingSignature";
 import {
   createRewardRecord,
   updateRewardWithTxnHash,
-} from "../../shared/utils/createReward";
+} from "../../utils/helpers/createReward";
 
 /**
  * Firebase onCall function to reward a participant after task completion.

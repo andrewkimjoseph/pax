@@ -7,19 +7,19 @@ import { celo } from "viem/chains";
 import { createViemAccount } from "@privy-io/server-auth/viem";
 import { FieldValue } from "firebase-admin/firestore";
 
-import { taskManagerV1ABI } from "../../shared/abis/taskManagerV1ABI";
+import { taskManagerV1ABI } from "../../utils/abis/taskManagerV1ABI";
 import {
   FUNCTION_RUNTIME_OPTS,
   PRIVY_CLIENT,
   PUBLIC_CLIENT,
   PIMLICO_URL,
   DB,
-} from "../../shared/config";
+} from "../../utils/config";
 import {
   createScreeningSignaturePackage,
   generateRandomNonce,
-} from "../../shared/utils/screeningSignature";
-import { createScreeningRecord } from "../../shared/utils/createScreening";
+} from "../../utils/helpers/screeningSignature";
+import { createScreeningRecord } from "../../utils/helpers/createScreening";
 
 /**
  * Comprehensive cloud function to screen a participant

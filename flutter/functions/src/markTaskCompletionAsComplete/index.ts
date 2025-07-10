@@ -3,7 +3,7 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 import { FieldValue } from "firebase-admin/firestore";
 
-import { FUNCTION_RUNTIME_OPTS, DB } from "../../shared/config";
+import { FUNCTION_RUNTIME_OPTS, DB } from "../../utils/config";
 
 /**
  * Cloud function to mark a task completion as complete

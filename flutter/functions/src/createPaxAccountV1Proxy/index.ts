@@ -14,10 +14,10 @@ import { entryPoint07Address } from "viem/account-abstraction";
 import { celo } from "viem/chains";
 import { createViemAccount } from "@privy-io/server-auth/viem";
 import { randomBytes } from "crypto";
-import { paxAccountV1ABI } from "../../shared/abis/paxAccountV1ABI";
-import { erc1967ProxyABI } from "../../shared/abis/erc1967Proxy";
-import { erc1967ByteCode } from "../../shared/bytecode/erc1967";
-import { calculateEventSignature } from "../../shared/utils/calculateEventSignature";
+import { paxAccountV1ABI } from "../../utils/abis/paxAccountV1ABI";
+import { erc1967ProxyABI } from "../../utils/abis/erc1967Proxy";
+import { erc1967ByteCode } from "../../utils/bytecode/erc1967";
+import { calculateEventSignature } from "../../utils/helpers/calculateEventSignature";
 import {
   PAXACCOUNT_IMPLEMENTATION_ADDRESS,
   FUNCTION_RUNTIME_OPTS,
@@ -26,7 +26,7 @@ import {
   PUBLIC_CLIENT,
   PIMLICO_URL,
   DB,
-} from "../../shared/config";
+} from "../../utils/config";
 
 // Initialize clients
 

@@ -2,7 +2,7 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 import { Address, encodeFunctionData, http, parseEther } from "viem";
 import { celo } from "viem/chains";
-import { erc20ABI } from "../../shared/abis/erc20";
+import { erc20ABI } from "../../utils/abis/erc20";
 import {
   FUNCTION_RUNTIME_OPTS,
   PUBLIC_CLIENT,
@@ -10,7 +10,7 @@ import {
   PAX_MASTER,
   REWARD_TOKEN_ADDRESS,
   DB,
-} from "../../shared/config";
+} from "../../utils/config";
 import { entryPoint07Address } from "viem/account-abstraction";
 import { privateKeyToAccount } from "viem/accounts";
 
@@ -215,6 +215,17 @@ export const processAchievementClaim = onCall(
         transactionHash: userOpReceipt.userOpHash,
         achievementId,
         recipientAddress,
+      });
+
+      // Update the achievement document immediately to prevent double claiming
+      await firestore.collection("achievements").doc(achievementId).update({
+        txnHash: userOpReceipt.userOpHash,
+        timeClaimed: new Date(),
+      });
+
+      logger.info("Achievement document updated with transaction hash:", {
+        achievementId,
+        txnHash: userOpReceipt.userOpHash,
       });
 
       // Check balance after transfer
