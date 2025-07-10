@@ -19,8 +19,8 @@ export const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '';
 
 
 export const FUNCTION_RUNTIME_OPTS: CallableOptions = {
-  // timeoutSeconds: 300,
-  // memory: '1GiB', // Using the proper memory string value
+  // timeoutSeconds: 60,
+  // memory: "256MiB",
 };
 
 admin.initializeApp();
