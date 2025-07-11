@@ -2,22 +2,21 @@ import { logger } from "firebase-functions/v2";
 import { getAuth } from "firebase-admin/auth";
 
 /**
- * Checks if a user exists in in Auth
- * @param userId - The user ID to check
+ * Checks if a user exists in Auth by email address
+ * @param email - The email address to check
  * @returns Promise<boolean> - true if user exists, false otherwise
  */
-export async function checkIfParticipantExistsInAuth(userId: string): Promise<boolean> {
+export async function checkIfParticipantExistsInAuthByEmail(email: string): Promise<boolean> {
     try {
-
-        const participantInAuth = await getAuth().getUser(userId);
+        const participantInAuth = await getAuth().getUserByEmail(email);
 
         if (!participantInAuth) {
             return false;
         }
         return true;
     } catch (error) {
-        logger.error('Error checking if user exists in Auth', {
-            userId,
+        logger.error('Error checking if user exists in Auth by email', {
+            email,
             error: error instanceof Error ? error.message : 'Unknown error',
         });
         // If we can't check, assume user doesn't exist to be safe

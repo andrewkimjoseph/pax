@@ -2,7 +2,7 @@ import { beforeUserCreated } from "firebase-functions/v2/identity";
 import { logger } from "firebase-functions/v2";
 import { TELEGRAM_CHAT_ID } from "../../utils/config";
 import { sendTelegramMessage } from "../../utils/helpers/sendTelegramMessage";
-import { checkIfParticipantExistsInAuth } from "../../utils/helpers/checkIfParticipantExistsInAuth";
+import { checkIfParticipantExistsInAuthByEmail } from "../../utils/helpers/checkIfParticipantExistsInAuthByEmail";
 // import { checkIfParticipantExistsInFirestore } from "../../utils/helpers/checkIfParticipantExistsInFirestore";
 
 interface TelegramMessage {
@@ -69,14 +69,14 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(
         return;
       }
 
-      logger.info("Checking if user exists in Auth", {
+      logger.info("Checking if user exists in Auth by email", {
         userId: user.uid,
         userEmail,
         eventId: event.eventId,
       });
 
-      // Check if user already exists in Auth
-      const userExistsInAuth = await checkIfParticipantExistsInAuth(user.uid);
+      // Check if user already exists in Auth by email
+      const userExistsInAuth = await checkIfParticipantExistsInAuthByEmail(userEmail);
       
       logger.info("Auth check completed", {
         userId: user.uid,
