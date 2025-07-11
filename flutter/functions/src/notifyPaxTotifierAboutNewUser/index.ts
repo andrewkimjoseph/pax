@@ -3,7 +3,8 @@ import { logger } from "firebase-functions/v2";
 import { TELEGRAM_CHAT_ID } from "../../utils/config";
 import { sendTelegramMessage } from "../../utils/helpers/sendTelegramMessage";
 import { checkIfParticipantExistsInAuthByEmail } from "../../utils/helpers/checkIfParticipantExistsInAuthByEmail";
-// import { checkIfParticipantExistsInFirestore } from "../../utils/helpers/checkIfParticipantExistsInFirestore";
+import { checkIfParticipantExistsInFirestore } from "../../utils/helpers/checkIfParticipantExistsInFirestore";
+import { escapeMarkdown } from "../../utils/helpers/escapeMarkdown";
 
 interface TelegramMessage {
   chat_id: string;
@@ -94,6 +95,25 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(
         return;
       }
 
+      // Check if user already exists in Firestore by userId
+      const userExistsInFirestore = await checkIfParticipantExistsInFirestore(user.uid);
+
+      logger.info("Firestore check completed", {
+        userId: user.uid,
+        userEmail,
+        userExistsInFirestore,
+        eventId: event.eventId,
+      });
+
+      if (userExistsInFirestore) {
+        logger.info("User already exists in Firestore, skipping notification", {
+          userId: user.uid,
+          userEmail,
+          eventId: event.eventId,
+        });
+        return;
+      }
+
       // Mark email as processed BEFORE sending notification to prevent duplicates
       processedEmails.add(userEmail);
 
@@ -118,15 +138,14 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(
         chat_id: TELEGRAM_CHAT_ID,
         text:
           `🎉 *New Pax Participant Registered!*\n\n` +
-          `*User ID:* \`${user.uid}\`\n` +
-          `*Email:* ${user.email || "Not provided"}\n` +
-          `*Display Name:* ${user.displayName || "Not provided"}\n` +
-          `*Photo URL:* ${user.photoURL || "Not provided"}\n` +
-          `*Event ID:* \`${event.eventId}\`\n` +
-          `*User Email:* \`${userEmail}\`\n` +
-          `*Created At (Kenya):* ${new Date().toLocaleString("en-US", {
+          `*User ID:* \`${escapeMarkdown(user.uid)}\`\n` +
+          `*Email:* ${escapeMarkdown(user.email || "Not provided")}\n` +
+          `*Display Name:* ${escapeMarkdown(user.displayName || "Not provided")}\n` +
+          `*Photo URL:* ${escapeMarkdown(user.photoURL || "Not provided")}\n` +
+          `*Event ID:* \`${escapeMarkdown(event.eventId)}\`\n` +
+          `*Created At (Kenya):* ${escapeMarkdown(new Date().toLocaleString("en-US", {
             timeZone: "Africa/Nairobi",
-          })}`,
+          }))}`,
         parse_mode: "Markdown",
       };
 
