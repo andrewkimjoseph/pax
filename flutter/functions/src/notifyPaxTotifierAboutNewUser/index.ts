@@ -2,8 +2,6 @@ import { beforeUserCreated } from "firebase-functions/v2/identity";
 import { logger } from "firebase-functions/v2";
 import { TELEGRAM_CHAT_ID } from "../../utils/config";
 import { sendTelegramMessage } from "../../utils/helpers/sendTelegramMessage";
-import { checkIfParticipantExistsInAuthByEmail } from "../../utils/helpers/checkIfParticipantExistsInAuthByEmail";
-import { checkIfParticipantExistsInFirestore } from "../../utils/helpers/checkIfParticipantExistsInFirestore";
 import { escapeMarkdown } from "../../utils/helpers/escapeMarkdown";
 
 interface TelegramMessage {
@@ -17,7 +15,6 @@ const processedEmails = new Set<string>();
 
 export const notifyPaxTotifierAboutNewUser = beforeUserCreated(
   async (event) => {
-    
     try {
       logger.info(
         "notifyPaxTotifierAboutNewUser triggered for new user creation",
@@ -61,12 +58,15 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(
 
       // Check if we've already processed this email in this function instance
       if (processedEmails.has(userEmail)) {
-        logger.warn("Email already processed in this function instance, skipping", {
-          userEmail,
-          eventId: event.eventId,
-          processedEmailsCount: processedEmails.size,
-          allProcessedEmails: Array.from(processedEmails),
-        });
+        logger.warn(
+          "Email already processed in this function instance, skipping",
+          {
+            userEmail,
+            eventId: event.eventId,
+            processedEmailsCount: processedEmails.size,
+            allProcessedEmails: Array.from(processedEmails),
+          }
+        );
         return;
       }
 
@@ -75,44 +75,6 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(
         userEmail,
         eventId: event.eventId,
       });
-
-      // Check if user already exists in Auth by email
-      const userExistsInAuth = await checkIfParticipantExistsInAuthByEmail(userEmail);
-      
-      logger.info("Auth check completed", {
-        userId: user.uid,
-        userEmail,
-        userExistsInAuth,
-        eventId: event.eventId,
-      });
-
-      if (userExistsInAuth) {
-        logger.info("User already exists in Auth, skipping notification", {
-          userId: user.uid,
-          userEmail,
-          eventId: event.eventId,
-        });
-        return;
-      }
-
-      // Check if user already exists in Firestore by userId
-      const userExistsInFirestore = await checkIfParticipantExistsInFirestore(user.uid);
-
-      logger.info("Firestore check completed", {
-        userId: user.uid,
-        userEmail,
-        userExistsInFirestore,
-        eventId: event.eventId,
-      });
-
-      if (userExistsInFirestore) {
-        logger.info("User already exists in Firestore, skipping notification", {
-          userId: user.uid,
-          userEmail,
-          eventId: event.eventId,
-        });
-        return;
-      }
 
       // Mark email as processed BEFORE sending notification to prevent duplicates
       processedEmails.add(userEmail);
@@ -138,14 +100,13 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(
         chat_id: TELEGRAM_CHAT_ID,
         text:
           `🎉 *New Pax Participant Registered!*\n\n` +
-          `*User ID:* \`${escapeMarkdown(user.uid)}\`\n` +
+          `*User ID:* \`${user.uid}\`\n` +
           `*Email:* ${escapeMarkdown(user.email || "Not provided")}\n` +
           `*Display Name:* ${escapeMarkdown(user.displayName || "Not provided")}\n` +
           `*Photo URL:* ${escapeMarkdown(user.photoURL || "Not provided")}\n` +
-          `*Event ID:* \`${escapeMarkdown(event.eventId)}\`\n` +
-          `*Created At (Kenya):* ${escapeMarkdown(new Date().toLocaleString("en-US", {
+          `*Created At (Kenya):* ${new Date().toLocaleString("en-US", {
             timeZone: "Africa/Nairobi",
-          }))}`,
+          })}`,
         parse_mode: "Markdown",
       };
 
@@ -173,15 +134,14 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(
       if (processedEmails.size > 100) {
         const entries = Array.from(processedEmails);
         processedEmails.clear();
-        entries.slice(-50).forEach(entry => processedEmails.add(entry));
-        
+        entries.slice(-50).forEach((entry) => processedEmails.add(entry));
+
         logger.info("Cleaned up processed emails cache", {
           previousSize: entries.length,
           newSize: processedEmails.size,
           eventId: event.eventId,
         });
       }
-
     } catch (error) {
       logger.error("Error in notifyPaxTotifierAboutNewUser", {
         error: error instanceof Error ? error.message : "Unknown error",
@@ -189,8 +149,6 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(
         eventId: event.eventId,
         processedEmailsCount: processedEmails.size,
       });
-      
-      // Don't rethrow to prevent retries that could cause duplicates
     }
   }
 );
