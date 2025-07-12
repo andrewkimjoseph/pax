@@ -8,7 +8,9 @@ import { getAuth } from "firebase-admin/auth";
  */
 export async function checkIfParticipantExistsInAuthByEmail(email: string): Promise<boolean> {
     try {
-        const participantInAuth = await getAuth().getUserByEmail(email);
+        const participantsInAuth = await getAuth().listUsers();
+
+        const participantInAuth = participantsInAuth.users.find((user: any) => user.email === email);
 
         if (!participantInAuth) {
             return false;

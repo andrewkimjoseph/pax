@@ -228,6 +228,9 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
     });
     final claimState = ref.read(achievementClaimProvider.notifier);
 
+    // Capture screen width before showing dialogs
+    final screenWidth = MediaQuery.of(context).size.width;
+
     // Show claiming dialog
     showDialog(
       context: context,
@@ -335,7 +338,7 @@ class _AchievementCardState extends ConsumerState<AchievementCard> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       SizedBox(
-                        width: MediaQuery.of(context).size.width / 2.5,
+                        width: screenWidth / 2.5,
                         child: PrimaryButton(
                           child: const Text('OK'),
                           onPressed: () => dialogContext.pop(),
