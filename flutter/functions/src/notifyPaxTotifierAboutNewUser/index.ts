@@ -41,14 +41,12 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(
 
       if (!userEmail) {
         logger.warn("No email provided for user, cannot process", {
-          userId: user.uid,
           eventId: event.eventId,
         });
         return;
       }
 
       logger.info("User data received", {
-        userId: user.uid,
         email: user.email,
         displayName: user.displayName,
         photoURL: user.photoURL,
@@ -71,7 +69,6 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(
       }
 
       logger.info("Checking if user exists in Auth by email", {
-        userId: user.uid,
         userEmail,
         eventId: event.eventId,
       });
@@ -80,14 +77,12 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(
       processedEmails.add(userEmail);
 
       logger.info("Email marked as processed, proceeding with notification", {
-        userId: user.uid,
         userEmail,
         eventId: event.eventId,
         processedEmailsCount: processedEmails.size,
       });
 
       logger.info("Processing new user notification", {
-        userId: user.uid,
         email: user.email,
         displayName: user.displayName,
         photoURL: user.photoURL,
@@ -100,7 +95,6 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(
         chat_id: TELEGRAM_CHAT_ID,
         text:
           `🎉 *New Pax Participant Registered!*\n\n` +
-          `*User ID:* \`${user.uid}\`\n` +
           `*Email:* ${escapeMarkdown(user.email || "Not provided")}\n` +
           `*Display Name:* ${escapeMarkdown(user.displayName || "Not provided")}\n` +
           `*Photo URL:* ${escapeMarkdown(user.photoURL || "Not provided")}\n` +
@@ -111,7 +105,6 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(
       };
 
       logger.info("Sending Telegram notification", {
-        userId: user.uid,
         userEmail,
         telegramChatId: TELEGRAM_CHAT_ID,
         messageLength: message.text.length,
@@ -122,7 +115,6 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(
       await sendTelegramMessage(message);
 
       logger.info("Successfully notified about new user", {
-        userId: user.uid,
         userEmail,
         telegramChatId: TELEGRAM_CHAT_ID,
         eventId: event.eventId,
