@@ -261,7 +261,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
                   InkWell(
                     onTap: () {
                       ref.read(analyticsProvider).paymentMethodsTapped();
-                      context.push("/payment-methods");
+                      context.push("/withdrawal-methods");
                     },
                     child: AccountOptionCard(
                       'payment_methods',

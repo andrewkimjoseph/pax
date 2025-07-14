@@ -83,7 +83,9 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                           ref.read(analyticsProvider).paymentMethodTapped({
                             "paymentMethodName": "MiniPay",
                           });
-                          context.push("/payment-methods/minipay-connection");
+                          context.push(
+                            "/withdrawal-methods/minipay-connection",
+                          );
                         },
                       ),
                     ],

@@ -173,7 +173,7 @@ final routerProvider = Provider((ref) {
             (BuildContext context, GoRouterState state) => TaskCompleteView(),
       ),
       GoRoute(
-        path: "/payment-methods",
+        path: "/withdrawal-methods",
         builder:
             (BuildContext context, GoRouterState state) =>
                 WithdrawalMethodsView(),
