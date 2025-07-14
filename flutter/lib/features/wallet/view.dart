@@ -24,7 +24,7 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
 
   @override
   Widget build(BuildContext context) {
-    final minipay = ref.watch(primaryPaymentMethodProvider);
+    final minipay = ref.watch(primaryWithdrawalMethodProvider);
 
     return Scaffold(
       headers: [

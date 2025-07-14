@@ -44,7 +44,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
   Widget build(BuildContext context) {
     final featureFlags = ref.watch(featureFlagsProvider);
     final index = ref.watch(homeSelectedIndexProvider);
-    ref.watch(primaryPaymentMethodProvider);
+    ref.watch(primaryWithdrawalMethodProvider);
 
     return Scaffold(
       headers: [

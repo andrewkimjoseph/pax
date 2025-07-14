@@ -612,9 +612,11 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                                           .circleExclamation,
                                                 );
                                               } finally {
-                                                setState(() {
-                                                  isProcessing = false;
-                                                });
+                                                if (mounted) {
+                                                  setState(() {
+                                                    isProcessing = false;
+                                                  });
+                                                }
                                               }
                                             },
                                     child:

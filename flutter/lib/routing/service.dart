@@ -175,7 +175,8 @@ final routerProvider = Provider((ref) {
       GoRoute(
         path: "/payment-methods",
         builder:
-            (BuildContext context, GoRouterState state) => PaymentMethodsView(),
+            (BuildContext context, GoRouterState state) =>
+                WithdrawalMethodsView(),
         routes: [
           GoRoute(
             path: "minipay-connection",
