@@ -116,6 +116,7 @@ flutter:
     - lib/assets/svgs/dashboard_carousel/
     - lib/assets/svgs/achievements/
     - lib/assets/lottie/
+    - lib/assets/google_fonts/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
