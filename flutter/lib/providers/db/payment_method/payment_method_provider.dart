@@ -59,7 +59,7 @@ class WithdrawalMethodsStateModel {
   }
 
   // Get primary payment method (the first in the list)
-  WithdrawalMethod? get primaryPaymentMethod {
+  WithdrawalMethod? get primaryWithdrawalMethod {
     return withdrawalMethods.isNotEmpty ? withdrawalMethods.first : null;
   }
 
@@ -296,7 +296,7 @@ final paymentMethodsByTypeProvider =
     });
 
 // Provider to get default payment method
-final primaryPaymentMethodProvider = Provider<WithdrawalMethod?>((ref) {
+final primaryWithdrawalMethodProvider = Provider<WithdrawalMethod?>((ref) {
   final methodsState = ref.watch(withdrawalMethodsProvider);
-  return methodsState.primaryPaymentMethod;
+  return methodsState.primaryWithdrawalMethod;
 });

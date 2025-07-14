@@ -269,6 +269,7 @@ class RemoteConfigService {
           RemoteConfigKeys.areAchievementsAvailable: true,
           RemoteConfigKeys.areTasksAvailable: true,
           RemoteConfigKeys.areTasksCompletionsAvailable: true,
+          RemoteConfigKeys.isWithdrawalMethodConnectionAvailable: true,
         };
       }
 
@@ -286,6 +287,9 @@ class RemoteConfigService {
             configMap[RemoteConfigKeys.areTasksAvailable] ?? true,
         RemoteConfigKeys.areTasksCompletionsAvailable:
             configMap[RemoteConfigKeys.areTasksCompletionsAvailable] ?? true,
+        RemoteConfigKeys.isWithdrawalMethodConnectionAvailable:
+            configMap[RemoteConfigKeys.isWithdrawalMethodConnectionAvailable] ??
+            true,
       };
     } catch (e) {
       if (kDebugMode) {
@@ -297,6 +301,7 @@ class RemoteConfigService {
         RemoteConfigKeys.areAchievementsAvailable: true,
         RemoteConfigKeys.areTasksAvailable: true,
         RemoteConfigKeys.areTasksCompletionsAvailable: true,
+        RemoteConfigKeys.isWithdrawalMethodConnectionAvailable: true,
       };
     }
   }

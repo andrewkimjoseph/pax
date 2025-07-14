@@ -128,6 +128,13 @@ class WithdrawNotifier extends Notifier<WithdrawStateModel> {
         print('Error withdrawing tokens: $e');
       }
 
+      ref.read(analyticsProvider).withdrawalFailed({
+        "errorMessage": e.toString().substring(
+          0,
+          e.toString().length.clamp(0, 99),
+        ),
+      });
+
       state = state.copyWith(
         state: WithdrawState.error,
         errorMessage: e.toString(),

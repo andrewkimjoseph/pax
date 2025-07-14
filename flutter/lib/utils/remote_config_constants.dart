@@ -22,6 +22,12 @@ class RemoteConfigKeys {
   static const String areTasksCompletionsAvailable =
       'are_tasks_completions_available';
 
+  /// Controls whether the withdrawal method connection feature is available in the app.
+  /// When false, users will not be able to connect or manage withdrawal methods.
+  /// Key: 'is_withdrawal_method_connection_available'
+  static const String isWithdrawalMethodConnectionAvailable =
+      'is_withdrawal_method_connection_available';
+
   // App version config keys
   /// The minimum version of the app that users must have installed.
   /// Users with versions below this will be prompted to update.

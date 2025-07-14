@@ -108,6 +108,9 @@ class AnalyticsProvider {
   Future<void> withdrawalComplete([Map<String, dynamic>? properties]) =>
       _logEvent('withdrawal_complete', properties: properties);
 
+  Future<void> withdrawalFailed([Map<String, dynamic>? properties]) =>
+      _logEvent('withdrawal_failed', properties: properties);
+
   Future<void> xFollowTapped([Map<String, dynamic>? properties]) =>
       _logEvent('x_follow_tapped', properties: properties);
 
