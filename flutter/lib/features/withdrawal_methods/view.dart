@@ -59,7 +59,9 @@ class _WithdrawalMethodsViewState extends ConsumerState<WithdrawalMethodsView> {
             Divider(color: PaxColors.lightGrey),
           ],
           child:
-              kDebugMode || (isWithdrawalMethodConnectionAvailable == true)
+              kDebugMode ||
+                      (isWithdrawalMethodConnectionAvailable == true) ||
+                      (minipay != null)
                   ? SingleChildScrollView(
                     child: Column(
                       children: [
