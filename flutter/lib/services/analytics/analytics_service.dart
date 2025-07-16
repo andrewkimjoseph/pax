@@ -3,6 +3,7 @@ import 'package:amplitude_flutter/configuration.dart';
 import 'package:amplitude_flutter/default_tracking.dart';
 import 'package:amplitude_flutter/events/base_event.dart';
 import 'package:amplitude_flutter/events/identify.dart';
+import 'package:clarity_flutter/clarity_flutter.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -68,6 +69,7 @@ class AnalyticsService {
     await _amplitude.setUserId(participantId);
     await _firebaseAnalytics.setUserId(id: participantId);
     FlutterBranchSdk.setIdentity(participantId);
+    Clarity.setCustomUserId(participantId);
   }
 
   /// Logs an event with optional properties.
@@ -93,6 +95,8 @@ class AnalyticsService {
     FlutterBranchSdk.trackContentWithoutBuo(
       branchEvent: BranchEvent.customEvent(eventName),
     );
+
+    Clarity.sendCustomEvent(eventName);
   }
 
   /// Logs a user property.
