@@ -56,7 +56,7 @@ const createDomain = (contractAddress: Address): TaskManagerDomain => ({
  * @param taskMasterServerWalletAddress The wallet address of the task master
  * @param taskManagerContractAddress TaskManager contract address
  * @param participantProxy Address of the participant proxy claiming the reward
- * @param taskCompletionId Unique identifier for this reward
+ * @param taskCompletionId Task completion linked to the reward to be claimed
  * @param nonce Random value to prevent replay attacks
  * @returns Promise containing the signature
  */
@@ -109,7 +109,7 @@ export async function signRewardClaimRequest(
  * Verify that a reward claim signature is valid and was signed by the expected signer
  * @param taskManagerContractAddress TaskManager contract address
  * @param participantProxy Address of the participant proxy claiming the reward
- * @param taskCompletionId Unique identifier for this reward
+ * @param taskCompletionId Task completion linked to the reward to be claimed
  * @param nonce Random value to prevent replay attacks
  * @param signature The signature to verify
  * @param expectedSigner The address that should have signed the message
@@ -166,7 +166,7 @@ export async function verifyRewardClaimSignature(
  * @param taskMasterServerWalletId ID of the task master server wallet
  * @param taskMasterServerWalletAddress Address of the task master server wallet
  * @param participantProxy Address of the participant proxy claiming the reward
- * @param taskCompletionId Reward identifier
+ * @param taskCompletionId Task completion linked to the reward to be claimed
  * @param nonce Random nonce
  * @returns Object containing all necessary signature data
  */
