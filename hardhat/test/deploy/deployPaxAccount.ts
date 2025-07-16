@@ -1,5 +1,5 @@
 import { Address, Hex } from "viem";
-import { create2Factory, publicClient, waitForUserOperationReceipt } from "../utils/clients";
+import { create2Factory, waitForUserOperationReceipt } from "../utils/clients";
 import { getProxyDeployDataAndSalt, findContractAddressFromLogs, IMPLEMENTATION_ADDRESS } from "../utils/helpers";
 import { WalletInfo } from "../utils/wallets";
 

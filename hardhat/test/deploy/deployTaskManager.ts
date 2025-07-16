@@ -1,7 +1,8 @@
-import { Address, parseEther } from "viem";
+import { Abi, Address, parseEther } from "viem";
 import { create2Factory, waitForUserOperationReceipt } from "../utils/clients";
-import { getTaskManagerDeployDataAndSalt, findContractAddressFromLogs, REWARD_TOKEN_ADDRESS } from "../utils/helpers";
+import { getTaskManagerV2DeployDataAndSalt, findContractAddressFromLogs, REWARD_TOKEN_ADDRESS } from "../utils/helpers";
 import { WalletInfo } from "../utils/wallets";
+
 
 /**
  * Deploy a TaskManager contract using a smart account
@@ -24,7 +25,7 @@ export async function deployTaskManager(
   console.log(`Reward token address: ${rewardTokenAddress}`);
 
   // Get deployment data with salt for CREATE2
-  const { deployData } = getTaskManagerDeployDataAndSalt(
+  const { deployData } = getTaskManagerV2DeployDataAndSalt(
     taskManagerWallet.serverWalletAccount.address,
     taskManagerWallet.safeSmartAccount.address,
     rewardAmount,

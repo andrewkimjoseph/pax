@@ -7,18 +7,21 @@ import {
     encodeFunctionData,
     keccak256,
     toHex,
-    BlockTag 
+    BlockTag, 
+    Abi
   } from "viem";
   import { paxAccountV1ABI } from "../abis/paxAccountV1";
-  import { taskManagerV1ABI } from "../abis/taskManagerV1";
   import { erc1967ProxyABI } from "../abis/erc1967Proxy";
   import { erc1967ByteCode } from "../bytecode/ERC1967";
-  import { taskManagerV1Bytecode } from "../bytecode/taskManagerV1";
   import { publicClient } from "./clients";
   import { randomBytes } from "crypto";
   import * as fs from 'fs';
   import * as path from 'path';
-  
+  import * as taskManagerV2ContractArtifact from "../../../hardhat/artifacts/contracts/TaskManagerV2.sol/TaskManagerV2.json";
+
+
+const taskManagerV2ABI = taskManagerV2ContractArtifact.abi as Abi;
+const taskManagerV2Bytecode = taskManagerV2ContractArtifact.bytecode as Address;
   
   // Constants
   export const IMPLEMENTATION_ADDRESS = "0xD9Ae701950bB2615b9a068C6a310156af6AD92A2" as Address;
@@ -61,7 +64,7 @@ import {
   }
   
   // Get TaskManager deployment data with salt
-  export function getTaskManagerDeployDataAndSalt(
+  export function getTaskManagerV2DeployDataAndSalt(
     signerAddress: Address,
     taskMaster: Address,
     _rewardAmountPerParticipantProxyInWei: bigint,
@@ -79,8 +82,8 @@ import {
     ];
   
     const data = encodeDeployData({
-      abi: taskManagerV1ABI,
-      bytecode: taskManagerV1Bytecode,
+      abi: taskManagerV2ABI,
+      bytecode: taskManagerV2Bytecode,
       args,
     });
   
