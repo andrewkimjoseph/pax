@@ -260,12 +260,10 @@ export const rewardParticipantProxy = onCall(
 
       // Step 3: Generate reward claim signature
       const nonce = generateRandomNonce();
-      // Use taskCompletionId as the rewardId for consistency
-      const rewardId = taskCompletionId;
 
       logger.info("Generating reward claim signature", {
         participantProxy,
-        rewardId,
+        taskCompletionId,
         nonce: nonce.toString(),
       });
 
@@ -274,7 +272,7 @@ export const rewardParticipantProxy = onCall(
         taskMasterWallet.id,
         taskMasterWallet.address as Address,
         participantProxy,
-        rewardId,
+        taskCompletionId,
         nonce
       );
 
@@ -308,7 +306,7 @@ export const rewardParticipantProxy = onCall(
         args: [
           participantProxy,
           paxAccountContractAddress,
-          rewardId,
+          taskCompletionId,
           nonce,
           signature,
         ],
@@ -370,10 +368,9 @@ export const rewardParticipantProxy = onCall(
         success: true,
         participantProxy,
         paxAccountContractAddress,
-        rewardId, // This is the taskCompletionId
+        taskCompletionId,
         taskId,
         participantId,
-        taskCompletionId,
         signature,
         nonce: nonceString,
         txnHash,

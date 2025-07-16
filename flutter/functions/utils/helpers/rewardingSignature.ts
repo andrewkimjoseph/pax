@@ -29,7 +29,7 @@ type RewardClaimRequestTypes = {
   ];
   RewardClaimRequest: [
     { name: 'participant'; type: 'address' },
-    { name: 'rewardId'; type: 'string' },
+    { name: 'taskCompletionId'; type: 'string' },
     { name: 'nonce'; type: 'uint256' }
   ];
 };
@@ -56,7 +56,7 @@ const createDomain = (contractAddress: Address): TaskManagerDomain => ({
  * @param taskMasterServerWalletAddress The wallet address of the task master
  * @param taskManagerContractAddress TaskManager contract address
  * @param participantProxy Address of the participant proxy claiming the reward
- * @param rewardId Unique identifier for this reward
+ * @param taskCompletionId Unique identifier for this reward
  * @param nonce Random value to prevent replay attacks
  * @returns Promise containing the signature
  */
@@ -65,7 +65,7 @@ export async function signRewardClaimRequest(
   taskMasterServerWalletAddress: Address,
   taskManagerContractAddress: Address,
   participantProxy: Address,
-  rewardId: string,
+  taskCompletionId: string,
   nonce: bigint
 ): Promise<Hex> {
   // Create viem account from Privy wallet
@@ -84,7 +84,7 @@ export async function signRewardClaimRequest(
     ],
     RewardClaimRequest: [
       { name: 'participant', type: 'address' },
-      { name: 'rewardId', type: 'string' },
+      { name: 'taskCompletionId', type: 'string' },
       { name: 'nonce', type: 'uint256' }
     ]
   };
@@ -93,7 +93,7 @@ export async function signRewardClaimRequest(
   
   const message = {
     participant: participantProxy,
-    rewardId,
+    taskCompletionId,
     nonce
   };
 
@@ -109,7 +109,7 @@ export async function signRewardClaimRequest(
  * Verify that a reward claim signature is valid and was signed by the expected signer
  * @param taskManagerContractAddress TaskManager contract address
  * @param participantProxy Address of the participant proxy claiming the reward
- * @param rewardId Unique identifier for this reward
+ * @param taskCompletionId Unique identifier for this reward
  * @param nonce Random value to prevent replay attacks
  * @param signature The signature to verify
  * @param expectedSigner The address that should have signed the message
@@ -118,7 +118,7 @@ export async function signRewardClaimRequest(
 export async function verifyRewardClaimSignature(
   taskManagerContractAddress: Address,
   participantProxy: Address,
-  rewardId: string,
+  taskCompletionId: string,
   nonce: bigint,
   signature: Hex,
   expectedSigner: Address
@@ -133,7 +133,7 @@ export async function verifyRewardClaimSignature(
       ],
       RewardClaimRequest: [
         { name: 'participant', type: 'address' },
-        { name: 'rewardId', type: 'string' },
+        { name: 'taskCompletionId', type: 'string' },
         { name: 'nonce', type: 'uint256' }
       ]
     };
@@ -142,7 +142,7 @@ export async function verifyRewardClaimSignature(
     
     const message = {
       participant: participantProxy,
-      rewardId,
+      taskCompletionId,
       nonce
     };
 
@@ -166,7 +166,7 @@ export async function verifyRewardClaimSignature(
  * @param taskMasterServerWalletId ID of the task master server wallet
  * @param taskMasterServerWalletAddress Address of the task master server wallet
  * @param participantProxy Address of the participant proxy claiming the reward
- * @param rewardId Reward identifier
+ * @param taskCompletionId Reward identifier
  * @param nonce Random nonce
  * @returns Object containing all necessary signature data
  */
@@ -175,7 +175,7 @@ export async function createRewardClaimSignaturePackage(
   taskMasterServerWalletId: string,
   taskMasterServerWalletAddress: Address,
   participantProxy: Address,
-  rewardId: string,
+  taskCompletionId: string,
   nonce: bigint
 ) {
   const signature = await signRewardClaimRequest(
@@ -183,14 +183,14 @@ export async function createRewardClaimSignaturePackage(
     taskMasterServerWalletAddress,
     taskManagerContractAddress,
     participantProxy,
-    rewardId,
+    taskCompletionId,
     nonce
   );
   
   const isValid = await verifyRewardClaimSignature(
     taskManagerContractAddress,
     participantProxy,
-    rewardId,
+    taskCompletionId,
     nonce,
     signature,
     taskMasterServerWalletAddress
@@ -200,7 +200,7 @@ export async function createRewardClaimSignaturePackage(
     signature,
     isValid,
     participantProxy,
-    rewardId,
+    taskCompletionId,
     nonce: nonce.toString(),
   };
 }
