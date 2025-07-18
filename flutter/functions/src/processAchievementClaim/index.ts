@@ -7,12 +7,13 @@ import {
   FUNCTION_RUNTIME_OPTS,
   PUBLIC_CLIENT,
   PIMLICO_URL,
-  PAX_MASTER,
+  PAX_MASTER_SMART_ACCOUNT,
   REWARD_TOKEN_ADDRESS,
   DB,
 } from "../../utils/config";
 import { entryPoint07Address } from "viem/account-abstraction";
 import { privateKeyToAccount } from "viem/accounts";
+import { getReferralTagFromSmartAccount } from "../../utils/helpers/getReferralTagFromSmartAccount";
 
 export const processAchievementClaim = onCall(
   FUNCTION_RUNTIME_OPTS,
@@ -135,7 +136,7 @@ export const processAchievementClaim = onCall(
         rewardTokenAddress: REWARD_TOKEN_ADDRESS,
       });
 
-      const PAX_MASTER_ACCOUNT = privateKeyToAccount(PAX_MASTER);
+      const PAX_MASTER_ACCOUNT = privateKeyToAccount(PAX_MASTER_SMART_ACCOUNT);
 
       const paxMasterSmartAccount = await toSimpleSmartAccount({
         client: PUBLIC_CLIENT,
@@ -184,12 +185,14 @@ export const processAchievementClaim = onCall(
         },
       });
 
+      const referralTag = getReferralTagFromSmartAccount(smartAccountClient);
+
       // Send the transaction
       const userOpTxnHash = await smartAccountClient.sendUserOperation({
         calls: [
           {
             to: REWARD_TOKEN_ADDRESS,
-            data,
+            data: (data + referralTag) as Address,
           },
         ],
       });

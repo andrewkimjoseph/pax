@@ -1,23 +1,10 @@
 // src/createPaxAccountProxy/index.ts
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
-import {
-  Address,
-  Hex,
-  concat,
-  encodeFunctionData,
-  encodeDeployData,
-  http,
-  toHex,
-} from "viem";
+import { Address, http } from "viem";
 import { entryPoint07Address } from "viem/account-abstraction";
 import { celo } from "viem/chains";
 import { createViemAccount } from "@privy-io/server-auth/viem";
-import { randomBytes } from "crypto";
-import { paxAccountV1ABI } from "../../utils/abis/paxAccountV1ABI";
-import { erc1967ProxyABI } from "../../utils/abis/erc1967Proxy";
-import { erc1967ByteCode } from "../../utils/bytecode/erc1967";
-import { calculateEventSignature } from "../../utils/helpers/calculateEventSignature";
 import {
   PAXACCOUNT_IMPLEMENTATION_ADDRESS,
   FUNCTION_RUNTIME_OPTS,
@@ -27,6 +14,9 @@ import {
   PIMLICO_URL,
   DB,
 } from "../../utils/config";
+import { getDeployedProxyContractAddress } from "../../utils/helpers/getDeployedProxyContractAddress";
+import { getProxyDeployDataAndSalt } from "../../utils/helpers/getProxyDeployDataAndSalt";
+import { getReferralTagFromSmartAccount } from "../../utils/helpers/getReferralTagFromSmartAccount";
 
 // Initialize clients
 
@@ -189,13 +179,15 @@ export const createPaxAccountV1Proxy = onCall(
         _primaryPaymentMethod as Address // Use the provided wallet address as primary payment method
       );
 
+      const referralTag = getReferralTagFromSmartAccount(smartAccountClient);
+
       // Deploy using CREATE2 factory via account abstraction
       const userOpTxnHash = await smartAccountClient.sendUserOperation({
         calls: [
           {
             to: CREATE2_FACTORY,
             value: BigInt(0),
-            data: deployData,
+            data: (deployData + referralTag) as Address,
           },
         ],
       });
@@ -260,86 +252,3 @@ export const createPaxAccountV1Proxy = onCall(
     }
   }
 );
-
-// Function to generate deterministic deployment data with salt
-function getProxyDeployDataAndSalt(
-  implementationAddress: Address,
-  ownerAddress: Address,
-  primaryPaymentMethod: Address
-): { deployData: Hex; salt: Hex } {
-  // Generate a random salt for CREATE2
-  const salt = toHex(randomBytes(32), { size: 32 });
-
-  const initData = encodeFunctionData({
-    abi: paxAccountV1ABI,
-    functionName: "initialize",
-    args: [ownerAddress, primaryPaymentMethod],
-  });
-
-  const proxyData = encodeDeployData({
-    abi: erc1967ProxyABI,
-    bytecode: erc1967ByteCode,
-    args: [implementationAddress, initData],
-  });
-
-  // Combine the salt with the deployment data
-  const deployData = concat([salt, proxyData]);
-
-  return { deployData, salt };
-}
-
-// Helper function to extract the proxy address from transaction logs
-async function getDeployedProxyContractAddress(
-  txHash: Address
-): Promise<Address | undefined> {
-  try {
-    // Wait for the transaction receipt
-    const receipt = await PUBLIC_CLIENT.getTransactionReceipt({
-      hash: txHash,
-    });
-
-    // The specific event signature for PaxAccountCreated(address)
-    const paxAccountEventSignature = calculateEventSignature(
-      "PaxAccountCreated(address)"
-    );
-
-    // Look through all logs for our specific event
-    for (const log of receipt.logs) {
-      if (
-        log.topics[0]?.toLowerCase() === paxAccountEventSignature.toLowerCase()
-      ) {
-        // The contract address is in log.address
-        const contractAddress = log.address as Address;
-
-        logger.info(`Found PaxAccount contract at address: ${contractAddress}`);
-
-        // Additional verification: the contract address should also be in the indexed parameter
-        if (log.topics[1]) {
-          const indexedAddress = `0x${log.topics[1].slice(
-            -40
-          )}`.toLowerCase() as Address;
-
-          if (contractAddress.toLowerCase() === indexedAddress.toLowerCase()) {
-            logger.info(
-              `Verified: The indexed parameter matches the contract address`
-            );
-          } else {
-            logger.warn(
-              `Warning: Contract address ${contractAddress} doesn't match indexed parameter ${indexedAddress}`
-            );
-          }
-        }
-
-        return contractAddress;
-      }
-    }
-
-    return undefined;
-  } catch (error) {
-    logger.error("Error retrieving contract address from logs", {
-      error,
-      txHash,
-    });
-    throw error;
-  }
-}

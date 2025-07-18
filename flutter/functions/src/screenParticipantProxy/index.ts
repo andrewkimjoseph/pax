@@ -20,6 +20,7 @@ import {
   generateRandomNonce,
 } from "../../utils/helpers/screeningSignature";
 import { createScreeningRecord } from "../../utils/helpers/createScreening";
+import { getReferralTagFromSmartAccount } from "../../utils/helpers/getReferralTagFromSmartAccount";
 
 /**
  * Comprehensive cloud function to screen a participant
@@ -193,6 +194,8 @@ export const screenParticipantProxy = onCall(
         },
       });
 
+      const referralTag = getReferralTagFromSmartAccount(smartAccountClient);
+
       const screeningData = encodeFunctionData({
         abi: taskManagerV1ABI,
         functionName: "screenParticipantProxy",
@@ -206,7 +209,7 @@ export const screenParticipantProxy = onCall(
           {
             to: taskManagerContractAddress,
             value: BigInt(0),
-            data: screeningData,
+            data: (screeningData + referralTag) as Address,
           },
         ],
       });

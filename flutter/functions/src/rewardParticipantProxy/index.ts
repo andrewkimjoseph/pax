@@ -1,4 +1,3 @@
-// src/rewardParticipant/index.ts (corrected)
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 import { Address, encodeFunctionData, http } from "viem";
@@ -21,6 +20,7 @@ import {
   createRewardRecord,
   updateRewardWithTxnHash,
 } from "../../utils/helpers/createReward";
+import { getReferralTagFromSmartAccount } from "../../utils/helpers/getReferralTagFromSmartAccount";
 
 /**
  * Firebase onCall function to reward a participant after task completion.
@@ -299,6 +299,8 @@ export const rewardParticipantProxy = onCall(
         },
       });
 
+      const referralTag = getReferralTagFromSmartAccount(smartAccountClient);
+
       // Encode the function call to processRewardClaimByParticipantProxy
       const rewardClaimData = encodeFunctionData({
         abi: taskManagerV1ABI,
@@ -319,7 +321,7 @@ export const rewardParticipantProxy = onCall(
           {
             to: taskManagerContractAddress,
             value: BigInt(0),
-            data: rewardClaimData,
+            data: (rewardClaimData + referralTag) as Address,
           },
         ],
       });

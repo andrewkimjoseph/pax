@@ -15,6 +15,7 @@ import {
   PIMLICO_URL,
 } from "../../utils/config";
 import { createWithdrawalRecord } from "../../utils/helpers/createWithdrawal";
+import { getReferralTagFromSmartAccount } from "../../utils/helpers/getReferralTagFromSmartAccount";
 
 /**
  * Cloud function to withdraw tokens to a payment method
@@ -224,6 +225,8 @@ export const withdrawToPaymentMethod = onCall(
         },
       });
 
+      const referralTag = getReferralTagFromSmartAccount(smartAccountClient);
+
       // Encode the function call to withdrawToPaymentMethod
       const withdrawData = encodeFunctionData({
         abi: paxAccountV1ABI,
@@ -237,7 +240,7 @@ export const withdrawToPaymentMethod = onCall(
           {
             to: paxAccountAddress as Address,
             value: BigInt(0),
-            data: withdrawData,
+            data: (withdrawData + referralTag) as Address,
           },
         ],
       });
