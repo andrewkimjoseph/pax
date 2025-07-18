@@ -56,7 +56,7 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(
 
       // Check if we've already processed this email in this function instance
       if (processedEmails.has(userEmail)) {
-        logger.warn(
+        logger.info(
           "Email already processed in this function instance, skipping",
           {
             userEmail,
