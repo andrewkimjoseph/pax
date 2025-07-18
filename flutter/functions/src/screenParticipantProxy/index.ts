@@ -231,8 +231,11 @@ export const screenParticipantProxy = onCall(
         );
       }
 
-      const txnHash = userOpReceipt.userOpHash;
-      logger.info("Transaction confirmed", { txnHash });
+      // const txnHash = userOpReceipt.userOpHash;
+      // logger.info("Transaction confirmed", { txnHash });
+
+      const bundleTxnHash = userOpReceipt.receipt.transactionHash;
+      logger.info("Bundle transaction confirmed", { bundleTxnHash });
 
       // Step 4: Create screening record using the utility function
       const screeningId = await createScreeningRecord({
@@ -240,7 +243,7 @@ export const screenParticipantProxy = onCall(
         participantId,
         signature,
         nonce: nonceString,
-        txnHash,
+        txnHash: bundleTxnHash,
       });
 
       logger.info("Screening record created", { screeningId });
@@ -279,7 +282,7 @@ export const screenParticipantProxy = onCall(
         taskId,
         signature,
         nonce: nonceString,
-        txnHash,
+        txnHash: bundleTxnHash,
         screeningId,
         taskCompletionId, // Added task completion ID to the response
       };
