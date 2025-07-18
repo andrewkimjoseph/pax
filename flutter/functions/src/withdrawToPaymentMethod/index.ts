@@ -260,8 +260,11 @@ export const withdrawToPaymentMethod = onCall(
         throw new HttpsError("internal", "User operation failed");
       }
 
-      const txnHash = userOpReceipt.userOpHash;
-      logger.info("Transaction confirmed", { txnHash });
+      // const txnHash = userOpReceipt.userOpHash;
+      // logger.info("Transaction confirmed", { txnHash });
+
+      const bundleTxnHash = userOpReceipt.receipt.transactionHash;
+      logger.info("Bundle transaction confirmed", { bundleTxnHash });
 
       // Create withdrawal record
       const withdrawalId = await createWithdrawalRecord({
@@ -269,13 +272,13 @@ export const withdrawToPaymentMethod = onCall(
         paymentMethodId: withdrawalPaymentMethodId, // Use the string ID for the withdrawal record
         amountRequested: parseFloat(amountRequested),
         rewardCurrencyId: tokenId,
-        txnHash,
+        txnHash: bundleTxnHash,
       });
 
       // Return the transaction hash and details
       return {
         success: true,
-        txnHash,
+        bundleTxnHash,
         withdrawalId,
         details: {
           paxAccountAddress,
