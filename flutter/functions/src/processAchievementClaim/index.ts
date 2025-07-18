@@ -217,15 +217,18 @@ export const processAchievementClaim = onCall(
         recipientAddress,
       });
 
+      const bundleTxnHash = userOpReceipt.receipt.transactionHash;
+      logger.info("Bundle transaction confirmed", { bundleTxnHash });
+
       // Update the achievement document immediately to prevent double claiming
       await firestore.collection("achievements").doc(achievementId).update({
-        txnHash: userOpReceipt.userOpHash,
+        txnHash: bundleTxnHash,
         timeClaimed: new Date(),
       });
 
       logger.info("Achievement document updated with transaction hash:", {
         achievementId,
-        txnHash: userOpReceipt.userOpHash,
+        txnHash: bundleTxnHash,
       });
 
       // Check balance after transfer
