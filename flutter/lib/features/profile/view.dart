@@ -36,6 +36,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     required Color backgroundColor,
     required IconData icon,
   }) {
+    if (!context.mounted) return;
     showToast(
       context: context,
       location: ToastLocation.topCenter,
