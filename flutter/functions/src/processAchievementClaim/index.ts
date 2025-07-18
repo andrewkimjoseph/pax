@@ -7,12 +7,11 @@ import {
   FUNCTION_RUNTIME_OPTS,
   PUBLIC_CLIENT,
   PIMLICO_URL,
-  PAX_MASTER_SMART_ACCOUNT,
   REWARD_TOKEN_ADDRESS,
   DB,
+  PAX_MASTER_PRIVATE_KEY_ACCOUNT,
 } from "../../utils/config";
 import { entryPoint07Address } from "viem/account-abstraction";
-import { privateKeyToAccount } from "viem/accounts";
 import { getReferralTagFromSmartAccount } from "../../utils/helpers/getReferralTagFromSmartAccount";
 
 export const processAchievementClaim = onCall(
@@ -136,11 +135,9 @@ export const processAchievementClaim = onCall(
         rewardTokenAddress: REWARD_TOKEN_ADDRESS,
       });
 
-      const PAX_MASTER_ACCOUNT = privateKeyToAccount(PAX_MASTER_SMART_ACCOUNT);
-
       const paxMasterSmartAccount = await toSimpleSmartAccount({
         client: PUBLIC_CLIENT,
-        owner: PAX_MASTER_ACCOUNT,
+        owner: PAX_MASTER_PRIVATE_KEY_ACCOUNT,
         entryPoint: {
           address: entryPoint07Address,
           version: "0.7",
