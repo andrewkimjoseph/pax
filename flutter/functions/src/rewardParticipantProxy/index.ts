@@ -343,8 +343,11 @@ export const rewardParticipantProxy = onCall(
         );
       }
 
-      const txnHash = userOpReceipt.userOpHash;
-      logger.info("Transaction confirmed", { txnHash });
+      // const txnHash = userOpReceipt.userOpHash;
+      // logger.info("Transaction confirmed", { txnHash });
+
+      const bundleTxnHash = userOpReceipt.receipt.transactionHash;
+      logger.info("Bundle transaction confirmed", { bundleTxnHash });
 
       // Create reward record only after successful transaction
       const rewardRecordId = await createRewardRecord({
@@ -358,11 +361,11 @@ export const rewardParticipantProxy = onCall(
       });
 
       // Update the reward record with the transaction hash
-      await updateRewardWithTxnHash(rewardRecordId, txnHash);
+      await updateRewardWithTxnHash(rewardRecordId, bundleTxnHash);
 
       logger.info("Reward record created and updated with transaction hash", {
         rewardRecordId,
-        txnHash,
+        bundleTxnHash,
       });
 
       // Return complete response with all relevant data
@@ -375,7 +378,7 @@ export const rewardParticipantProxy = onCall(
         participantId,
         signature,
         nonce: nonceString,
-        txnHash,
+        txnHash: bundleTxnHash,
         rewardRecordId,
         amount: rewardAmountPerParticipant,
         rewardCurrencyId,
