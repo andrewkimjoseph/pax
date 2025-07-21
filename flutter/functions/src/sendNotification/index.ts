@@ -1,6 +1,6 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { getMessaging } from "firebase-admin/messaging";
-import { FUNCTION_RUNTIME_OPTS } from "../../utils/config";
+import { AUTH, FUNCTION_RUNTIME_OPTS } from "../../utils/config";
 
 interface SendNotificationParams {
   title: string;
@@ -19,8 +19,7 @@ export const sendNotification = onCall(
       }
       const userId = request.auth.uid;
       // Check if the user is disabled
-      const { getAuth } = await import("firebase-admin/auth");
-      const userRecord = await getAuth().getUser(userId);
+      const userRecord = await AUTH.getUser(userId);
       if (userRecord.disabled) {
         throw new HttpsError("permission-denied", "This user is disabled.");
       }

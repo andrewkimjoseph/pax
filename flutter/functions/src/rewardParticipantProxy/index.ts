@@ -11,6 +11,7 @@ import {
   PUBLIC_CLIENT,
   PIMLICO_URL,
   DB,
+  AUTH,
 } from "../../utils/config";
 import {
   createRewardClaimSignaturePackage,
@@ -56,8 +57,7 @@ export const rewardParticipantProxy = onCall(
 
       const userId = request.auth.uid;
       // Check if the user is disabled
-      const { getAuth } = await import("firebase-admin/auth");
-      const userRecord = await getAuth().getUser(userId);
+      const userRecord = await AUTH.getUser(userId);
       if (userRecord.disabled) {
         throw new HttpsError("permission-denied", "This user is disabled.");
       }

@@ -5,7 +5,6 @@ import { Address, encodeFunctionData, http } from "viem";
 import { entryPoint07Address } from "viem/account-abstraction";
 import { celo } from "viem/chains";
 import { createViemAccount } from "@privy-io/server-auth/viem";
-import { getAuth } from "firebase-admin/auth";
 
 import { paxAccountV1ABI } from "../../utils/abis/paxAccountV1ABI";
 import {
@@ -13,6 +12,7 @@ import {
   PRIVY_CLIENT,
   PUBLIC_CLIENT,
   PIMLICO_URL,
+  AUTH,
 } from "../../utils/config";
 import { createWithdrawalRecord } from "../../utils/helpers/createWithdrawal";
 import { getReferralTagFromSmartAccount } from "../../utils/helpers/getReferralTagFromSmartAccount";
@@ -51,8 +51,7 @@ export const withdrawToPaymentMethod = onCall(
       const userId = request.auth.uid;
 
       // Check user's banned status immediately after authentication
-      const auth = getAuth();
-      const userRecord = await auth.getUser(userId);
+      const userRecord = await AUTH.getUser(userId);
       if (userRecord.disabled) {
         throw new HttpsError("permission-denied", "This user is disabled.");
       }

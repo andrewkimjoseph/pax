@@ -3,7 +3,7 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { logger } from "firebase-functions/v2";
 import { FieldValue } from "firebase-admin/firestore";
 
-import { FUNCTION_RUNTIME_OPTS, DB } from "../../utils/config";
+import { FUNCTION_RUNTIME_OPTS, DB, AUTH } from "../../utils/config";
 
 /**
  * Cloud function to mark a task completion as complete
@@ -30,6 +30,10 @@ export const markTaskCompletionAsComplete = onCall(
       }
 
       const userId = request.auth.uid;
+      const userRecord = await AUTH.getUser(userId);
+      if (userRecord.disabled) {
+        throw new HttpsError("permission-denied", "This user is disabled.");
+      }
       const { screeningId, taskId } = request.data as {
         screeningId: string;
         taskId: string;

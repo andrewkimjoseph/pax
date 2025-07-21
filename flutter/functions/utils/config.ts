@@ -53,3 +53,5 @@ export const PAX_MASTER_PRIVATE_KEY_ACCOUNT = privateKeyToAccount(`0x${PAX_MASTE
 export const DB = admin.firestore;
 
 export const MESSAGING = admin.messaging();
+
+export const AUTH = admin.auth();

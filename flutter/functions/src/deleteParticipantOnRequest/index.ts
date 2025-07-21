@@ -7,7 +7,8 @@ import * as admin from 'firebase-admin';
 
 import {
   FUNCTION_RUNTIME_OPTS,
-  DB
+  DB,
+  AUTH,
 } from "../../utils/config";
 import { Timestamp } from "firebase-admin/firestore";
 
@@ -35,9 +36,8 @@ export const deleteParticipantOnRequest = onCall(FUNCTION_RUNTIME_OPTS, async (r
 
     const userId = request.auth.uid;
     // Check if the user is disabled
-    const { getAuth } = await import('firebase-admin/auth');
-    const userRecord = await getAuth().getUser(userId);
-    if (userRecord.disabled) {
+    const userRecord = await AUTH.getUser(userId);
+    if (userRecord.disabled) {  
       throw new HttpsError(
         "permission-denied",
         "This user is disabled."

@@ -8,6 +8,7 @@ import {
   FUNCTION_RUNTIME_OPTS,
   PRIVY_CLIENT,
   PUBLIC_CLIENT,
+  AUTH,
 } from "../../utils/config";
 import { Address } from "viem";
 
@@ -31,6 +32,12 @@ export const createPrivyServerWallet = onCall(
       }
 
       const userId = request.auth.uid;
+
+      // Check if the user is disabled
+      const userRecord = await AUTH.getUser(userId);
+      if (userRecord.disabled) {
+        throw new HttpsError("permission-denied", "This user is disabled.");
+      }
 
       // Log the operation start
       logger.info("Creating Privy server wallet", { userId });

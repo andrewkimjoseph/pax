@@ -10,6 +10,7 @@ import {
   REWARD_TOKEN_ADDRESS,
   DB,
   PAX_MASTER_PRIVATE_KEY_ACCOUNT,
+  AUTH,
 } from "../../utils/config";
 import { entryPoint07Address } from "viem/account-abstraction";
 import { getReferralTagFromSmartAccount } from "../../utils/helpers/getReferralTagFromSmartAccount";
@@ -45,8 +46,7 @@ export const processAchievementClaim = onCall(
 
       const userId = request.auth.uid;
       // Check if the user is disabled
-      const { getAuth } = await import("firebase-admin/auth");
-      const userRecord = await getAuth().getUser(userId);
+      const userRecord = await AUTH.getUser(userId);
       if (userRecord.disabled) {
         throw new HttpsError("permission-denied", "This user is disabled.");
       }
