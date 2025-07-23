@@ -15,6 +15,8 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "firebase-admin": "^13.4.0"
+    "dotenv": "^17.2.0",
+    "firebase-admin": "^13.4.0",
+    "googleapis": "^153.0.0"
   }
 }
