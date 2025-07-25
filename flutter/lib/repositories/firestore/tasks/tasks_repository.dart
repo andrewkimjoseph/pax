@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:pax/models/firestore/task/task_model.dart';
 import 'package:pax/models/firestore/task_completion/task_completion_model.dart';
 import 'package:rxdart/rxdart.dart';
+import 'dart:async';
 
 class TasksRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -20,16 +21,6 @@ class TasksRepository {
 
   // Constructor
   TasksRepository();
-
-  // // Stream of all tasks
-  // Stream<List<Task>> getTasks() {
-  //   return _tasksCollection
-  //       .orderBy('timeCreated', descending: true)
-  //       .snapshots()
-  //       .map((snapshot) {
-  //         return snapshot.docs.map((doc) => Task.fromFirestore(doc)).toList();
-  //       });
-  // }
 
   Stream<List<Task>> getAvailableTasks(String? participantId) {
     // Build the base query
@@ -93,16 +84,24 @@ class TasksRepository {
           };
         });
 
-    // Combine all streams to filter tasks
-    return Rx.combineLatest3<
+    // Add a timer stream that emits every second
+    final timerStream = Stream<DateTime>.periodic(
+      const Duration(seconds: 1),
+      (_) => DateTime.now().toUtc(),
+    );
+
+    // Combine all streams to filter tasks, including the timer
+    return Rx.combineLatest4<
       List<Task>,
       List<TaskCompletion>,
       Map<String, dynamic>,
+      DateTime,
       List<Task>
-    >(availableTasksStream, completionsStream, screeningsStream, (
+    >(availableTasksStream, completionsStream, screeningsStream, timerStream, (
       availableTasks,
       completions,
       screeningsData,
+      nowUtc,
     ) {
       // Separate completions into those with timeCompleted (fully completed)
       // and those without (in progress)
@@ -135,10 +134,12 @@ class TasksRepository {
         // If participant has been screened for this task, show it
         if (participantScreenedTaskIds.contains(task.id)) return true;
 
-        // Check if the task is past due
-        if (task.deadline != null &&
-            task.deadline!.toDate().isBefore(DateTime.now())) {
-          return false;
+        // Check if the task is past due (compare in UTC)
+        if (task.deadline != null) {
+          final deadlineUtc = task.deadline!.toDate().toUtc();
+          if (deadlineUtc.isBefore(nowUtc)) {
+            return false;
+          }
         }
 
         // For tasks neither completed, in progress, nor screened by this participant,
