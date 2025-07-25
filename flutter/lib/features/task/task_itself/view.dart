@@ -13,6 +13,7 @@ import 'package:pax/providers/local/task_context/task_context_provider.dart';
 import 'package:pax/providers/local/task_completion_state_provider.dart';
 import 'package:pax/services/task_completion_service.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
+import 'package:pax/utils/time_formatter.dart';
 
 class TaskItselfView extends ConsumerStatefulWidget {
   const TaskItselfView({super.key});
@@ -91,11 +92,31 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
     // Parse the original URI
     Uri uri = Uri.parse(taskUrl);
 
-    // Add the authId query parameter to the existing parameters
-    Map<String, dynamic> queryParams = Map<String, String>.from(
+    // Add query parameters to the URL
+    Map<String, String?> queryParams = Map<String, String?>.from(
       uri.queryParameters,
     );
-    queryParams['authId'] = currentParticipant?.id;
+
+    // Add id if available
+    if (currentParticipant?.id != null) {
+      queryParams['id'] = currentParticipant?.id;
+    }
+
+    // Add gender if available
+    if (currentParticipant?.gender != null) {
+      queryParams['gender'] = currentParticipant?.gender;
+    }
+
+    // Add country if available
+    if (currentParticipant?.country != null) {
+      queryParams['country'] = currentParticipant?.country;
+    }
+    // Calculate age from dateOfBirth if available
+    if (currentParticipant?.dateOfBirth != null) {
+      final dateOfBirthAsDateTime = currentParticipant!.dateOfBirth!.toDate();
+      final age = calculateAge(dateOfBirthAsDateTime);
+      queryParams['age'] = age.toString();
+    }
     // Create a new URI with the updated query parameters
     Uri updatedUri = uri.replace(queryParameters: queryParams);
 
