@@ -9,7 +9,7 @@ import { taskManagerV1ABI } from "./abis/taskManagerV1";
 import { paxAccountV1ABI } from "./abis/paxAccountV1";
 import { readContractState, REWARD_TOKEN_ADDRESS } from "./utils/helpers";
 import { erc20ABI } from "./abis/erc20";
-import { deployTaskManager } from "./deploy/deployTaskManager";
+import { deployTaskManagerV2 } from "./deploy/deployTaskManager";
 import { deployPaxAccountProxy } from "./deploy/deployPaxAccount";
 
 // Global variables to store deployed contract addresses
@@ -77,10 +77,10 @@ describe("1. Initial Setup Tests", function () {
 
   it("should deploy TaskManager contract", async function () {
     // Deploy TaskManager with default parameters
-    taskManagerAddress = await deployTaskManager(
+    taskManagerAddress = await deployTaskManagerV2(
       wallets.TASK_MANAGER,
-      parseEther("0.25"), // 0.01 cUSD per participant
-      15n // 5 target participants
+      parseEther("0.15"), // 0.01 cUSD per participant
+      200n // 5 target participants
     );
 
     expect(taskManagerAddress).to.match(/^0x[a-fA-F0-9]{40}$/);

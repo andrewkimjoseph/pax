@@ -12,7 +12,7 @@ import { WalletInfo } from "../utils/wallets";
  * @param rewardTokenAddress Address of the ERC20 token used for rewards
  * @returns The deployed TaskManager contract address
  */
-export async function deployTaskManager(
+export async function deployTaskManagerV2(
   taskManagerWallet: WalletInfo,
   rewardAmount: bigint = parseEther("10"),
   targetParticipants: bigint = 1n,
