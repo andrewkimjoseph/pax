@@ -164,13 +164,6 @@ class _AppState extends ConsumerState<App> {
                                 return const SizedBox.shrink();
                               }
 
-                              if (kDebugMode) {
-                                print(
-                                  'MaintenanceDialog - Maintenance config: ${maintenanceConfig.isUnderMaintenance}',
-                                );
-                                return const SizedBox.shrink();
-                              }
-
                               return const MaintenanceDialog();
                             },
                             loading: () => const SizedBox.shrink(),

@@ -13,31 +13,31 @@ class MaintenanceDialog extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final maintenanceConfigAsync = ref.watch(maintenanceConfigProvider);
 
-    return maintenanceConfigAsync.when(
-      data: (config) {
-        if (kDebugMode) {
-          print(
-            'MaintenanceDialog - Config received: ${config.isUnderMaintenance}',
-          );
-          print('MaintenanceDialog - Message: ${config.message}');
-        }
-
-        if (!config.isUnderMaintenance) {
+    return PopScope(
+      canPop: false,
+      child: maintenanceConfigAsync.when(
+        data: (config) {
           if (kDebugMode) {
             print(
-              'MaintenanceDialog - Not showing: isUnderMaintenance is false',
+              'MaintenanceDialog - Config received: ${config.isUnderMaintenance}',
             );
+            print('MaintenanceDialog - Message: ${config.message}');
           }
-          return const SizedBox.shrink();
-        }
 
-        if (kDebugMode) {
-          print('MaintenanceDialog - Showing maintenance dialog');
-        }
+          if (!config.isUnderMaintenance) {
+            if (kDebugMode) {
+              print(
+                'MaintenanceDialog - Not showing: isUnderMaintenance is false',
+              );
+            }
+            return const SizedBox.shrink();
+          }
 
-        return PopScope(
-          canPop: false,
-          child: Stack(
+          if (kDebugMode) {
+            print('MaintenanceDialog - Showing maintenance dialog');
+          }
+
+          return Stack(
             children: [
               const ModalBarrier(
                 dismissible: false,
@@ -81,21 +81,21 @@ class MaintenanceDialog extends ConsumerWidget {
                 ).withAlign(Alignment.center),
               ),
             ],
-          ),
-        );
-      },
-      loading: () {
-        if (kDebugMode) {
-          print('MaintenanceDialog - Loading state');
-        }
-        return const SizedBox.shrink();
-      },
-      error: (error, stack) {
-        if (kDebugMode) {
-          print('MaintenanceDialog - Error: $error');
-        }
-        return const SizedBox.shrink();
-      },
+          );
+        },
+        loading: () {
+          if (kDebugMode) {
+            print('MaintenanceDialog - Loading state');
+          }
+          return const SizedBox.shrink();
+        },
+        error: (error, stack) {
+          if (kDebugMode) {
+            print('MaintenanceDialog - Error: $error');
+          }
+          return const SizedBox.shrink();
+        },
+      ),
     );
   }
 }

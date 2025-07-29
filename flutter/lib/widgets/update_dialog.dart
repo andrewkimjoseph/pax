@@ -23,25 +23,25 @@ class UpdateDialog extends ConsumerWidget {
 
     return appVersionConfigAsync.when(
       data: (config) {
-        return FutureBuilder<String>(
-          future: getCurrentAppVersion(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) return const SizedBox.shrink();
-            if (snapshot.hasError) return const SizedBox.shrink();
+        return PopScope(
+          canPop: false,
+          child: FutureBuilder<String>(
+            future: getCurrentAppVersion(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const SizedBox.shrink();
+              if (snapshot.hasError) return const SizedBox.shrink();
 
-            final currentAppVersion = snapshot.data!;
-            final needsUpdate =
-                config.forceUpdate &&
-                VersionUtil.isVersionLower(
-                  currentAppVersion,
-                  config.minimumVersion,
-                );
+              final currentAppVersion = snapshot.data!;
+              final needsUpdate =
+                  config.forceUpdate &&
+                  VersionUtil.isVersionLower(
+                    currentAppVersion,
+                    config.minimumVersion,
+                  );
 
-            if (!needsUpdate) return const SizedBox.shrink();
+              if (!needsUpdate) return const SizedBox.shrink();
 
-            return PopScope(
-              canPop: false,
-              child: Stack(
+              return Stack(
                 children: [
                   const ModalBarrier(
                     dismissible: false,
@@ -104,9 +104,9 @@ class UpdateDialog extends ConsumerWidget {
                     ).withAlign(Alignment.center),
                   ),
                 ],
-              ),
-            );
-          },
+              );
+            },
+          ),
         );
       },
       loading: () => const SizedBox.shrink(),
