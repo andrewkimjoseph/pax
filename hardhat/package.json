@@ -4,8 +4,10 @@
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@nomicfoundation/hardhat-toolbox-viem": "^3.0.0",
     "@types/chai": "^4.3.20",
+    "@types/jest": "^30.0.0",
+    "@types/mocha": "^10.0.10",
     "chai": "^4.5.0",
-    "hardhat": "^2.23.0"
+    "hardhat": "^2.26.1"
   },
   "dependencies": {
     "@privy-io/server-auth": "^1.20.2",
