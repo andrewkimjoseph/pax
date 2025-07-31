@@ -83,15 +83,18 @@ class TaskCompletionService {
           'amountEarned': AchievementConstants.taskStarterAmount,
         });
         final fcmToken = await ref.read(fcmTokenProvider.future);
-        ref
-            .read(notificationServiceProvider)
-            .sendAchievementEarnedNotification(
-              token: fcmToken!,
-              achievementData: {
-                'achievementName': AchievementConstants.taskStarter,
-                'amountEarned': AchievementConstants.taskStarterAmount,
-              },
-            );
+
+        if (fcmToken != null) {
+          ref
+              .read(notificationServiceProvider)
+              .sendAchievementEarnedNotification(
+                token: fcmToken,
+                achievementData: {
+                  'achievementName': AchievementConstants.taskStarter,
+                  'amountEarned': AchievementConstants.taskStarterAmount,
+                },
+              );
+        }
       }
 
       // Handle Task Expert achievement
@@ -132,15 +135,18 @@ class TaskCompletionService {
           });
 
           final fcmToken = await ref.read(fcmTokenProvider.future);
-          ref
-              .read(notificationServiceProvider)
-              .sendAchievementEarnedNotification(
-                token: fcmToken!,
-                achievementData: {
-                  'achievementName': AchievementConstants.taskExpert,
-                  'amountEarned': AchievementConstants.taskExpertAmount,
-                },
-              );
+
+          if (fcmToken != null) {
+            ref
+                .read(notificationServiceProvider)
+                .sendAchievementEarnedNotification(
+                  token: fcmToken,
+                  achievementData: {
+                    'achievementName': AchievementConstants.taskExpert,
+                    'amountEarned': AchievementConstants.taskExpertAmount,
+                  },
+                );
+          }
         }
 
         await ref

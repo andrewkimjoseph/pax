@@ -27,7 +27,7 @@ class TaskMasterServerIdNotifier extends Notifier<String?> {
   }
 
   // Set a server ID directly (useful for testing or manual override)
-  void setServerId(String? serverId) {
+  void setServerWalletId(String? serverId) {
     state = serverId;
   }
 }

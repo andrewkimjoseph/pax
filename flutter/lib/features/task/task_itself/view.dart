@@ -336,11 +336,14 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
         ).withPadding(top: 16),
         Divider(color: PaxColors.lightGrey),
       ],
-      child: Stack(
-        children: [
-          WebViewWidget(controller: controller),
-          if (isLoading) Center(child: CircularProgressIndicator()),
-        ],
+      child: PopScope(
+        canPop: false,
+        child: Stack(
+          children: [
+            WebViewWidget(controller: controller),
+            if (isLoading) Center(child: CircularProgressIndicator()),
+          ],
+        ),
       ),
     );
   }

@@ -209,7 +209,7 @@ class TaskCard extends ConsumerWidget {
 
                 ref
                     .read(taskMasterServerIdProvider.notifier)
-                    .setServerId(serverWalletId);
+                    .setServerWalletId(serverWalletId);
 
                 if (screening?.txnHash != null) {
                   ref

@@ -44,7 +44,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
   Widget build(BuildContext context) {
     final featureFlags = ref.watch(featureFlagsProvider);
     final index = ref.watch(homeSelectedIndexProvider);
-    ref.watch(primaryWithdrawalMethodProvider);
+    final primaryWithdrawalMethod = ref.watch(primaryWithdrawalMethodProvider);
 
     return Scaffold(
       headers: [
@@ -112,7 +112,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                             label: 'Tasks',
                                             isActive: index == 1,
                                             onPressed: _onTasksPressed,
-                                            badgeCount: tasks.length,
+                                            badgeCount:
+                                                primaryWithdrawalMethod != null
+                                                    ? tasks.length
+                                                    : null,
                                           ),
                                       loading:
                                           () => _homeTabButton(
