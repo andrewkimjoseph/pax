@@ -55,4 +55,14 @@ List<ForumReport> forumReports = [
     postURI:
         "https://forum.celo.org/t/stablecoin-and-cryptocurrency-adoption-comparing-kenya-and-nigeria/10819",
   ),
+  ForumReport(
+    id: "r1t_1_2",
+    title: "Could Digital Rewards Revolutionise Recycling in Africa",
+    subtitle:
+        "As climate change accelerates and plastic pollution threatens ecosystems across Africa, understanding how to motivate sustainable behaviours becomes increasingly critical.",
+    timePublished: DateTime.parse("2025-07-31"),
+    coverImageURI: "lib/assets/images/reports/r1t_1_2.png",
+    postURI:
+        "https://forum.celo.org/t/could-digital-rewards-revolutionise-recycling-in-africa-new-survey-results-featuring-wayst-recycling/12038",
+  ),
 ];
