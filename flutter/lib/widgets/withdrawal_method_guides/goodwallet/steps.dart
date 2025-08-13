@@ -2,16 +2,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/widgets/gooddollar_step_image.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
-class GoodDollarVerificationSteps extends ConsumerStatefulWidget {
-  const GoodDollarVerificationSteps({super.key});
+class GoodWalletGoodDollarVerificationSteps extends ConsumerStatefulWidget {
+  const GoodWalletGoodDollarVerificationSteps({super.key});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
-      _GoodDollarVerificationStepsState();
+      _GoodWalletGoodDollarVerificationStepsState();
 }
 
-class _GoodDollarVerificationStepsState
-    extends ConsumerState<GoodDollarVerificationSteps> {
+class _GoodWalletGoodDollarVerificationStepsState
+    extends ConsumerState<GoodWalletGoodDollarVerificationSteps> {
   final StepperController controller = StepperController();
 
   @override
@@ -23,7 +23,7 @@ class _GoodDollarVerificationStepsState
         Step(
           title:
               const Text(
-                'Step 1: Download MiniPay > Apps (Mini Apps)',
+                'Step 1: Open GoodWallet (link above) and Continue with Google.',
               ).expanded(),
           contentBuilder: (context) {
             return StepContainer(
@@ -36,13 +36,37 @@ class _GoodDollarVerificationStepsState
                   },
                 ),
               ],
-              child: GoodDollarStepImage('step_1'),
+              child: GoodDollarStepImage('good_wallet/step_1'),
+            );
+          },
+        ),
+        Step(
+          title: const Text("Step 2: Tap the Claim button.").expanded(),
+          contentBuilder: (context) {
+            return StepContainer(
+              actions: [
+                OutlineButton(
+                  child: const Text('Prev'),
+                  onPressed: () {
+                    controller.previousStep();
+                  },
+                ),
+                PrimaryButton(
+                  child: const Text('Next'),
+                  onPressed: () {
+                    controller.nextStep();
+                  },
+                ),
+              ],
+              child: GoodDollarStepImage('good_wallet/step_2'),
             );
           },
         ),
         Step(
           title:
-              const Text("Step 2: Finance > Universal basic income").expanded(),
+              const Text(
+                "Step 3: Tap Verify and confirm you are over 18 years to complete face verification.",
+              ).expanded(),
           contentBuilder: (context) {
             return StepContainer(
               actions: [
@@ -59,12 +83,12 @@ class _GoodDollarVerificationStepsState
                   },
                 ),
               ],
-              child: GoodDollarStepImage('step_2'),
+              child: GoodDollarStepImage('good_wallet/step_3'),
             );
           },
         ),
         Step(
-          title: const Text("Step 3: Claim Now > Verify I'm Human").expanded(),
+          title: const Text("Step 4: Complete face verification.").expanded(),
           contentBuilder: (context) {
             return StepContainer(
               actions: [
@@ -81,34 +105,15 @@ class _GoodDollarVerificationStepsState
                   },
                 ),
               ],
-              child: GoodDollarStepImage('step_3'),
+              child: GoodDollarStepImage('good_wallet/step_4'),
             );
           },
         ),
         Step(
-          title: const Text("Step 4: Sign message").expanded(),
-          contentBuilder: (context) {
-            return StepContainer(
-              actions: [
-                OutlineButton(
-                  child: const Text('Prev'),
-                  onPressed: () {
-                    controller.previousStep();
-                  },
-                ),
-                PrimaryButton(
-                  child: const Text('Next'),
-                  onPressed: () {
-                    controller.nextStep();
-                  },
-                ),
-              ],
-              child: GoodDollarStepImage('step_4'),
-            );
-          },
-        ),
-        Step(
-          title: const Text("Step 5: Complete face verification").expanded(),
+          title:
+              const Text(
+                "Step 5: In the wallet, tap the copy icon and select Celo to get the verified wallet address.",
+              ).expanded(),
           contentBuilder: (context) {
             return StepContainer(
               actions: [
@@ -125,7 +130,7 @@ class _GoodDollarVerificationStepsState
                   },
                 ),
               ],
-              child: GoodDollarStepImage('step_5'),
+              child: GoodDollarStepImage('good_wallet/step_5'),
             );
           },
         ),

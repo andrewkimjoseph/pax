@@ -7,10 +7,10 @@ import 'package:http/http.dart' as http;
 import 'package:pax/env/env.dart';
 import 'package:pax/models/firestore/pax_account/pax_account_model.dart';
 import 'package:pax/repositories/firestore/pax_account/pax_account_repository.dart';
-import 'package:pax/repositories/firestore/payment_method/payment_method_repository.dart';
+import 'package:pax/repositories/firestore/withdrawal_method/withdrawal_method_repository.dart';
 import 'package:pointycastle/digests/keccak.dart';
 
-class MiniPayService {
+class WithdrawalMethodConnectionService {
   final FirebaseFunctions _functions = FirebaseFunctions.instance;
   final PaxAccountRepository _paxAccountRepository;
   final WithdrawalMethodRepository _withdrawalMethodRepository;
@@ -22,7 +22,7 @@ class MiniPayService {
   final String _whitelistContractAddress =
       "0xC361A6E67822a0EDc17D899227dd9FC50BD62F42";
 
-  MiniPayService({
+  WithdrawalMethodConnectionService({
     required PaxAccountRepository paxAccountRepository,
     required WithdrawalMethodRepository withdrawalMethodRepository,
   }) : _paxAccountRepository = paxAccountRepository,
@@ -46,11 +46,17 @@ class MiniPayService {
     required String userId,
     required String paxAccountId,
     required String walletAddress,
+    required String name,
+    required int predefinedId,
+    String? txnHash,
   }) async {
     await _withdrawalMethodRepository.createWithdrawalMethod(
       participantId: userId,
       paxAccountId: paxAccountId,
       walletAddress: walletAddress,
+      name: name,
+      predefinedId: predefinedId,
+      txnHash: txnHash,
     );
   }
 
@@ -68,9 +74,16 @@ class MiniPayService {
   }
 
   // Check if wallet is GoodDollar verified
-  Future<bool> isGoodDollarVerified(String walletAddress) async {
+  Future<bool> isGoodDollarVerified(
+    String walletAddress,
+    bool checkWhitelist,
+  ) async {
     try {
       // Use logic from whitelist_status.dart
+      if (!checkWhitelist) {
+        return true;
+      }
+
       final rootAddress = await _getWhitelistedRoot(walletAddress);
 
       if (rootAddress == "0x0000000000000000000000000000000000000000") {
@@ -158,88 +171,126 @@ class MiniPayService {
     }
   }
 
-  // Connect wallet to PaxAccount and create payment method (transaction-like pattern)
-  Future<bool> connectWallet({
-    required String userId,
-    required String walletAddress,
+  Future<Map<String, dynamic>> addNonPrimaryPaymentMethodToPaxAccount({
+    required String withdrawalMethod,
+    required String serverWalletId,
+    required int predefinedId,
+    required String contractAddress,
   }) async {
     try {
-      // 1. Get PaxAccount
-      final paxAccount = await _paxAccountRepository.getAccount(userId);
-      if (paxAccount == null) {
-        throw Exception('PaxAccount not found');
-      }
-
-      // 2. Get or create server wallet - will use existing if available
-      Map<String, dynamic> serverWalletData;
-      if (paxAccount.serverWalletId != null &&
-          paxAccount.serverWalletId!.isNotEmpty &&
-          paxAccount.serverWalletAddress != null &&
-          paxAccount.serverWalletAddress!.isNotEmpty &&
-          paxAccount.smartAccountWalletAddress != null &&
-          paxAccount.smartAccountWalletAddress!.isNotEmpty) {
-        // Use existing server wallet
-        serverWalletData = {
-          'serverWalletId': paxAccount.serverWalletId,
-          'serverWalletAddress': paxAccount.serverWalletAddress,
-          'smartAccountWalletAddress': paxAccount.smartAccountWalletAddress,
-        };
-      } else {
-        // Create a new server wallet
-        serverWalletData = await createServerWallet();
-
-        // Update PaxAccount with server wallet data immediately
-        // This is critical to prevent creating duplicate server wallets if later steps fail
-        await _paxAccountRepository.updateAccount(userId, {
-          'serverWalletId': serverWalletData['serverWalletId'],
-          'serverWalletAddress': serverWalletData['serverWalletAddress'],
-          'smartAccountWalletAddress':
-              serverWalletData['smartAccountWalletAddress'],
-        });
-      }
-
-      // 3. Get or deploy contract
-      Map<String, dynamic> contractData;
-      if (paxAccount.contractAddress != null &&
-          paxAccount.contractAddress!.isNotEmpty &&
-          paxAccount.contractCreationTxnHash != null &&
-          paxAccount.contractCreationTxnHash!.isNotEmpty) {
-        // Use existing contract
-        contractData = {
-          'contractAddress': paxAccount.contractAddress,
-          'contractCreationTxnHash': paxAccount.contractCreationTxnHash,
-        };
-      } else {
-        // Deploy a new contract
-        contractData = await deployPaxAccountV1ProxyContractAddress(
-          walletAddress,
-          serverWalletData['serverWalletId'],
-        );
-
-        // Update PaxAccount with contract data immediately
-        await _paxAccountRepository.updateAccount(userId, {
-          'contractAddress': contractData['contractAddress'],
-          'contractCreationTxnHash':
-              contractData['contractCreationTxnHash'] ??
-              contractData['txnHash'],
-        });
-      }
-
-      // 4. Create payment method
-      await _withdrawalMethodRepository.createWithdrawalMethod(
-        participantId: userId,
-        paxAccountId: paxAccount.id,
-        walletAddress: walletAddress,
+      // Create callable function
+      final callable = _functions.httpsCallable(
+        'addNonPrimaryWithdrawalMethodToPaxAccountV1Proxy',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 300)),
       );
 
-      return true;
+      // Call the function with parameters
+      final result = await callable.call({
+        'walletAddress': withdrawalMethod,
+        '_paymentMethodId': predefinedId,
+        'serverWalletId': serverWalletId,
+        'contractAddress': contractAddress,
+      });
+
+      if (result.data == null) {
+        throw Exception('Contract interaction failed - empty response');
+      }
+
+      return Map<String, dynamic>.from(result.data);
     } catch (e) {
       if (kDebugMode) {
-        print('Error connecting wallet: $e');
+        print('Error interacting with smart contract: $e');
       }
-      return false;
+      rethrow;
     }
   }
+
+  // Connect wallet to PaxAccount and create payment method (transaction-like pattern)
+  // Future<bool> connectWallet({
+  //   required String userId,
+  //   required String walletAddress,
+  //   required int predefinedId,
+  //   required String name,
+  // }) async {
+  //   try {
+  //     // 1. Get PaxAccount
+  //     final paxAccount = await _paxAccountRepository.getAccount(userId);
+  //     if (paxAccount == null) {
+  //       throw Exception('PaxAccount not found');
+  //     }
+
+  //     // 2. Get or create server wallet - will use existing if available
+  //     Map<String, dynamic> serverWalletData;
+  //     if (paxAccount.serverWalletId != null &&
+  //         paxAccount.serverWalletId!.isNotEmpty &&
+  //         paxAccount.serverWalletAddress != null &&
+  //         paxAccount.serverWalletAddress!.isNotEmpty &&
+  //         paxAccount.smartAccountWalletAddress != null &&
+  //         paxAccount.smartAccountWalletAddress!.isNotEmpty) {
+  //       // Use existing server wallet
+  //       serverWalletData = {
+  //         'serverWalletId': paxAccount.serverWalletId,
+  //         'serverWalletAddress': paxAccount.serverWalletAddress,
+  //         'smartAccountWalletAddress': paxAccount.smartAccountWalletAddress,
+  //       };
+  //     } else {
+  //       // Create a new server wallet
+  //       serverWalletData = await createServerWallet();
+
+  //       // Update PaxAccount with server wallet data immediately
+  //       // This is critical to prevent creating duplicate server wallets if later steps fail
+  //       await _paxAccountRepository.updateAccount(userId, {
+  //         'serverWalletId': serverWalletData['serverWalletId'],
+  //         'serverWalletAddress': serverWalletData['serverWalletAddress'],
+  //         'smartAccountWalletAddress':
+  //             serverWalletData['smartAccountWalletAddress'],
+  //       });
+  //     }
+
+  //     // 3. Get or deploy contract
+  //     Map<String, dynamic> contractData;
+  //     if (paxAccount.contractAddress != null &&
+  //         paxAccount.contractAddress!.isNotEmpty &&
+  //         paxAccount.contractCreationTxnHash != null &&
+  //         paxAccount.contractCreationTxnHash!.isNotEmpty) {
+  //       // Use existing contract
+  //       contractData = {
+  //         'contractAddress': paxAccount.contractAddress,
+  //         'contractCreationTxnHash': paxAccount.contractCreationTxnHash,
+  //       };
+  //     } else {
+  //       // Deploy a new contract
+  //       contractData = await deployPaxAccountV1ProxyContractAddress(
+  //         walletAddress,
+  //         serverWalletData['serverWalletId'],
+  //       );
+
+  //       // Update PaxAccount with contract data immediately
+  //       await _paxAccountRepository.updateAccount(userId, {
+  //         'contractAddress': contractData['contractAddress'],
+  //         'contractCreationTxnHash':
+  //             contractData['contractCreationTxnHash'] ??
+  //             contractData['txnHash'],
+  //       });
+  //     }
+
+  //     // 4. Create payment method
+  //     await _withdrawalMethodRepository.createWithdrawalMethod(
+  //       participantId: userId,
+  //       paxAccountId: paxAccount.id,
+  //       walletAddress: walletAddress,
+  //       predefinedId: predefinedId,
+  //       name: name,
+  //     );
+
+  //     return true;
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       print('Error connecting wallet: $e');
+  //     }
+  //     return false;
+  //   }
+  // }
 
   // Rest of the service methods remain the same...
   // Helper method to get the root whitelisted address (from whitelist_status.dart)
