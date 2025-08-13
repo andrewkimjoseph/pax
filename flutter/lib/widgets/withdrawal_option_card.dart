@@ -8,9 +8,9 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:intl/intl.dart';
 
 class WalletOptionCard extends ConsumerWidget {
-  const WalletOptionCard(this.paymentMethod, {super.key});
+  const WalletOptionCard(this.withdrawalMethod, {super.key});
 
-  final WithdrawalMethod paymentMethod;
+  final WithdrawalMethod withdrawalMethod;
 
   void _toggleSelection(WidgetRef ref, bool isSelected) {
     if (isSelected) {
@@ -20,7 +20,7 @@ class WalletOptionCard extends ConsumerWidget {
       // If not selected, select it
       ref
           .read(withdrawContextProvider.notifier)
-          .setSelectedPaymentMethod(paymentMethod);
+          .setSelectedPaymentMethod(withdrawalMethod);
     }
   }
 
@@ -30,61 +30,70 @@ class WalletOptionCard extends ConsumerWidget {
 
     // Determine if this payment method is currently selected
     final isSelected =
-        withdrawContext?.selectedPaymentMethod?.id == paymentMethod.id;
+        withdrawContext?.selectedWithdrawalMethod?.id == withdrawalMethod.id;
 
     return InkWell(
       onTap: () => _toggleSelection(ref, isSelected),
 
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(7),
-            child: SvgPicture.asset(
-              'lib/assets/svgs/${paymentMethod.name.toLowerCase()}.svg',
-              height: 48,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: PaxColors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: PaxColors.lightLilac, width: 1),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(7),
+              child: SvgPicture.asset(
+                'lib/assets/svgs/wallets/${withdrawalMethod.name.toLowerCase()}.svg',
+                height: 48,
+              ),
+            ).withPadding(right: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      toBeginningOfSentenceCase(withdrawalMethod.name),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 18,
+                        color: PaxColors.black,
+                      ),
+                    ),
+                  ],
+                ).withPadding(bottom: 8),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${withdrawalMethod.walletAddress.substring(0, 20)}...',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                        color: PaxColors.lilac,
+                      ),
+                    ),
+                  ],
+                ).withPadding(bottom: 8),
+              ],
             ),
-          ).withPadding(right: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    toBeginningOfSentenceCase(paymentMethod.name),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 18,
-                      color: PaxColors.black,
-                    ),
-                  ),
-                ],
-              ).withPadding(bottom: 8),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    '${paymentMethod.walletAddress.substring(0, 20)}...',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                      color: PaxColors.lilac,
-                    ),
-                  ),
-                ],
-              ).withPadding(bottom: 8),
-            ],
-          ),
-          const Spacer(),
-          Checkbox(
-            state: isSelected ? CheckboxState.checked : CheckboxState.unchecked,
-            onChanged: (_) => _toggleSelection(ref, isSelected),
-          ),
-        ],
+            const Spacer(),
+            Checkbox(
+              state:
+                  isSelected ? CheckboxState.checked : CheckboxState.unchecked,
+              onChanged: (_) => _toggleSelection(ref, isSelected),
+            ),
+          ],
+        ),
       ),
     );
   }

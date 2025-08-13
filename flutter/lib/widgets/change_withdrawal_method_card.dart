@@ -31,7 +31,7 @@ class _ChangeWithdrawalMethodCardState
         ClipRRect(
           borderRadius: BorderRadius.circular(7),
           child: SvgPicture.asset(
-            'lib/assets/svgs/${widget.paymentMethod.name.toLowerCase()}.svg',
+            'lib/assets/svgs/wallets/${widget.paymentMethod.name.toLowerCase()}.svg',
             height: 48,
           ),
         ).withPadding(right: 16),

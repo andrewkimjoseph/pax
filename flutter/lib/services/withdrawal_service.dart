@@ -30,7 +30,7 @@ class WithdrawalService {
   Future<Map<String, dynamic>> withdrawToPaymentMethod({
     required String userId,
     required String paymentMethodId,
-    int predefinedId = 1,
+    required int predefinedId,
     required double amountToWithdraw,
     required int tokenId,
     required String currencyAddress,

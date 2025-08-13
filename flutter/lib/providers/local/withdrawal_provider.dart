@@ -24,12 +24,14 @@ class WithdrawNotifier extends Notifier<WithdrawStateModel> {
     return WithdrawStateModel();
   }
 
-  Future<void> withdrawToPaymentMethod({
+  Future<void> withdrawToWithdrawalMethod({
     required String paymentMethodId,
     required double amountToWithdraw,
     required int tokenId,
     required String currencyAddress,
     required String selectedWalletAddress,
+    required int predefinedId,
+    required String walletName,
     int decimals = 18,
   }) async {
     if (state.isSubmitting) return; // Prevent multiple submissions
@@ -79,6 +81,7 @@ class WithdrawNotifier extends Notifier<WithdrawStateModel> {
         tokenId: tokenId,
         currencyAddress: currencyAddress,
         decimals: decimals,
+        predefinedId: predefinedId,
       );
 
       if (kDebugMode) {
@@ -117,6 +120,7 @@ class WithdrawNotifier extends Notifier<WithdrawStateModel> {
             'currencySymbol': currencySymbol,
             'txnHash': result['txnHash'],
           },
+          wallet: walletName,
         );
       }
 

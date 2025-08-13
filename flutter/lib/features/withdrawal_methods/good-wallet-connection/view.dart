@@ -1,4 +1,3 @@
-// views/minipay_connection_view.dart (refactored to use provider)
 import 'package:flutter/material.dart' show Divider, InkWell;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
@@ -10,22 +9,23 @@ import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/withdrawal_method/withdrawal_method_provider.dart';
 import 'package:pax/providers/withdrawal_method_connection/withdrawal_method_connection_provider.dart';
 import 'package:pax/theming/colors.dart';
-import 'package:pax/widgets/withdrawal_method_guides/minipay_gooddapp/steps.dart';
+import 'package:pax/widgets/withdrawal_method_guides/goodwallet/steps.dart';
 import 'package:pax/services/notifications/notification_service.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
 import 'package:pax/utils/url_handler.dart';
 
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider, Consumer;
 
-class MiniPayConnectionView extends ConsumerStatefulWidget {
-  const MiniPayConnectionView({super.key});
+class GoodWalletConnectionView extends ConsumerStatefulWidget {
+  const GoodWalletConnectionView({super.key});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
-      _MiniPayConnectionViewState();
+      _GoodWalletConnectionViewState();
 }
 
-class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
+class _GoodWalletConnectionViewState
+    extends ConsumerState<GoodWalletConnectionView> {
   final TextEditingController _walletAddressController =
       TextEditingController();
   bool _isShowingDialog = false;
@@ -51,7 +51,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
     _isConnecting = true;
     FocusManager.instance.primaryFocus?.unfocus();
     ref.read(analyticsProvider).connectMinipayTapped();
-    final miniPayWalletAddress = _walletAddressController.text.trim();
+    final goodWalletAddress = _walletAddressController.text.trim();
     final authState = ref.read(authProvider);
 
     final withdrawalMethods =
@@ -68,9 +68,9 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
         .read(withdrawalConnectionProvider.notifier)
         .connectWalletAddress(
           userId: authState.user.uid,
-          walletAddress: miniPayWalletAddress,
+          walletAddress: goodWalletAddress,
           checkWhitelist: withdrawalMethods.isEmpty,
-          name: 'MiniPay',
+          name: 'GoodWallet',
           predefinedId: withdrawalMethods.length + 1,
         );
   }
@@ -212,7 +212,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                 ).withPadding(bottom: 8),
 
                 const Text(
-                  'MiniPay Wallet Connected Successfully',
+                  'GoodWallet Connected Successfully',
                   style: TextStyle(
                     color: PaxColors.deepPurple,
                     fontSize: 16,
@@ -259,7 +259,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
         await notificationService.sendPaymentMethodLinkedNotification(
           token: fcmToken,
           paymentData: {
-            'paymentMethodName': 'MiniPay',
+            'paymentMethodName': 'GoodWallet',
             'walletAddress': _walletAddressController.text.trim(),
           },
         );
@@ -312,7 +312,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
               ),
               const Spacer(),
               const Text(
-                "Connect Your MiniPay",
+                "Connect Your GoodWallet",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 20),
               ).withPadding(right: 16),
@@ -339,12 +339,12 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: SvgPicture.asset(
-                        'lib/assets/svgs/minipay.svg',
+                        'lib/assets/svgs/wallets/goodwallet.svg',
                         height: 50,
                       ),
                     ),
                     const Text(
-                      "Paste MiniPay Wallet Address",
+                      "Paste GoodWallet Address",
                       textAlign: TextAlign.left,
                       style: TextStyle(
                         fontSize: 18,
@@ -352,7 +352,6 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                       ),
                     ).withPadding(vertical: 20),
 
-                    // _buildErrorMessage(connectionState).animate().fadeIn(),
                     Container(
                       padding: const EdgeInsets.all(8),
                       width: MediaQuery.of(context).size.width,
@@ -494,12 +493,12 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                           onTap:
                               () => UrlHandler.launchCustomTab(
                                 context,
-                                'https://play.google.com/store/apps/details?id=com.opera.minipay&hl=en',
+                                'http://goodwallet.xyz?inviteCode=2TWZbDwPWN',
                               ),
                           child: Row(
                             children: [
                               const Text(
-                                "Set up a MiniPay wallet",
+                                "Set up your GoodWallet",
                                 textAlign: TextAlign.left,
                                 style: TextStyle(
                                   color: PaxColors.black,
@@ -543,8 +542,9 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                       ],
                     ),
 
-                    const MiniPayGoodDappGoodDollarVerificationSteps()
-                        .withPadding(vertical: 8),
+                    const GoodWalletGoodDollarVerificationSteps().withPadding(
+                      vertical: 8,
+                    ),
                   ],
                 ),
               ),

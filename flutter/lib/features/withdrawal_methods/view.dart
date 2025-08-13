@@ -3,14 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
-import 'package:pax/providers/db/payment_method/payment_method_provider.dart';
+import 'package:pax/providers/db/withdrawal_method/withdrawal_method_provider.dart';
 import 'package:pax/widgets/payment_method_cards/minipay_payment_method_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
 import 'package:pax/utils/remote_config_constants.dart';
 import 'package:pax/providers/remote_config/remote_config_provider.dart';
 import 'package:flutter/foundation.dart';
-
 import '../../theming/colors.dart' show PaxColors;
+import '../../widgets/payment_method_cards/good_wallet_withdrawal_method_card.dart';
 
 class WithdrawalMethodsView extends ConsumerStatefulWidget {
   const WithdrawalMethodsView({super.key});
@@ -24,7 +24,9 @@ class _WithdrawalMethodsViewState extends ConsumerState<WithdrawalMethodsView> {
   @override
   Widget build(BuildContext context) {
     final featureFlags = ref.watch(featureFlagsProvider);
-    final minipay = ref.watch(primaryWithdrawalMethodProvider);
+
+    final withdrawalMethods =
+        ref.watch(withdrawalMethodsProvider).withdrawalMethods;
 
     return featureFlags.when(
       data: (flags) {
@@ -59,9 +61,7 @@ class _WithdrawalMethodsViewState extends ConsumerState<WithdrawalMethodsView> {
             Divider(color: PaxColors.lightGrey),
           ],
           child:
-              kDebugMode ||
-                      (isWithdrawalMethodConnectionAvailable == true) ||
-                      (minipay != null)
+              kDebugMode || (isWithdrawalMethodConnectionAvailable == true)
                   ? SingleChildScrollView(
                     child: Column(
                       children: [
@@ -79,13 +79,40 @@ class _WithdrawalMethodsViewState extends ConsumerState<WithdrawalMethodsView> {
                           child: Column(
                             children: [
                               MiniPayPaymentMethodCard(
-                                minipay,
+                                withdrawalMethods.isNotEmpty
+                                    ? withdrawalMethods
+                                        .where(
+                                          (method) => method.name
+                                              .toLowerCase()
+                                              .contains('minipay'),
+                                        )
+                                        .firstOrNull
+                                    : null,
                                 callBack: () {
                                   ref
                                       .read(analyticsProvider)
-                                      .minipayPaymentMethodCardTapped();
+                                      .minipayWithdrawalMethodCardTapped();
                                   context.push(
                                     "/withdrawal-methods/minipay-connection",
+                                  );
+                                },
+                              ).withPadding(bottom: 8),
+                              GoodWalletWithdrawalMethodCard(
+                                withdrawalMethods.isNotEmpty
+                                    ? withdrawalMethods
+                                        .where(
+                                          (method) => method.name
+                                              .toLowerCase()
+                                              .contains('goodwallet'),
+                                        )
+                                        .firstOrNull
+                                    : null,
+                                callBack: () {
+                                  ref
+                                      .read(analyticsProvider)
+                                      .goodWalletWithdrawalMethodCardTapped();
+                                  context.push(
+                                    "/withdrawal-methods/good-wallet-connection",
                                   );
                                 },
                               ),
@@ -94,7 +121,7 @@ class _WithdrawalMethodsViewState extends ConsumerState<WithdrawalMethodsView> {
                         ),
                       ],
                     ),
-                  ).withPadding(all: 8)
+                  ).withPadding(horizontal: 8)
                   : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

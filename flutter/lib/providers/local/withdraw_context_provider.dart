@@ -6,14 +6,13 @@ class WithdrawContext {
   final int tokenId;
   final num balance;
   final num? amountToWithdraw;
-  final WithdrawalMethod?
-  selectedPaymentMethod; // Store the actual PaymentMethod object
+  final WithdrawalMethod? selectedWithdrawalMethod;
 
   WithdrawContext({
     required this.tokenId,
     required this.balance,
     this.amountToWithdraw,
-    this.selectedPaymentMethod,
+    this.selectedWithdrawalMethod,
   });
 
   // Create a copy with updated values
@@ -21,14 +20,14 @@ class WithdrawContext {
     int? tokenId,
     num? balance,
     num? amountToWithdraw,
-    WithdrawalMethod? selectedPaymentMethod,
+    WithdrawalMethod? selectedWithdrawalMethod,
   }) {
     return WithdrawContext(
       tokenId: tokenId ?? this.tokenId,
       balance: balance ?? this.balance,
       amountToWithdraw: amountToWithdraw ?? this.amountToWithdraw,
-      selectedPaymentMethod:
-          selectedPaymentMethod ?? this.selectedPaymentMethod,
+      selectedWithdrawalMethod:
+          selectedWithdrawalMethod ?? this.selectedWithdrawalMethod,
     );
   }
 }
@@ -61,7 +60,7 @@ class WithdrawContextNotifier extends Notifier<WithdrawContext?> {
       tokenId: state!.tokenId,
       balance: state!.balance,
       amountToWithdraw: state!.amountToWithdraw,
-      selectedPaymentMethod: method,
+      selectedWithdrawalMethod: method,
     );
   }
 
