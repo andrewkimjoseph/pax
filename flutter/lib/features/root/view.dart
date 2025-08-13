@@ -66,6 +66,7 @@ class _RootViewState extends ConsumerState<RootView> {
       AchievementConstants.payoutConnector,
       AchievementConstants.profilePerfectionist,
       AchievementConstants.verifiedHuman,
+      AchievementConstants.doublePayoutConnector,
     ];
     final userAchievementNames =
         achievementState.achievements

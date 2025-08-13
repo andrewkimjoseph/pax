@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart' show Badge;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:pax/exports/views.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/achievement/achievement_provider.dart';
-import 'package:pax/providers/db/payment_method/payment_method_provider.dart';
+import 'package:pax/providers/db/withdrawal_method/withdrawal_method_provider.dart';
 import 'package:pax/providers/remote_config/remote_config_provider.dart';
 import 'package:pax/utils/remote_config_constants.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/db/tasks/task_provider.dart';
 import 'package:pax/providers/route/home_selected_index_provider.dart';
+import 'package:pax/utils/url_handler.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Consumer;
 import '../../theming/colors.dart' show PaxColors;
 import 'package:pax/utils/achievement_constants.dart';
@@ -49,7 +51,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
     return Scaffold(
       headers: [
         AppBar(
-          height: 87.5,
+          height: 97.5,
           padding: EdgeInsets.all(8),
           backgroundColor: PaxColors.white,
           header: Row(
@@ -77,6 +79,28 @@ class _HomeViewState extends ConsumerState<HomeView> {
               //     'lib/assets/svgs/active_notification.svg',
               //   ),
               // ),
+              Badge(
+                offset: const Offset(5, -5),
+                // backgroundColor: PaxColors.green,
+                isLabelVisible: true,
+                backgroundColor: PaxColors.red,
+                smallSize: 15,
+                label: Text(""),
+                child: IconButton.primary(
+                  onPressed: () async {
+                    ref.read(analyticsProvider).goodWalletTapped();
+                    UrlHandler.launchCustomTab(
+                      context,
+                      'http://goodwallet.xyz?inviteCode=2TWZbDwPWN',
+                    );
+                  },
+                  density: ButtonDensity.icon,
+                  icon: SvgPicture.asset(
+                    'lib/assets/svgs/wallets/goodwallet.svg',
+                    height: 30,
+                  ),
+                ),
+              ),
             ],
           ).withPadding(bottom: 8),
           subtitle: Column(

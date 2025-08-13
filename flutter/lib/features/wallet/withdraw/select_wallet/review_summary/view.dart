@@ -49,9 +49,9 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
 
     final amountToWithdraw = withdrawContext.amountToWithdraw;
     final tokenId = withdrawContext.tokenId;
-    final paymentMethod = withdrawContext.selectedPaymentMethod;
+    final withdrawalMethod = withdrawContext.selectedWithdrawalMethod;
 
-    if (paymentMethod == null) {
+    if (withdrawalMethod == null) {
       _showErrorDialog('No payment method selected');
       return;
     }
@@ -68,19 +68,21 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
     ref.read(analyticsProvider).withdrawalStarted({
       "amount": amountToWithdraw,
       "tokenId": tokenId,
-      "selectedPaymentMethodId": paymentMethod.id,
-      "selectedWalletAddress": paymentMethod.walletAddress,
+      "selectedPaymentMethodId": withdrawalMethod.id,
+      "selectedWalletAddress": withdrawalMethod.walletAddress,
     });
 
     ref
         .read(withdrawProvider.notifier)
-        .withdrawToPaymentMethod(
-          paymentMethodId: paymentMethod.id,
+        .withdrawToWithdrawalMethod(
+          paymentMethodId: withdrawalMethod.id,
           amountToWithdraw: amountToWithdraw!.toDouble(),
           tokenId: tokenId,
           currencyAddress: currencyAddress,
           decimals: decimals,
-          selectedWalletAddress: paymentMethod.walletAddress,
+          selectedWalletAddress: withdrawalMethod.walletAddress,
+          predefinedId: withdrawalMethod.predefinedId,
+          walletName: withdrawalMethod.name,
         );
 
     // Show processing dialog
@@ -152,7 +154,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
     final withdrawContext = ref.read(withdrawContextProvider);
     final amountToWithdraw = withdrawContext?.amountToWithdraw ?? 0;
 
-    final paymentMethod = withdrawContext?.selectedPaymentMethod;
+    final paymentMethod = withdrawContext?.selectedWithdrawalMethod;
 
     final tokenId = withdrawContext?.tokenId;
 
@@ -286,7 +288,7 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
     final withdrawContext = ref.watch(withdrawContextProvider);
     final amountToWithdraw = withdrawContext?.amountToWithdraw ?? 1;
     final tokenId = withdrawContext?.tokenId ?? 0;
-    final paymentMethod = withdrawContext?.selectedPaymentMethod;
+    final paymentMethod = withdrawContext?.selectedWithdrawalMethod;
     final featureFlags = ref.watch(featureFlagsProvider);
 
     return Scaffold(

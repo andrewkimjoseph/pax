@@ -60,6 +60,10 @@ class Achievement {
             : 'Complete $tasksNeededForCompletion task${tasksNeededForCompletion == 1 ? '' : 's'}';
       case AchievementConstants.taskExpert:
         return isCompleted ? 'Completed 10 tasks' : 'Complete 10 tasks';
+      case AchievementConstants.doublePayoutConnector:
+        return isCompleted
+            ? 'Connected two payment methods'
+            : 'Connect two payment methods';
       default:
         return '';
     }
@@ -77,6 +81,8 @@ class Achievement {
         return 'task_starter';
       case AchievementConstants.taskExpert:
         return 'task_expert';
+      case AchievementConstants.doublePayoutConnector:
+        return 'payout_connector';
       default:
         return '';
     }

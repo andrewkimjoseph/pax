@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
-import 'package:pax/providers/db/payment_method/payment_method_provider.dart';
+import 'package:pax/providers/db/withdrawal_method/withdrawal_method_provider.dart';
 import 'package:pax/providers/local/withdraw_context_provider.dart';
 import 'package:pax/widgets/withdrawal_option_card.dart';
 import 'package:pax/theming/colors.dart';
@@ -28,7 +28,7 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
     final withdrawContext = ref.watch(withdrawContextProvider);
 
     // Button is enabled only when a payment method is selected
-    final isContinueEnabled = withdrawContext?.selectedPaymentMethod != null;
+    final isContinueEnabled = withdrawContext?.selectedWithdrawalMethod != null;
 
     return Scaffold(
       headers: [
@@ -60,7 +60,7 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.only(top: 8, left: 8, right: 8),
             width: double.infinity,
             decoration: BoxDecoration(
               color: PaxColors.white,
@@ -69,23 +69,10 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
             ),
             child: Column(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: PaxColors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: PaxColors.lightLilac, width: 1),
+                if (withdrawalMethods.isNotEmpty)
+                  ...withdrawalMethods.map(
+                    (method) => WalletOptionCard(method).withPadding(bottom: 8),
                   ),
-                  child: Column(
-                    children: [
-                      // Show payment methods if available
-                      if (withdrawalMethods.isNotEmpty)
-                        ...withdrawalMethods.map(
-                          (method) => WalletOptionCard(method),
-                        ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
@@ -113,7 +100,7 @@ class _SelectWalletViewState extends ConsumerState<SelectWalletView> {
                                     "tokenId": withdrawContext?.tokenId,
                                     "selectedPaymentMethodId":
                                         withdrawContext
-                                            ?.selectedPaymentMethod
+                                            ?.selectedWithdrawalMethod
                                             ?.id,
                                   });
                               context.push(

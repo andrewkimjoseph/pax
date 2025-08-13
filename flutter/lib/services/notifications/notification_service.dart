@@ -324,11 +324,12 @@ class NotificationService {
   Future<void> sendWithdrawalSuccessNotification({
     required String token,
     required Map<String, dynamic> withdrawalData,
+    required String wallet,
   }) async {
     await sendRemoteNotification(
       title: 'Withdrawal Successful! 💸',
       body:
-          'Your withdrawal of ${_formatAmount(withdrawalData['amount'])} ${withdrawalData['currencySymbol']} has been processed. Check your MiniPay ${withdrawalData['currencySymbol']} balance.',
+          'Your withdrawal of ${_formatAmount(withdrawalData['amount'])} ${withdrawalData['currencySymbol']} has been processed. Check your $wallet ${withdrawalData['currencySymbol']} balance.',
       token: token,
       data: {'type': 'withdrawal_success', ...withdrawalData},
     );

@@ -35,6 +35,7 @@ class _AccountOptionCardState extends ConsumerState<AccountOptionCard> {
       requiredAchievements = [
         AchievementConstants.payoutConnector,
         AchievementConstants.verifiedHuman,
+        AchievementConstants.doublePayoutConnector,
       ];
     }
     final missingCount =

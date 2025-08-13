@@ -177,14 +177,17 @@ class AnalyticsProvider {
   Future<void> paymentMethodsTapped([Map<String, dynamic>? properties]) =>
       _logEvent('payment_methods_tapped', properties: properties);
 
-  Future<void> minipayPaymentMethodCardTapped([
+  Future<void> minipayWithdrawalMethodCardTapped([
     Map<String, dynamic>? properties,
-  ]) => _logEvent('minipay_payment_method_card_tapped', properties: properties);
+  ]) => _logEvent(
+    'minipay_withdrawal_method_card_tapped',
+    properties: properties,
+  );
 
   Future<void> connectMinipayTapped([Map<String, dynamic>? properties]) =>
       _logEvent('connect_minipay_tapped', properties: properties);
 
-  Future<void> minipayConnectionComplete([
+  Future<void> withdrawalMethodConnectionComplete([
     Map<String, dynamic>? properties,
   ]) async {
     Map<String, dynamic> eventProperties =
@@ -193,13 +196,15 @@ class AnalyticsProvider {
         );
 
     return _logEvent(
-      'minipay_connection_complete',
+      'withdrawal_method_connection_complete',
       properties: eventProperties,
     );
   }
 
-  Future<void> minipayConnectionFailed([Map<String, dynamic>? properties]) =>
-      _logEvent('minipay_connection_failed', properties: properties);
+  Future<void> withdrawalMethodConnectionFailed([
+    Map<String, dynamic>? properties,
+  ]) =>
+      _logEvent('withdrawal_method_connection_failed', properties: properties);
 
   Future<void> helpAndSupportTapped([Map<String, dynamic>? properties]) =>
       _logEvent('help_and_support_tapped', properties: properties);
@@ -285,6 +290,16 @@ class AnalyticsProvider {
 
   Future<void> telegramTapped([Map<String, dynamic>? properties]) =>
       _logEvent('telegram_tapped', properties: properties);
+
+  Future<void> goodWalletTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('good_wallet_tapped', properties: properties);
+
+  Future<void> goodWalletWithdrawalMethodCardTapped([
+    Map<String, dynamic>? properties,
+  ]) => _logEvent(
+    'good_wallet_withdrawal_method_card_tapped',
+    properties: properties,
+  );
 }
 
 final analyticsProvider = Provider<AnalyticsProvider>((ref) {

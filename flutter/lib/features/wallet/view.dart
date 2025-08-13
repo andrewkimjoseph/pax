@@ -2,9 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
-import 'package:pax/providers/db/payment_method/payment_method_provider.dart';
+import 'package:pax/providers/db/withdrawal_method/withdrawal_method_provider.dart';
 import 'package:pax/widgets/current_balance_card.dart';
 import 'package:pax/widgets/payment_method_cards/minipay_payment_method_card.dart';
+import 'package:pax/widgets/payment_method_cards/good_wallet_withdrawal_method_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import '../../theming/colors.dart' show PaxColors;
@@ -24,7 +25,8 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
 
   @override
   Widget build(BuildContext context) {
-    final minipay = ref.watch(primaryWithdrawalMethodProvider);
+    final withdrawalMethods =
+        ref.watch(withdrawalMethodsProvider).withdrawalMethods;
 
     return Scaffold(
       headers: [
@@ -78,13 +80,40 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                   Column(
                     children: [
                       MiniPayPaymentMethodCard(
-                        minipay,
+                        withdrawalMethods.isNotEmpty
+                            ? withdrawalMethods
+                                .where(
+                                  (method) => method.name
+                                      .toLowerCase()
+                                      .contains('minipay'),
+                                )
+                                .firstOrNull
+                            : null,
                         callBack: () {
                           ref.read(analyticsProvider).paymentMethodTapped({
                             "paymentMethodName": "MiniPay",
                           });
                           context.push(
                             "/withdrawal-methods/minipay-connection",
+                          );
+                        },
+                      ).withPadding(bottom: 8),
+                      GoodWalletWithdrawalMethodCard(
+                        withdrawalMethods.isNotEmpty
+                            ? withdrawalMethods
+                                .where(
+                                  (method) => method.name
+                                      .toLowerCase()
+                                      .contains('goodwallet'),
+                                )
+                                .firstOrNull
+                            : null,
+                        callBack: () {
+                          ref
+                              .read(analyticsProvider)
+                              .goodWalletWithdrawalMethodCardTapped();
+                          context.push(
+                            "/withdrawal-methods/good-wallet-connection",
                           );
                         },
                       ),

@@ -118,7 +118,7 @@ class _HelpAndSupportViewState extends ConsumerState<HelpAndSupportView> {
 
   void _onPrivacyPolicyTapped() {
     ref.read(analyticsProvider).privacyPolicyTapped();
-    UrlHandler.launchInAppWebView(
+    UrlHandler.launchCustomTab(
       context,
       "https://canvassing.notion.site/Pax-PRIVACY-POLICY-2145e1ccc593803e87cdc48c334dc4de?pvs=74",
     );
@@ -126,7 +126,7 @@ class _HelpAndSupportViewState extends ConsumerState<HelpAndSupportView> {
 
   void _onTermsOfServiceTapped() {
     ref.read(analyticsProvider).termsOfServiceTapped();
-    UrlHandler.launchInAppWebView(
+    UrlHandler.launchCustomTab(
       context,
       "https://canvassing.notion.site/Pax-TERMS-OF-SERVICE-2145e1ccc593803d8c44e6ec05c695e7",
     );
@@ -134,7 +134,7 @@ class _HelpAndSupportViewState extends ConsumerState<HelpAndSupportView> {
 
   void _onAboutUsTapped() {
     ref.read(analyticsProvider).aboutUsTapped();
-    UrlHandler.launchInAppWebView(
+    UrlHandler.launchCustomTab(
       context,
       "https://optimistic-volunteers-396150.framer.app/",
     );

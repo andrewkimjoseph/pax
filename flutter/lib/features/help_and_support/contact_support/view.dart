@@ -83,7 +83,7 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
                   InkWell(
                     onTap: () {
                       ref.read(analyticsProvider).raiseTicketTapped();
-                      UrlHandler.launchInAppWebView(
+                      UrlHandler.launchCustomTab(
                         context,
                         "https://tally.so/r/nGy7V2?authId=${participant?.id}",
                       );
@@ -97,7 +97,7 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
                   InkWell(
                     onTap: () {
                       ref.read(analyticsProvider).websiteTapped();
-                      UrlHandler.launchInAppWebView(
+                      UrlHandler.launchCustomTab(
                         context,
                         "https://thecanvassing.xyz",
                       );
@@ -107,7 +107,8 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
                   InkWell(
                     onTap: () {
                       ref.read(analyticsProvider).contactSupportXTapped();
-                      UrlHandler.launchInExternalBrowser(
+                      UrlHandler.launchCustomTab(
+                        context,
                         "https://x.com/thecanvassing",
                       );
                     },
@@ -117,7 +118,7 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
                   InkWell(
                     onTap: () {
                       ref.read(analyticsProvider).whatsappTapped();
-                      UrlHandler.launchInExternalBrowser(whatsappChannelLink);
+                      UrlHandler.launchCustomTab(context, whatsappChannelLink);
                     },
                     child: ContactSupportCard('WhatsApp', 'whatsapp'),
                   ),
@@ -125,7 +126,7 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
                   InkWell(
                     onTap: () {
                       ref.read(analyticsProvider).telegramTapped();
-                      UrlHandler.launchInExternalBrowser(telegramChannelLink);
+                      UrlHandler.launchCustomTab(context, telegramChannelLink);
                     },
                     child: ContactSupportCard('Telegram', 'telegram'),
                   ),

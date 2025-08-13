@@ -19,7 +19,7 @@ class _XFollowButtonState extends ConsumerState<XFollowButton> {
     return Button(
       onPressed: () {
         ref.read(analyticsProvider).xFollowTapped();
-        UrlHandler.launchInExternalBrowser('https://x.com/thecanvassing');
+        UrlHandler.launchCustomTab(context, 'https://x.com/thecanvassing');
       },
       disableHoverEffect: true,
       disableTransition: true,

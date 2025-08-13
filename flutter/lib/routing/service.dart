@@ -6,6 +6,7 @@ import 'package:pax/features/claim_reward/view.dart';
 import 'package:pax/features/report_page/view.dart';
 import 'package:pax/features/task/task_itself/view.dart';
 import 'package:pax/features/webview/view.dart';
+import 'package:pax/features/withdrawal_methods/good-wallet-connection/view.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/route/route_notifier_provider.dart';
@@ -183,6 +184,12 @@ final routerProvider = Provider((ref) {
             builder:
                 (BuildContext context, GoRouterState state) =>
                     MiniPayConnectionView(),
+          ),
+          GoRoute(
+            path: "good-wallet-connection",
+            builder:
+                (BuildContext context, GoRouterState state) =>
+                    GoodWalletConnectionView(),
           ),
         ],
       ),

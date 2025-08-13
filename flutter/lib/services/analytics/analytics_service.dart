@@ -96,7 +96,7 @@ class AnalyticsService {
       branchEvent: BranchEvent.customEvent(eventName),
     );
 
-    Clarity.sendCustomEvent(eventName);
+    // Clarity.sendCustomEvent(eventName);
   }
 
   /// Logs a user property.

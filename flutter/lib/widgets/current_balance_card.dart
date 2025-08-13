@@ -282,6 +282,21 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
                     loading: () => const SizedBox.shrink(),
                     error: (_, __) => const SizedBox.shrink(),
                   ),
+
+              const Spacer(),
+
+              // http://goodwallet.xyz?inviteCode=2TWZbDwPWN
+              // if (widget.nextLocation == "/wallet")
+              //   IconButton.outline(
+              //     onPressed: () async {
+              //       _launchUrl(context);
+              //     },
+              //     density: ButtonDensity.icon,
+              //     icon: SvgPicture.asset(
+              //       'lib/assets/logos/good_wallet.svg',
+              //       height: 25,
+              //     ),
+              //   ),
             ],
           ),
         ],

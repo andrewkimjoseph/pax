@@ -7,6 +7,8 @@ class AchievementConstants {
   static const String taskExpert = "Task Expert";
   static const String profilePerfectionist = "Profile Perfectionist";
   static const String payoutConnector = "Payout Connector";
+  static const String doublePayoutConnector = "Double Payout Connector";
+
   static const String verifiedHuman = "Verified Human";
 
   // Achievement Amounts
@@ -14,6 +16,7 @@ class AchievementConstants {
   static const int taskExpertAmount = 1000;
   static const int profilePerfectionistAmount = 400;
   static const int payoutConnectorAmount = 500;
+  static const int doublePayoutConnectorAmount = 500;
   static const int verifiedHumanAmount = 500;
 
   // Achievement Tasks Needed
@@ -21,6 +24,7 @@ class AchievementConstants {
   static const int taskExpertTasksNeeded = 10;
   static const int profilePerfectionistTasksNeeded = 1;
   static const int payoutConnectorTasksNeeded = 1;
+  static const int doublePayoutConnectorTasksNeeded = 1;
   static const int verifiedHumanTasksNeeded = 1;
 
   // Helper method to get amount for achievement

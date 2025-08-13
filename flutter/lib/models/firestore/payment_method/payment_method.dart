@@ -10,17 +10,19 @@ class WithdrawalMethod {
   final String participantId;
   final String paxAccountId;
   final String name;
+  final String? txnHash;
   final String walletAddress;
   final Timestamp? timeCreated;
   final Timestamp? timeUpdated;
 
   WithdrawalMethod({
     required this.id,
-    this.predefinedId = 1,
+    required this.predefinedId,
     required this.participantId,
     required this.paxAccountId,
-    this.name = 'MiniPay',
+    required this.name,
     required this.walletAddress,
+    this.txnHash,
     this.timeCreated,
     this.timeUpdated,
   });
@@ -34,6 +36,7 @@ class WithdrawalMethod {
       'paxAccountId': paxAccountId,
       'name': name,
       'walletAddress': walletAddress,
+      'txnHash': txnHash,
       'timeCreated': timeCreated,
       'timeUpdated': timeUpdated,
     };
@@ -46,11 +49,12 @@ class WithdrawalMethod {
   }) {
     return WithdrawalMethod(
       id: id,
-      predefinedId: map['predefinedId'] ?? 1,
+      predefinedId: map['predefinedId'] ?? -1,
       participantId: map['participantId'] ?? '',
       paxAccountId: map['paxAccountId'] ?? '',
-      name: map['name'] ?? 'minipay',
+      name: map['name'] ?? '',
       walletAddress: map['walletAddress'] ?? '',
+      txnHash: map['txnHash'],
       timeCreated: map['timeCreated'],
       timeUpdated: map['timeUpdated'],
     );
