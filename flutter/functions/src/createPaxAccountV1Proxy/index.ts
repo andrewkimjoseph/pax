@@ -6,7 +6,7 @@ import { entryPoint07Address } from "viem/account-abstraction";
 import { celo } from "viem/chains";
 import { createViemAccount } from "@privy-io/server-auth/viem";
 import {
-  PAXACCOUNT_IMPLEMENTATION_ADDRESS,
+  PAXACCOUNT_V1_IMPLEMENTATION_ADDRESS,
   FUNCTION_RUNTIME_OPTS,
   CREATE2_FACTORY,
   PRIVY_CLIENT,
@@ -174,7 +174,7 @@ export const createPaxAccountV1Proxy = onCall(
 
       // Get deployment data with salt for CREATE2
       const { deployData } = getProxyDeployDataAndSalt(
-        PAXACCOUNT_IMPLEMENTATION_ADDRESS,
+        PAXACCOUNT_V1_IMPLEMENTATION_ADDRESS,
         _owner,
         _primaryPaymentMethod as Address // Use the provided wallet address as primary payment method
       );
@@ -229,7 +229,7 @@ export const createPaxAccountV1Proxy = onCall(
 
       logger.info("PaxAccount proxy deployed successfully", {
         proxyAddress,
-        implementationAddress: PAXACCOUNT_IMPLEMENTATION_ADDRESS,
+        implementationAddress: PAXACCOUNT_V1_IMPLEMENTATION_ADDRESS,
       });
 
       // Return the contract address and transaction hash

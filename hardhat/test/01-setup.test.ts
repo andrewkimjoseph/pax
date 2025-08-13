@@ -79,8 +79,8 @@ describe("1. Initial Setup Tests", function () {
     // Deploy TaskManager with default parameters
     taskManagerAddress = await deployTaskManagerV2(
       wallets.TASK_MANAGER,
-      parseEther("0.15"), // 0.01 cUSD per participant
-      200n // 5 target participants
+      parseEther("1500"), // 0.01 cUSD per participant
+      54n // 5 target participants
     );
 
     expect(taskManagerAddress).to.match(/^0x[a-fA-F0-9]{40}$/);

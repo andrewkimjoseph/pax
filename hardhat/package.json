@@ -7,7 +7,8 @@
     "@types/jest": "^30.0.0",
     "@types/mocha": "^10.0.10",
     "chai": "^4.5.0",
-    "hardhat": "^2.26.1"
+    "hardhat": "^2.26.1",
+    "ts-node": "^10.9.2"
   },
   "dependencies": {
     "@privy-io/server-auth": "^1.20.2",
