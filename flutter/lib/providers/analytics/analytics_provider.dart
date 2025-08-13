@@ -300,6 +300,9 @@ class AnalyticsProvider {
     'good_wallet_withdrawal_method_card_tapped',
     properties: properties,
   );
+
+  Future<void> connectGoodWalletTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('connect_good_wallet_tapped', properties: properties);
 }
 
 final analyticsProvider = Provider<AnalyticsProvider>((ref) {
