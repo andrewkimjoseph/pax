@@ -50,7 +50,7 @@ class _GoodWalletConnectionViewState
     if (_isConnecting) return;
     _isConnecting = true;
     FocusManager.instance.primaryFocus?.unfocus();
-    ref.read(analyticsProvider).connectMinipayTapped();
+    ref.read(analyticsProvider).connectGoodWalletTapped();
     final goodWalletAddress = _walletAddressController.text.trim();
     final authState = ref.read(authProvider);
 
@@ -282,6 +282,9 @@ class _GoodWalletConnectionViewState
       _isConnecting = false;
     }
 
+    final checkWhitelist =
+        ref.watch(withdrawalMethodsProvider).withdrawalMethods.isEmpty;
+
     return Scaffold(
       footers: [
         Container(
@@ -352,77 +355,78 @@ class _GoodWalletConnectionViewState
                       ),
                     ).withPadding(vertical: 20),
 
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      width: MediaQuery.of(context).size.width,
-                      decoration: BoxDecoration(
-                        color: PaxColors.otherOrange.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: PaxColors.otherOrange,
-                          width: 2,
-                        ),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              FaIcon(
-                                FontAwesomeIcons.triangleExclamation,
-                                color: PaxColors.otherOrange,
-                                size: 25,
-                              ).withPadding(right: 4),
-                              // SvgPicture.asset(
-                              //   'lib/assets/svgs/verification_required.svg',
-                              // ).withPadding(right: 8),
-                            ],
+                    if (checkWhitelist)
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                          color: PaxColors.otherOrange.withValues(alpha: 0.4),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: PaxColors.otherOrange,
+                            width: 2,
                           ),
-
-                          Expanded(
-                            child: Column(
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                InkWell(
-                                  // onTap:
-                                  //     () => UrlHandler.launchInAppWebView(
-                                  //       context,
-                                  //       'https://www.gooddollar.org/blog-posts/face-verification-challenge-identity',
-                                  //     ),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-
-                                    children: [
-                                      SvgPicture.asset(
-                                        'lib/assets/svgs/currencies/good_dollar.svg',
-                                        height: 30,
-                                      ),
-
-                                      const Text(
-                                        " Face Verification Required",
-                                        style: TextStyle(
-                                          color: PaxColors.deepPurple,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      // .withPadding(right: 8),
-
-                                      // SvgPicture.asset(
-                                      //   'lib/assets/svgs/redirect_window.svg',
-                                      //   height: 15,
-                                      // ),
-                                    ],
-                                  ),
-                                ),
-                                // ),
+                                FaIcon(
+                                  FontAwesomeIcons.triangleExclamation,
+                                  color: PaxColors.otherOrange,
+                                  size: 25,
+                                ).withPadding(right: 4),
+                                // SvgPicture.asset(
+                                //   'lib/assets/svgs/verification_required.svg',
+                                // ).withPadding(right: 8),
                               ],
                             ),
-                          ),
-                        ],
-                      ),
-                    ).withPadding(bottom: 20),
+
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  InkWell(
+                                    // onTap:
+                                    //     () => UrlHandler.launchInAppWebView(
+                                    //       context,
+                                    //       'https://www.gooddollar.org/blog-posts/face-verification-challenge-identity',
+                                    //     ),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+
+                                      children: [
+                                        SvgPicture.asset(
+                                          'lib/assets/svgs/currencies/good_dollar.svg',
+                                          height: 30,
+                                        ),
+
+                                        const Text(
+                                          " Face Verification Required",
+                                          style: TextStyle(
+                                            color: PaxColors.deepPurple,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        // .withPadding(right: 8),
+
+                                        // SvgPicture.asset(
+                                        //   'lib/assets/svgs/redirect_window.svg',
+                                        //   height: 15,
+                                        // ),
+                                      ],
+                                    ),
+                                  ),
+                                  // ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ).withPadding(bottom: 20),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
