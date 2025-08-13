@@ -10,9 +10,6 @@ interface TelegramMessage {
   parse_mode?: string;
 }
 
-// Use a simple in-memory cache to track processed emails within this function instance
-const processedEmails = new Set<string>();
-
 export const notifyPaxTotifierAboutNewUser = beforeUserCreated(
   async (event) => {
     try {
@@ -22,7 +19,6 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(
           eventId: event.eventId,
           eventType: event.eventType,
           timestamp: new Date().toISOString(),
-          processedEmailsCount: processedEmails.size,
         }
       );
 
@@ -36,7 +32,6 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(
         return;
       }
 
-      // Use only email as the unique identifier
       const userEmail = user.email;
 
       if (!userEmail) {
@@ -45,42 +40,6 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(
         });
         return;
       }
-
-      logger.info("User data received", {
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-        userEmail,
-        eventId: event.eventId,
-      });
-
-      // Check if we've already processed this email in this function instance
-      if (processedEmails.has(userEmail)) {
-        logger.info(
-          "Email already processed in this function instance, skipping",
-          {
-            userEmail,
-            eventId: event.eventId,
-            processedEmailsCount: processedEmails.size,
-            allProcessedEmails: Array.from(processedEmails),
-          }
-        );
-        return;
-      }
-
-      logger.info("Checking if user exists in Auth by email", {
-        userEmail,
-        eventId: event.eventId,
-      });
-
-      // Mark email as processed BEFORE sending notification to prevent duplicates
-      processedEmails.add(userEmail);
-
-      logger.info("Email marked as processed, proceeding with notification", {
-        userEmail,
-        eventId: event.eventId,
-        processedEmailsCount: processedEmails.size,
-      });
 
       logger.info("Processing new user notification", {
         email: user.email,
@@ -118,28 +77,13 @@ export const notifyPaxTotifierAboutNewUser = beforeUserCreated(
         userEmail,
         telegramChatId: TELEGRAM_CHAT_ID,
         eventId: event.eventId,
-        processedEmailsCount: processedEmails.size,
       });
 
-      // Clean up old entries to prevent memory leaks
-      // Keep only the last 100 processed emails
-      if (processedEmails.size > 100) {
-        const entries = Array.from(processedEmails);
-        processedEmails.clear();
-        entries.slice(-50).forEach((entry) => processedEmails.add(entry));
-
-        logger.info("Cleaned up processed emails cache", {
-          previousSize: entries.length,
-          newSize: processedEmails.size,
-          eventId: event.eventId,
-        });
-      }
     } catch (error) {
       logger.error("Error in notifyPaxTotifierAboutNewUser", {
         error: error instanceof Error ? error.message : "Unknown error",
         stack: error instanceof Error ? error.stack : undefined,
         eventId: event.eventId,
-        processedEmailsCount: processedEmails.size,
       });
     }
   }
