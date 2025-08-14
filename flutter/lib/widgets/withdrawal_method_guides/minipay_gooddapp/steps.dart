@@ -37,7 +37,7 @@ class _MinipayGoodDappGoodDollarVerificationStepsState
                   },
                 ),
               ],
-              child: GoodDollarStepImage('step_1'),
+              child: GoodDollarStepImage('step_1', 'minipay-connection'),
             );
           },
         ),
@@ -62,7 +62,7 @@ class _MinipayGoodDappGoodDollarVerificationStepsState
                   },
                 ),
               ],
-              child: GoodDollarStepImage('step_2'),
+              child: GoodDollarStepImage('step_2', 'minipay-connection'),
             );
           },
         ),
@@ -84,7 +84,7 @@ class _MinipayGoodDappGoodDollarVerificationStepsState
                   },
                 ),
               ],
-              child: GoodDollarStepImage('step_3'),
+              child: GoodDollarStepImage('step_3', 'minipay-connection'),
             );
           },
         ),
@@ -106,7 +106,7 @@ class _MinipayGoodDappGoodDollarVerificationStepsState
                   },
                 ),
               ],
-              child: GoodDollarStepImage('step_4'),
+              child: GoodDollarStepImage('step_4', 'minipay-connection'),
             );
           },
         ),
@@ -128,7 +128,7 @@ class _MinipayGoodDappGoodDollarVerificationStepsState
                   },
                 ),
               ],
-              child: GoodDollarStepImage('step_5'),
+              child: GoodDollarStepImage('step_5', 'minipay-connection'),
             );
           },
         ),

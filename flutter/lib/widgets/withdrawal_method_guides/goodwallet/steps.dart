@@ -36,7 +36,10 @@ class _GoodWalletGoodDollarVerificationStepsState
                   },
                 ),
               ],
-              child: GoodDollarStepImage('good_wallet/step_1'),
+              child: GoodDollarStepImage(
+                'good_wallet/step_1',
+                'good-wallet-connection',
+              ),
             );
           },
         ),
@@ -58,7 +61,10 @@ class _GoodWalletGoodDollarVerificationStepsState
                   },
                 ),
               ],
-              child: GoodDollarStepImage('good_wallet/step_2'),
+              child: GoodDollarStepImage(
+                'good_wallet/step_2',
+                'good-wallet-connection',
+              ),
             );
           },
         ),
@@ -83,7 +89,10 @@ class _GoodWalletGoodDollarVerificationStepsState
                   },
                 ),
               ],
-              child: GoodDollarStepImage('good_wallet/step_3'),
+              child: GoodDollarStepImage(
+                'good_wallet/step_3',
+                'good-wallet-connection',
+              ),
             );
           },
         ),
@@ -105,7 +114,10 @@ class _GoodWalletGoodDollarVerificationStepsState
                   },
                 ),
               ],
-              child: GoodDollarStepImage('good_wallet/step_4'),
+              child: GoodDollarStepImage(
+                'good_wallet/step_4',
+                'good-wallet-connection',
+              ),
             );
           },
         ),
@@ -130,7 +142,10 @@ class _GoodWalletGoodDollarVerificationStepsState
                   },
                 ),
               ],
-              child: GoodDollarStepImage('good_wallet/step_5'),
+              child: GoodDollarStepImage(
+                'good_wallet/step_5',
+                'good-wallet-connection',
+              ),
             );
           },
         ),
