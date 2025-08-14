@@ -10,10 +10,11 @@ import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/withdrawal_method/withdrawal_method_provider.dart';
 import 'package:pax/providers/withdrawal_method_connection/withdrawal_method_connection_provider.dart';
 import 'package:pax/theming/colors.dart';
-import 'package:pax/widgets/withdrawal_method_guides/minipay_gooddapp/steps.dart';
+import 'package:pax/widgets/withdrawal_method_guides/minipay/with_face_verification/steps.dart';
 import 'package:pax/services/notifications/notification_service.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
 import 'package:pax/utils/url_handler.dart';
+import 'package:pax/widgets/withdrawal_method_guides/minipay/without_face_verification/steps.dart';
 
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider, Consumer;
 
@@ -519,34 +520,62 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                       ],
                     ).withPadding(bottom: 8),
                     const Divider().withPadding(vertical: 8),
-                    Row(
-                      children: [
-                        const Text(
-                          "How to complete ",
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
 
-                        SvgPicture.asset(
-                          'lib/assets/svgs/currencies/good_dollar.svg',
-                          height: 20,
-                        ),
-                        const Text(
-                          " Face Verification:",
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w900,
+                    if (checkWhitelist)
+                      Row(
+                        children: [
+                          const Text(
+                            "How to complete ",
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w900,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
 
-                    const MiniPayGoodDappGoodDollarVerificationSteps()
-                        .withPadding(vertical: 8),
+                          SvgPicture.asset(
+                            'lib/assets/svgs/currencies/good_dollar.svg',
+                            height: 20,
+                          ),
+                          const Text(
+                            " Face Verification:",
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                    if (!checkWhitelist)
+                      Row(
+                        children: [
+                          const Text(
+                            "How to connect ",
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: SvgPicture.asset(
+                              'lib/assets/svgs/minipay.svg',
+                              height: 20,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                    if (checkWhitelist)
+                      const MiniPayLinkingStepsWithFaceVerification()
+                          .withPadding(vertical: 8),
+                    if (!checkWhitelist)
+                      const MiniPayLinkingStepsWithoutFaceVerification()
+                          .withPadding(vertical: 8),
                   ],
                 ),
               ),
