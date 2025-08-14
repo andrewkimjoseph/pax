@@ -75,6 +75,7 @@ dependencies:
   cached_network_image: ^3.4.1
   firebase_app_check: ^0.3.2+8
   flutter_custom_tabs: ^2.4.0
+  photo_view: ^0.15.0
 
 dev_dependencies:
   flutter_test:
