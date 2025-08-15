@@ -99,36 +99,36 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
 
   // Dialog showing processing state
   Widget _buildProcessingDialog() {
-    return Consumer(
-      builder: (context, ref, _) {
-        final withdrawState = ref.watch(withdrawProvider);
+    return PopScope(
+      canPop: false,
+      child: Consumer(
+        builder: (context, ref, _) {
+          final withdrawState = ref.watch(withdrawProvider);
 
-        // Handle different withdrawal states
-        if (withdrawState.state == WithdrawState.success) {
-          // Dismiss the dialog after a short delay
-          Future.delayed(Duration(milliseconds: 500), () {
-            if (context.mounted) {
-              context.pop();
-            }
+          // Handle different withdrawal states
+          if (withdrawState.state == WithdrawState.success) {
+            // Dismiss the dialog after a short delay
+            Future.delayed(Duration(milliseconds: 500), () {
+              if (context.mounted) {
+                context.pop();
+              }
 
-            _showSuccessDialog();
-          });
-        } else if (withdrawState.state == WithdrawState.error) {
-          // Dismiss the dialog after a short delay
-          Future.delayed(Duration(milliseconds: 500), () {
-            if (context.mounted) {
-              context.pop();
-            }
-            _showErrorDialog(
-              withdrawState.errorMessage ?? 'An unknown error occurred',
-            );
-          });
-        }
+              _showSuccessDialog();
+            });
+          } else if (withdrawState.state == WithdrawState.error) {
+            // Dismiss the dialog after a short delay
+            Future.delayed(Duration(milliseconds: 500), () {
+              if (context.mounted) {
+                context.pop();
+              }
+              _showErrorDialog(
+                withdrawState.errorMessage ?? 'An unknown error occurred',
+              );
+            });
+          }
 
-        // Show loading indicator
-        return PopScope(
-          canPop: false,
-          child: AlertDialog(
+          // Show loading indicator
+          return AlertDialog(
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -143,9 +143,9 @@ class _ReviewSummaryViewState extends ConsumerState<ReviewSummaryView> {
                 ),
               ],
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
