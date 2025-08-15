@@ -303,6 +303,12 @@ class AnalyticsProvider {
 
   Future<void> connectGoodWalletTapped([Map<String, dynamic>? properties]) =>
       _logEvent('connect_good_wallet_tapped', properties: properties);
+
+  Future<void> setUpGoodWalletTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('set_up_good_wallet_tapped', properties: properties);
+
+  Future<void> setUpMiniPayTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('set_up_minipay_tapped', properties: properties);
 }
 
 final analyticsProvider = Provider<AnalyticsProvider>((ref) {
