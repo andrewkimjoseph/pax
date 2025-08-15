@@ -9,6 +9,7 @@ import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/withdrawal_method/withdrawal_method_provider.dart';
 import 'package:pax/providers/withdrawal_method_connection/withdrawal_method_connection_provider.dart';
 import 'package:pax/theming/colors.dart';
+import 'package:pax/utils/secret_constants.dart';
 import 'package:pax/widgets/withdrawal_method_guides/goodwallet/with_face_verification/steps.dart';
 import 'package:pax/services/notifications/notification_service.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
@@ -495,11 +496,14 @@ class _GoodWalletConnectionViewState
                           ),
                         ).withPadding(right: 2),
                         InkWell(
-                          onTap:
-                              () => UrlHandler.launchCustomTab(
-                                context,
-                                'http://goodwallet.xyz?inviteCode=2TWZbDwPWN',
-                              ),
+                          onTap: () {
+                            ref.read(analyticsProvider).setUpGoodWalletTapped();
+
+                            UrlHandler.launchCustomTab(
+                              context,
+                              goodWalletInviteLink,
+                            );
+                          },
                           child: Row(
                             children: [
                               const Text(

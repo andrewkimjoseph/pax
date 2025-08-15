@@ -10,6 +10,7 @@ import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/withdrawal_method/withdrawal_method_provider.dart';
 import 'package:pax/providers/withdrawal_method_connection/withdrawal_method_connection_provider.dart';
 import 'package:pax/theming/colors.dart';
+import 'package:pax/utils/secret_constants.dart';
 import 'package:pax/widgets/withdrawal_method_guides/minipay/with_face_verification/steps.dart';
 import 'package:pax/services/notifications/notification_service.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
@@ -494,11 +495,13 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                           ),
                         ).withPadding(right: 2),
                         InkWell(
-                          onTap:
-                              () => UrlHandler.launchCustomTab(
-                                context,
-                                'https://play.google.com/store/apps/details?id=com.opera.minipay&hl=en',
-                              ),
+                          onTap: () {
+                            ref.read(analyticsProvider).setUpMiniPayTapped();
+                            UrlHandler.launchCustomTab(
+                              context,
+                              minipayInviteLink,
+                            );
+                          },
                           child: Row(
                             children: [
                               const Text(
