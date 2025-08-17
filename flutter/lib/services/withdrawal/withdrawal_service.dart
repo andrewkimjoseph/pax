@@ -79,6 +79,11 @@ class WithdrawalMethodConnectionService {
     bool checkWhitelist,
   ) async {
     try {
+      // First, validate that the wallet address is a valid Ethereum address
+      if (!isValidEthereumAddress(walletAddress)) {
+        return false;
+      }
+
       // Use logic from whitelist_status.dart
       if (!checkWhitelist) {
         return true;
