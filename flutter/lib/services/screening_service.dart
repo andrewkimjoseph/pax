@@ -8,9 +8,11 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
+import 'package:pax/providers/db/withdrawal_method/withdrawal_method_provider.dart';
 import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/providers/local/screening_state_provider.dart';
 import 'package:pax/providers/local/screening_context/screening_context_provider.dart';
+import 'package:pax/providers/withdrawal_method_connection/withdrawal_method_connection_provider.dart';
 
 class ScreeningService {
   final Ref ref;
@@ -27,6 +29,31 @@ class ScreeningService {
     try {
       // Update state to loading
       ref.read(screeningProvider.notifier).startScreening();
+
+      final withdrawalMethods =
+          ref.read(withdrawalMethodsProvider).withdrawalMethods;
+
+      // Check if at least one withdrawal method is GoodDollar verified
+      final withdrawalService = ref.read(withdrawalServiceProvider);
+      bool hasVerifiedMethod = false;
+
+      for (final withdrawalMethod in withdrawalMethods) {
+        final isVerified = await withdrawalService.isGoodDollarVerified(
+          withdrawalMethod.walletAddress,
+          true, // checkWhitelist = true
+        );
+        if (isVerified) {
+          hasVerifiedMethod = true;
+          break;
+        }
+      }
+
+      // If no withdrawal method is verified, fail the screening
+      if (!hasVerifiedMethod) {
+        throw Exception(
+          'You need to re-verify one of your withdrawal methods.',
+        );
+      }
 
       // Call the Firebase function
       final httpsCallable = FirebaseFunctions.instance.httpsCallable(
