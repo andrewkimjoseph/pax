@@ -619,11 +619,17 @@ class WithdrawalMethodConnectionNotifier
 
     // Check if withdrawal methods exist before accessing first element
     if (withdrawalMethod.withdrawalMethods.isNotEmpty) {
+      final withdrawalMethodData =
+          withdrawalMethod.withdrawalMethods.first.toMap();
+
+      withdrawalMethodData.addAll({
+        "currentWithdrawalMethodCount":
+            withdrawalMethod.withdrawalMethods.length,
+      });
+
       ref
           .read(analyticsProvider)
-          .withdrawalMethodConnectionComplete(
-            withdrawalMethod.withdrawalMethods.first.toMap(),
-          );
+          .withdrawalMethodConnectionComplete(withdrawalMethodData);
     } else {
       if (kDebugMode) {
         print('Warning: No withdrawal methods found for analytics');
@@ -679,7 +685,10 @@ class WithdrawalMethodConnectionNotifier
             withdrawalMethod.withdrawalMethods[predefinedId - 1].toMap(),
           );
     } else {
-      ref.read(analyticsProvider).withdrawalMethodConnectionComplete({});
+      ref.read(analyticsProvider).withdrawalMethodConnectionComplete({
+        "currentWithdrawalMethodCount":
+            withdrawalMethod.withdrawalMethods.length,
+      });
     }
   }
 
