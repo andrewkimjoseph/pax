@@ -38,12 +38,12 @@ class _TaskViewState extends ConsumerState<TasksView> {
             participant?.dateOfBirth != null &&
             participant?.gender != null);
 
-    final hasPaymentMethod = paxAccount?.contractAddress != null;
+    final hasDeployedPaxAccount = paxAccount?.contractAddress != null;
 
     // Combine tasks and screenings
     return Scaffold(
       child:
-          !hasPaymentMethod
+          !hasDeployedPaxAccount
               ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
