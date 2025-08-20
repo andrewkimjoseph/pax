@@ -496,7 +496,9 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                         ).withPadding(right: 2),
                         InkWell(
                           onTap: () {
-                            ref.read(analyticsProvider).setUpMiniPayTapped();
+                            ref.read(analyticsProvider).setUpMiniPayTapped({
+                              "inviteCode": minipayInviteCode,
+                            });
                             UrlHandler.launchCustomTab(
                               context,
                               minipayInviteLink,

@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/db/tasks/task_provider.dart';
 import 'package:pax/providers/route/home_selected_index_provider.dart';
+import 'package:pax/utils/secret_constants.dart';
 import 'package:pax/utils/url_handler.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Consumer;
 import '../../theming/colors.dart' show PaxColors;
@@ -88,11 +89,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 label: Text(""),
                 child: IconButton.primary(
                   onPressed: () async {
-                    ref.read(analyticsProvider).goodWalletTapped();
-                    UrlHandler.launchCustomTab(
-                      context,
-                      'http://goodwallet.xyz?inviteCode=2TWZbDwPWN',
-                    );
+                    ref.read(analyticsProvider).goodWalletTapped({
+                      "inviteCode": goodWalletInviteCode,
+                    });
+                    UrlHandler.launchCustomTab(context, goodWalletInviteLink);
                   },
                   density: ButtonDensity.icon,
                   icon: SvgPicture.asset(

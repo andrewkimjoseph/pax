@@ -497,7 +497,9 @@ class _GoodWalletConnectionViewState
                         ).withPadding(right: 2),
                         InkWell(
                           onTap: () {
-                            ref.read(analyticsProvider).setUpGoodWalletTapped();
+                            ref.read(analyticsProvider).setUpGoodWalletTapped({
+                              "inviteCode": minipayInviteCode,
+                            });
 
                             UrlHandler.launchCustomTab(
                               context,
