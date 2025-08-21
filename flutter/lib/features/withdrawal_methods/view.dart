@@ -42,7 +42,11 @@ class _WithdrawalMethodsViewState extends ConsumerState<WithdrawalMethodsView> {
                 children: [
                   InkWell(
                     onTap: () {
-                      context.pop();
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.go("/home");
+                      }
                     },
                     child: SvgPicture.asset(
                       'lib/assets/svgs/arrow_left_long.svg',
@@ -107,6 +111,7 @@ class _WithdrawalMethodsViewState extends ConsumerState<WithdrawalMethodsView> {
                                         )
                                         .firstOrNull
                                     : null,
+
                                 callBack: () {
                                   ref
                                       .read(analyticsProvider)
