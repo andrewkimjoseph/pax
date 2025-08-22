@@ -6,8 +6,12 @@ import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
 import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/providers/local/withdrawal_service_provider.dart';
+
 import 'package:pax/providers/auth/auth_provider.dart';
+import 'package:pax/providers/db/withdrawal_method/withdrawal_method_provider.dart';
+import 'package:pax/providers/withdrawal_method_connection/withdrawal_method_connection_provider.dart';
 import 'package:pax/services/withdrawal_service.dart';
+import 'package:pax/services/withdrawal/withdrawal_service.dart';
 import 'package:pax/services/notifications/notification_service.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
 import 'package:pax/utils/currency_symbol.dart';
@@ -16,11 +20,13 @@ import 'package:pax/services/blockchain/blockchain_service.dart';
 
 class WithdrawNotifier extends Notifier<WithdrawStateModel> {
   late final WithdrawalService _withdrawalService;
+  late final WithdrawalMethodConnectionService _withdrawalMethodService;
   final NotificationService _notificationService = NotificationService();
 
   @override
   WithdrawStateModel build() {
     _withdrawalService = ref.watch(withdrawalServiceProvider);
+    _withdrawalMethodService = ref.watch(withdrawalMethodConnectionProvider);
     return WithdrawStateModel();
   }
 
@@ -71,6 +77,29 @@ class WithdrawNotifier extends Notifier<WithdrawStateModel> {
 
       if (!hasBalance) {
         throw Exception('Insufficient contract balance for withdrawal');
+      }
+
+      // Check if at least one withdrawal method is GoodDollar verified
+      final withdrawalMethods =
+          ref.read(withdrawalMethodsProvider).withdrawalMethods;
+      bool hasVerifiedMethod = false;
+
+      for (final withdrawalMethod in withdrawalMethods) {
+        final isVerified = await _withdrawalMethodService.isGoodDollarVerified(
+          withdrawalMethod.walletAddress,
+          true, // checkWhitelist = true
+        );
+        if (isVerified) {
+          hasVerifiedMethod = true;
+          break;
+        }
+      }
+
+      // If no withdrawal method is verified, fail the withdrawal
+      if (!hasVerifiedMethod) {
+        throw Exception(
+          'You need to re-verify one of your withdrawal methods.',
+        );
       }
 
       // Call the withdrawal service
