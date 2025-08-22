@@ -11,14 +11,15 @@ import 'package:pax/providers/fcm/fcm_provider.dart';
 import 'package:pax/utils/achievement_constants.dart';
 import 'package:pax/utils/user_property_constants.dart';
 
-final withdrawalServiceProvider = Provider<WithdrawalMethodConnectionService>((
-  ref,
-) {
-  return WithdrawalMethodConnectionService(
-    paxAccountRepository: ref.watch(paxAccountRepositoryProvider),
-    withdrawalMethodRepository: ref.watch(withdrawalMethodRepositoryProvider),
-  );
-});
+final withdrawalMethodConnectionProvider =
+    Provider<WithdrawalMethodConnectionService>((ref) {
+      return WithdrawalMethodConnectionService(
+        paxAccountRepository: ref.watch(paxAccountRepositoryProvider),
+        withdrawalMethodRepository: ref.watch(
+          withdrawalMethodRepositoryProvider,
+        ),
+      );
+    });
 
 // Define an enum for the connection state
 enum WithdrawalMethodConnectionState {
@@ -82,7 +83,7 @@ class WithdrawalMethodConnectionNotifier
 
   @override
   WithdrawalMethodConnectionStateModel build() {
-    _withdrawalMethodService = ref.watch(withdrawalServiceProvider);
+    _withdrawalMethodService = ref.watch(withdrawalMethodConnectionProvider);
     return WithdrawalMethodConnectionStateModel();
   }
 

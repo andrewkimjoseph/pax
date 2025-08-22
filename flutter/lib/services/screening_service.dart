@@ -34,7 +34,7 @@ class ScreeningService {
           ref.read(withdrawalMethodsProvider).withdrawalMethods;
 
       // Check if at least one withdrawal method is GoodDollar verified
-      final withdrawalService = ref.read(withdrawalServiceProvider);
+      final withdrawalService = ref.read(withdrawalMethodConnectionProvider);
       bool hasVerifiedMethod = false;
 
       for (final withdrawalMethod in withdrawalMethods) {
