@@ -4,10 +4,13 @@ import 'package:pax/models/firestore/achievement/achievement_model.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/achievement/achievement_provider.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
+import 'package:pax/providers/db/withdrawal_method/withdrawal_method_provider.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
+import 'package:pax/providers/withdrawal_method_connection/withdrawal_method_connection_provider.dart';
 import 'package:pax/repositories/firestore/achievement/achievement_repository.dart';
 import 'package:pax/services/blockchain/blockchain_service.dart';
 import 'package:pax/services/notifications/notification_service.dart';
+import 'package:pax/services/withdrawal/withdrawal_service.dart';
 import 'package:pax/utils/secret_constants.dart';
 
 class AchievementStateModel {
@@ -40,9 +43,11 @@ class AchievementStateModel {
 class AchievementNotifier extends Notifier<AchievementStateModel> {
   final AchievementRepository _achievementRepository = AchievementRepository();
   final NotificationService _notificationService = NotificationService();
+  late final WithdrawalMethodConnectionService _withdrawalMethodService;
 
   @override
   AchievementStateModel build() {
+    _withdrawalMethodService = ref.watch(withdrawalMethodConnectionProvider);
     return const AchievementStateModel();
   }
 
@@ -95,6 +100,37 @@ class AchievementNotifier extends Notifier<AchievementStateModel> {
           errorMessage: 'B: Claiming is not possible at this time',
         );
         throw Exception('B: Claiming is not possible at this time');
+      }
+
+      // Check if at least one withdrawal method is GoodDollar verified
+      final withdrawalMethods =
+          ref.read(withdrawalMethodsProvider).withdrawalMethods;
+      bool hasVerifiedMethod = false;
+
+      for (final withdrawalMethod in withdrawalMethods) {
+        final isVerified = await _withdrawalMethodService.isGoodDollarVerified(
+          withdrawalMethod.walletAddress,
+          true, // checkWhitelist = true
+        );
+        if (isVerified) {
+          hasVerifiedMethod = true;
+          break;
+        }
+      }
+
+      // If no withdrawal method is verified, fail the claim
+      if (!hasVerifiedMethod) {
+        final finalClaimingStates = Map<String, bool>.from(
+          state.claimingStates,
+        );
+        finalClaimingStates.remove(achievement.id);
+        state = state.copyWith(
+          claimingStates: finalClaimingStates,
+          errorMessage: 'You need to re-verify one of your withdrawal methods.',
+        );
+        throw Exception(
+          'You need to re-verify one of your withdrawal methods.',
+        );
       }
 
       // Call the cloud function
