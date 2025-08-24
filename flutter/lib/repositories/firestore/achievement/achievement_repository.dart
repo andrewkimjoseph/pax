@@ -135,9 +135,6 @@ class AchievementRepository {
 
       return txnHash;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error processing achievement claim: $e');
-      }
       throw Exception('Failed to process achievement claim: $e');
     }
   }
