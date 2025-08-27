@@ -216,7 +216,9 @@ class _TaskItselfViewState extends ConsumerState<TaskItselfView> {
             // Dismiss the dialog after a short delay and navigate
             Future.delayed(Duration(milliseconds: 500), () {
               if (dialogContext.mounted) {
-                dialogContext.pop();
+                if (dialogContext.canPop()) {
+                  dialogContext.pop();
+                }
                 context.pushReplacement('/task-complete');
               }
             });
