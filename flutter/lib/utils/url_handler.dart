@@ -17,16 +17,16 @@ class UrlHandler {
   }
 
   // /// Launches a URL in the device's external browser
-  // static Future<void> launchInExternalBrowser(String url) async {
-  //   try {
-  //     final Uri uri = Uri.parse(url);
-  //     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-  //       throw Exception('Could not launch URL: $url');
-  //     }
-  //   } catch (e) {
-  //     rethrow;
-  //   }
-  // }
+  static Future<void> launchInExternalBrowser(String url) async {
+    try {
+      final Uri uri = Uri.parse(url);
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        throw Exception('Could not launch URL: $url');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 
   /// Launches a URL in an in-app WebView
   // static void launchInAppWebView(BuildContext context, String url) {

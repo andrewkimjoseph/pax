@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pax/exports/views.dart';
 import 'package:pax/features/account_and_security/view.dart';
+import 'package:pax/features/canvassing_x_gooddollar/view.dart';
 import 'package:pax/features/claim_reward/view.dart';
 import 'package:pax/features/report_page/view.dart';
 import 'package:pax/features/task/task_itself/view.dart';
@@ -96,6 +97,10 @@ final routerProvider = Provider((ref) {
       GoRoute(
         path: Routes.onboarding,
         builder: (context, state) => const OnboardingView(),
+      ),
+      GoRoute(
+        path: Routes.canvassingXGoodDollar,
+        builder: (context, state) => const CanvassingXGoodDollarView(),
       ),
       GoRoute(
         path: Routes.activity,

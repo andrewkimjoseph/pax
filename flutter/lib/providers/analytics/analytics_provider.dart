@@ -294,6 +294,12 @@ class AnalyticsProvider {
   Future<void> goodWalletTapped([Map<String, dynamic>? properties]) =>
       _logEvent('good_wallet_tapped', properties: properties);
 
+  Future<void> goodDollarTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('good_dollar_tapped', properties: properties);
+
+  Future<void> goodPaxAppTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('good_pax_app_tapped', properties: properties);
+
   Future<void> goodWalletWithdrawalMethodCardTapped([
     Map<String, dynamic>? properties,
   ]) => _logEvent(

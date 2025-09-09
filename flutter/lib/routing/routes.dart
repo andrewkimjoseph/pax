@@ -5,4 +5,5 @@ class Routes {
   static const accountAndSecurity = "/account-and-security";
   static const reportPage = "/report-page";
   static const claimReward = "/claim-reward";
+  static const canvassingXGoodDollar = "/canvassing-x-gooddollar";
 }

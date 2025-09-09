@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart' show Badge;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pax/exports/views.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
@@ -12,8 +12,6 @@ import 'package:flutter/foundation.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/db/tasks/task_provider.dart';
 import 'package:pax/providers/route/home_selected_index_provider.dart';
-import 'package:pax/utils/secret_constants.dart';
-import 'package:pax/utils/url_handler.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Consumer;
 import '../../theming/colors.dart' show PaxColors;
 import 'package:pax/utils/achievement_constants.dart';
@@ -87,18 +85,22 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 backgroundColor: PaxColors.red,
                 smallSize: 15,
                 label: Text(""),
-                child: IconButton.primary(
+                child: Button(
+                  style: ButtonStyle.primary(
+                    density: ButtonDensity.icon,
+                  ).withBackgroundColor(color: PaxColors.goodDollarBlue),
                   onPressed: () async {
-                    ref.read(analyticsProvider).goodWalletTapped({
-                      "inviteCode": goodWalletInviteCode,
-                    });
-                    UrlHandler.launchCustomTab(context, goodWalletInviteLink);
+                    ref.read(analyticsProvider).goodDollarTapped();
+                    context.push("/canvassing-x-gooddollar");
                   },
-                  density: ButtonDensity.icon,
-                  icon: SvgPicture.asset(
-                    'lib/assets/svgs/wallets/goodwallet.svg',
+
+                  child: Image.asset(
+                    'lib/assets/images/good_dollar.png',
                     height: 30,
                   ),
+
+                  // density: ButtonDensity.icon,
+                  // icon: ,
                 ),
               ),
             ],
