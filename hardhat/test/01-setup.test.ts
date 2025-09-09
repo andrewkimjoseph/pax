@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { expect } from "chai";
-import { Address, parseEther } from "viem";
+import { Address, parseEther, parseUnits } from "viem";
 import { WALLET_IDS, getWalletInfo, WalletInfo } from "./utils/wallets";
 
 // import { participantOne, participantThree, participantTwo, publicClient } from "./utils/clients";
@@ -79,8 +79,8 @@ describe("1. Initial Setup Tests", function () {
     // Deploy TaskManager with default parameters
     taskManagerAddress = await deployTaskManagerV2(
       wallets.TASK_MANAGER,
-      parseEther("1500"), // 0.01 cUSD per participant
-      60n // 250 target participants
+      parseUnits("0.15", 6), // 0.01 cUSD per participant
+      250n // 250 target participants
     );
 
     expect(taskManagerAddress).to.match(/^0x[a-fA-F0-9]{40}$/);
