@@ -1289,7 +1289,7 @@ packages:
     source: hosted
     version: "6.1.0"
   phonecodes:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: phonecodes
       sha256: d963c19d35914cd83620e64125689a0c09047e25046639f2a124142ccf5868bb
