@@ -65,4 +65,26 @@ List<ForumReport> forumReports = [
     postURI:
         "https://forum.celo.org/t/could-digital-rewards-revolutionise-recycling-in-africa-new-survey-results-featuring-wayst-recycling/12038",
   ),
+
+  ForumReport(
+    id: "rzt_1",
+    title: "Web3 Community Participation & Voting: Africa Leads the Charge",
+    subtitle:
+        "What we discovered challenges everything we thought we knew about crypto adoption and voting behavior in Africa. The results reveal a continent not just participating in Web3, but leading it—with implications that extend far beyond blockchain technology into the future of digital democracy itself.",
+    timePublished: DateTime.parse("2025-08-29"),
+    coverImageURI: "lib/assets/images/reports/rzt_1.png",
+    postURI:
+        "https://forum.celo.org/t/web3-community-participation-voting-africa-leads-the-charge/12226",
+  ),
+  ForumReport(
+    id: "rzt_2",
+    title:
+        "Crypto Education in Africa: Bridging Knowledge Gaps for Web3 Adoption",
+    subtitle:
+        "What we discovered challenges everything we thought we knew about crypto adoption and voting behavior in Africa. The results reveal a continent not just participating in Web3, but leading it—with implications that extend far beyond blockchain technology into the future of digital democracy itself.",
+    timePublished: DateTime.parse("2025-09-05"),
+    coverImageURI: "lib/assets/images/reports/rzt_2.png",
+    postURI:
+        "https://forum.celo.org/t/crypto-education-in-africa-bridging-knowledge-gaps-for-web3-adoption-latest/12277",
+  ),
 ];
