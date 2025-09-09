@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
+import 'package:pax/utils/country_util.dart';
 import 'package:pax/widgets/custom_avatar.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -20,9 +21,9 @@ class ProfileView extends ConsumerStatefulWidget {
 }
 
 class _ProfileViewState extends ConsumerState<ProfileView> {
-  PhoneNumber? phoneNumber;
   DateTime? dateTime;
   String? genderValue;
+  String? selectedCountry;
   bool isProcessing = false;
 
   @override
@@ -60,28 +61,16 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     );
   }
 
-  // Validate phone number
-  bool _validatePhoneNumber() {
-    if (phoneNumber == null || phoneNumber!.number.isEmpty) {
+  // Validate country selection
+  bool _validateCountry() {
+    if (selectedCountry == null) {
       _showToast(
-        message: 'Phone number is required',
+        message: 'Country selection is required',
         backgroundColor: Colors.amber,
         icon: FontAwesomeIcons.circleInfo,
       );
       return false;
     }
-
-    // Additional validation could be added here
-    // For example, checking minimum length based on country
-    if (phoneNumber!.number.length < 6) {
-      _showToast(
-        message: 'Phone number is too short',
-        backgroundColor: Colors.amber,
-        icon: FontAwesomeIcons.circleInfo,
-      );
-      return false;
-    }
-
     return true;
   }
 
@@ -98,11 +87,11 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     return true;
   }
 
-  // Validate birthdate
-  bool _validateBirthdate() {
+  // Validate date of birth
+  bool _validateDateOfBirth() {
     if (dateTime == null) {
       _showToast(
-        message: 'Birthdate is required',
+        message: 'Date of birth is required',
         backgroundColor: Colors.amber,
         icon: FontAwesomeIcons.circleInfo,
       );
@@ -135,35 +124,36 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
 
     final bool isProfileComplete =
         participant != null &&
-        participant.phoneNumber != null &&
+        participant.country != null &&
         participant.gender != null &&
         participant.dateOfBirth != null;
 
-    // Initialize phone number from participant if available
-    if (participant != null && participant.phoneNumber != null) {
-      try {
-        // Parse existing phone number if available (format: "+254 712345678")
-        final parts = participant.phoneNumber!.split(' ');
-        if (parts.length == 2) {
-          final countryCode = parts[0];
-          final number = parts[1];
-          // Find country by dial code
-          final country = Country.values.firstWhere(
-            (c) => c.dialCode == countryCode,
-            orElse: () => Country.kenya,
-          );
-
-          // Always set phone number from participant data to ensure it's properly displayed
-          if (phoneNumber == null || phoneNumber!.number.isEmpty) {
-            phoneNumber = PhoneNumber(country, number);
+    // Initialize selected country from participant if available
+    if (participant != null && participant.country != null) {
+      // Extract country name from participant.country string if it's not already set
+      if (selectedCountry == null) {
+        try {
+          // participant.country might be in format "Country.kenya" or just "Kenya"
+          final countryString = participant.country!;
+          if (countryString.contains('Country.')) {
+            // Parse enum format like "Country.kenya"
+            final enumName = countryString.split('.').last;
+            final country =
+                Country.values
+                    .where(
+                      (c) => c.name.toLowerCase() == enumName.toLowerCase(),
+                    )
+                    .firstOrNull;
+            selectedCountry = country?.name;
+          } else {
+            // Direct country name
+            selectedCountry = countryString;
           }
+        } catch (e) {
+          // Fallback - could set a default country if needed
+          selectedCountry = null;
         }
-      } catch (e) {
-        // Fallback for parsing errors if this is the first time loading
-        phoneNumber ??= PhoneNumber(Country.kenya, '');
       }
-    } else {
-      phoneNumber ??= PhoneNumber(Country.kenya, '');
     }
 
     return Scaffold(
@@ -322,66 +312,120 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                   ],
                                 ).withPadding(bottom: 16),
 
-                                // Phone Number Field
-                                SizedBox(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "Phone Number",
-                                        textAlign: TextAlign.left,
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w900,
-                                        ),
-                                      ).withPadding(bottom: 8),
-
-                                      if (participant != null &&
-                                          participant.phoneNumber != null)
-                                        TextField(
-                                          enabled: false,
-                                          placeholder: Text(
-                                            phoneNumber.toString(),
-                                          ),
-                                        ),
-
-                                      Visibility(
-                                        visible:
-                                            participant != null &&
-                                            participant.phoneNumber == null,
-                                        child: FittedBox(
-                                          fit: BoxFit.fill,
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
+                                // Country Field
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Country",
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    ).withPadding(bottom: 8),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: Select<String>(
+                                        itemBuilder: (context, item) {
+                                          // Find the country by name to get the flag
+                                          final country =
+                                              CountryUtil.allCountries
+                                                  .where((c) => c.name == item)
+                                                  .firstOrNull;
+                                          return Row(
+                                            mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              PhoneInput(
-                                                initialValue:
-                                                    phoneNumber?.country !=
-                                                                null &&
-                                                            phoneNumber
-                                                                    ?.number !=
-                                                                null
-                                                        ? PhoneNumber(
-                                                          phoneNumber!.country,
-                                                          phoneNumber!.number,
-                                                        )
-                                                        : null,
-
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    phoneNumber = value;
-                                                  });
-                                                },
-                                              ),
+                                              if (country != null) ...[
+                                                Text(country.flag),
+                                                SizedBox(width: 8),
+                                              ],
+                                              Text(item),
                                             ],
-                                          ),
+                                          );
+                                        },
+                                        popup:
+                                            SelectPopup.builder(
+                                              searchPlaceholder: const Text(
+                                                'Search country',
+                                              ),
+                                              emptyBuilder: (context) {
+                                                return const Center(
+                                                  child: Text(
+                                                    'No country found',
+                                                  ),
+                                                );
+                                              },
+                                              loadingBuilder: (context) {
+                                                return const Center(
+                                                  child:
+                                                      CircularProgressIndicator(),
+                                                );
+                                              },
+                                              builder: (
+                                                context,
+                                                searchQuery,
+                                              ) async {
+                                                final allCountries =
+                                                    CountryUtil.allCountries;
+                                                final filteredCountries =
+                                                    searchQuery == null
+                                                        ? allCountries
+                                                        : allCountries
+                                                            .where(
+                                                              (
+                                                                country,
+                                                              ) => CountryUtil.filterCountry(
+                                                                country,
+                                                                searchQuery
+                                                                    .toLowerCase(),
+                                                              ),
+                                                            )
+                                                            .toList();
+                                                return SelectItemBuilder(
+                                                  childCount:
+                                                      filteredCountries.isEmpty
+                                                          ? 0
+                                                          : filteredCountries
+                                                              .length,
+                                                  builder: (context, index) {
+                                                    final country =
+                                                        filteredCountries[index];
+                                                    return SelectItemButton(
+                                                      value: country.name,
+                                                      child: Row(
+                                                        children: [
+                                                          Text(country.flag),
+                                                          SizedBox(width: 8),
+                                                          Expanded(
+                                                            child: Text(
+                                                              country.name,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    );
+                                                  },
+                                                );
+                                              },
+                                            ).call,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            selectedCountry = value;
+                                          });
+                                        },
+                                        enabled: participant?.country == null,
+                                        constraints: const BoxConstraints(
+                                          minWidth: 200,
+                                        ),
+                                        value: selectedCountry,
+                                        placeholder: const Text(
+                                          'Select a country',
                                         ),
                                       ),
-                                    ],
-                                  ).withPadding(bottom: 16),
-                                ),
+                                    ),
+                                  ],
+                                ).withPadding(bottom: 16),
 
                                 // Gender Field
                                 Container(
@@ -402,7 +446,14 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                         child: Select<String>(
                                           disableHoverEffect: true,
                                           itemBuilder: (context, item) {
-                                            return Text(item);
+                                            // Add emoji to the selected value display
+                                            String displayText = item;
+                                            if (item == 'Male') {
+                                              displayText = '♂️  Male';
+                                            } else if (item == 'Female') {
+                                              displayText = '♀️  Female';
+                                            }
+                                            return Text(displayText);
                                           },
                                           onChanged: (value) {
                                             setState(() {
@@ -412,7 +463,6 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                           value:
                                               genderValue ??
                                               participant?.gender,
-                                          // Only allow editing if gender hasn't been set
                                           enabled: participant?.gender == null,
                                           placeholder: const Text('Gender'),
                                           popup: (context) {
@@ -421,11 +471,11 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                                 children: [
                                                   SelectItemButton(
                                                     value: 'Male',
-                                                    child: Text('Male'),
+                                                    child: Text('♂️ Male'),
                                                   ),
                                                   SelectItemButton(
                                                     value: 'Female',
-                                                    child: Text('Female'),
+                                                    child: Text('♀️ Female'),
                                                   ),
                                                 ],
                                               ),
@@ -442,7 +492,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "Birthdate",
+                                      "Date of Birth",
                                       textAlign: TextAlign.left,
                                       style: TextStyle(
                                         fontSize: 16,
@@ -513,11 +563,11 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                               });
 
                                               try {
-                                                // Validate phone number if not already set
+                                                // Validate country if not already set
                                                 if (participant != null &&
-                                                    participant.phoneNumber ==
+                                                    participant.country ==
                                                         null &&
-                                                    !_validatePhoneNumber()) {
+                                                    !_validateCountry()) {
                                                   setState(() {
                                                     isProcessing = false;
                                                   });
@@ -536,7 +586,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                                 // Validate birthdate if not already set
                                                 if (participant?.dateOfBirth ==
                                                         null &&
-                                                    !_validateBirthdate()) {
+                                                    !_validateDateOfBirth()) {
                                                   setState(() {
                                                     isProcessing = false;
                                                   });
@@ -564,17 +614,12 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                                       );
                                                 }
 
-                                                // Add phone number and country if not already set
-                                                if (participant?.phoneNumber ==
+                                                // Add country if not already set
+                                                if (participant?.country ==
                                                         null &&
-                                                    phoneNumber != null) {
-                                                  final formattedPhoneNumber =
-                                                      '${phoneNumber!.country.dialCode} ${phoneNumber!.number}';
-                                                  updateData['phoneNumber'] =
-                                                      formattedPhoneNumber;
+                                                    selectedCountry != null) {
                                                   updateData['country'] =
-                                                      phoneNumber?.country
-                                                          .toString();
+                                                      selectedCountry;
                                                 }
 
                                                 // Only proceed if there are changes to save

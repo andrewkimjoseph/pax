@@ -136,11 +136,11 @@ class ParticipantNotifier extends Notifier<ParticipantStateModel> {
       // Check if this is the first time completing profile
       final isFirstTimeCompletingProfile =
           // Check if all required fields were previously null
-          state.participant?.phoneNumber == null &&
+          state.participant?.country == null &&
           state.participant?.gender == null &&
           state.participant?.dateOfBirth == null &&
           // Check if all required fields are being set now
-          data.containsKey('phoneNumber') &&
+          data.containsKey('country') &&
           data.containsKey('gender') &&
           data.containsKey('dateOfBirth') &&
           // Ensure we're not just updating verification timestamps
@@ -181,10 +181,9 @@ class ParticipantNotifier extends Notifier<ParticipantStateModel> {
       }
 
       ref.read(analyticsProvider).identifyUser({
-        UserPropertyConstants.phoneNumber: updatedParticipant.phoneNumber,
+        UserPropertyConstants.country: updatedParticipant.country,
         UserPropertyConstants.gender: updatedParticipant.gender,
         UserPropertyConstants.dateOfBirth: updatedParticipant.dateOfBirth,
-        UserPropertyConstants.country: updatedParticipant.country,
       });
 
       // Update state with updated participant
