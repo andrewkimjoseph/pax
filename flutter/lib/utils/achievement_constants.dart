@@ -28,40 +28,40 @@ class AchievementConstants {
   static const int verifiedHumanTasksNeeded = 1;
 
   // Helper method to get amount for achievement
-  static int getAmountForAchievement(String achievementName) {
-    switch (achievementName) {
-      case taskStarter:
-        return taskStarterAmount;
-      case taskExpert:
-        return taskExpertAmount;
-      case profilePerfectionist:
-        return profilePerfectionistAmount;
-      case payoutConnector:
-        return payoutConnectorAmount;
-      case verifiedHuman:
-        return verifiedHumanAmount;
-      default:
-        return 0;
-    }
-  }
+  // static int getAmountForAchievement(String achievementName) {
+  //   switch (achievementName) {
+  //     case taskStarter:
+  //       return taskStarterAmount;
+  //     case taskExpert:
+  //       return taskExpertAmount;
+  //     case profilePerfectionist:
+  //       return profilePerfectionistAmount;
+  //     case payoutConnector:
+  //       return payoutConnectorAmount;
+  //     case verifiedHuman:
+  //       return verifiedHumanAmount;
+  //     default:
+  //       return 0;
+  //   }
+  // }
 
   // Helper method to get tasks needed for achievement
-  static int getTasksNeededForAchievement(String achievementName) {
-    switch (achievementName) {
-      case taskStarter:
-        return taskStarterTasksNeeded;
-      case taskExpert:
-        return taskExpertTasksNeeded;
-      case profilePerfectionist:
-        return profilePerfectionistTasksNeeded;
-      case payoutConnector:
-        return payoutConnectorTasksNeeded;
-      case verifiedHuman:
-        return verifiedHumanTasksNeeded;
-      default:
-        return 1;
-    }
-  }
+  // static int getTasksNeededForAchievement(String achievementName) {
+  //   switch (achievementName) {
+  //     case taskStarter:
+  //       return taskStarterTasksNeeded;
+  //     case taskExpert:
+  //       return taskExpertTasksNeeded;
+  //     case profilePerfectionist:
+  //       return profilePerfectionistTasksNeeded;
+  //     case payoutConnector:
+  //       return payoutConnectorTasksNeeded;
+  //     case verifiedHuman:
+  //       return verifiedHumanTasksNeeded;
+  //     default:
+  //       return 1;
+  //   }
+  // }
 }
 
 /// Utility to get the string name of an AchievementStatus enum value

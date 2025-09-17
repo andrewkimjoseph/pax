@@ -52,8 +52,8 @@ class Achievement {
             : 'Verify humanness on your connected payment method';
       case AchievementConstants.profilePerfectionist:
         return isCompleted
-            ? 'Filled in your phone number, gender, and date of birth'
-            : 'Fill in your phone number, gender, and date of birth';
+            ? 'Filled in your country, gender, and date of birth'
+            : 'Fill in your country, gender, and date of birth';
       case AchievementConstants.taskStarter:
         return isCompleted
             ? 'Completed $tasksNeededForCompletion task${tasksNeededForCompletion == 1 ? '' : 's'}'
