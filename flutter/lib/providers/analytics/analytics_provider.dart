@@ -315,6 +315,9 @@ class AnalyticsProvider {
 
   Future<void> setUpMiniPayTapped([Map<String, dynamic>? properties]) =>
       _logEvent('set_up_minipay_tapped', properties: properties);
+
+  Future<void> drpcTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('drpc_tapped', properties: properties);
 }
 
 final analyticsProvider = Provider<AnalyticsProvider>((ref) {

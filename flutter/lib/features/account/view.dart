@@ -5,7 +5,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/local/activity_providers.dart';
+import 'package:pax/utils/secret_constants.dart';
 import 'package:pax/utils/token_balance_util.dart';
+import 'package:pax/utils/url_handler.dart';
 import 'package:pax/widgets/account/account_option_card.dart';
 import 'package:pax/widgets/custom_avatar.dart';
 import 'package:pax/widgets/logout/logout_drawer.dart';
@@ -244,9 +246,19 @@ class _AccountViewState extends ConsumerState<AccountView> {
                       context.push("/profile");
                     },
                     child: AccountOptionCard(
+                      'info',
+                      true,
+                    ).withPadding(bottom: 24),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      ref.read(analyticsProvider).myProfileTapped();
+                      context.push("/profile");
+                    },
+                    child: AccountOptionCard(
                       'profile',
                       true,
-                    ).withPadding(bottom: 28),
+                    ).withPadding(bottom: 24),
                   ),
                   // InkWell(
                   //   onTap: () {
@@ -266,7 +278,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
                     child: AccountOptionCard(
                       'payment_methods',
                       true,
-                    ).withPadding(bottom: 28),
+                    ).withPadding(bottom: 24),
                   ),
                   InkWell(
                     onTap: () {
@@ -276,7 +288,7 @@ class _AccountViewState extends ConsumerState<AccountView> {
                     child: AccountOptionCard(
                       'help_and_support',
                       true,
-                    ).withPadding(bottom: 28),
+                    ).withPadding(bottom: 24),
                   ),
                   InkWell(
                     onTap: () {
@@ -289,14 +301,29 @@ class _AccountViewState extends ConsumerState<AccountView> {
               ),
             ),
 
-            // Text(
-            //   "Pax - v$version",
-            //   style: TextStyle(
-            //     fontWeight: FontWeight.normal,
-            //     fontSize: 12,
-            //     color: PaxColors.black,
-            //   ),
-            // ).withPadding(top: 8).withAlign(Alignment.centerLeft),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                InkWell(
+                  onTap: () {
+                    UrlHandler.launchInExternalBrowser(drpcReferralLink);
+                    ref.read(analyticsProvider).drpcTapped();
+                  },
+                  child: SvgPicture.asset(
+                    'lib/assets/svgs/drpc.svg',
+                    height: 40,
+                  ),
+                ),
+                // Text(
+                //   "Pax - v1.2",
+                //   style: TextStyle(
+                //     fontWeight: FontWeight.normal,
+                //     fontSize: 12,
+                //     color: PaxColors.black,
+                //   ),
+                // ).withPadding(top: 8).withAlign(Alignment.centerLeft),
+              ],
+            ).withPadding(top: 8),
           ],
         ),
       ).withPadding(horizontal: 8, bottom: 8),
