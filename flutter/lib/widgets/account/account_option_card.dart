@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart' show Badge;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:intl/intl.dart' show toBeginningOfSentenceCase;
@@ -35,7 +35,7 @@ class _AccountOptionCardState extends ConsumerState<AccountOptionCard> {
       requiredAchievements = [
         AchievementConstants.payoutConnector,
         AchievementConstants.verifiedHuman,
-        AchievementConstants.doublePayoutConnector,
+        // AchievementConstants.doublePayoutConnector,
       ];
     }
     final missingCount =
@@ -51,11 +51,30 @@ class _AccountOptionCardState extends ConsumerState<AccountOptionCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          SvgPicture.asset(
-            'lib/assets/svgs/${widget.option}.svg',
+          FaIcon(
+            widget.option == 'profile'
+                ? FontAwesomeIcons.solidCircleUser
+                // : widget.option == 'account'
+                // ? FontAwesomeIcons.moneyBill
+                : widget.option == 'info'
+                ? FontAwesomeIcons.addressCard
+                : widget.option == 'payment_methods'
+                ? FontAwesomeIcons.wallet
+                : widget.option == 'help_and_support'
+                ? FontAwesomeIcons.circleInfo
+                : widget.option == 'logout'
+                ? FontAwesomeIcons.arrowRightFromBracket
+                : FontAwesomeIcons.solidFaceMehBlank,
 
-            // height: 24,
+            size: 20,
+            color: widget.option == 'logout' ? Colors.red : PaxColors.black,
           ).withPadding(right: 20),
+
+          // SvgPicture.asset(
+          //   'lib/assets/svgs/${widget.option}.svg',
+
+          //   // height: 24,
+          // ).withPadding(right: 20),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -75,6 +94,8 @@ class _AccountOptionCardState extends ConsumerState<AccountOptionCard> {
                           ? 'Help & Support'
                           : widget.option == 'logout'
                           ? 'Logout'
+                          : widget.option == 'info'
+                          ? 'My Info'
                           : toBeginningOfSentenceCase(
                             widget.option.split('_')[0],
                           ),
@@ -113,13 +134,14 @@ class _AccountOptionCardState extends ConsumerState<AccountOptionCard> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SvgPicture.asset(
-                      'lib/assets/svgs/arrow_right.svg',
+                    FaIcon(FontAwesomeIcons.chevronRight, size: 12),
+                    // SvgPicture.asset(
+                    //   'lib/assets/svgs/arrow_right.svg',
 
-                      // height: 24,
-                    ),
+                    //   // height: 24,
+                    // ),
                   ],
-                ).withPadding(bottom: 8),
+                ).withPadding(bottom: 8, right: 2),
               ),
             ],
           ),
