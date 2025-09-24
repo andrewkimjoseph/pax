@@ -161,39 +161,6 @@ contract PaxAccountV1 is
         emit TokenWithdrawn(paymentMethod, amountRequested, bytes32(bytes(currency.symbol())));
     }
 
-    // /**
-    //  * @notice Add a new payment method to the system
-    //  * @dev Registers a new address as a valid payment destination
-    //  *      Ensures uniqueness of payment method IDs and prevents zero addresses
-    //  * @param paymentMethodId The ID for the new payment method
-    //  * @param paymentMethod The address of the payment method
-    //  */
-    // function addPaymentMethod(uint256 paymentMethodId, address paymentMethod)
-    //     external
-    //     onlyOwner
-    // {
-    //     require(
-    //         paymentMethod != address(0),
-    //         "Payment method cannot be zero address"
-    //     );
-    //     require(
-    //         paymentMethodId != 0,
-    //         "ID 0 is reserved for primary payment method"
-    //     );
-
-    //     bytes32 key = keccak256(abi.encodePacked(paymentMethodId));
-    //     require(
-    //         paymentMethods[key] == address(0),
-    //         "Payment method ID already exists"
-    //     );
-
-    //     // Add the payment method
-    //     paymentMethods[key] = paymentMethod;
-    //     numberOfPaymentMethods++;
-
-    //     emit PaymentMethodAdded(paymentMethodId, paymentMethod);
-    // }
-
     /**
      * @notice Retrieve all registered payment methods
      * @dev Returns an array of tuples containing payment method IDs and corresponding addresses
