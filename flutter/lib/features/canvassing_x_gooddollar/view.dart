@@ -90,8 +90,8 @@ class _CanvassingXGoodDollarViewState
                   InkWell(
                     onTap: _onGoodPaxAppTapped,
                     child: CanvassingXGoodDollarCard(
-                      'Good Pax App',
-                      'lib/assets/svgs/currencies/good_dollar.svg',
+                      'The Good Pax App',
+                      'lib/assets/svgs/thegoodpaxapp.svg',
                     ),
                   ),
                 ],
