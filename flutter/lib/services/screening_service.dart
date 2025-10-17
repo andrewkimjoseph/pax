@@ -85,6 +85,10 @@ class ScreeningService {
           .read(screeningContextProvider.notifier)
           .fetchScreeningById(screeningResult.screeningId);
 
+      ref
+          .read(screeningContextProvider.notifier)
+          .setScreeningResult(screeningResult);
+
       // Update state to complete with the result
       ref.read(screeningProvider.notifier).completeScreening(screeningResult);
 
