@@ -59,6 +59,9 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
 
     final amount = task?.rewardAmountPerParticipant;
     final tokenId = task?.rewardCurrencyId;
+    final numberOfCooldownDays = task?.numberOfCooldownDays ?? 0;
+    final timeCompleted = widget.activity.taskCompletion?.timeCompleted;
+    final isValid = widget.activity.taskCompletion?.isValid;
 
     ref
         .read(claimRewardContextProvider.notifier)
@@ -70,6 +73,9 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
           tokenId: tokenId,
           txnHash: matchingReward?.reward?.txnHash,
           taskIsCompleted: isTaskComplete,
+          numberOfCooldownDays: numberOfCooldownDays,
+          timeCompleted: timeCompleted,
+          isValid: isValid,
         );
 
     if (!isTaskComplete) {
@@ -104,6 +110,7 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
 
     final isTaskComplete = widget.activity.isComplete;
     final isTaskCompletion = widget.activity.taskCompletion != null;
+    final isValid = widget.activity.taskCompletion?.isValid;
 
     return InkWell(
       onTap: isTaskCompletion ? () => _callBackFn() : null,
@@ -192,7 +199,9 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
                                     activityIsRewarded
                                         ? 'Rewarded'
                                         : isTaskComplete
-                                        ? 'Unrewarded'
+                                        ? (isValid == false
+                                            ? 'Invalid'
+                                            : 'Unrewarded')
                                         : 'Incomplete',
                                   ).withPadding(right: 4),
                                   FaIcon(
@@ -203,6 +212,9 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
                                     color:
                                         activityIsRewarded
                                             ? PaxColors.green
+                                            : (isTaskComplete &&
+                                                isValid != false)
+                                            ? PaxColors.orange
                                             : PaxColors.red,
                                   ),
                                 ],

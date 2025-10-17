@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pax/providers/local/task_context/task_context_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/currency_symbol.dart';
@@ -8,6 +10,16 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 class OtherTaskCard extends ConsumerWidget {
   const OtherTaskCard({super.key});
+
+  bool _shouldShowDetails(BuildContext context, String? actionText) {
+    final currentLocation = GoRouterState.of(context).matchedLocation;
+    final isTaskSummary = currentLocation.startsWith('/tasks/task-summary');
+    final isNotCheckoutTask =
+        actionText != 'Check Out Web App' &&
+        actionText != 'Check Out Mobile App';
+
+    return isTaskSummary || isNotCheckoutTask;
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -70,123 +82,175 @@ class OtherTaskCard extends ConsumerWidget {
               Text(
                 task?.title ?? 'Untitled Task',
                 style: TextStyle(
-                  fontWeight: FontWeight.normal,
+                  fontWeight: FontWeight.bold,
                   fontSize: 18,
                   color: PaxColors.black,
                 ),
               ).withPadding(bottom: 8),
 
               Spacer(),
-              Text(
-                TokenBalanceUtil.getLocaleFormattedAmount(
-                  num.parse(rewardAmount),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: PaxColors.deepPurple.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                style: TextStyle(
-                  fontSize: 18,
-                  color: PaxColors.green,
-                  fontWeight: FontWeight.bold,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      TokenBalanceUtil.getLocaleFormattedAmount(
+                        num.parse(rewardAmount),
+                      ),
+                      style: TextStyle(
+                        fontSize: 24,
+                        color: PaxColors.deepPurple,
+                        fontWeight: FontWeight.w900,
+                        height: 1, // Tighter line height
+                        letterSpacing:
+                            -0.5, // Tighter letter spacing for numbers
+                      ),
+                    ).withPadding(right: 8),
+                    SvgPicture.asset(
+                      'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(task?.rewardCurrencyId)}.svg',
+                      height: 25,
+                    ),
+                  ],
                 ),
-              ).withPadding(right: 4),
-              SvgPicture.asset(
-                'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(task?.rewardCurrencyId)}.svg',
-                height: 25,
               ),
             ],
           ).withPadding(bottom: 8),
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  SvgPicture.asset(
-                    'lib/assets/svgs/clock_icon.svg',
-                  ).withPadding(right: 8),
-                  Text(
-                    estimatedTime,
-                    style: TextStyle(
-                      fontWeight: FontWeight.normal,
-                      fontSize: 13,
+          Visibility(
+            visible: _shouldShowDetails(context, task?.actionText),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    FaIcon(
+                      FontAwesomeIcons.clock,
+                      size: 16,
                       color: PaxColors.black,
+                    ).withPadding(right: 8),
+                    Text(
+                      estimatedTime,
+                      style: TextStyle(
+                        fontWeight: FontWeight.normal,
+                        fontSize: 13,
+                        color: PaxColors.black,
+                      ),
                     ),
-                  ),
-                ],
-              ).withPadding(right: 8),
-              Row(
-                children: [
-                  SvgPicture.asset(
-                    'lib/assets/svgs/difficulty_level_icon.svg',
-                  ).withPadding(right: 8),
-                  Text(
-                    difficultyLevel,
-                    style: TextStyle(
-                      fontWeight: FontWeight.normal,
-                      fontSize: 13,
+                  ],
+                ).withPadding(right: 8),
+                Row(
+                  children: [
+                    FaIcon(
+                      FontAwesomeIcons.chartSimple,
+                      size: 16,
                       color: PaxColors.black,
+                    ).withPadding(right: 8),
+                    Text(
+                      difficultyLevel,
+                      style: TextStyle(
+                        fontWeight: FontWeight.normal,
+                        fontSize: 13,
+                        color: PaxColors.black,
+                      ),
                     ),
-                  ),
-                ],
-              ).withPadding(right: 8),
+                  ],
+                ).withPadding(right: 8),
 
-              Row(
-                children: [
-                  SvgPicture.asset(
-                    'lib/assets/svgs/days_available_icon.svg',
-                  ).withPadding(right: 8),
-                  Text(
-                    daysRemaining,
-                    style: TextStyle(
-                      fontWeight: FontWeight.normal,
-                      fontSize: 13,
+                Row(
+                  children: [
+                    FaIcon(
+                      FontAwesomeIcons.calendar,
+                      size: 16,
                       color: PaxColors.black,
+                    ).withPadding(right: 8),
+                    Text(
+                      daysRemaining,
+                      style: TextStyle(
+                        fontWeight: FontWeight.normal,
+                        fontSize: 13,
+                        color: PaxColors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ).withPadding(bottom: 12),
+          ),
+
+          Visibility(
+            visible: _shouldShowDetails(context, task?.actionText),
+            child: Row(
+              children: [
+                // Button(
+                //   enableFeedback: false,
+                //   style: const ButtonStyle.outline(density: ButtonDensity.dense)
+                //       .withBackgroundColor(
+                //         color: PaxColors.green.withValues(alpha: 0.2),
+                //       )
+                //       .withBorder(border: Border.all(color: Colors.green))
+                //       .withBorderRadius(
+                //         borderRadius: BorderRadius.circular(20),
+                //       ),
+                //   // onPressed: () {},
+                //   child: Text(
+                //     task?.actionText ?? 'General',
+                //     style: TextStyle(
+                //       fontWeight: FontWeight.w900,
+                //       fontSize: 12,
+                //       color: PaxColors.green,
+                //     ),
+                //   ),
+                // ).withPadding(right: 8),
+                Button(
+                  enableFeedback: false,
+                  style: const ButtonStyle.outline(density: ButtonDensity.dense)
+                      .withBackgroundColor(
+                        color: PaxColors.blue.withValues(alpha: 0.2),
+                      )
+                      .withBorder(border: Border.all(color: PaxColors.blue))
+                      .withBorderRadius(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                  // onPressed: () {},
+                  child: Text(
+                    task?.category ?? 'General',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 12,
+                      color: PaxColors.blue,
                     ),
                   ),
-                ],
-              ),
-            ],
-          ).withPadding(bottom: 12),
+                ).withPadding(right: 8),
 
-          Row(
-            children: [
-              Button(
-                enableFeedback: false,
-                style: const ButtonStyle.outline(density: ButtonDensity.dense)
-                    .withBackgroundColor(
-                      color: PaxColors.green.withValues(alpha: 0.2),
-                    )
-                    .withBorder(border: Border.all(color: Colors.green))
-                    .withBorderRadius(borderRadius: BorderRadius.circular(20)),
-                // onPressed: () {},
-                child: Text(
-                  task?.type ?? 'General',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 12,
-                    color: PaxColors.green,
+                Button(
+                  enableFeedback: false,
+                  style: const ButtonStyle.outline(density: ButtonDensity.dense)
+                      .withBackgroundColor(
+                        color: PaxColors.blue.withValues(alpha: 0.2),
+                      )
+                      .withBorder(border: Border.all(color: PaxColors.blue))
+                      .withBorderRadius(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                  // onPressed: () {},
+                  child: Text(
+                    "${task?.paymentTerms} payment",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 12,
+                      color: PaxColors.orange,
+                    ),
                   ),
                 ),
-              ).withPadding(right: 8),
-
-              Button(
-                enableFeedback: false,
-                style: const ButtonStyle.outline(density: ButtonDensity.dense)
-                    .withBackgroundColor(
-                      color: PaxColors.blue.withValues(alpha: 0.2),
-                    )
-                    .withBorder(border: Border.all(color: PaxColors.blue))
-                    .withBorderRadius(borderRadius: BorderRadius.circular(20)),
-                // onPressed: () {},
-                child: Text(
-                  task?.category ?? 'General',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 12,
-                    color: PaxColors.blue,
-                  ),
-                ),
-              ),
-            ],
-          ).withPadding(bottom: 12),
+              ],
+            ),
+          ),
         ],
       ),
     );

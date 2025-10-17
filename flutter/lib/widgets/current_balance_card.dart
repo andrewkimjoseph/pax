@@ -267,15 +267,27 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
                                   context.push(widget.nextLocation);
                                 }
                                 : null,
-                        child: Text(
-                          widget.nextLocation == "/wallet"
-                              ? "Wallet"
-                              : "Withdraw",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            fontSize: 14,
-                            color: PaxColors.white,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            FaIcon(
+                              widget.nextLocation == "/wallet"
+                                  ? FontAwesomeIcons.wallet
+                                  : FontAwesomeIcons.arrowUpFromBracket,
+                              color: PaxColors.white,
+                              size: 14,
+                            ).withPadding(right: 6),
+                            Text(
+                              widget.nextLocation == "/wallet"
+                                  ? "Wallet"
+                                  : "Withdraw",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w900,
+                                fontSize: 14,
+                                color: PaxColors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ).withToolTip('Your wallet');
                     },

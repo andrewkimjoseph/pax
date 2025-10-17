@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pax/models/firestore/screening/screening_model.dart';
 import 'package:pax/models/firestore/task/task_model.dart';
@@ -11,6 +12,7 @@ import 'package:pax/providers/local/task_master_server_id_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/currency_symbol.dart';
 import 'package:pax/utils/token_balance_util.dart';
+import 'package:pax/widgets/task_timer.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 class TaskCard extends ConsumerWidget {
@@ -84,19 +86,35 @@ class TaskCard extends ConsumerWidget {
               ).withPadding(bottom: 8, right: 16).expanded(),
 
               // Spacer(),
-              Text(
-                TokenBalanceUtil.getLocaleFormattedAmount(
-                  num.parse(rewardAmount),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: PaxColors.deepPurple.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                style: TextStyle(
-                  fontSize: 20,
-                  color: PaxColors.green,
-                  fontWeight: FontWeight.bold,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      TokenBalanceUtil.getLocaleFormattedAmount(
+                        num.parse(rewardAmount),
+                      ),
+                      style: TextStyle(
+                        fontSize: 24,
+                        color: PaxColors.deepPurple,
+                        fontWeight: FontWeight.w900,
+                        height: 1, // Tighter line height
+                        letterSpacing:
+                            -0.5, // Tighter letter spacing for numbers
+                      ),
+                    ).withPadding(right: 8),
+                    SvgPicture.asset(
+                      'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(task.rewardCurrencyId)}.svg',
+                      height: 25,
+                    ),
+                  ],
                 ),
-              ).withPadding(right: 4),
-              SvgPicture.asset(
-                'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(task.rewardCurrencyId)}.svg',
-                height: 25,
               ),
             ],
           ).withPadding(bottom: 8),
@@ -106,8 +124,10 @@ class TaskCard extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  SvgPicture.asset(
-                    'lib/assets/svgs/clock_icon.svg',
+                  FaIcon(
+                    FontAwesomeIcons.clock,
+                    size: 16,
+                    color: PaxColors.black,
                   ).withPadding(right: 8),
                   Text(
                     estimatedTime,
@@ -121,8 +141,10 @@ class TaskCard extends ConsumerWidget {
               ).withPadding(right: 8),
               Row(
                 children: [
-                  SvgPicture.asset(
-                    'lib/assets/svgs/difficulty_level_icon.svg',
+                  FaIcon(
+                    FontAwesomeIcons.chartSimple,
+                    size: 16,
+                    color: PaxColors.black,
                   ).withPadding(right: 8),
                   Text(
                     difficultyLevel,
@@ -137,8 +159,10 @@ class TaskCard extends ConsumerWidget {
 
               Row(
                 children: [
-                  SvgPicture.asset(
-                    'lib/assets/svgs/days_available_icon.svg',
+                  FaIcon(
+                    FontAwesomeIcons.calendar,
+                    size: 16,
+                    color: PaxColors.black,
                   ).withPadding(right: 8),
                   Text(
                     daysRemaining,
@@ -155,25 +179,24 @@ class TaskCard extends ConsumerWidget {
 
           Row(
             children: [
-              Button(
-                enableFeedback: false,
-                style: const ButtonStyle.outline(density: ButtonDensity.dense)
-                    .withBackgroundColor(
-                      color: PaxColors.green.withValues(alpha: 0.2),
-                    )
-                    .withBorder(border: Border.all(color: Colors.green))
-                    .withBorderRadius(borderRadius: BorderRadius.circular(20)),
-                onPressed: () {},
-                child: Text(
-                  task.type ?? 'General',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 12,
-                    color: PaxColors.green,
-                  ),
-                ),
-              ).withPadding(right: 8),
-
+              // Button(
+              //   enableFeedback: false,
+              //   style: const ButtonStyle.outline(density: ButtonDensity.dense)
+              //       .withBackgroundColor(
+              //         color: PaxColors.green.withValues(alpha: 0.2),
+              //       )
+              //       .withBorder(border: Border.all(color: Colors.green))
+              //       .withBorderRadius(borderRadius: BorderRadius.circular(10)),
+              //   onPressed: () {},
+              //   child: Text(
+              //     task.actionText,
+              //     style: TextStyle(
+              //       fontWeight: FontWeight.w900,
+              //       fontSize: 12,
+              //       color: PaxColors.green,
+              //     ),
+              //   ),
+              // ).withPadding(right: 8),
               Button(
                 enableFeedback: false,
                 style: const ButtonStyle.outline(density: ButtonDensity.dense)
@@ -181,7 +204,7 @@ class TaskCard extends ConsumerWidget {
                       color: PaxColors.blue.withValues(alpha: 0.2),
                     )
                     .withBorder(border: Border.all(color: PaxColors.blue))
-                    .withBorderRadius(borderRadius: BorderRadius.circular(20)),
+                    .withBorderRadius(borderRadius: BorderRadius.circular(10)),
                 onPressed: () {},
                 child: Text(
                   task.category ?? 'General',
@@ -191,7 +214,31 @@ class TaskCard extends ConsumerWidget {
                     color: PaxColors.blue,
                   ),
                 ),
+              ).withPadding(right: 8),
+
+              Button(
+                enableFeedback: false,
+                style: const ButtonStyle.outline(density: ButtonDensity.dense)
+                    .withBackgroundColor(
+                      color: PaxColors.orange.withValues(alpha: 0.2),
+                    )
+                    .withBorder(border: Border.all(color: PaxColors.orange))
+                    .withBorderRadius(borderRadius: BorderRadius.circular(10)),
+                onPressed: () {},
+                child: Text(
+                  "${task.paymentTerms} payment",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 12,
+                    color: PaxColors.orange,
+                  ),
+                ),
               ),
+              Spacer(),
+              if (screening?.txnHash != null && screening?.timeCreated != null)
+                TaskTimer(
+                  screeningTimeCreated: screening!.timeCreated!.toDate(),
+                ),
             ],
           ).withPadding(bottom: 12),
 
@@ -225,13 +272,24 @@ class TaskCard extends ConsumerWidget {
                   "taskMasterServerWalletId": serverWalletId,
                 });
 
-                if (screening?.txnHash != null) {
-                  if (context.mounted) {
-                    context.push('/task-itself');
-                  }
-                } else {
-                  if (context.mounted) {
-                    context.push('/task-summary');
+                if (context.mounted) {
+                  if (screening?.txnHash != null) {
+                    String nextRoute = "";
+                    if (task.actionText == 'Check Out Web App' ||
+                        task.actionText == 'Check Out Mobile App') {
+                      nextRoute = '/tasks/check-out-product';
+                    } else if (task.actionText == 'Fill A Form') {
+                      nextRoute = '/tasks/fill-a-form';
+                    }
+
+                    // else if (task.actionText == 'Do Video Interview') {
+                    //   nextRoute = '/tasks/do-video-interview';
+                    // } else if (task.actionText == 'Follow On Social') {
+                    //   nextRoute = '/tasks/follow-on-social';
+                    // }
+                    context.push(nextRoute);
+                  } else {
+                    context.push('/tasks/task-summary');
                   }
                 }
               },
