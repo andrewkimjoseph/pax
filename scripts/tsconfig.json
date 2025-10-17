@@ -15,6 +15,6 @@
       "isolatedModules": true,
       "verbatimModuleSyntax": true
     },
-    "include": ["src/**/*"],
+    "include": ["src/**/*", "utils"],
     "exclude": ["node_modules", "dist"]
   }

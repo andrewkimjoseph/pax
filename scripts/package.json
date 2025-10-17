@@ -15,8 +15,11 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@privy-io/server-auth": "^1.32.5",
     "dotenv": "^17.2.0",
     "firebase-admin": "^13.4.0",
-    "googleapis": "^153.0.0"
+    "googleapis": "^153.0.0",
+    "permissionless": "^0.2.57",
+    "viem": "^2.37.8"
   }
 }
