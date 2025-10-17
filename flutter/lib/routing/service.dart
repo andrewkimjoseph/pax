@@ -5,7 +5,8 @@ import 'package:pax/features/account_and_security/view.dart';
 import 'package:pax/features/canvassing_x_gooddollar/view.dart';
 import 'package:pax/features/claim_reward/view.dart';
 import 'package:pax/features/report_page/view.dart';
-import 'package:pax/features/task/task_itself/view.dart';
+import 'package:pax/features/task/task_itself/check_out_product/view.dart';
+import 'package:pax/features/task/task_itself/fill_a_form/view.dart';
 import 'package:pax/features/webview/view.dart';
 import 'package:pax/features/withdrawal_methods/good-wallet-connection/view.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
@@ -164,21 +165,54 @@ final routerProvider = Provider((ref) {
           ),
         ],
       ),
+
       GoRoute(
-        path: "/task-summary",
-        builder:
-            (BuildContext context, GoRouterState state) => TaskSummaryView(),
+        path: "/tasks",
+        builder: (BuildContext context, GoRouterState state) => TasksView(),
+        routes: [
+          GoRoute(
+            path: "/task-summary",
+            builder:
+                (BuildContext context, GoRouterState state) =>
+                    TaskSummaryView(),
+            routes: [
+              GoRoute(
+                path: "image-photo-view",
+                builder:
+                    (BuildContext context, GoRouterState state) =>
+                        ImageStepPhotoView(path: state.extra as String),
+              ),
+            ],
+          ),
+
+          GoRoute(
+            path: "/task-complete",
+            builder:
+                (BuildContext context, GoRouterState state) =>
+                    TaskCompleteView(),
+          ),
+          GoRoute(
+            path: "fill-a-form",
+            builder:
+                (BuildContext context, GoRouterState state) => FillAFormView(),
+          ),
+          GoRoute(
+            path: "/check-out-product",
+            builder:
+                (BuildContext context, GoRouterState state) =>
+                    CheckOutProductView(),
+            routes: [
+              GoRoute(
+                path: "image-photo-view",
+                builder:
+                    (BuildContext context, GoRouterState state) =>
+                        ImageStepPhotoView(path: state.extra as String),
+              ),
+            ],
+          ),
+        ],
       ),
-      GoRoute(
-        path: "/task-itself",
-        builder:
-            (BuildContext context, GoRouterState state) => TaskItselfView(),
-      ),
-      GoRoute(
-        path: "/task-complete",
-        builder:
-            (BuildContext context, GoRouterState state) => TaskCompleteView(),
-      ),
+
       GoRoute(
         path: "/withdrawal-methods",
         builder:
