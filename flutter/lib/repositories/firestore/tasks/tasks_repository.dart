@@ -1,8 +1,10 @@
 // lib/repositories/tasks/tasks_repository.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:pax/constants/task_timer.dart';
 import 'package:pax/models/firestore/task/task_model.dart';
 import 'package:pax/models/firestore/task_completion/task_completion_model.dart';
+import 'package:pax/utils/country_util.dart';
 import 'package:rxdart/rxdart.dart';
 import 'dart:async';
 
@@ -22,7 +24,10 @@ class TasksRepository {
   // Constructor
   TasksRepository();
 
-  Stream<List<Task>> getAvailableTasks(String? participantId) {
+  Stream<List<Task>> getAvailableTasks(
+    String? participantId,
+    String? participantCountry,
+  ) {
     // Build the base query
     Query tasksQuery;
     if (kDebugMode) {
@@ -60,6 +65,8 @@ class TasksRepository {
           Map<String, int> taskScreeningCounts = {};
           // 2. Track which tasks each participant has been screened for
           Set<String> participantScreenedTaskIds = {};
+          // 3. Track screening times for tasks
+          Map<String, DateTime> participantScreeningTimes = {};
 
           for (var doc in snapshot.docs) {
             final data = doc.data() as Map<String, dynamic>?;
@@ -67,20 +74,23 @@ class TasksRepository {
 
             String taskId = data['taskId'] as String;
             String screenedParticipantId = data['participantId'] as String;
+            Timestamp? timeCreated = data['timeCreated'] as Timestamp?;
 
             // Count all screenings for this task
             taskScreeningCounts[taskId] =
                 (taskScreeningCounts[taskId] ?? 0) + 1;
 
             // Track which tasks this specific participant has been screened for
-            if (screenedParticipantId == participantId) {
+            if (screenedParticipantId == participantId && timeCreated != null) {
               participantScreenedTaskIds.add(taskId);
+              participantScreeningTimes[taskId] = timeCreated.toDate();
             }
           }
 
           return {
             'taskScreeningCounts': taskScreeningCounts,
             'participantScreenedTaskIds': participantScreenedTaskIds,
+            'participantScreeningTimes': participantScreeningTimes,
           };
         });
 
@@ -122,11 +132,47 @@ class TasksRepository {
           screeningsData['taskScreeningCounts'] as Map<String, int>;
       final participantScreenedTaskIds =
           screeningsData['participantScreenedTaskIds'] as Set<String>;
+      final participantScreeningTimes =
+          screeningsData['participantScreeningTimes'] as Map<String, DateTime>;
 
       // Filter tasks based on the updated criteria
       return availableTasks.where((task) {
+        // Check if screening time has elapsed (45 minutes)
+        if (participantScreeningTimes.containsKey(task.id)) {
+          final screeningTime = participantScreeningTimes[task.id]!;
+          final elapsedMinutes = nowUtc.difference(screeningTime).inMinutes;
+          if (elapsedMinutes >= taskTimerDurationMinutes) return false;
+        }
         // If the task is fully completed by this participant, don't show it
         if (fullyCompletedTaskIds.contains(task.id)) return false;
+
+        // Check country targeting FIRST (applies to all tasks)
+        final targetCountry = task.targetCountry?.toUpperCase();
+        if (targetCountry != null && targetCountry != 'ALL') {
+          // If participant has no country set, don't show country-specific tasks
+          if (participantCountry == null) return false;
+
+          // Convert participant's country name to country code
+          // e.g., "Kenya" -> "KE", "Nigeria" -> "NG"
+          final participantCountryObj = CountryUtil.getCountryByName(
+            participantCountry,
+          );
+          if (participantCountryObj == null) return false;
+
+          final participantCountryCode =
+              participantCountryObj.code.toUpperCase();
+
+          // Split target countries by comma and check if participant's country code is in the list
+          final targetCountries =
+              targetCountry
+                  .split(',')
+                  .map((code) => code.trim().toUpperCase())
+                  .toList();
+
+          if (!targetCountries.contains(participantCountryCode)) {
+            return false;
+          }
+        }
 
         // If the task is in progress by this participant, show it
         if (inProgressTaskIds.contains(task.id)) return true;
