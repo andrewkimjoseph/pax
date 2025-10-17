@@ -1,25 +1,15 @@
-// ignore_for_file: unused_import
-
 import 'package:flutter/material.dart' show Divider, InkWell;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:go_router/go_router.dart';
-import 'package:pax/features/home/achievements/view.dart';
-import 'package:pax/features/home/dashboard/view.dart';
-import 'package:pax/features/home/tasks/view.dart';
-import 'package:pax/features/onboarding/view_model.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/secret_constants.dart';
 import 'package:pax/utils/url_handler.dart';
-import 'package:pax/widgets/account/account_option_card.dart';
 import 'package:pax/widgets/canvassing_x_gooddollar.dart';
-import 'package:pax/widgets/help_and_support.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Divider;
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 
 import '../../theming/colors.dart' show PaxColors;
-import '../../utils/clipper.dart';
 
 class CanvassingXGoodDollarView extends ConsumerStatefulWidget {
   const CanvassingXGoodDollarView({super.key});

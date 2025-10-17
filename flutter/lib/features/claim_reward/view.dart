@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart' show Divider;
+import 'package:flutter/material.dart' show Divider, InkWell;
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/route/home_selected_index_provider.dart';
@@ -11,6 +13,7 @@ import 'package:pax/providers/local/claim_reward_context_provider.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pax/utils/token_balance_util.dart';
 import 'package:pax/utils/currency_symbol.dart';
+import 'package:pax/widgets/toast.dart';
 
 class ClaimRewardView extends ConsumerStatefulWidget {
   const ClaimRewardView({super.key});
@@ -22,6 +25,52 @@ class ClaimRewardView extends ConsumerStatefulWidget {
 
 class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
   bool isClaiming = false;
+
+  /// Checks if the cooldown period has elapsed
+  /// Returns true if the user can claim the reward (cooldown has passed)
+  bool _canClaimReward({
+    required int numberOfCooldownDays,
+    required DateTime? timeCompleted,
+  }) {
+    if (numberOfCooldownDays == 0) return true;
+    if (timeCompleted == null) return false;
+
+    final cooldownEndDate = timeCompleted.add(
+      Duration(days: numberOfCooldownDays),
+    );
+    final now = DateTime.now();
+
+    return now.isAfter(cooldownEndDate) ||
+        now.isAtSameMomentAs(cooldownEndDate);
+  }
+
+  /// Gets the remaining time until cooldown expires
+  String _getRemainingCooldownTime({
+    required int numberOfCooldownDays,
+    required DateTime? timeCompleted,
+  }) {
+    if (timeCompleted == null) return '';
+
+    final cooldownEndDate = timeCompleted.add(
+      Duration(days: numberOfCooldownDays),
+    );
+    final now = DateTime.now();
+    final difference = cooldownEndDate.difference(now);
+
+    if (difference.isNegative) return '';
+
+    final days = difference.inDays;
+    final hours = difference.inHours.remainder(24);
+    final minutes = difference.inMinutes.remainder(60);
+
+    if (days > 0) {
+      return '$days day${days > 1 ? 's' : ''}, $hours hour${hours != 1 ? 's' : ''}';
+    } else if (hours > 0) {
+      return '$hours hour${hours > 1 ? 's' : ''}, $minutes minute${minutes != 1 ? 's' : ''}';
+    } else {
+      return '$minutes minute${minutes != 1 ? 's' : ''}';
+    }
+  }
 
   Future<void> _claimReward(BuildContext context) async {
     setState(() {
@@ -202,6 +251,19 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
     final tokenId = claimContext?.tokenId;
     final txnHash = claimContext?.txnHash;
     final taskIsCompleted = claimContext?.taskIsCompleted;
+    final numberOfCooldownDays = claimContext?.numberOfCooldownDays ?? 0;
+    final timeCompleted = claimContext?.timeCompleted?.toDate();
+    final isValid = claimContext?.isValid ?? true;
+
+    final canClaim = _canClaimReward(
+      numberOfCooldownDays: numberOfCooldownDays,
+      timeCompleted: timeCompleted,
+    );
+
+    final remainingCooldownTime = _getRemainingCooldownTime(
+      numberOfCooldownDays: numberOfCooldownDays,
+      timeCompleted: timeCompleted,
+    );
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -224,7 +286,9 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
                 child: Button(
                   style: ButtonStyle.primary(),
                   onPressed:
-                      (txnHash != null && txnHash.isNotEmpty)
+                      (txnHash != null && txnHash.isNotEmpty) ||
+                              (!canClaim && taskIsCompleted == true) ||
+                              (isValid == false && taskIsCompleted == true)
                           ? null
                           : () {
                             if (isClaiming) return;
@@ -243,6 +307,10 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
                                 ? 'Complete Task'
                                 : (txnHash != null && txnHash.isNotEmpty)
                                 ? 'Claimed'
+                                : isValid == false
+                                ? 'Invalid Submission'
+                                : !canClaim
+                                ? 'Cooldown Active'
                                 : 'Claim Reward',
                             style: Theme.of(context).typography.base.copyWith(
                               fontWeight: FontWeight.normal,
@@ -266,49 +334,206 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SvgPicture.asset('lib/assets/svgs/task_complete.svg'),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        taskIsCompleted == false
-                            ? "You will earn"
-                            : "You earned",
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.normal,
+                  // Only show reward amount if task is valid or not yet completed
+                  if (isValid != false || taskIsCompleted == false)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          taskIsCompleted == false
+                              ? "You will earn"
+                              : "You earned",
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ).withPadding(bottom: 16, top: 16),
+                        // Placeholder for reward amount and currency
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              amount != null
+                                  ? TokenBalanceUtil.getLocaleFormattedAmount(
+                                    amount,
+                                  )
+                                  : '--',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ).withPadding(right: 4),
+                            if (tokenId != null)
+                              SvgPicture.asset(
+                                'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(tokenId)}.svg',
+                                height: tokenId == 1 ? 25 : 20,
+                              ),
+                          ],
                         ),
-                      ).withPadding(bottom: 16, top: 16),
-                      // Placeholder for reward amount and currency
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      ],
+                    ).withPadding(bottom: 12),
+                  // Only show task completion ID if task is valid or not yet completed
+                  if (taskCompletionId != null &&
+                      (isValid != false || taskIsCompleted == false))
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Task Completion ID: ${taskCompletionId.substring(0, 8)}...",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: PaxColors.darkGrey,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        InkWell(
+                          onTap: () async {
+                            await Clipboard.setData(
+                              ClipboardData(text: taskCompletionId),
+                            );
+                            if (context.mounted) {
+                              showToast(
+                                context: context,
+                                location: ToastLocation.topCenter,
+                                builder:
+                                    (context, overlay) => Toast(
+                                      toastColor: PaxColors.green,
+                                      text: 'Task Completion ID copied',
+                                      trailingIcon:
+                                          FontAwesomeIcons.solidCircleCheck,
+                                    ),
+                              );
+                            }
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: PaxColors.deepPurple.withValues(
+                                alpha: 0.1,
+                              ),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: FaIcon(
+                              FontAwesomeIcons.copy,
+                              size: 12,
+                              color: PaxColors.deepPurple,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ).withPadding(top: 16),
+
+                  // Show cooldown information if there's a cooldown, task is completed, and task is valid
+                  if (numberOfCooldownDays > 0 &&
+                      taskIsCompleted == true &&
+                      isValid != false)
+                    Container(
+                      margin: EdgeInsets.only(top: 24),
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color:
+                            canClaim
+                                ? PaxColors.green.withValues(alpha: 0.1)
+                                : PaxColors.red.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: canClaim ? PaxColors.green : PaxColors.red,
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
                         children: [
-                          Text(
-                            amount != null
-                                ? TokenBalanceUtil.getLocaleFormattedAmount(
-                                  amount,
-                                )
-                                : '--',
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.normal,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                canClaim
+                                    ? Icons.check_circle
+                                    : Icons.access_time,
+                                color:
+                                    canClaim ? PaxColors.green : PaxColors.red,
+                                size: 20,
+                              ).withPadding(right: 8),
+                              Text(
+                                canClaim
+                                    ? 'Cooldown Complete'
+                                    : 'Cooldown Active',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      canClaim
+                                          ? PaxColors.green
+                                          : PaxColors.red,
+                                ),
+                              ),
+                            ],
+                          ).withPadding(bottom: canClaim ? 0 : 8),
+                          if (!canClaim && remainingCooldownTime.isNotEmpty)
+                            Text(
+                              'You can claim this reward in $remainingCooldownTime',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: PaxColors.black,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
-                          ).withPadding(right: 4),
-                          if (tokenId != null)
-                            SvgPicture.asset(
-                              'lib/assets/svgs/currencies/${CurrencySymbolUtil.getNameForCurrency(tokenId)}.svg',
-                              height: tokenId == 1 ? 25 : 20,
-                            ),
+                          if (canClaim)
+                            Text(
+                              'You can now claim your reward!',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: PaxColors.black,
+                              ),
+                              textAlign: TextAlign.center,
+                            ).withPadding(top: 8),
                         ],
                       ),
-                    ],
-                  ).withPadding(bottom: 12),
-                  if (taskCompletionId != null)
-                    Text(
-                      "Task Completion ID: ${taskCompletionId.substring(0, 8)}...",
-                      style: TextStyle(fontSize: 12, color: PaxColors.darkGrey),
-                    ).withPadding(top: 16),
+                    ),
+
+                  // Show invalid submission notice if isValid is false
+                  if (isValid == false && taskIsCompleted == true)
+                    Container(
+                      margin: EdgeInsets.only(top: 24),
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: PaxColors.red.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: PaxColors.red, width: 1),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                color: PaxColors.red,
+                                size: 20,
+                              ).withPadding(right: 8),
+                              Text(
+                                'Invalid submission.',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: PaxColors.red,
+                                ),
+                              ),
+                            ],
+                          ).withPadding(bottom: 8),
+                          Text(
+                            'Your task submission cannot be rewarded. Copy the task completion ID and contact support.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: PaxColors.black,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
                   Spacer(),
                 ],
               ),

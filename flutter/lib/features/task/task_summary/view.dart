@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' show InkWell;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
@@ -19,10 +20,10 @@ class TaskSummaryView extends ConsumerStatefulWidget {
   const TaskSummaryView({super.key});
 
   @override
-  ConsumerState<TaskSummaryView> createState() => _TaskViewState();
+  ConsumerState<TaskSummaryView> createState() => _TaskSummaryViewState();
 }
 
-class _TaskViewState extends ConsumerState<TaskSummaryView> {
+class _TaskSummaryViewState extends ConsumerState<TaskSummaryView> {
   bool isLoading = true;
   bool _isProcessingScreening = false;
 
@@ -115,7 +116,17 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
       if (!context.mounted) return;
       // Dismiss loading dialog and navigate on success
       context.pop();
-      context.go('/task-itself');
+
+      String nextRoute = "";
+
+      if (currentTask.actionText == 'Check Out Web App' ||
+          currentTask.actionText == 'Check Out Mobile App') {
+        nextRoute = '/tasks/check-out-product';
+      } else if (currentTask.actionText == 'Fill A Form') {
+        nextRoute = '/tasks/fill-a-form';
+      }
+
+      context.push(nextRoute);
     } catch (e) {
       if (!mounted) return;
       ref.read(analyticsProvider).screeningFailed({
@@ -236,18 +247,173 @@ class _TaskViewState extends ConsumerState<TaskSummaryView> {
       ],
       child: Column(
         children: [
-          Container(
-            height: 250, // Adjust height as needed
-            width: double.infinity,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage("lib/assets/images/tasks_by_canvassing.png"),
-                fit: BoxFit.cover,
+          InkWell(
+            onTap: () {
+              context.push(
+                '/tasks/task-summary/image-photo-view',
+                extra: "lib/assets/images/tasks_by_canvassing.png",
+              );
+            },
+            child: Container(
+              height: 250, // Adjust height as needed
+              width: double.infinity,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(
+                    "lib/assets/images/tasks_by_canvassing.png",
+                  ),
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
           Divider(),
           OtherTaskCard().withPadding(all: 4),
+
+          // Instructions Card
+          if (currentTask?.instructions != null &&
+              currentTask!.instructions!.isNotEmpty)
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(16),
+              margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: PaxColors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: PaxColors.lightGrey.withValues(alpha: 0.5),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: PaxColors.lightGrey.withValues(alpha: 0.15),
+                    spreadRadius: 0,
+                    blurRadius: 8,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      FaIcon(
+                        FontAwesomeIcons.listUl,
+                        size: 18,
+                        color: PaxColors.deepPurple,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        "Instructions",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
+                          color: PaxColors.deepPurple,
+                        ),
+                      ),
+                      Spacer(),
+                      Visibility(
+                        visible:
+                            currentTask.actionText == 'Check Out Web App' ||
+                            currentTask.actionText == 'Check Out Mobile App',
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: PaxColors.deepPurple.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            "Preview",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: PaxColors.deepPurple,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: PaxColors.lightGrey.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: PaxColors.lightGrey.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          currentTask.instructions!
+                              .split('\n')
+                              .take(2)
+                              .join('\n'),
+                          style: TextStyle(
+                            fontWeight: FontWeight.normal,
+                            fontSize: 15,
+                            height: 1.5,
+                            color: PaxColors.black.withValues(alpha: 0.85),
+                          ),
+                        ),
+                        if (currentTask.instructions!.split('\n').length >
+                            2) ...[
+                          SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: PaxColors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: PaxColors.lightGrey.withValues(
+                                      alpha: 0.5,
+                                    ),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      "See more when you continue",
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: PaxColors.deepPurple,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    SizedBox(width: 4),
+                                    FaIcon(
+                                      FontAwesomeIcons.angleRight,
+                                      size: 12,
+                                      color: PaxColors.deepPurple,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
