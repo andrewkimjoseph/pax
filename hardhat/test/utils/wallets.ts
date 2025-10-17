@@ -54,7 +54,7 @@ export async function getWalletInfo(
       walletId,
       address: smartAccountAddress,
       client: smartAccountClient,
-      safeSmartAccount,
+      safeSmartAccount: safeSmartAccount as ToSafeSmartAccountReturnType,
       serverWalletAccount: serverWalletAccount,
     };
   
