@@ -87,6 +87,7 @@ export const markTaskCompletionAsComplete = onCall(
       await taskCompletionDoc.ref.update({
         timeCompleted: FieldValue.serverTimestamp(),
         timeUpdated: FieldValue.serverTimestamp(),
+        isValid: true,
       });
 
       logger.info("Task completion marked as complete", {
