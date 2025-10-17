@@ -23,12 +23,16 @@ class TaskCompletionService {
   TaskCompletionService(this.ref);
 
   Future<void> markTaskAsComplete({
-    required String screeningId,
+    required String? screeningId,
     required String taskId,
   }) async {
     try {
       // Update state to processing
       ref.read(taskCompletionProvider.notifier).startCompletion();
+
+      if (screeningId == null) {
+        throw Exception('Screening ID is required');
+      }
 
       // Call the Firebase function
       final httpsCallable = FirebaseFunctions.instance.httpsCallable(

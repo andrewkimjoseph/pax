@@ -11,6 +11,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/models/firestore/screening/screening_model.dart';
+import 'package:pax/providers/local/screening_state_provider.dart';
 
 /// Provider for getting a screening by ID.
 /// This provider fetches a single screening record from Firestore.
@@ -51,7 +52,9 @@ class ScreeningContext {
   /// The current screening data, if any
   final Screening? screening;
 
-  const ScreeningContext({this.screening});
+  final ScreeningResult? screeningResult;
+
+  const ScreeningContext({this.screening, this.screeningResult});
 
   /// Create a copy with updated screening data.
   /// This is used to maintain immutability while allowing state updates.
@@ -73,6 +76,14 @@ class ScreeningContextNotifier extends Notifier<ScreeningContext?> {
   /// This should be called when a screening is selected or created.
   void setScreening(Screening screening) {
     state = ScreeningContext(screening: screening);
+  }
+
+  void setScreeningResult(ScreeningResult screeningResult) {
+    if (state == null || state?.screening == null) return;
+    state = ScreeningContext(
+      screening: state?.screening,
+      screeningResult: screeningResult,
+    );
   }
 
   /// Fetch a screening by ID and update the context.

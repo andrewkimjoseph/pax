@@ -9,6 +9,7 @@ class TaskCompletion {
   final Timestamp? timeCompleted;
   final Timestamp? timeCreated;
   final Timestamp? timeUpdated;
+  final bool? isValid;
 
   TaskCompletion({
     required this.id,
@@ -18,6 +19,7 @@ class TaskCompletion {
     this.timeCompleted,
     this.timeCreated,
     this.timeUpdated,
+    this.isValid,
   });
 
   factory TaskCompletion.fromFirestore(DocumentSnapshot doc) {
@@ -35,6 +37,7 @@ class TaskCompletion {
       timeCompleted: data['timeCompleted'],
       timeCreated: data['timeCreated'],
       timeUpdated: data['timeUpdated'],
+      isValid: data['isValid'],
     );
   }
 
@@ -46,6 +49,7 @@ class TaskCompletion {
       'timeCompleted': timeCompleted,
       'timeCreated': timeCreated,
       'timeUpdated': timeUpdated,
+      'isValid': isValid,
     };
   }
 
@@ -63,6 +67,7 @@ class TaskCompletion {
     Timestamp? timeCompleted,
     Timestamp? timeCreated,
     Timestamp? timeUpdated,
+    bool? isValid,
   }) {
     return TaskCompletion(
       id: id ?? this.id,
@@ -72,6 +77,7 @@ class TaskCompletion {
       timeCompleted: timeCompleted ?? this.timeCompleted,
       timeCreated: timeCreated ?? this.timeCreated,
       timeUpdated: timeUpdated ?? this.timeUpdated,
+      isValid: isValid ?? this.isValid,
     );
   }
 }
