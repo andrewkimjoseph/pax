@@ -132,8 +132,23 @@ class AnalyticsProvider {
   Future<void> screeningComplete([Map<String, dynamic>? properties]) =>
       _logEvent('screening_complete', properties: properties);
 
+  Future<void> taskCompletionStarted([Map<String, dynamic>? properties]) =>
+      _logEvent('task_completion_started', properties: properties);
+
   Future<void> taskCompletionComplete([Map<String, dynamic>? properties]) =>
       _logEvent('task_completion_complete', properties: properties);
+
+  Future<void> taskCompletionFailed([Map<String, dynamic>? properties]) =>
+      _logEvent('task_completion_failed', properties: properties);
+
+  Future<void> markTaskAsCompleteTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('mark_task_as_complete_tapped', properties: properties);
+
+  Future<void> completeTaskTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('complete_task_tapped', properties: properties);
+
+  Future<void> continueDoingTheTaskTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('continue_doing_the_task_tapped', properties: properties);
 
   Future<void> rewardingStarted([Map<String, dynamic>? properties]) =>
       _logEvent('rewarding_started', properties: properties);
