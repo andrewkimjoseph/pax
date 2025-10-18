@@ -425,10 +425,11 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
                       ],
                     ).withPadding(top: 16),
 
-                  // Show cooldown information if there's a cooldown, task is completed, and task is valid
+                  // Show cooldown information if there's a cooldown, task is completed, task is valid, and not already claimed
                   if (numberOfCooldownDays > 0 &&
                       taskIsCompleted == true &&
-                      isValid != false)
+                      isValid != false &&
+                      (txnHash == null || txnHash.isEmpty))
                     Container(
                       margin: EdgeInsets.only(top: 24),
                       padding: EdgeInsets.all(16),

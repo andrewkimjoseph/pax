@@ -113,7 +113,10 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
     final isValid = widget.activity.taskCompletion?.isValid;
 
     return InkWell(
-      onTap: isTaskCompletion ? () => _callBackFn() : null,
+      onTap:
+          (isTaskCompletion && isTaskComplete && !activityIsRewarded)
+              ? () => _callBackFn()
+              : null,
       child: Container(
         width: MediaQuery.of(context).size.width,
         padding: EdgeInsets.all(10),
