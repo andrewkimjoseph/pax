@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/url_handler.dart';
@@ -29,15 +29,15 @@ class _XFollowButtonState extends ConsumerState<XFollowButton> {
             borderRadius: BorderRadius.circular(20),
             hoverBorderRadius: BorderRadius.circular(20),
           ),
-      trailing: SvgPicture.asset(
-        'lib/assets/svgs/arrow_icon.svg',
-        colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
-        height: 16,
-      ),
+      trailing: FaIcon(
+        FontAwesomeIcons.chevronRight,
+        size: 12,
+        color: PaxColors.white,
+      ).withAlign(Alignment.center),
       child: const Text(
         "Follow",
-        style: TextStyle(color: PaxColors.white, fontSize: 12),
-      ),
+        style: TextStyle(color: PaxColors.white, fontSize: 14),
+      ).withPadding(horizontal: 8, vertical: 4),
     ).withToolTip('Follow us on X.');
   }
 }

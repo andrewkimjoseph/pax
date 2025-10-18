@@ -30,7 +30,7 @@ class XFollowCard extends ConsumerWidget {
               ),
               height: 32,
             ),
-          ).withPadding(right: 8),
+          ).withPadding(right: 8, left: 4),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,7 +45,7 @@ class XFollowCard extends ConsumerWidget {
                   ),
                 ).withPadding(bottom: 8),
                 const Text(
-                  "Our X followers get early access to 30% more high-paying surveys.",
+                  "Help us grow our X community!",
                   style: TextStyle(
                     fontWeight: FontWeight.normal,
                     fontSize: 14,
@@ -55,7 +55,7 @@ class XFollowCard extends ConsumerWidget {
               ],
             ),
           ),
-          const XFollowButton().withPadding(left: 8),
+          const XFollowButton(),
         ],
       ),
     );
