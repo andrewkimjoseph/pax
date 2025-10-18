@@ -324,30 +324,6 @@ class _AccountViewState extends ConsumerState<AccountView> {
                 // ).withPadding(top: 8).withAlign(Alignment.centerLeft),
               ],
             ).withPadding(top: 8),
-
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.center,
-            //   children: [
-            //     InkWell(
-            //       onTap: () {
-            //         UrlHandler.launchInExternalBrowser(drpcReferralLink);
-            //         ref.read(analyticsProvider).drpcTapped();
-            //       },
-            //       child: SvgPicture.asset(
-            //         'lib/assets/svgs/celo_wordmark.svg',
-            //         height: 25,
-            //       ),
-            //     ),
-            //     // Text(
-            //     //   "Pax - v1.2",
-            //     //   style: TextStyle(
-            //     //     fontWeight: FontWeight.normal,
-            //     //     fontSize: 12,
-            //     //     color: PaxColors.black,
-            //     //   ),
-            //     // ).withPadding(top: 8).withAlign(Alignment.centerLeft),
-            //   ],
-            // ).withPadding(top: 8),
           ],
         ),
       ).withPadding(horizontal: 8, bottom: 8),

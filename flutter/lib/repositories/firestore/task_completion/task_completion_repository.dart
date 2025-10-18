@@ -19,6 +19,7 @@ class TaskCompletionRepository {
           await _firestore
               .collection(collectionName)
               .where('participantId', isEqualTo: participantId)
+              .where('timeCompleted', isNull: false)
               .orderBy('timeCompleted', descending: true)
               .get();
 

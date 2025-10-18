@@ -295,7 +295,19 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
                     error: (_, __) => const SizedBox.shrink(),
                   ),
 
-              const Spacer(),
+              // const Spacer(),
+
+              // InkWell(
+              //   onTap: () {
+              //     UrlHandler.launchInExternalBrowser(drpcReferralLink);
+              //     ref.read(analyticsProvider).drpcTapped();
+              //   },
+              //   child: SvgPicture.asset(
+              //     'lib/assets/svgs/drpc.svg',
+              //     height: 35,
+              //     width: 30,
+              //   ),
+              // ),
 
               // http://goodwallet.xyz?inviteCode=2TWZbDwPWN
               // if (widget.nextLocation == "/wallet")
