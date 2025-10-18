@@ -15,6 +15,7 @@ import 'package:pax/providers/local/task_completion_state_provider.dart';
 import 'package:pax/services/task_completion_service.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/utils/time_formatter.dart';
+import 'package:pax/widgets/optimized_webview.dart';
 
 class FillAFormView extends ConsumerStatefulWidget {
   const FillAFormView({super.key});
@@ -42,6 +43,10 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
     controller =
         WebViewController()
           ..setJavaScriptMode(JavaScriptMode.unrestricted)
+          ..setBackgroundColor(PaxColors.white)
+          ..setUserAgent(
+            'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36',
+          )
           ..setNavigationDelegate(
             NavigationDelegate(
               onPageStarted: (String url) {
@@ -355,7 +360,7 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
         canPop: false,
         child: Stack(
           children: [
-            WebViewWidget(controller: controller),
+            OptimizedWebView(controller: controller, isLoading: isLoading),
             if (isLoading) Center(child: CircularProgressIndicator()),
           ],
         ),

@@ -24,6 +24,10 @@ class _ReportPageViewState extends State<ReportPageView> {
     controller =
         WebViewController()
           ..setJavaScriptMode(JavaScriptMode.unrestricted)
+          ..setBackgroundColor(PaxColors.white)
+          ..setUserAgent(
+            'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36',
+          )
           ..setNavigationDelegate(
             NavigationDelegate(
               onPageStarted: (String url) {

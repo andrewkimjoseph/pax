@@ -44,6 +44,9 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
+        // WebView optimizations
+        multiDexEnabled = true
     }
 
 
@@ -61,6 +64,10 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("release")
+            
+            // WebView optimizations for release builds
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }
