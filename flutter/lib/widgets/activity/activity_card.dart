@@ -59,7 +59,7 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
 
     final amount = task?.rewardAmountPerParticipant;
     final tokenId = task?.rewardCurrencyId;
-    final numberOfCooldownDays = task?.numberOfCooldownDays ?? 0;
+    final numberOfCooldownHours = task?.numberOfCooldownHours ?? 0;
     final timeCompleted = widget.activity.taskCompletion?.timeCompleted;
     final isValid = widget.activity.taskCompletion?.isValid;
 
@@ -73,7 +73,7 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
           tokenId: tokenId,
           txnHash: matchingReward?.reward?.txnHash,
           taskIsCompleted: isTaskComplete,
-          numberOfCooldownDays: numberOfCooldownDays,
+          numberOfCooldownHours: numberOfCooldownHours,
           timeCompleted: timeCompleted,
           isValid: isValid,
         );

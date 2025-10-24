@@ -78,17 +78,19 @@ class OtherTaskCard extends ConsumerWidget {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                task?.title ?? 'Untitled Task',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: PaxColors.black,
-                ),
-              ).withPadding(bottom: 8),
+              Expanded(
+                child: Text(
+                  task?.title ?? 'Untitled Task',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: PaxColors.black,
+                  ),
+                ).withPadding(bottom: 8),
+              ),
 
-              Spacer(),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(

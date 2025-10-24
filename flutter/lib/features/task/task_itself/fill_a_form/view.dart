@@ -2,8 +2,6 @@ import 'package:flutter/material.dart' show InkWell;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/local/screening_context/screening_context_provider.dart';
-import 'package:pax/providers/local/reward_state_provider.dart';
-import 'package:pax/services/reward_service.dart';
 import 'package:pax/widgets/task_timer.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Consumer;
 import 'package:webview_flutter/webview_flutter.dart';
@@ -36,7 +34,6 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       ref.read(taskCompletionProvider.notifier).reset();
-      ref.read(rewardStateProvider.notifier).reset();
     });
 
     // Initialize the WebViewController with empty URL
@@ -88,7 +85,7 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
     final currentParticipant = ref.read(participantProvider).participant;
 
     if (currentTask == null || currentTask.link == null) {
-      _showErrorDialog('Task or task link not found');
+      _showErrorDialog(context, 'Task or task link not found');
       return;
     }
 
@@ -131,7 +128,7 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
   }
 
   // Handle task completion
-  void _handleTaskCompletion() {
+  Future<void> _handleTaskCompletion() async {
     // Prevent multiple completion calls
     if (_isCompleting) return;
     _isCompleting = true;
@@ -139,13 +136,29 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
     try {
       final taskContext = ref.read(taskContextProvider);
       final currentTask = taskContext?.task;
-      final screening = ref.read(screeningContextProvider)?.screening;
+      final screeningContext = ref.read(screeningContextProvider);
+
+      ref.read(analyticsProvider).taskCompletionStarted({
+        "taskId": currentTask?.id,
+        "screeningId": screeningContext?.screening?.id,
+        "taskCompletionId": screeningContext?.screeningResult?.taskCompletionId,
+      });
 
       if (currentTask == null) {
+        ref.read(analyticsProvider).taskCompletionFailed({
+          "taskId": currentTask?.id,
+          "screeningId": screeningContext?.screening?.id,
+          "taskCompletionId":
+              screeningContext?.screeningResult?.taskCompletionId,
+        });
         throw Exception('Task not found');
       }
 
-      if (screening == null) {
+      if (screeningContext?.screening == null) {
+        ref.read(analyticsProvider).taskCompletionFailed({
+          "taskId": currentTask.id,
+          "screeningId": screeningContext?.screening?.id,
+        });
         throw Exception('Screening not found');
       }
 
@@ -156,30 +169,30 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
         builder:
             (dialogContext) => _buildCompletionDialog(
               dialogContext,
-              screening.id,
+              screeningContext?.screening?.id,
               currentTask.id,
             ),
       );
 
       // Start the task completion process
-      ref
+      await ref
           .read(taskCompletionServiceProvider)
           .markTaskAsComplete(
-            screeningId: screening.id,
+            screeningId: screeningContext?.screening?.id,
             taskId: currentTask.id,
           );
     } catch (e) {
       _isCompleting = false; // Reset flag on error
       if (mounted) {
-        _showErrorDialog(e.toString());
+        _showErrorDialog(context, e.toString());
       }
     }
   }
 
-  // Dialog showing completion and rewarding process
+  // Dialog showing completion process (without rewarding)
   Widget _buildCompletionDialog(
     BuildContext dialogContext,
-    String screeningId,
+    String? screeningId,
     String taskId,
   ) {
     return PopScope(
@@ -187,12 +200,9 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
       child: Consumer(
         builder: (context, ref, _) {
           final completionState = ref.watch(taskCompletionProvider);
-          final rewardState = ref.watch(rewardStateProvider);
 
-          // If task completion is complete, start the rewarding process
-          if (completionState.state == TaskCompletionState.complete &&
-              rewardState.state == RewardState.initial) {
-            // Get the task completion ID from the result
+          // Check for completion or errors
+          if (completionState.state == TaskCompletionState.complete) {
             final taskCompletionId = completionState.result?.taskCompletionId;
 
             ref.read(analyticsProvider).taskCompletionComplete({
@@ -201,24 +211,6 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
               "taskCompletionId": taskCompletionId,
             });
 
-            if (taskCompletionId != null) {
-              // Schedule rewarding after the build cycle
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                ref.read(analyticsProvider).rewardingStarted({
-                  "taskId": taskId,
-                  "screeningId": screeningId,
-                  "taskCompletionId": taskCompletionId,
-                });
-
-                ref
-                    .read(rewardServiceProvider)
-                    .rewardParticipant(taskCompletionId: taskCompletionId);
-              });
-            }
-          }
-
-          // Check for reward completion or errors
-          if (rewardState.state == RewardState.complete) {
             // Dismiss the dialog after a short delay and navigate
             Future.delayed(Duration(milliseconds: 500), () {
               if (dialogContext.mounted) {
@@ -228,44 +220,17 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
                 context.pushReplacement('/tasks/task-complete');
               }
             });
-          } else if (rewardState.state == RewardState.error) {
-            final taskCompletionId = completionState.result?.taskCompletionId;
-
-            ref.read(analyticsProvider).rewardingFailed({
-              "taskId": taskId,
-              "screeningId": screeningId,
-              "taskCompletionId": taskCompletionId,
-              "error": rewardState.errorMessage,
-            });
-
-            // Dismiss the dialog after a short delay
-            Future.delayed(Duration(milliseconds: 500), () {
-              if (dialogContext.mounted) {
-                dialogContext.pop();
-                _showErrorDialog(
-                  rewardState.errorMessage ??
-                      'An unknown error occurred during rewarding',
-                );
-              }
-            });
           } else if (completionState.state == TaskCompletionState.error) {
             // Dismiss the dialog after a short delay
             Future.delayed(Duration(milliseconds: 500), () {
               if (dialogContext.mounted) {
                 dialogContext.pop();
                 _showErrorDialog(
+                  context,
                   completionState.errorMessage ?? 'An unknown error occurred',
                 );
               }
             });
-          }
-
-          // Show appropriate loading message based on state
-          String message = 'Processing...';
-          if (completionState.state == TaskCompletionState.processing) {
-            message = 'Completing your task...';
-          } else if (rewardState.state == RewardState.rewarding) {
-            message = 'Rewarding your account...';
           }
 
           // Show loading indicator with appropriate message
@@ -275,7 +240,7 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
               children: [
                 CircularProgressIndicator().withPadding(bottom: 24),
                 Text(
-                  message,
+                  'Marking task as completed...',
                   style: TextStyle(
                     color: PaxColors.black,
                     fontSize: 16,
@@ -290,11 +255,12 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
     );
   }
 
-  void _showErrorDialog(String errorMessage) {
+  // Error dialog
+  void _showErrorDialog(BuildContext context, String errorMessage) {
     showDialog(
       barrierDismissible: false,
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return PopScope(
           canPop: false,
           child: AlertDialog(
@@ -318,7 +284,7 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
 
   @override
   Widget build(BuildContext context) {
-    final currentTask = ref.read(taskContextProvider)?.task;
+    final currentTask = ref.watch(taskContextProvider)?.task;
     return Scaffold(
       headers: [
         AppBar(

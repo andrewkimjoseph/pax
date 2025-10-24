@@ -119,10 +119,11 @@ class _TaskSummaryViewState extends ConsumerState<TaskSummaryView> {
 
       String nextRoute = "";
 
-      if (currentTask.actionText == 'Check Out Web App' ||
-          currentTask.actionText == 'Check Out Mobile App') {
-        nextRoute = '/tasks/check-out-product';
-      } else if (currentTask.actionText == 'Fill A Form') {
+      if (currentTask.actionText == 'Check Out App') {
+        nextRoute = '/tasks/check-out-app';
+      }
+
+      if (currentTask.actionText == 'Fill A Form') {
         nextRoute = '/tasks/fill-a-form';
       }
 

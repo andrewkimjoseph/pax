@@ -32,8 +32,8 @@ class TasksRepository {
     Query tasksQuery;
     if (kDebugMode) {
       tasksQuery = _tasksCollection
-          .where('isAvailable', isEqualTo: false)
-          .where('isTest', isEqualTo: true);
+          .where('isAvailable', isEqualTo: true)
+          .where('isTest', isEqualTo: false);
     } else {
       tasksQuery = _tasksCollection
           .where('isTest', isEqualTo: false)
@@ -137,6 +137,9 @@ class TasksRepository {
 
       // Filter tasks based on the updated criteria
       return availableTasks.where((task) {
+        if (kIsWeb) {
+          if (task.type == 'fillAForm') return false;
+        }
         // Check if screening time has elapsed (45 minutes)
         if (participantScreeningTimes.containsKey(task.id)) {
           final screeningTime = participantScreeningTimes[task.id]!;

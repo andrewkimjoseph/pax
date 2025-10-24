@@ -9,6 +9,7 @@ import 'package:pax/providers/local/task_context/task_context_provider.dart';
 import 'package:pax/providers/local/screening_context/screening_context_provider.dart';
 import 'package:pax/providers/local/task_master_provider.dart';
 import 'package:pax/providers/local/task_master_server_id_provider.dart';
+import 'package:pax/routing/routes.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/currency_symbol.dart';
 import 'package:pax/utils/token_balance_util.dart';
@@ -273,23 +274,28 @@ class TaskCard extends ConsumerWidget {
                 });
 
                 if (context.mounted) {
+                  String nextRoute = "";
                   if (screening?.txnHash != null) {
-                    String nextRoute = "";
-                    if (task.actionText == 'Check Out Web App' ||
-                        task.actionText == 'Check Out Mobile App') {
-                      nextRoute = '/tasks/check-out-product';
-                    } else if (task.actionText == 'Fill A Form') {
-                      nextRoute = '/tasks/fill-a-form';
+                    if (task.actionText == 'Check Out App') {
+                      nextRoute = "/tasks/check-out-app";
                     }
 
-                    // else if (task.actionText == 'Do Video Interview') {
-                    //   nextRoute = '/tasks/do-video-interview';
-                    // } else if (task.actionText == 'Follow On Social') {
-                    //   nextRoute = '/tasks/follow-on-social';
-                    // }
-                    context.push(nextRoute);
+                    if (task.actionText == 'Fill A Form') {
+                      nextRoute = "/tasks/fill-a-form";
+                    }
+
+                    if (task.actionText == 'Do Video Interview') {
+                      nextRoute = "/tasks/do-video-interview";
+                    }
+
+                    if (nextRoute.isEmpty) {
+                      context.go(Routes.home);
+                    } else {
+                      context.push(nextRoute);
+                    }
                   } else {
-                    context.push('/tasks/task-summary');
+                    nextRoute = Routes.taskSummary;
+                    context.push(Routes.taskSummary);
                   }
                 }
               },

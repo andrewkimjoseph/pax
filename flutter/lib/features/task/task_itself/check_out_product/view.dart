@@ -339,7 +339,7 @@ class _CheckOutProductViewState extends ConsumerState<CheckOutProductView> {
               InkWell(
                 onTap: () {
                   context.push(
-                    '/tasks/check-out-product/image-photo-view',
+                    '/tasks/check-out-app/image-photo-view',
                     extra: "lib/assets/images/tasks_by_canvassing.png",
                   );
                 },

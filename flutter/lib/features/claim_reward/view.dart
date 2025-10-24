@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart' show Divider, InkWell;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,18 +26,20 @@ class ClaimRewardView extends ConsumerStatefulWidget {
 
 class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
   bool isClaiming = false;
+  Timer? _countdownTimer;
+  Duration _remainingTime = Duration.zero;
 
   /// Checks if the cooldown period has elapsed
   /// Returns true if the user can claim the reward (cooldown has passed)
   bool _canClaimReward({
-    required int numberOfCooldownDays,
+    required int numberOfCooldownHours,
     required DateTime? timeCompleted,
   }) {
-    if (numberOfCooldownDays == 0) return true;
+    if (numberOfCooldownHours == 0) return true;
     if (timeCompleted == null) return false;
 
     final cooldownEndDate = timeCompleted.add(
-      Duration(days: numberOfCooldownDays),
+      Duration(hours: numberOfCooldownHours),
     );
     final now = DateTime.now();
 
@@ -44,32 +47,56 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
         now.isAtSameMomentAs(cooldownEndDate);
   }
 
-  /// Gets the remaining time until cooldown expires
-  String _getRemainingCooldownTime({
-    required int numberOfCooldownDays,
+  /// Formats duration as HH:MM:SS
+  String _formatDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
+
+    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+
+  /// Starts the countdown timer
+  void _startCountdown({
+    required int numberOfCooldownHours,
     required DateTime? timeCompleted,
   }) {
-    if (timeCompleted == null) return '';
+    if (timeCompleted == null) return;
 
     final cooldownEndDate = timeCompleted.add(
-      Duration(days: numberOfCooldownDays),
+      Duration(hours: numberOfCooldownHours),
     );
     final now = DateTime.now();
     final difference = cooldownEndDate.difference(now);
 
-    if (difference.isNegative) return '';
+    if (difference.isNegative) return;
 
-    final days = difference.inDays;
-    final hours = difference.inHours.remainder(24);
-    final minutes = difference.inMinutes.remainder(60);
+    _remainingTime = difference;
+    _countdownTimer?.cancel();
 
-    if (days > 0) {
-      return '$days day${days > 1 ? 's' : ''}, $hours hour${hours != 1 ? 's' : ''}';
-    } else if (hours > 0) {
-      return '$hours hour${hours > 1 ? 's' : ''}, $minutes minute${minutes != 1 ? 's' : ''}';
-    } else {
-      return '$minutes minute${minutes != 1 ? 's' : ''}';
-    }
+    _countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _remainingTime = _remainingTime - Duration(seconds: 1);
+          if (_remainingTime.isNegative || _remainingTime == Duration.zero) {
+            _remainingTime = Duration.zero;
+            timer.cancel();
+          }
+        });
+      }
+    });
+  }
+
+  /// Stops the countdown timer
+  void _stopCountdown() {
+    _countdownTimer?.cancel();
+    _countdownTimer = null;
+  }
+
+  @override
+  void dispose() {
+    _stopCountdown();
+    super.dispose();
   }
 
   Future<void> _claimReward(BuildContext context) async {
@@ -251,19 +278,28 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
     final tokenId = claimContext?.tokenId;
     final txnHash = claimContext?.txnHash;
     final taskIsCompleted = claimContext?.taskIsCompleted;
-    final numberOfCooldownDays = claimContext?.numberOfCooldownDays ?? 0;
+    final numberOfCooldownHours = claimContext?.numberOfCooldownHours ?? 0;
     final timeCompleted = claimContext?.timeCompleted?.toDate();
     final isValid = claimContext?.isValid ?? true;
 
     final canClaim = _canClaimReward(
-      numberOfCooldownDays: numberOfCooldownDays,
+      numberOfCooldownHours: numberOfCooldownHours,
       timeCompleted: timeCompleted,
     );
 
-    final remainingCooldownTime = _getRemainingCooldownTime(
-      numberOfCooldownDays: numberOfCooldownDays,
-      timeCompleted: timeCompleted,
-    );
+    // Start countdown timer if cooldown is active
+    if (numberOfCooldownHours > 0 &&
+        taskIsCompleted == true &&
+        isValid != false &&
+        (txnHash == null || txnHash.isEmpty) &&
+        !canClaim) {
+      _startCountdown(
+        numberOfCooldownHours: numberOfCooldownHours,
+        timeCompleted: timeCompleted,
+      );
+    } else {
+      _stopCountdown();
+    }
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -426,7 +462,7 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
                     ).withPadding(top: 16),
 
                   // Show cooldown information if there's a cooldown, task is completed, task is valid, and not already claimed
-                  if (numberOfCooldownDays > 0 &&
+                  if (numberOfCooldownHours > 0 &&
                       taskIsCompleted == true &&
                       isValid != false &&
                       (txnHash == null || txnHash.isEmpty))
@@ -472,14 +508,28 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
                               ),
                             ],
                           ).withPadding(bottom: canClaim ? 0 : 8),
-                          if (!canClaim && remainingCooldownTime.isNotEmpty)
-                            Text(
-                              'You can claim this reward in $remainingCooldownTime',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: PaxColors.black,
-                              ),
-                              textAlign: TextAlign.center,
+                          if (!canClaim && _remainingTime > Duration.zero)
+                            Column(
+                              children: [
+                                Text(
+                                  'You can claim this reward in:',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: PaxColors.black,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ).withPadding(bottom: 8),
+                                Text(
+                                  _formatDuration(_remainingTime),
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: PaxColors.red,
+                                    fontFamily: 'monospace',
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
                             ),
                           if (canClaim)
                             Text(

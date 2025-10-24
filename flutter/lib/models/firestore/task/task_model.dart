@@ -18,7 +18,7 @@ import 'package:pax/utils/string_util.dart';
 /// final task = Task(
 ///   id: 'task123',
 ///   title: 'Test our new app',
-///   type: 'checkoutmobileapp',
+///   type: 'checkoutapp',
 ///   rewardAmountPerParticipant: 100,
 /// );
 /// ```
@@ -41,19 +41,17 @@ class Task {
   /// The type of task to be performed.
   ///
   /// Common values include:
-  /// - 'checkoutwebapp': Check out a web application
+  /// - 'checkoutapp': Check out a mobile or web application
   /// - 'fillaform': Fill out a form
-  /// - 'checkoutmobileapp': Check out a mobile application
   /// - 'videointerview': Participate in a video interview
   /// - 'followonsocial': Follow on social media
-  /// - 'general': General or unspecified task type
-  ///
-  /// Defaults to "General" if not specified.
+  /// - 'general': General task type (default)
   final String? type;
 
   /// The category this task belongs to.
   ///
-  /// Used for organizing and filtering tasks. Defaults to "General" if not specified.
+  /// Used for organizing and filtering tasks. Helps group similar tasks together
+  /// for better user experience and task management. Defaults to "General" if not specified.
   final String? category;
 
   /// Estimated time in minutes required to complete this task.
@@ -79,28 +77,35 @@ class Task {
 
   /// The difficulty level of the task.
   ///
+  /// Helps users understand the complexity and effort required to complete the task.
   /// Common values might include 'easy', 'medium', 'hard', or custom difficulty indicators.
   final String? levelOfDifficulty;
 
   /// The blockchain smart contract address that manages this task.
   ///
-  /// This contract handles reward distribution and task completion verification.
+  /// This contract handles reward distribution, task completion verification,
+  /// and ensures secure, transparent reward payouts to participants.
   final String? managerContractAddress;
 
   /// The reward amount each participant will receive for completing this task.
   ///
-  /// The actual currency is determined by [rewardCurrencyId].
+  /// The actual currency/token is determined by [rewardCurrencyId].
+  /// This amount is distributed automatically upon successful task completion.
   final num? rewardAmountPerParticipant;
 
   /// The ID of the currency/token used for rewards.
   ///
   /// References a specific cryptocurrency or token that participants will receive.
+  /// This ID corresponds to a token registry that maps to actual blockchain tokens.
   final int? rewardCurrencyId;
 
   /// Whether this task is currently available for participation.
   ///
-  /// Tasks may become unavailable due to reaching participant limits, expiring,
-  /// or being manually disabled.
+  /// Tasks may become unavailable due to:
+  /// - Reaching the target number of participants
+  /// - Passing the deadline
+  /// - Being manually disabled by the task master
+  /// - System maintenance or other administrative reasons
   final bool? isAvailable;
 
   /// The timestamp when this task was created.
@@ -112,38 +117,44 @@ class Task {
   /// Whether this is a test task.
   ///
   /// Test tasks are used for testing purposes and may not provide real rewards.
+  /// They are typically used for development, QA, or demonstration purposes.
   final bool? isTest;
 
   /// Feedback or additional notes about the task.
   ///
-  /// Can be used by task creators to provide extra context or updates.
+  /// Can be used by task creators to provide extra context, updates,
+  /// or important information that participants should be aware of.
   final String? feedback;
 
   /// Terms and conditions regarding payment for this task.
   ///
-  /// Explains when and how participants will receive their rewards.
+  /// Explains when and how participants will receive their rewards,
+  /// including any conditions or requirements for payment eligibility.
   final String? paymentTerms;
 
   /// Detailed instructions on how to complete the task.
   ///
   /// Step-by-step guidance for participants on what they need to do.
+  /// Should be clear and comprehensive to ensure successful task completion.
   final String? instructions;
 
   /// The target country or countries for this task.
   ///
-  /// Can be:
+  /// Determines geographical availability of the task:
   /// - "ALL" or null: Available to all countries
   /// - Comma-separated country codes (e.g., "US,UK,CA"): Available to specific countries
   ///
   /// Use the [targetCountries] getter to get a parsed list of [Country] objects.
   final String? targetCountry;
 
-  /// The number of days a user must wait before they can participate in this task again.
+  /// The number of hours a user must wait before they can participate in this task again.
   ///
   /// A cooldown period prevents users from repeatedly completing the same task.
   /// - 0 (default): No cooldown, users can participate multiple times immediately
-  /// - Positive integer: Number of days to wait before re-participation is allowed
-  final int numberOfCooldownDays;
+  /// - Positive integer: Number of hours to wait before re-participation is allowed
+  ///
+  /// Note: This field is stored as [numberOfCooldownDays] in Firestore but converted to hours.
+  final int numberOfCooldownHours;
 
   /// Creates a new [Task] instance.
   ///
@@ -153,7 +164,7 @@ class Task {
   /// Default values:
   /// - [type]: "General"
   /// - [category]: "General"
-  /// - [numberOfCooldownDays]: 0
+  /// - [numberOfCooldownHours]: 0
   Task({
     required this.id,
     this.taskMasterId,
@@ -176,7 +187,7 @@ class Task {
     this.paymentTerms,
     this.instructions,
     this.targetCountry,
-    this.numberOfCooldownDays = 0,
+    this.numberOfCooldownHours = 0,
   });
 
   /// Creates a [Task] instance from a Firestore document.
@@ -189,6 +200,8 @@ class Task {
   /// task properties.
   ///
   /// Default values are applied for [type] and [category] if not present in the document.
+  ///
+  /// Note: The [numberOfCooldownDays] field from Firestore is mapped to [numberOfCooldownHours].
   ///
   /// Example:
   /// ```dart
@@ -228,7 +241,7 @@ class Task {
       paymentTerms: StringUtil.capitalizeFirst(data['paymentTerms']),
       instructions: data['instructions'],
       targetCountry: data['targetCountry'],
-      numberOfCooldownDays: data['numberOfCooldownDays'] ?? 0,
+      numberOfCooldownHours: data['numberOfCooldownDays'] ?? 0,
     );
   }
 
@@ -238,30 +251,25 @@ class Task {
   /// in the user interface.
   ///
   /// Mappings:
-  /// - 'checkoutwebapp' → 'Check Out Web App'
+  /// - 'checkoutapp' → 'Check Out App'
   /// - 'fillaform' → 'Fill A Form'
-  /// - 'checkoutmobileapp' → 'Check Out Mobile App'
   /// - 'videointerview' → 'Do Video Interview'
   /// - 'followonsocial' → 'Follow On Social'
   /// - Other values → Returns the original type or 'General' if null
   ///
   /// Example:
   /// ```dart
-  /// final task = Task(id: '1', type: 'checkoutwebapp');
-  /// print(task.actionText); // Output: 'Check Out Web App'
+  /// final task = Task(id: '1', type: 'checkoutapp');
+  /// print(task.actionText); // Output: 'Check Out App'
   /// ```
   String get actionText {
     switch (type?.toLowerCase()) {
-      case 'checkoutwebapp':
-        return 'Check Out Web App';
+      case 'checkoutapp':
+        return 'Check Out App';
       case 'fillaform':
         return 'Fill A Form';
-      case 'checkoutmobileapp':
-        return 'Check Out Mobile App';
       case 'videointerview':
         return 'Do Video Interview';
-      case 'followonsocial':
-        return 'Follow On Social';
       default:
         return type ?? 'General';
     }
@@ -307,16 +315,17 @@ class Task {
   /// - JSON serialization
   ///
   /// All fields, including null values, are included in the resulting map.
+  /// Note: [numberOfCooldownHours] is stored as 'numberOfCooldownDays' in the map.
   ///
   /// Example:
   /// ```dart
   /// final task = Task(
   ///   id: 'task123',
   ///   title: 'Test our app',
-  ///   type: 'checkoutmobileapp',
+  ///   type: 'checkoutapp',
   /// );
   /// final map = task.toMap();
-  /// // map contains: {'id': 'task123', 'title': 'Test our app', 'type': 'checkoutmobileapp', ...}
+  /// // map contains: {'id': 'task123', 'title': 'Test our app', 'type': 'checkoutapp', ...}
   /// ```
   Map<String, dynamic> toMap() {
     return {
@@ -341,7 +350,7 @@ class Task {
       'paymentTerms': paymentTerms,
       'instructions': instructions,
       'targetCountry': targetCountry,
-      'numberOfCooldownDays': numberOfCooldownDays,
+      'numberOfCooldownDays': numberOfCooldownHours,
     };
   }
 }
