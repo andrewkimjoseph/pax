@@ -33,7 +33,7 @@ export const CREATE2_FACTORY = "0x4e59b44847b379578588920cA78FbF26c0B4956C" as A
 // API endpoint configs
 export const PIMLICO_URL = `https://api.pimlico.io/v2/42220/rpc?apikey=${PIMLICO_API_KEY}`;
 
-export const DRPC_URL = `https://lb.drpc.org/ogrpc?network=celo&dkey=${DRPC_API_KEY}`;
+export const DRPC_URL = `https://lb.drpc.live/celo/${DRPC_API_KEY}`;
 
 export const REWARD_TOKEN_ADDRESS = "0x62B8B11039FcfE5aB0C56E502b1C372A3d2a9c7A" as Address;
 
