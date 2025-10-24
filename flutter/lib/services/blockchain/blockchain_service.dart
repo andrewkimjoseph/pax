@@ -10,7 +10,8 @@ class BlockchainService {
   // API key should ideally be stored in a secure configuration
   static final String _apiKey =
       Env.drpcAPIKey; // Replace with your actual API key
-  static final String _apiUrl = 'https://lb.drpc.org/ogrpc?network=celo&dkey=';
+  // static final String _apiUrl = 'https://lb.drpc.org/ogrpc?network=celo&dkey=';
+  static final String _apiUrl = 'https://lb.drpc.live/celo/';
 
   // Token configurations
   static final Map<int, TokenInfo> supportedTokens = {

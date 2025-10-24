@@ -9,7 +9,7 @@ class ClaimRewardContext {
   final int? tokenId;
   final String? txnHash;
   bool? taskIsCompleted = false;
-  final int numberOfCooldownDays;
+  final int numberOfCooldownHours;
   final Timestamp? timeCompleted;
   final bool? isValid;
 
@@ -21,7 +21,7 @@ class ClaimRewardContext {
     this.tokenId,
     this.txnHash,
     this.taskIsCompleted,
-    this.numberOfCooldownDays = 0,
+    this.numberOfCooldownHours = 0,
     this.timeCompleted,
     this.isValid,
   });
@@ -34,7 +34,7 @@ class ClaimRewardContext {
     int? tokenId,
     String? txnHash,
     bool? taskIsCompleted,
-    int? numberOfCooldownDays,
+    int? numberOfCooldownHours,
     Timestamp? timeCompleted,
     bool? isValid,
   }) {
@@ -46,7 +46,8 @@ class ClaimRewardContext {
       tokenId: tokenId ?? this.tokenId,
       txnHash: txnHash ?? this.txnHash,
       taskIsCompleted: taskIsCompleted ?? this.taskIsCompleted,
-      numberOfCooldownDays: numberOfCooldownDays ?? this.numberOfCooldownDays,
+      numberOfCooldownHours:
+          numberOfCooldownHours ?? this.numberOfCooldownHours,
       timeCompleted: timeCompleted ?? this.timeCompleted,
       isValid: isValid ?? this.isValid,
     );
@@ -67,7 +68,7 @@ class ClaimRewardContextNotifier extends Notifier<ClaimRewardContext?> {
     int? tokenId,
     String? txnHash,
     bool? taskIsCompleted,
-    int numberOfCooldownDays = 0,
+    int numberOfCooldownHours = 0,
     Timestamp? timeCompleted,
     bool? isValid,
   }) {
@@ -79,7 +80,7 @@ class ClaimRewardContextNotifier extends Notifier<ClaimRewardContext?> {
       tokenId: tokenId,
       txnHash: txnHash,
       taskIsCompleted: taskIsCompleted,
-      numberOfCooldownDays: numberOfCooldownDays,
+      numberOfCooldownHours: numberOfCooldownHours,
       timeCompleted: timeCompleted,
       isValid: isValid,
     );

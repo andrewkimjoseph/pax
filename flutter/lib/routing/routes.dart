@@ -6,4 +6,5 @@ class Routes {
   static const reportPage = "/report-page";
   static const claimReward = "/claim-reward";
   static const canvassingXGoodDollar = "/canvassing-x-gooddollar";
+  static const taskSummary = "/tasks/task-summary";
 }

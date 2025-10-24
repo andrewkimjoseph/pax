@@ -1,5 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 class LocalDBHelper {
   static final LocalDBHelper _instance = LocalDBHelper._internal();
@@ -15,8 +17,17 @@ class LocalDBHelper {
   }
 
   Future<Database> _initDb() async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'pax_balances.db');
+    String path;
+
+    if (kIsWeb) {
+      // Change default factory on the web
+      databaseFactory = databaseFactoryFfiWeb;
+      path = 'pax_balances_web.db';
+    } else {
+      final dbPath = await getDatabasesPath();
+      path = join(dbPath, 'pax_balances.db');
+    }
+
     return await openDatabase(
       path,
       version: 1,

@@ -116,18 +116,18 @@ final routerProvider = Provider((ref) {
         builder: (BuildContext context, GoRouterState state) => WalletView(),
         routes: [
           GoRoute(
-            path: "withdraw",
+            path: "/withdraw",
             builder:
                 (BuildContext context, GoRouterState state) => WithdrawView(),
             routes: [
               GoRoute(
-                path: "select-wallet",
+                path: "/select-wallet",
                 builder:
                     (BuildContext context, GoRouterState state) =>
                         SelectWalletView(),
                 routes: [
                   GoRoute(
-                    path: "review-summary",
+                    path: "/review-summary",
                     builder:
                         (BuildContext context, GoRouterState state) =>
                             ReviewSummaryView(),
@@ -154,11 +154,11 @@ final routerProvider = Provider((ref) {
             (BuildContext context, GoRouterState state) => HelpAndSupportView(),
         routes: [
           GoRoute(
-            path: "faq",
+            path: "/faq",
             builder: (BuildContext context, GoRouterState state) => FAQView(),
           ),
           GoRoute(
-            path: "contact-support",
+            path: "/contact-support",
             builder:
                 (BuildContext context, GoRouterState state) =>
                     ContactSupportView(),
@@ -177,7 +177,7 @@ final routerProvider = Provider((ref) {
                     TaskSummaryView(),
             routes: [
               GoRoute(
-                path: "image-photo-view",
+                path: "/image-photo-view",
                 builder:
                     (BuildContext context, GoRouterState state) =>
                         ImageStepPhotoView(path: state.extra as String),
@@ -192,18 +192,18 @@ final routerProvider = Provider((ref) {
                     TaskCompleteView(),
           ),
           GoRoute(
-            path: "fill-a-form",
+            path: "/fill-a-form",
             builder:
                 (BuildContext context, GoRouterState state) => FillAFormView(),
           ),
           GoRoute(
-            path: "/check-out-product",
+            path: "/check-out-app",
             builder:
                 (BuildContext context, GoRouterState state) =>
                     CheckOutProductView(),
             routes: [
               GoRoute(
-                path: "image-photo-view",
+                path: "/image-photo-view",
                 builder:
                     (BuildContext context, GoRouterState state) =>
                         ImageStepPhotoView(path: state.extra as String),
@@ -220,13 +220,13 @@ final routerProvider = Provider((ref) {
                 WithdrawalMethodsView(),
         routes: [
           GoRoute(
-            path: "minipay-connection",
+            path: "/minipay-connection",
             builder:
                 (BuildContext context, GoRouterState state) =>
                     MiniPayConnectionView(),
             routes: [
               GoRoute(
-                path: "image-photo-view",
+                path: "/image-photo-view",
                 builder:
                     (BuildContext context, GoRouterState state) =>
                         ImageStepPhotoView(path: state.extra as String),
@@ -234,13 +234,13 @@ final routerProvider = Provider((ref) {
             ],
           ),
           GoRoute(
-            path: "good-wallet-connection",
+            path: "/good-wallet-connection",
             builder:
                 (BuildContext context, GoRouterState state) =>
                     GoodWalletConnectionView(),
             routes: [
               GoRoute(
-                path: "image-photo-view",
+                path: "/image-photo-view",
                 builder:
                     (BuildContext context, GoRouterState state) =>
                         ImageStepPhotoView(path: state.extra as String),

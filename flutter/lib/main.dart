@@ -18,6 +18,7 @@ import 'package:pax/theming/theme_provider.dart';
 import 'package:pax/utils/version_util.dart';
 import 'package:pax/widgets/app_lifecycle_handler.dart';
 import 'package:pax/widgets/maintenance_dialog.dart';
+import 'package:pax/widgets/mobile_only_wrapper.dart';
 import 'package:pax/widgets/update_dialog.dart';
 
 Future<void> main() async {
@@ -124,58 +125,60 @@ class _AppState extends ConsumerState<App> {
         title: 'Pax',
         theme: ref.watch(themeProvider),
         builder: (context, child) {
-          return ClarityWidget(
-            clarityConfig: ref.watch(clarityConfigProvider),
-            app: MediaQuery(
-              data: MediaQuery.of(
-                context,
-              ).copyWith(textScaler: TextScaler.noScaling),
-              child: Consumer(
-                builder: (context, ref, _) {
-                  final appVersionConfigAsync = ref.watch(
-                    appVersionConfigProvider,
-                  );
-                  final maintenanceConfigAsync = ref.watch(
-                    maintenanceConfigProvider,
-                  );
+          return MobileOnlyWrapper(
+            child: ClarityWidget(
+              clarityConfig: ref.watch(clarityConfigProvider),
+              app: MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(textScaler: TextScaler.noScaling),
+                child: Consumer(
+                  builder: (context, ref, _) {
+                    final appVersionConfigAsync = ref.watch(
+                      appVersionConfigProvider,
+                    );
+                    final maintenanceConfigAsync = ref.watch(
+                      maintenanceConfigProvider,
+                    );
 
-                  return Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      child ?? const CircularProgressIndicator(),
-                      appVersionConfigAsync.when(
-                        data: (config) {
-                          if (_currentVersion == null) {
-                            return const SizedBox.shrink();
-                          }
+                    return Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        child ?? const CircularProgressIndicator(),
+                        appVersionConfigAsync.when(
+                          data: (config) {
+                            if (_currentVersion == null) {
+                              return const SizedBox.shrink();
+                            }
 
-                          final needsUpdate =
-                              config.forceUpdate &&
-                              VersionUtil.isVersionLower(
-                                _currentVersion!,
-                                config.minimumVersion,
-                              );
+                            final needsUpdate =
+                                config.forceUpdate &&
+                                VersionUtil.isVersionLower(
+                                  _currentVersion!,
+                                  config.minimumVersion,
+                                );
 
-                          if (needsUpdate) return const UpdateDialog();
+                            if (needsUpdate) return const UpdateDialog();
 
-                          return maintenanceConfigAsync.when(
-                            data: (maintenanceConfig) {
-                              if (!maintenanceConfig.isUnderMaintenance) {
-                                return const SizedBox.shrink();
-                              }
+                            return maintenanceConfigAsync.when(
+                              data: (maintenanceConfig) {
+                                if (!maintenanceConfig.isUnderMaintenance) {
+                                  return const SizedBox.shrink();
+                                }
 
-                              return const MaintenanceDialog();
-                            },
-                            loading: () => const SizedBox.shrink(),
-                            error: (_, __) => const SizedBox.shrink(),
-                          );
-                        },
-                        loading: () => const SizedBox.shrink(),
-                        error: (_, __) => const SizedBox.shrink(),
-                      ),
-                    ],
-                  );
-                },
+                                return const MaintenanceDialog();
+                              },
+                              loading: () => const SizedBox.shrink(),
+                              error: (_, __) => const SizedBox.shrink(),
+                            );
+                          },
+                          loading: () => const SizedBox.shrink(),
+                          error: (_, __) => const SizedBox.shrink(),
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
           );

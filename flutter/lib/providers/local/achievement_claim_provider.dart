@@ -10,7 +10,7 @@ import 'package:pax/providers/withdrawal_method_connection/withdrawal_method_con
 import 'package:pax/repositories/firestore/achievement/achievement_repository.dart';
 import 'package:pax/services/blockchain/blockchain_service.dart';
 import 'package:pax/services/notifications/notification_service.dart';
-import 'package:pax/services/withdrawal/withdrawal_service.dart';
+import 'package:pax/services/withdrawal/withdrawal_method_connection_service.dart';
 import 'package:pax/utils/secret_constants.dart';
 
 class AchievementStateModel {

@@ -46,7 +46,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
     final featureFlags = ref.watch(featureFlagsProvider);
     final index = ref.watch(homeSelectedIndexProvider);
     final primaryWithdrawalMethod = ref.watch(primaryWithdrawalMethodProvider);
-
     return Scaffold(
       headers: [
         AppBar(

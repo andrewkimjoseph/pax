@@ -43,7 +43,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                 transition: const CarouselTransition.fading(),
                 controller: controller,
                 direction: Axis.horizontal,
-                autoplaySpeed: const Duration(seconds: 1),
+                autoplaySpeed: const Duration(seconds: 5),
                 // speed: Duration(seconds: 10),
                 // sizeConstraint: CarouselSizeConstraint.fractional(1),
                 itemCount: 5,
