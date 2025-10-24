@@ -6,7 +6,7 @@ import 'package:pax/providers/db/achievement/achievement_provider.dart';
 import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/db/pax_account/pax_account_provider.dart';
 import 'package:pax/providers/db/withdrawal_method/withdrawal_method_provider.dart';
-import 'package:pax/services/withdrawal/withdrawal_service.dart';
+import 'package:pax/services/withdrawal/withdrawal_method_connection_service.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
 import 'package:pax/utils/achievement_constants.dart';
 import 'package:pax/utils/user_property_constants.dart';
