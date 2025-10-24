@@ -26,9 +26,9 @@ const taskManagerV2Bytecode = taskManagerV2ContractArtifact.bytecode as Address;
   // Constants
   export const IMPLEMENTATION_ADDRESS = "0xD9Ae701950bB2615b9a068C6a310156af6AD92A2" as Address;
   // export const REWARD_TOKEN_ADDRESS = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1" as Address; // cUSD Alfajores
-  export const REWARD_TOKEN_ADDRESS = "0x62B8B11039FcfE5aB0C56E502b1C372A3d2a9c7A" as Address; // GoodDollar Mainnet
+  // export const REWARD_TOKEN_ADDRESS = "0x62B8B11039FcfE5aB0C56E502b1C372A3d2a9c7A" as Address; // GoodDollar Mainnet
   // export const REWARD_TOKEN_ADDRESS = "0x765DE816845861e75A25fCA122bb6898B8B1282a" as Address; //  cUSD Mainnet
-  // export const REWARD_TOKEN_ADDRESS = "0x48065fbBE25f71C9282ddf5e1cD6D6A887483D5e" as Address; // Tether Mainnet
+  export const REWARD_TOKEN_ADDRESS = "0x48065fbBE25f71C9282ddf5e1cD6D6A887483D5e" as Address; // Tether Mainnet
 
   // Helper to calculate event signatures
   export function calculateEventSignature(eventSignatureString: string): string {
