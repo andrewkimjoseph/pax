@@ -1,0 +1,20 @@
+{
+    "accountAssociation": {
+        "header": "eyJmaWQiOjgxMTA0NCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweEE5NGM4Mzc3NTdGYTg2Qjk1OEVlMjZFNzU0NDY4QjA3OTBlNjU3NjAifQ",
+        "payload": "eyJkb21haW4iOiJ0aGVwYXhhcHAud2ViLmFwcCJ9",
+        "signature": "EpdN6D83gRwtqUjnoOafHiyS8b0Bn3c+/rHa6J2Ju6wowbFtb0ZENnsMU7Zwr11lwQ9jjpxyIlTbfuWMpqS7Ehw="
+    },
+    "frame": {
+        "name": "The Pax App",
+        "version": "1",
+        "iconUrl": "https://thepaxapp.web.app/icons/Icon-192.png",
+        "homeUrl": "https://thepaxapp.web.app",
+        "imageUrl": "https://thepaxapp.web.app/icons/Icon-192.png",
+        "splashImageUrl": "https://thepaxapp.web.app/icons/Icon-192.png",
+        "splashBackgroundColor": "#f5f0ec",
+        "subtitle": "Get paid to do micro tasks",
+        "heroImageUrl": "https://thepaxapp.web.app/icons/Icon-192.png",
+        "description": "The Pax App delivers micro tasks rewarded in tokens",
+        "primaryCategory": "finance"
+    }
+}
