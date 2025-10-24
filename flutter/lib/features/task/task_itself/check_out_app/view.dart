@@ -19,15 +19,14 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:pax/theming/colors.dart';
 
-class CheckOutProductView extends ConsumerStatefulWidget {
-  const CheckOutProductView({super.key});
+class CheckOutAppView extends ConsumerStatefulWidget {
+  const CheckOutAppView({super.key});
 
   @override
-  ConsumerState<CheckOutProductView> createState() =>
-      _CheckOutProductViewState();
+  ConsumerState<CheckOutAppView> createState() => _CheckOutAppViewState();
 }
 
-class _CheckOutProductViewState extends ConsumerState<CheckOutProductView> {
+class _CheckOutAppViewState extends ConsumerState<CheckOutAppView> {
   bool isLoading = true;
   bool _isCompleting = false;
 

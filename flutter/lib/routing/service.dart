@@ -5,7 +5,7 @@ import 'package:pax/features/account_and_security/view.dart';
 import 'package:pax/features/canvassing_x_gooddollar/view.dart';
 import 'package:pax/features/claim_reward/view.dart';
 import 'package:pax/features/report_page/view.dart';
-import 'package:pax/features/task/task_itself/check_out_product/view.dart';
+import 'package:pax/features/task/task_itself/check_out_app/view.dart';
 import 'package:pax/features/task/task_itself/fill_a_form/view.dart';
 import 'package:pax/features/webview/view.dart';
 import 'package:pax/features/withdrawal_methods/good-wallet-connection/view.dart';
@@ -200,7 +200,7 @@ final routerProvider = Provider((ref) {
             path: "/check-out-app",
             builder:
                 (BuildContext context, GoRouterState state) =>
-                    CheckOutProductView(),
+                    CheckOutAppView(),
             routes: [
               GoRoute(
                 path: "/image-photo-view",
