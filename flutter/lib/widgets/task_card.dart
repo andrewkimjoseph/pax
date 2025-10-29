@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -13,6 +14,7 @@ import 'package:pax/routing/routes.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/currency_symbol.dart';
 import 'package:pax/utils/token_balance_util.dart';
+import 'package:pax/utils/url_handler.dart';
 import 'package:pax/widgets/task_timer.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -247,6 +249,8 @@ class TaskCard extends ConsumerWidget {
             width: double.infinity,
             child: Button(
               onPressed: () async {
+                // Check if web and fillAForm task type
+
                 ref
                     .read(taskContextProvider.notifier)
                     .setTaskContext(task.id, task);
@@ -272,6 +276,13 @@ class TaskCard extends ConsumerWidget {
                   "taskCategory": task.category,
                   "taskMasterServerWalletId": serverWalletId,
                 });
+
+                if (kIsWeb && task.type == "fillAForm") {
+                  await UrlHandler.launchInExternalBrowser(
+                    'https://thepax.app/web',
+                  );
+                  return;
+                }
 
                 if (context.mounted) {
                   String nextRoute = "";
@@ -309,7 +320,11 @@ class TaskCard extends ConsumerWidget {
                   ),
 
               child: Text(
-                screening?.txnHash != null ? 'Go to task' : 'Check it out',
+                kIsWeb && task.type == "fillAForm"
+                    ? 'Complete in mobile app'
+                    : (screening?.txnHash != null
+                        ? 'Go to task'
+                        : 'Check it out'),
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 14,
