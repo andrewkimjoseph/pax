@@ -476,11 +476,7 @@ class _GoodWalletConnectionViewState
                           ),
                           features: [
                             InputFeature.leading(
-                              SvgPicture.asset(
-                                'lib/assets/svgs/wallet_address.svg',
-                                height: 20,
-                                width: 20,
-                              ),
+                              FaIcon(FontAwesomeIcons.wallet),
                             ),
                           ],
                         ),
@@ -512,7 +508,7 @@ class _GoodWalletConnectionViewState
                           child: Row(
                             children: [
                               const Text(
-                                "Set up your GoodWallet",
+                                "Create a GoodWallet account.",
                                 textAlign: TextAlign.left,
                                 style: TextStyle(
                                   color: PaxColors.black,
@@ -529,6 +525,49 @@ class _GoodWalletConnectionViewState
                         ),
                       ],
                     ).withPadding(bottom: 8),
+
+                    Row(
+                      children: [
+                        const Text(
+                          "Want to copy your wallet address?",
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            color: PaxColors.black,
+                            fontSize: 13,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ).withPadding(right: 2),
+                        InkWell(
+                          onTap: () {
+                            ref
+                                .read(analyticsProvider)
+                                .checkOutCopyWalletAddressStepsTapped({
+                                  "wallet": "GoodWallet",
+                                });
+                            context.push(
+                              "/withdrawal-methods/good-wallet-connection/copy-wallet-address",
+                            );
+                          },
+                          child: Row(
+                            children: [
+                              const Text(
+                                "Check out these steps.",
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  color: PaxColors.black,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.normal,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ).withPadding(vertical: 4, right: 4),
+                              // SvgPicture.asset(
+                              //   'lib/assets/svgs/redirect_window.svg',
+                              // ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                     const Divider().withPadding(vertical: 8),
 
                     if (checkWhitelist)

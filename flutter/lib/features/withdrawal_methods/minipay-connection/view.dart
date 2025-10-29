@@ -472,11 +472,7 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                           ),
                           features: [
                             InputFeature.leading(
-                              SvgPicture.asset(
-                                'lib/assets/svgs/wallet_address.svg',
-                                height: 20,
-                                width: 20,
-                              ),
+                              FaIcon(FontAwesomeIcons.wallet),
                             ),
                           ],
                         ),
@@ -499,15 +495,15 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                             ref.read(analyticsProvider).setUpMiniPayTapped({
                               "inviteCode": minipayInviteCode,
                             });
-                            UrlHandler.launchCustomTab(
-                              context,
+                            UrlHandler.launchInExternalBrowser(
+                              // context,
                               minipayInviteLink,
                             );
                           },
                           child: Row(
                             children: [
                               const Text(
-                                "Set up a MiniPay wallet",
+                                "Download MiniPay.",
                                 textAlign: TextAlign.left,
                                 style: TextStyle(
                                   color: PaxColors.black,
@@ -524,6 +520,49 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                         ),
                       ],
                     ).withPadding(bottom: 8),
+
+                    Row(
+                      children: [
+                        const Text(
+                          "Want to copy your wallet address?",
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            color: PaxColors.black,
+                            fontSize: 13,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ).withPadding(right: 2),
+                        InkWell(
+                          onTap: () {
+                            ref
+                                .read(analyticsProvider)
+                                .checkOutCopyWalletAddressStepsTapped({
+                                  "wallet": "MiniPay",
+                                });
+                            context.push(
+                              "/withdrawal-methods/minipay-connection/copy-wallet-address",
+                            );
+                          },
+                          child: Row(
+                            children: [
+                              const Text(
+                                "Check out these steps.",
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  color: PaxColors.black,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.normal,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ).withPadding(vertical: 4, right: 4),
+                              // SvgPicture.asset(
+                              //   'lib/assets/svgs/redirect_window.svg',
+                              // ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                     const Divider().withPadding(vertical: 8),
 
                     if (checkWhitelist)

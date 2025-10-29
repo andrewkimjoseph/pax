@@ -331,6 +331,13 @@ class AnalyticsProvider {
   Future<void> setUpMiniPayTapped([Map<String, dynamic>? properties]) =>
       _logEvent('set_up_minipay_tapped', properties: properties);
 
+  Future<void> checkOutCopyWalletAddressStepsTapped([
+    Map<String, dynamic>? properties,
+  ]) => _logEvent(
+    'check_out_copy_wallet_address_steps_tapped',
+    properties: properties,
+  );
+
   Future<void> drpcTapped([Map<String, dynamic>? properties]) =>
       _logEvent('drpc_tapped', properties: properties);
 }

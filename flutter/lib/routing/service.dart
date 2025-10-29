@@ -8,7 +8,9 @@ import 'package:pax/features/report_page/view.dart';
 import 'package:pax/features/task/task_itself/check_out_app/view.dart';
 import 'package:pax/features/task/task_itself/fill_a_form/view.dart';
 import 'package:pax/features/webview/view.dart';
+import 'package:pax/features/withdrawal_methods/good-wallet-connection/copy-wallet-address/view.dart';
 import 'package:pax/features/withdrawal_methods/good-wallet-connection/view.dart';
+import 'package:pax/features/withdrawal_methods/minipay-connection/copy-wallet-address/view.dart';
 import 'package:pax/models/auth/auth_state_model.dart';
 import 'package:pax/widgets/image_step_photo_view/image_step_photo_view.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
@@ -231,6 +233,22 @@ final routerProvider = Provider((ref) {
                     (BuildContext context, GoRouterState state) =>
                         ImageStepPhotoView(path: state.extra as String),
               ),
+
+              GoRoute(
+                path: "/copy-wallet-address",
+                builder:
+                    (BuildContext context, GoRouterState state) =>
+                        CopyWalletAddressMiniPayView(),
+
+                routes: [
+                  GoRoute(
+                    path: "/image-photo-view",
+                    builder:
+                        (BuildContext context, GoRouterState state) =>
+                            ImageStepPhotoView(path: state.extra as String),
+                  ),
+                ],
+              ),
             ],
           ),
           GoRoute(
@@ -244,6 +262,22 @@ final routerProvider = Provider((ref) {
                 builder:
                     (BuildContext context, GoRouterState state) =>
                         ImageStepPhotoView(path: state.extra as String),
+              ),
+
+              GoRoute(
+                path: "/copy-wallet-address",
+                builder:
+                    (BuildContext context, GoRouterState state) =>
+                        CopyWalletAddressGoodWalletView(),
+
+                routes: [
+                  GoRoute(
+                    path: "/image-photo-view",
+                    builder:
+                        (BuildContext context, GoRouterState state) =>
+                            ImageStepPhotoView(path: state.extra as String),
+                  ),
+                ],
               ),
             ],
           ),
