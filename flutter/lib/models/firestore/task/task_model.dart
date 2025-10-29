@@ -41,11 +41,9 @@ class Task {
   /// The type of task to be performed.
   ///
   /// Common values include:
-  /// - 'checkoutapp': Check out a mobile or web application
-  /// - 'fillaform': Fill out a form
-  /// - 'videointerview': Participate in a video interview
-  /// - 'followonsocial': Follow on social media
-  /// - 'general': General task type (default)
+  /// - 'checkOutApp': Check out a mobile or web application
+  /// - 'fillAForm': Fill out a form
+  /// - 'doVideoInterview': Participate in a video interview
   final String? type;
 
   /// The category this task belongs to.
@@ -263,15 +261,15 @@ class Task {
   /// print(task.actionText); // Output: 'Check Out App'
   /// ```
   String get actionText {
-    switch (type?.toLowerCase()) {
-      case 'checkoutapp':
+    switch (type) {
+      case 'checkOutApp':
         return 'Check Out App';
-      case 'fillaform':
+      case 'fillAForm':
         return 'Fill A Form';
-      case 'videointerview':
+      case 'doVideoInterview':
         return 'Do Video Interview';
       default:
-        return type ?? 'General';
+        return 'Check Out App';
     }
   }
 
