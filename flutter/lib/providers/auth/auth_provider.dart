@@ -192,6 +192,8 @@ class AuthNotifier extends Notifier<AuthStateModel> {
 
         ref.read(onboardingViewModelProvider.notifier).resetOnboarding();
 
+        ref.read(homeSelectedIndexProvider.notifier).setIndex(1);
+
         ref.read(analyticsProvider).signInWithGoogleComplete(user.toMap());
       } else {
         // User cancelled the sign-in flow

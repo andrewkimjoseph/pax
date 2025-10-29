@@ -45,7 +45,10 @@ class _GoodWalletLinkingStepsWithFaceVerificationState
           },
         ),
         Step(
-          title: const Text("Step 2: Tap the Claim button.").expanded(),
+          title:
+              const Text(
+                "Step 2: Tap the Claim / GoodDollar button.",
+              ).expanded(),
           contentBuilder: (context) {
             return StepContainer(
               actions: [
