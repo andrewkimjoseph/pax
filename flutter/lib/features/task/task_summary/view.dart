@@ -36,6 +36,42 @@ class _TaskSummaryViewState extends ConsumerState<TaskSummaryView> {
     });
   }
 
+  void _showWithdrawalMethodDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder:
+          (dialogContext) => AlertDialog(
+            title: const Text('Add a Withdrawal Method'),
+            content: const Text(
+              'To continue with tasks, you need to add a withdrawal method first. This is where your rewards will be sent.',
+            ),
+            actions: [
+              // SecondaryButton(
+              //   onPressed: () {
+              //     Navigator.of(dialogContext).pop();
+              //     // Go back to home
+              //     context.pop();
+              //   },
+              //   child: const Text('Later'),
+              // ),
+              Align(
+                alignment: Alignment.center,
+                child: PrimaryButton(
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                    // Pop back to home first, then push withdrawal methods
+                    context.pop();
+                    context.push('/withdrawal-methods');
+                  },
+                  child: const Text('Add Withdrawal Method'),
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+
   // Method to handle screening process
   Future<void> _processScreening(BuildContext context) async {
     if (_isProcessingScreening) return;
@@ -51,8 +87,28 @@ class _TaskSummaryViewState extends ConsumerState<TaskSummaryView> {
 
     final taskMasterServerWalletId = ref.read(taskMasterServerIdProvider);
     final serverWalletId = ref.read(paxAccountProvider).account?.serverWalletId;
+    final participant = ref.read(participantProvider).participant;
+
+    final paxAccount = ref.watch(paxAccountProvider).account;
+
     final participantId = ref.read(participantProvider).participant?.id;
     final taskManagerContractAddress = currentTask.managerContractAddress;
+
+    final hasDeployedPaxAccount = paxAccount?.contractAddress != null;
+
+    final participantIsComplete =
+        (participant?.country != null &&
+            participant?.dateOfBirth != null &&
+            participant?.gender != null);
+
+    final participantIsCompletelyComplete =
+        participantIsComplete && hasDeployedPaxAccount;
+
+    // If participant is not completely complete, show dialog and return
+    if (!participantIsCompletelyComplete) {
+      _showWithdrawalMethodDialog();
+      return;
+    }
 
     if (!mounted) return;
     setState(() {
