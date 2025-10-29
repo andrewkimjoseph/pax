@@ -40,13 +40,38 @@ class MiniPayPaymentMethodCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    minipay?.name ?? "MiniPay",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 18,
-                      color: PaxColors.black,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        minipay?.name ?? "MiniPay",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
+                          color: PaxColors.black,
+                        ),
+                      ),
+                      if (minipay?.walletAddress == null) ...[
+                        SizedBox(width: 8),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: PaxColors.red.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            "Recommended",
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: PaxColors.red,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ).withPadding(bottom: 8),
                   Text(
                     minipay?.walletAddress != null
