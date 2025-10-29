@@ -18,6 +18,7 @@ import 'package:pax/utils/token_balance_util.dart';
 import 'package:pax/widgets/select_currency_button.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:pax/providers/local/refresh_time_provider.dart';
+// import 'dart:math' as math;
 
 class CurrentBalanceCard extends ConsumerStatefulWidget {
   const CurrentBalanceCard(this.nextLocation, {super.key});
@@ -28,7 +29,30 @@ class CurrentBalanceCard extends ConsumerStatefulWidget {
   ConsumerState<CurrentBalanceCard> createState() => _CurrentBalanceCardState();
 }
 
-class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
+class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard>
+// with SingleTickerProviderStateMixin
+{
+  // late AnimationController _animationController;
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _animationController = AnimationController(
+  //     vsync: this,
+  //     duration: const Duration(milliseconds: 800),
+  //   );
+
+  //   if (widget.nextLocation == "/wallet") {
+  //     _animationController.repeat();
+  //   }
+  // }
+
+  // @override
+  // void dispose() {
+  //   _animationController.dispose();
+  //   super.dispose();
+  // }
+
   @override
   Widget build(BuildContext context) {
     final paxAccount = ref.watch(paxAccountProvider);
@@ -151,12 +175,95 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard> {
 
           Row(
             children: [
-              Container(
+              // if (widget.nextLocation == "/wallet")
+              //   AnimatedBuilder(
+              //     animation: _animationController,
+              //     builder: (context, child) {
+              //       return Container(
+              //         width: 150,
+              //         decoration: BoxDecoration(
+              //           color: PaxColors.white,
+              //           borderRadius: BorderRadius.circular(12),
+              //           border: Border.all(width: 2, color: Colors.transparent),
+              //           gradient: SweepGradient(
+              //             colors: [
+              //               PaxColors.blue,
+              //               PaxColors.blue,
+              //               PaxColors.blue.withAlpha((0.5 * 255).toInt()),
+              //               Colors.transparent,
+              //               Colors.transparent,
+              //             ],
+              //             stops: const [0.0, 0.2, 0.4, 0.6, 0.8],
+              //             transform: GradientRotation(
+              //               _animationController.value * 2 * math.pi,
+              //             ),
+              //           ),
+              //         ),
+              //         child: Container(
+              //           decoration: BoxDecoration(
+              //             color: PaxColors.white,
+              //             borderRadius: BorderRadius.circular(10),
+              //           ),
+              //           child: child,
+              //         ),
+              //       );
+              //     },
+              //     child: Select<String>(
+              //       itemBuilder: (context, item) {
+              //         return Row(
+              //           children: [
+              //             SvgPicture.asset(
+              //               'lib/assets/svgs/currencies/$item.svg',
+              //               height: 20,
+              //             ).withPadding(right: 8),
+              //             Text(CurrencySymbolUtil.getSymbolForCurrency(item)),
+              //           ],
+              //         );
+              //       },
+              //       onChanged: (value) {
+              //         if (value != null) {
+              //           ref
+              //               .read(rewardCurrencyContextProvider.notifier)
+              //               .setSelectedCurrency(value);
+
+              //           ref
+              //               .read(withdrawContextProvider.notifier)
+              //               .setWithdrawContext(
+              //                 tokenId ?? 1,
+              //                 currentBalance ?? 0,
+              //               );
+              //         }
+              //       },
+              //       value: selectedCurrency,
+              //       placeholder: const Text('Change currency'),
+              //       popup:
+              //           (context) => SelectPopup(
+              //             items: SelectItemList(
+              //               children: [
+              //                 SelectCurrencyButton(
+              //                   'good_dollar',
+              //                   selectedCurrency == 'good_dollar',
+              //                 ),
+              //                 SelectCurrencyButton(
+              //                   'celo_dollar',
+              //                   selectedCurrency == 'celo_dollar',
+              //                 ),
+              //                 SelectCurrencyButton(
+              //                   'tether_usd',
+              //                   selectedCurrency == 'tether_usd',
+              //                 ),
+              //                 SelectCurrencyButton(
+              //                   'usd_coin',
+              //                   selectedCurrency == 'usd_coin',
+              //                 ).withPadding(bottom: kIsWeb ? 0 : 30),
+              //               ],
+              //             ),
+              //           ),
+              //     ),
+              //   ).withPadding(right: 8)
+              // else
+              SizedBox(
                 width: 150,
-                decoration: BoxDecoration(
-                  color: PaxColors.white,
-                  borderRadius: BorderRadius.circular(12),
-                ),
                 child: Select<String>(
                   itemBuilder: (context, item) {
                     return Row(

@@ -199,6 +199,10 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                                         height: 16,
                                         width: 16,
                                       ).withMargin(right: 8),
+                                      // FaIcon(
+                                      //   FontAwesomeIcons.google,
+                                      //   size: 15,
+                                      // ).withMargin(right: 8),
                                       Text(
                                         authState.state ==
                                                 AuthState.authenticated
