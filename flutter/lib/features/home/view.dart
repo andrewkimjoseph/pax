@@ -5,7 +5,7 @@ import 'package:pax/exports/views.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
 import 'package:pax/providers/db/achievement/achievement_provider.dart';
-import 'package:pax/providers/db/withdrawal_method/withdrawal_method_provider.dart';
+// import 'package:pax/providers/db/withdrawal_method/withdrawal_method_provider.dart';
 import 'package:pax/providers/remote_config/remote_config_provider.dart';
 import 'package:pax/utils/remote_config_constants.dart';
 import 'package:flutter/foundation.dart';
@@ -45,7 +45,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
   Widget build(BuildContext context) {
     final featureFlags = ref.watch(featureFlagsProvider);
     final index = ref.watch(homeSelectedIndexProvider);
-    final primaryWithdrawalMethod = ref.watch(primaryWithdrawalMethodProvider);
+    // final primaryWithdrawalMethod = ref.watch(primaryWithdrawalMethodProvider);
     return Scaffold(
       headers: [
         AppBar(
@@ -77,29 +77,27 @@ class _HomeViewState extends ConsumerState<HomeView> {
               //     'lib/assets/svgs/active_notification.svg',
               //   ),
               // ),
-              Badge(
-                offset: const Offset(5, -5),
-                // backgroundColor: PaxColors.green,
-                isLabelVisible: true,
-                backgroundColor: PaxColors.red,
-                smallSize: 15,
-                label: Text(""),
-                child: Button(
-                  style: ButtonStyle.primary(
-                    density: ButtonDensity.icon,
-                  ).withBackgroundColor(color: PaxColors.goodDollarBlue),
-                  onPressed: () async {
-                    ref.read(analyticsProvider).goodDollarTapped();
-                    context.push("/canvassing-x-gooddollar");
-                  },
+              // Badge(
+              //   offset: const Offset(5, -5),
+              //   // backgroundColor: PaxColors.green,
+              //   isLabelVisible: true,
+              //   backgroundColor: PaxColors.red,
+              //   smallSize: 15,
+              //   label: Text(""),
+              //   child: ,
+              // ),
+              Button(
+                style: ButtonStyle.primary(
+                  density: ButtonDensity.icon,
+                ).withBackgroundColor(color: PaxColors.goodDollarBlue),
+                onPressed: () async {
+                  ref.read(analyticsProvider).goodDollarTapped();
+                  context.push("/canvassing-x-gooddollar");
+                },
 
-                  child: Image.asset(
-                    'lib/assets/images/good_dollar.png',
-                    height: 30,
-                  ),
-
-                  // density: ButtonDensity.icon,
-                  // icon: ,
+                child: Image.asset(
+                  'lib/assets/images/good_dollar.png',
+                  height: 30,
                 ),
               ),
             ],
@@ -138,9 +136,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                             isActive: index == 1,
                                             onPressed: _onTasksPressed,
                                             badgeCount:
-                                                primaryWithdrawalMethod != null
-                                                    ? tasks.length
-                                                    : null,
+                                                // primaryWithdrawalMethod != null
+                                                // ?
+                                                tasks.length,
+                                            // : null,
                                           ),
                                       loading:
                                           () => _homeTabButton(

@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/providers/db/achievement/achievement_provider.dart';
-import 'package:pax/providers/db/participant/participant_provider.dart';
+// import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/widgets/achievement/achievement_card.dart';
 import 'package:pax/models/firestore/achievement/achievement_model.dart';
-import 'package:pax/models/firestore/participant/participant_model.dart';
+// import 'package:pax/models/firestore/participant/participant_model.dart';
 import 'package:pax/widgets/achievement/filter_button.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -19,20 +19,20 @@ class AchievementsView extends ConsumerStatefulWidget {
 class _AchievementsViewState extends ConsumerState<AchievementsView> {
   int index = 0;
 
-  bool _isProfileComplete(Participant? participant) {
-    if (participant == null) return false;
-    return participant.displayName != null &&
-        participant.gender != null &&
-        participant.country != null &&
-        participant.dateOfBirth != null;
-  }
+  // bool _isProfileComplete(Participant? participant) {
+  //   if (participant == null) return false;
+  //   return participant.displayName != null &&
+  //       participant.gender != null &&
+  //       participant.country != null &&
+  //       participant.dateOfBirth != null;
+  // }
 
   @override
   Widget build(BuildContext context) {
     final achievementState = ref.watch(achievementsProvider);
-    final participantState = ref.watch(participantProvider);
-    final participant = participantState.participant;
-    final isProfileComplete = _isProfileComplete(participant);
+    // final participantState = ref.watch(participantProvider);
+    // final participant = participantState.participant;
+    // final isProfileComplete = _isProfileComplete(participant);
 
     return Scaffold(
       child: SingleChildScrollView(
@@ -128,19 +128,20 @@ class _AchievementsViewState extends ConsumerState<AchievementsView> {
               ),
             ).withPadding(bottom: 8),
 
-            if (!isProfileComplete)
-              SizedBox(
-                height: 200,
-                width: double.infinity,
-                child: Center(
-                  child: Text(
-                    'Complete your profile by adding your phone number, gender and date of birth to see your achievements.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: PaxColors.black),
-                  ).withPadding(all: 16),
-                ),
-              )
-            else if (achievementState.state == AchievementState.loading)
+            // if (!isProfileComplete)
+            //   SizedBox(
+            //     height: 200,
+            //     width: double.infinity,
+            //     child: Center(
+            //       child: Text(
+            //         'Complete your profile by adding your phone number, gender and date of birth to see your achievements.',
+            //         textAlign: TextAlign.center,
+            //         style: TextStyle(fontSize: 16, color: PaxColors.black),
+            //       ).withPadding(all: 16),
+            //     ),
+            //   )
+            // else
+            if (achievementState.state == AchievementState.loading)
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [CircularProgressIndicator()],
