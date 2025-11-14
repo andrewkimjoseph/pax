@@ -136,7 +136,7 @@ class _HelpAndSupportViewState extends ConsumerState<HelpAndSupportView> {
     ref.read(analyticsProvider).aboutUsTapped();
     UrlHandler.launchCustomTab(
       context,
-      "https://optimistic-volunteers-396150.framer.app/",
+      "https://thecanvassing.framer.website/",
     );
   }
 }
