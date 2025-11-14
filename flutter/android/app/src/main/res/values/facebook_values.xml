@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="facebook_app_id">1362692362171990</string>
+  <string name="facebook_client_token">bc9abe672792091317ca807c171bf29a</string>
+  <string name="fb_login_protocol_scheme">fb1362692362171990</string>
+  <string name="app_name">Pax</string>
+</resources>

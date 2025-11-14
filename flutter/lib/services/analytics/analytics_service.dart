@@ -4,6 +4,7 @@ import 'package:amplitude_flutter/default_tracking.dart';
 import 'package:amplitude_flutter/events/base_event.dart';
 import 'package:amplitude_flutter/events/identify.dart';
 import 'package:clarity_flutter/clarity_flutter.dart';
+import 'package:facebook_app_events/facebook_app_events.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,6 +17,8 @@ class AnalyticsService {
   late final Amplitude _amplitude;
 
   late final FirebaseAnalytics _firebaseAnalytics;
+
+  static final facebookAppEvents = FacebookAppEvents();
 
   bool _isInitialized = false;
 
@@ -96,7 +99,12 @@ class AnalyticsService {
       branchEvent: BranchEvent.customEvent(eventName),
     );
 
-    // Clarity.sendCustomEvent(eventName);
+    Clarity.sendCustomEvent(eventName);
+
+    facebookAppEvents.logEvent(
+      name: eventName,
+      parameters: convertedProperties,
+    );
   }
 
   /// Logs a user property.
