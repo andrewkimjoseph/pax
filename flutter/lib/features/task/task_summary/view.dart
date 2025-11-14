@@ -59,6 +59,13 @@ class _TaskSummaryViewState extends ConsumerState<TaskSummaryView> {
                 alignment: Alignment.center,
                 child: PrimaryButton(
                   onPressed: () {
+                    final participantId =
+                        ref.read(participantProvider).participant?.id;
+
+                    ref.read(analyticsProvider).addWithdrawalMethodTapped({
+                      "participantId": participantId,
+                    });
+
                     Navigator.of(dialogContext).pop();
                     // Pop back to home first, then push withdrawal methods
                     context.pop();
