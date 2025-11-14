@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -13,6 +13,7 @@ import 'package:pax/providers/local/task_master_server_id_provider.dart';
 import 'package:pax/routing/routes.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/currency_symbol.dart';
+import 'package:pax/utils/secret_constants.dart';
 import 'package:pax/utils/token_balance_util.dart';
 import 'package:pax/utils/url_handler.dart';
 import 'package:pax/widgets/task_timer.dart';
@@ -278,9 +279,7 @@ class TaskCard extends ConsumerWidget {
                 });
 
                 if (kIsWeb && task.type == "fillAForm") {
-                  await UrlHandler.launchInExternalBrowser(
-                    'https://thepax.app/web',
-                  );
+                  await UrlHandler.launchInExternalBrowser(paxAppLinkFromSite);
                   return;
                 }
 
