@@ -252,9 +252,6 @@ class Task {
   /// - 'checkoutapp' → 'Check Out App'
   /// - 'fillaform' → 'Fill A Form'
   /// - 'videointerview' → 'Do Video Interview'
-  /// - 'followonsocial' → 'Follow On Social'
-  /// - Other values → Returns the original type or 'General' if null
-  ///
   /// Example:
   /// ```dart
   /// final task = Task(id: '1', type: 'checkoutapp');
