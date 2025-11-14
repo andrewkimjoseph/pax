@@ -225,9 +225,11 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
       });
       _showErrorDialog('Failed to claim reward: $e');
     } finally {
-      setState(() {
-        isClaiming = false;
-      });
+      if (context.mounted) {
+        setState(() {
+          isClaiming = false;
+        });
+      }
     }
   }
 
