@@ -137,9 +137,9 @@ class TasksRepository {
 
       // Filter tasks based on the updated criteria
       return availableTasks.where((task) {
-        if (kIsWeb) {
-          if (task.type == 'fillAForm') return false;
-        }
+        // if (kIsWeb) {
+        //   if (task.type == 'fillAForm') return false;
+        // }
         // Check if screening time has elapsed (45 minutes)
         if (participantScreeningTimes.containsKey(task.id)) {
           final screeningTime = participantScreeningTimes[task.id]!;
