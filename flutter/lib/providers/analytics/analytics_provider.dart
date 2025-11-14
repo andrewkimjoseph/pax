@@ -343,6 +343,12 @@ class AnalyticsProvider {
 
   Future<void> drpcTapped([Map<String, dynamic>? properties]) =>
       _logEvent('drpc_tapped', properties: properties);
+
+  Future<void> optionsTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('options_tapped', properties: properties);
+
+  Future<void> esiTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('esi_tapped', properties: properties);
 }
 
 final analyticsProvider = Provider<AnalyticsProvider>((ref) {
