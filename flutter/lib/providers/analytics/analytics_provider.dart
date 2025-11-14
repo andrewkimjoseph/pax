@@ -331,6 +331,9 @@ class AnalyticsProvider {
   Future<void> setUpMiniPayTapped([Map<String, dynamic>? properties]) =>
       _logEvent('set_up_minipay_tapped', properties: properties);
 
+  Future<void> addWithdrawalMethodTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('add_withdrawal_method_tapped', properties: properties);
+
   Future<void> checkOutCopyWalletAddressStepsTapped([
     Map<String, dynamic>? properties,
   ]) => _logEvent(
