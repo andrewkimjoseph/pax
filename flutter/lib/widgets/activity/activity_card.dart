@@ -98,7 +98,7 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
 
   @override
   Widget build(BuildContext context) {
-    final activityIsRewardedOrUnclaimed =
+    final activityIsClaimed =
         widget.activity.taskCompletion != null &&
         widget.allActivities.any(
           (activity) =>
@@ -114,14 +114,14 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
 
     return InkWell(
       onTap:
-          (isTaskCompletion && isTaskComplete && !activityIsRewardedOrUnclaimed)
+          (isTaskCompletion && isTaskComplete && !activityIsClaimed)
               ? () => _callBackFn()
               : null,
       child: Container(
         width: MediaQuery.of(context).size.width,
         padding: EdgeInsets.all(10),
         decoration:
-            isTaskCompletion && isTaskComplete && !activityIsRewardedOrUnclaimed
+            isTaskCompletion && isTaskComplete && !activityIsClaimed
                 ? ShapeDecoration(
                   shape: GradientBorder(
                     gradient: LinearGradient(
@@ -199,24 +199,25 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
                               child: Row(
                                 children: [
                                   Text(
-                                    activityIsRewardedOrUnclaimed
-                                        ? 'Rewarded'
+                                    isValid == false
+                                        ? 'Invalid'
+                                        : activityIsClaimed
+                                        ? 'Claimed'
                                         : isTaskComplete
-                                        ? (isValid == false
-                                            ? 'Invalid'
-                                            : 'Unclaimed')
+                                        ? 'Unclaimed'
                                         : 'Incomplete',
                                   ).withPadding(right: 4),
                                   FaIcon(
-                                    activityIsRewardedOrUnclaimed
+                                    activityIsClaimed
                                         ? FontAwesomeIcons.solidCircleCheck
                                         : FontAwesomeIcons.solidCircleXmark,
                                     size: 16,
                                     color:
-                                        activityIsRewardedOrUnclaimed
+                                        activityIsClaimed
                                             ? PaxColors.green
-                                            : (isTaskComplete &&
-                                                isValid != false)
+                                            : isValid == false
+                                            ? PaxColors.red
+                                            : (isTaskComplete)
                                             ? PaxColors.orange
                                             : PaxColors.red,
                                   ),
