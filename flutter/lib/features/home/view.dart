@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart' show Badge;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pax/exports/views.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/auth/auth_provider.dart';
@@ -15,6 +15,7 @@ import 'package:pax/providers/route/home_selected_index_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Consumer;
 import '../../theming/colors.dart' show PaxColors;
 import 'package:pax/utils/achievement_constants.dart';
+import 'package:pax/widgets/drawer.dart';
 
 class HomeView extends ConsumerStatefulWidget {
   const HomeView({super.key});
@@ -86,19 +87,21 @@ class _HomeViewState extends ConsumerState<HomeView> {
               //   label: Text(""),
               //   child: ,
               // ),
-              Button(
-                style: ButtonStyle.primary(
-                  density: ButtonDensity.icon,
-                ).withBackgroundColor(color: PaxColors.goodDollarBlue),
+              IconButton(
+                // style: ButtonStyle.primary(
+                //   density: ButtonDensity.icon,
+                // ).withBackgroundColor(color: PaxColors.goodDollarBlue),
                 onPressed: () async {
-                  ref.read(analyticsProvider).goodDollarTapped();
-                  context.push("/canvassing-x-gooddollar");
+                  // ref.read(analyticsProvider).goodDollarTapped();
+                  Drawer.open(context, ref);
                 },
+                icon: FaIcon(FontAwesomeIcons.bars),
+                variance: ButtonStyle.ghost(),
 
-                child: Image.asset(
-                  'lib/assets/images/good_dollar.png',
-                  height: 30,
-                ),
+                // child: Image.asset(
+                //   'lib/assets/images/good_dollar.png',
+                //   height: 30,
+                // ),
               ),
             ],
           ).withPadding(bottom: 8),
