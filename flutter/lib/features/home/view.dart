@@ -92,7 +92,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 //   density: ButtonDensity.icon,
                 // ).withBackgroundColor(color: PaxColors.goodDollarBlue),
                 onPressed: () async {
-                  // ref.read(analyticsProvider).goodDollarTapped();
+                  ref.read(analyticsProvider).optionsTapped();
                   Drawer.open(context, ref);
                 },
                 icon: FaIcon(FontAwesomeIcons.bars),

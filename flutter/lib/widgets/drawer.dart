@@ -66,7 +66,9 @@ class Drawer extends ConsumerStatefulWidget {
               ),
 
               InkWell(
-                onTap: null,
+                onTap: () {
+                  ref.read(analyticsProvider).esiTapped();
+                },
                 child: OptionCard(
                   'ESI',
                   'lib/assets/svgs/esi.svg',
