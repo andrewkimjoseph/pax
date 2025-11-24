@@ -1,11 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pax/theming/colors.dart';
-import 'package:pax/widgets/x_follow_button.dart';
+import 'package:pax/utils/secret_constants.dart';
+import 'package:pax/widgets/socials/x_follow_button.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
-class XFollowCard extends ConsumerWidget {
-  const XFollowCard({super.key});
+class TelegramFollowCard extends ConsumerWidget {
+  const TelegramFollowCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -13,7 +14,7 @@ class XFollowCard extends ConsumerWidget {
       height: 100,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: PaxColors.black,
+        color: Color(0xFF24A1DE),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -23,11 +24,11 @@ class XFollowCard extends ConsumerWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: SvgPicture.asset(
-              'lib/assets/svgs/x_white.svg',
-              colorFilter: const ColorFilter.mode(
-                Colors.white,
-                BlendMode.srcIn,
-              ),
+              'lib/assets/svgs/telegram.svg',
+              // colorFilter: const ColorFilter.mode(
+              //   // Colors.white,
+              //   // BlendMode.srcIn,
+              // ),
               height: 32,
             ),
           ).withPadding(right: 8, left: 4),
@@ -45,7 +46,7 @@ class XFollowCard extends ConsumerWidget {
                   ),
                 ).withPadding(bottom: 8),
                 const Text(
-                  "Help us grow our X community!",
+                  "Help us grow our Telegram community!",
                   style: TextStyle(
                     fontWeight: FontWeight.normal,
                     fontSize: 14,
@@ -55,7 +56,10 @@ class XFollowCard extends ConsumerWidget {
               ],
             ),
           ),
-          const XFollowButton(),
+          FollowSocialButton(
+            socialName: "Telegram",
+            socialLink: telegramChannelLink,
+          ),
         ],
       ),
     );

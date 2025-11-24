@@ -5,7 +5,7 @@ import 'package:pax/theming/colors.dart';
 import 'package:pax/widgets/current_balance_card.dart';
 import 'package:pax/widgets/published_reports_card.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:pax/widgets/x_follow_card.dart';
+import 'package:pax/widgets/socials/social_links_carousel.dart';
 
 class DashboardView extends ConsumerStatefulWidget {
   const DashboardView({super.key});
@@ -32,7 +32,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
           children: [
             const CurrentBalanceCard('/wallet').withPadding(bottom: 8),
 
-            const XFollowCard().withPadding(bottom: 8),
+            const SocialLinksCarousel().withPadding(bottom: 8),
 
             SizedBox(
               height: MediaQuery.of(context).size.width / 2,

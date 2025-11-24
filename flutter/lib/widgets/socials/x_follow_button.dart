@@ -4,22 +4,30 @@ import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/url_handler.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:pax/extensions/tooltip.dart';
 
-class XFollowButton extends ConsumerStatefulWidget {
-  const XFollowButton({super.key});
+class FollowSocialButton extends ConsumerStatefulWidget {
+  const FollowSocialButton({
+    super.key,
+    required this.socialLink,
+    required this.socialName,
+  });
+
+  final String socialLink;
+  final String socialName;
 
   @override
-  ConsumerState<XFollowButton> createState() => _XFollowButtonState();
+  ConsumerState<FollowSocialButton> createState() => _FollowSocialButtonState();
 }
 
-class _XFollowButtonState extends ConsumerState<XFollowButton> {
+class _FollowSocialButtonState extends ConsumerState<FollowSocialButton> {
   @override
   Widget build(BuildContext context) {
     return Button(
       onPressed: () {
-        ref.read(analyticsProvider).xFollowTapped();
-        UrlHandler.launchCustomTab(context, 'https://x.com/thecanvassing');
+        ref.read(analyticsProvider).joinTribeTapped({
+          "social": widget.socialName,
+        });
+        UrlHandler.launchCustomTab(context, widget.socialLink);
       },
       disableHoverEffect: true,
       disableTransition: true,
@@ -34,10 +42,10 @@ class _XFollowButtonState extends ConsumerState<XFollowButton> {
         size: 12,
         color: PaxColors.white,
       ).withAlign(Alignment.center),
-      child: const Text(
-        "Follow",
+      child: Text(
+        widget.socialName == "X" ? "Follow" : "Join",
         style: TextStyle(color: PaxColors.white, fontSize: 14),
       ).withPadding(horizontal: 8, vertical: 4),
-    ).withToolTip('Follow us on X.');
+    );
   }
 }
