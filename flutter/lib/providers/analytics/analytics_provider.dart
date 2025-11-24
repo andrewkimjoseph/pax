@@ -111,8 +111,8 @@ class AnalyticsProvider {
   Future<void> withdrawalFailed([Map<String, dynamic>? properties]) =>
       _logEvent('withdrawal_failed', properties: properties);
 
-  Future<void> xFollowTapped([Map<String, dynamic>? properties]) =>
-      _logEvent('x_follow_tapped', properties: properties);
+  Future<void> joinTribeTapped([Map<String, dynamic>? properties]) =>
+      _logEvent('join_tribe_tapped', properties: properties);
 
   Future<void> taskTapped([Map<String, dynamic>? properties]) =>
       _logEvent('task_tapped', properties: properties);
