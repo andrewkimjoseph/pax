@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' show Divider, InkWell;
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -233,12 +234,60 @@ class _AccountViewState extends ConsumerState<AccountView> {
                                 fontSize: 12,
                                 color: PaxColors.black,
                               ),
-                            ),
+                            ).withPadding(bottom: 8),
+                            if (participant?.id != null)
+                              Row(
+                                children: [
+                                  Text(
+                                    "ID: ${participant!.id.substring(0, 15)}...",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: PaxColors.darkGrey,
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  InkWell(
+                                    onTap: () async {
+                                      await Clipboard.setData(
+                                        ClipboardData(text: participant.id),
+                                      );
+                                      if (context.mounted) {
+                                        showToast(
+                                          context: context,
+                                          location: ToastLocation.topCenter,
+                                          builder:
+                                              (context, overlay) => Toast(
+                                                toastColor: PaxColors.green,
+                                                text: 'Participant ID copied',
+                                                trailingIcon:
+                                                    FontAwesomeIcons
+                                                        .solidCircleCheck,
+                                              ),
+                                        );
+                                      }
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: PaxColors.deepPurple.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: FaIcon(
+                                        FontAwesomeIcons.copy,
+                                        size: 12,
+                                        color: PaxColors.deepPurple,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                           ],
                         ),
                       ),
                     ],
-                  ).withPadding(bottom: 8, top: 8),
+                  ).withPadding(bottom: 0, top: 8),
                   Divider().withPadding(top: 8, bottom: 16),
                   // InkWell(
                   //   onTap: () {
