@@ -34,8 +34,25 @@ Future<void> main() async {
       systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
-  await AppInitializer().initialize();
-  runApp(ProviderScope(child: App()));
+
+  // On web, initialize Firebase only (fast), then start app
+  // Other services initialize in background to allow faster splash removal
+  if (kIsWeb) {
+    // Only initialize Firebase synchronously (required for app to work)
+    await AppInitializer().initializeFirebaseOnly();
+    // Start app immediately - splash will be removed when Flutter renders
+    runApp(ProviderScope(child: App()));
+    // Continue other initializations in background
+    AppInitializer().initializeRemaining().catchError((error) {
+      if (kDebugMode) {
+        print('Background initialization error: $error');
+      }
+    });
+  } else {
+    // On mobile, wait for full initialization before starting app
+    await AppInitializer().initialize();
+    runApp(ProviderScope(child: App()));
+  }
 }
 
 class App extends ConsumerStatefulWidget {

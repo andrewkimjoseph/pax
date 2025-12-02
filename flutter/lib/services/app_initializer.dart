@@ -20,12 +20,48 @@ class AppInitializer {
   AppInitializer._internal();
 
   Future<void> initialize() async {
+    // Critical path: Initialize Firebase first (required for everything else)
     await _initializeFirebase();
-    await _initializeAppCheck();
-    await _setupErrorHandling();
-    await _initializeNotifications();
 
-    // Initialize Remote Config with retry logic
+    // Parallelize independent initializations
+    await Future.wait([
+      _setupErrorHandling(),
+      _initializeAppCheck(),
+      _initializeNotifications(),
+    ]);
+
+    // Defer non-critical services - they'll initialize in background
+    // This allows the app to start faster
+    _initializeNonCriticalServices();
+  }
+
+  /// Initialize only Firebase (for web fast startup)
+  Future<void> initializeFirebaseOnly() async {
+    await _initializeFirebase();
+    _setupErrorHandling(); // Non-blocking, just sets up handlers
+  }
+
+  /// Initialize remaining services after app has started (for web)
+  Future<void> initializeRemaining() async {
+    // Parallelize independent initializations
+    await Future.wait([_initializeAppCheck(), _initializeNotifications()]);
+
+    // Defer non-critical services
+    _initializeNonCriticalServices();
+  }
+
+  /// Initialize non-critical services in the background
+  /// These don't block app startup
+  void _initializeNonCriticalServices() {
+    // Use unawaited to prevent blocking
+    _initializeRemoteConfigBackground();
+    if (!kIsWeb) {
+      // Branch SDK is not needed on web (handled in index.html)
+      _initializeBranchBackground();
+    }
+  }
+
+  Future<void> _initializeRemoteConfigBackground() async {
     int retryCount = 0;
     const maxRetries = 3;
     const retryDelay = Duration(seconds: 2);
@@ -53,8 +89,17 @@ class AppInitializer {
         await Future.delayed(retryDelay);
       }
     }
+  }
 
-    await _initializeBranch();
+  Future<void> _initializeBranchBackground() async {
+    try {
+      await _initializeBranch();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Branch SDK initialization failed: $e');
+      }
+      // Don't block app startup if Branch fails
+    }
   }
 
   Future<void> _initializeFirebase() async {
@@ -64,51 +109,60 @@ class AppInitializer {
   }
 
   Future<void> _initializeAppCheck() async {
-    int retryCount = 0;
-    const maxRetries = 3;
-    const baseDelay = Duration(seconds: 1);
-
-    while (retryCount < maxRetries) {
-      try {
-        await FirebaseAppCheck.instance.activate(
-          androidProvider:
-              kDebugMode
-                  ? AndroidProvider.debug
-                  : AndroidProvider.playIntegrity,
+    // App Check is less critical and can fail gracefully
+    // Use a shorter timeout on web for faster startup
+    try {
+      await FirebaseAppCheck.instance
+          .activate(
+            androidProvider:
+                kDebugMode
+                    ? AndroidProvider.debug
+                    : AndroidProvider.playIntegrity,
+          )
+          .timeout(
+            Duration(seconds: kIsWeb ? 3 : 10),
+            onTimeout: () {
+              if (kDebugMode) {
+                print(
+                  'App Check initialization timed out. Continuing without App Check.',
+                );
+              }
+            },
+          );
+    } catch (e) {
+      if (kDebugMode) {
+        print(
+          'App Check initialization failed: $e. Continuing without App Check.',
         );
-        break; // Success, exit the retry loop
-      } catch (e) {
-        retryCount++;
-        if (kDebugMode) {
-          print('App Check initialization attempt $retryCount failed: $e');
-        }
-
-        if (retryCount >= maxRetries) {
-          if (kDebugMode) {
-            print(
-              'App Check initialization failed after $maxRetries attempts. Continuing without App Check.',
-            );
-          }
-          // Don't rethrow - allow app to continue without App Check
-          break;
-        }
-
-        // Exponential backoff: 1s, 2s, 4s
-        final delay = Duration(
-          seconds: baseDelay.inSeconds * (1 << (retryCount - 1)),
-        );
-        await Future.delayed(delay);
       }
+      // Don't rethrow - allow app to continue without App Check
     }
   }
 
   Future<void> _setupErrorHandling() async {
     FlutterError.onError = (errorDetails) {
-      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+      // On web, Crashlytics may not be available or needed
+      if (!kIsWeb) {
+        FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+      } else {
+        // Log to console on web for debugging
+        if (kDebugMode) {
+          print('Flutter Error: ${errorDetails.exception}');
+          print('Stack: ${errorDetails.stack}');
+        }
+      }
     };
 
     PlatformDispatcher.instance.onError = (error, stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      if (!kIsWeb) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      } else {
+        // Log to console on web for debugging
+        if (kDebugMode) {
+          print('Platform Error: $error');
+          print('Stack: $stack');
+        }
+      }
       return true;
     };
   }
