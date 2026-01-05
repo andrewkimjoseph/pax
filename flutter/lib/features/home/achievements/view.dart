@@ -71,7 +71,7 @@ class _AchievementsViewState extends ConsumerState<AchievementsView> {
                       Row(
                         children: [
                           Text(
-                            "Canvassing GoodDollar Points",
+                            "Canvassing x GoodDollar - Achievements",
                             style: TextStyle(
                               fontSize: 16,
                               color: PaxColors.deepPurple,

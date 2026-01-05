@@ -68,12 +68,9 @@ class Drawer extends ConsumerStatefulWidget {
               InkWell(
                 onTap: () {
                   ref.read(analyticsProvider).esiTapped();
+                  UrlHandler.launchInExternalBrowser(esiRegistrationLink);
                 },
-                child: OptionCard(
-                  'ESI',
-                  'lib/assets/svgs/esi.svg',
-                  badge: 'Coming soon',
-                ),
+                child: OptionCard('ESI Level 1', 'lib/assets/svgs/esi.svg'),
               ),
             ],
           ),
