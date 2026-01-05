@@ -52,7 +52,9 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
     if (_isConnecting) return;
     _isConnecting = true;
     FocusManager.instance.primaryFocus?.unfocus();
-    ref.read(analyticsProvider).connectMinipayTapped();
+    ref.read(analyticsProvider).withdrawalMethodConnectionTapped({
+      "method": "MiniPay",
+    });
     final miniPayWalletAddress = _walletAddressController.text.trim();
     final authState = ref.read(authProvider);
 
@@ -492,11 +494,13 @@ class _MiniPayConnectionViewState extends ConsumerState<MiniPayConnectionView> {
                         ).withPadding(right: 2),
                         InkWell(
                           onTap: () {
-                            ref.read(analyticsProvider).setUpMiniPayTapped({
-                              "inviteCode": minipayInviteCode,
-                            });
+                            ref
+                                .read(analyticsProvider)
+                                .setUpWithdrawalMethodTapped({
+                                  "method": "MiniPay",
+                                  "inviteCode": minipayInviteCode,
+                                });
                             UrlHandler.launchInExternalBrowser(
-                              // context,
                               minipayInviteLink,
                             );
                           },

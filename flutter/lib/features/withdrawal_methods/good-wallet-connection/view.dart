@@ -52,7 +52,9 @@ class _GoodWalletConnectionViewState
     if (_isConnecting) return;
     _isConnecting = true;
     FocusManager.instance.primaryFocus?.unfocus();
-    ref.read(analyticsProvider).connectGoodWalletTapped();
+    ref.read(analyticsProvider).withdrawalMethodConnectionTapped({
+      "method": "GoodWallet",
+    });
     final goodWalletAddress = _walletAddressController.text.trim();
     final authState = ref.read(authProvider);
 
@@ -496,9 +498,12 @@ class _GoodWalletConnectionViewState
                         ).withPadding(right: 2),
                         InkWell(
                           onTap: () {
-                            ref.read(analyticsProvider).setUpGoodWalletTapped({
-                              "inviteCode": minipayInviteCode,
-                            });
+                            ref
+                                .read(analyticsProvider)
+                                .setUpWithdrawalMethodTapped({
+                                  "inviteCode": goodWalletInviteCode,
+                                  "method": "GoodWallet",
+                                });
 
                             UrlHandler.launchCustomTab(
                               context,

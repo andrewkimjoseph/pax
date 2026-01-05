@@ -94,9 +94,11 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                                 .firstOrNull
                             : null,
                         callBack: () {
-                          ref.read(analyticsProvider).paymentMethodTapped({
-                            "paymentMethodName": "MiniPay",
-                          });
+                          ref
+                              .read(analyticsProvider)
+                              .withdrawalMethodConnectionTapped({
+                                "method": "MiniPay",
+                              });
                           context.push(
                             "/withdrawal-methods/minipay-connection",
                           );
@@ -115,7 +117,9 @@ class _WalletViewViewState extends ConsumerState<WalletView> {
                         callBack: () {
                           ref
                               .read(analyticsProvider)
-                              .goodWalletWithdrawalMethodCardTapped();
+                              .withdrawalMethodConnectionTapped({
+                                "method": "GoodWallet",
+                              });
                           context.push(
                             "/withdrawal-methods/good-wallet-connection",
                           );

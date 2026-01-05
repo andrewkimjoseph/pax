@@ -62,7 +62,7 @@ class _TaskSummaryViewState extends ConsumerState<TaskSummaryView> {
                     final participantId =
                         ref.read(participantProvider).participant?.id;
 
-                    ref.read(analyticsProvider).addWithdrawalMethodTapped({
+                    ref.read(analyticsProvider).setUpWithdrawalMethodTapped({
                       "participantId": participantId,
                     });
 

@@ -192,15 +192,29 @@ class AnalyticsProvider {
   Future<void> paymentMethodsTapped([Map<String, dynamic>? properties]) =>
       _logEvent('payment_methods_tapped', properties: properties);
 
-  Future<void> minipayWithdrawalMethodCardTapped([
-    Map<String, dynamic>? properties,
-  ]) => _logEvent(
-    'minipay_withdrawal_method_card_tapped',
-    properties: properties,
-  );
+  // Future<void> minipayWithdrawalMethodCardTapped([
+  //   Map<String, dynamic>? properties,
+  // ]) => _logEvent(
+  //   'minipay_withdrawal_method_card_tapped',
+  //   properties: properties,
+  // );
 
-  Future<void> connectMinipayTapped([Map<String, dynamic>? properties]) =>
-      _logEvent('connect_minipay_tapped', properties: properties);
+  // Future<void> connectMinipayTapped([Map<String, dynamic>? properties]) =>
+  //     _logEvent('connect_minipay_tapped', properties: properties);
+
+  Future<void> withdrawalMethodConnectionTapped([
+    Map<String, dynamic>? properties,
+  ]) async {
+    Map<String, dynamic> eventProperties =
+        await BranchParamCleaner.mergeWithBranchFirstReferringParams(
+          properties,
+        );
+
+    return _logEvent(
+      'withdrawal_method_connection_complete',
+      properties: eventProperties,
+    );
+  }
 
   Future<void> withdrawalMethodConnectionComplete([
     Map<String, dynamic>? properties,
@@ -315,24 +329,19 @@ class AnalyticsProvider {
   Future<void> goodPaxAppTapped([Map<String, dynamic>? properties]) =>
       _logEvent('good_pax_app_tapped', properties: properties);
 
-  Future<void> goodWalletWithdrawalMethodCardTapped([
+  // Future<void> goodWalletWithdrawalMethodCardTapped([
+  //   Map<String, dynamic>? properties,
+  // ]) => _logEvent(
+  //   'good_wallet_withdrawal_method_card_tapped',
+  //   properties: properties,
+  // );
+
+  // Future<void> connectGoodWalletTapped([Map<String, dynamic>? properties]) =>
+  //     _logEvent('connect_good_wallet_tapped', properties: properties);
+
+  Future<void> setUpWithdrawalMethodTapped([
     Map<String, dynamic>? properties,
-  ]) => _logEvent(
-    'good_wallet_withdrawal_method_card_tapped',
-    properties: properties,
-  );
-
-  Future<void> connectGoodWalletTapped([Map<String, dynamic>? properties]) =>
-      _logEvent('connect_good_wallet_tapped', properties: properties);
-
-  Future<void> setUpGoodWalletTapped([Map<String, dynamic>? properties]) =>
-      _logEvent('set_up_good_wallet_tapped', properties: properties);
-
-  Future<void> setUpMiniPayTapped([Map<String, dynamic>? properties]) =>
-      _logEvent('set_up_minipay_tapped', properties: properties);
-
-  Future<void> addWithdrawalMethodTapped([Map<String, dynamic>? properties]) =>
-      _logEvent('add_withdrawal_method_tapped', properties: properties);
+  ]) => _logEvent('set_up_withdrawal_method_tapped', properties: properties);
 
   Future<void> checkOutCopyWalletAddressStepsTapped([
     Map<String, dynamic>? properties,

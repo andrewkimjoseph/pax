@@ -95,7 +95,9 @@ class _WithdrawalMethodsViewState extends ConsumerState<WithdrawalMethodsView> {
                                 callBack: () {
                                   ref
                                       .read(analyticsProvider)
-                                      .minipayWithdrawalMethodCardTapped();
+                                      .withdrawalMethodConnectionTapped({
+                                        "method": "MiniPay",
+                                      });
                                   context.push(
                                     "/withdrawal-methods/minipay-connection",
                                   );
@@ -115,7 +117,9 @@ class _WithdrawalMethodsViewState extends ConsumerState<WithdrawalMethodsView> {
                                 callBack: () {
                                   ref
                                       .read(analyticsProvider)
-                                      .goodWalletWithdrawalMethodCardTapped();
+                                      .withdrawalMethodConnectionTapped({
+                                        "method": "GoodWallet",
+                                      });
                                   context.push(
                                     "/withdrawal-methods/good-wallet-connection",
                                   );
