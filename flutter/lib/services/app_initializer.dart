@@ -11,6 +11,7 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_branch_sdk/flutter_branch_sdk.dart';
 import 'package:pax/firebase_options.dart';
+import 'package:pax/services/branch_service.dart';
 import 'package:pax/services/notifications/notification_service.dart';
 import 'package:pax/services/remote_config/remote_config_service.dart';
 
@@ -178,6 +179,9 @@ class AppInitializer {
 
   Future<void> _initializeBranch() async {
     await FlutterBranchSdk.init(enableLogging: true);
+
+    // Notify BranchService that SDK is ready
+    BranchService.markSdkInitialized();
 
     if (kDebugMode) {
       print('Branch SDK initialized');

@@ -35,7 +35,7 @@ class _AppLifecycleHandlerState extends ConsumerState<AppLifecycleHandler>
     _branchService.init(
       deepLinkHandler: widget.onDeepLink,
     ); // Initialize with handler
-    _branchService.listenToDeepLinks(); // Start listening after init
+    _branchService.listenToDeepLinks(); // Start listening (waits for SDK init)
   }
 
   @override
