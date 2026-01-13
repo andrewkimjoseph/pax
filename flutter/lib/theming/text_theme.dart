@@ -28,4 +28,4 @@ import 'package:google_fonts/google_fonts.dart' show GoogleFonts;
 ///
 /// The TextTheme provides the base styles that are mapped to the shadcn
 /// Typography class in PaxTypography for use throughout the application.
-final TextTheme paxTextTheme = GoogleFonts.dmSansTextTheme();
+final TextTheme paxTextTheme = GoogleFonts.senTextTheme();
