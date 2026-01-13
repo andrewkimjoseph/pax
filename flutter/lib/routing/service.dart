@@ -168,6 +168,20 @@ final routerProvider = Provider((ref) {
         ],
       ),
 
+      // GoRoute(
+      //   path: "/developer-options",
+      //   builder:
+      //       (BuildContext context, GoRouterState state) =>
+      //           DeveloperOptionsView(),
+      //   routes: [
+      //     GoRoute(
+      //       path: "/test-submit-for-forms",
+      //       builder:
+      //           (BuildContext context, GoRouterState state) =>
+      //               TestSubmitForFormsView(),
+      //     ),
+      //   ],
+      // ),
       GoRoute(
         path: "/tasks",
         builder: (BuildContext context, GoRouterState state) => TasksView(),

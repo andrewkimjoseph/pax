@@ -339,6 +339,15 @@ class _AccountViewState extends ConsumerState<AccountView> {
                       true,
                     ).withPadding(bottom: 24),
                   ),
+                  // InkWell(
+                  //   onTap: () {
+                  //     context.push("/developer-options");
+                  //   },
+                  //   child: AccountOptionCard(
+                  //     'developer_options',
+                  //     true,
+                  //   ).withPadding(bottom: 24),
+                  // ),
                   InkWell(
                     onTap: () {
                       ref.read(analyticsProvider).logoutTapped();

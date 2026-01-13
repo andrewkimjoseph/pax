@@ -62,6 +62,8 @@ class _AccountOptionCardState extends ConsumerState<AccountOptionCard> {
                 ? FontAwesomeIcons.wallet
                 : widget.option == 'help_and_support'
                 ? FontAwesomeIcons.circleInfo
+                : widget.option == 'developer_options'
+                ? FontAwesomeIcons.code
                 : widget.option == 'logout'
                 ? FontAwesomeIcons.arrowRightFromBracket
                 : FontAwesomeIcons.solidFaceMehBlank,
@@ -92,6 +94,8 @@ class _AccountOptionCardState extends ConsumerState<AccountOptionCard> {
                           ? 'Withdrawal Methods'
                           : widget.option == 'help_and_support'
                           ? 'Help & Support'
+                          : widget.option == 'developer_options'
+                          ? 'Developer Options'
                           : widget.option == 'logout'
                           ? 'Logout'
                           : widget.option == 'info'
