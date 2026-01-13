@@ -85,38 +85,14 @@
         opacity: 1;
       }
 
-      /* Mobile-only restriction */
-      @media (min-width: 768px) {
-        #mobile-only-message {
-          display: block;
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-color: #f8f9fa;
-          z-index: 9999;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-direction: column;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-            sans-serif;
-        }
-
-        #flutter-app {
-          display: none;
-        }
+      /* Mobile-only restriction is now handled by Flutter MobileOnlyWrapper widget */
+      /* Always show Flutter app - the widget will handle desktop restriction */
+      #mobile-only-message {
+        display: none;
       }
 
-      @media (max-width: 767px) {
-        #mobile-only-message {
-          display: none;
-        }
-
-        #flutter-app {
-          display: block;
-        }
+      #flutter-app {
+        display: block;
       }
 
       /* Additional mobile optimizations */
@@ -279,31 +255,7 @@
     </picture>
 
 
-    <!-- Mobile-only message for desktop users -->
-    <div id="mobile-only-message">
-      <div style="text-align: center; padding: 20px; max-width: 400px">
-        <div style="font-size: 48px; margin-bottom: 20px">📱</div>
-        <h1 style="color: #333; margin-bottom: 16px; font-size: 24px">
-          Mobile App Only
-        </h1>
-        <p style="color: #666; margin-bottom: 24px; line-height: 1.5">
-          This app is designed for mobile devices. Please access it from your
-          smartphone or tablet for the best experience.
-        </p>
-        <div
-          style="
-            background-color: #e9ecef;
-            padding: 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #495057;
-          "
-        >
-          <strong>Tip:</strong> Try resizing your browser window to mobile size
-          or use your device's developer tools to simulate a mobile view.
-        </div>
-      </div>
-    </div>
+    <!-- Mobile-only message is now handled by Flutter MobileOnlyWrapper widget -->
 
     <!-- Flutter App Container -->
     <div id="flutter-app">
