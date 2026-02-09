@@ -56,7 +56,7 @@ export const notifyPaxTotifierAboutNewUser = onDocumentCreated(
           `*Email:* ${escapeMarkdown(participant.emailAddress || "Not provided")}\n` +
           `*Display Name:* ${escapeMarkdown(participant.displayName || "Not provided")}\n` +
           `*Photo URL:* ${escapeMarkdown(participant.profilePictureURI || "Not provided")}\n` +
-          `*Participant ID:* ${escapeMarkdown(participantId || "Not provided")}\n` +
+          `*Participant ID:* \`${participantId || "Not provided"}\`\n` +
           `*Created At (Kenya):* ${new Date().toLocaleString("en-US", {
             timeZone: "Africa/Nairobi",
           })}`,
