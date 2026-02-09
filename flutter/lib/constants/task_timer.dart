@@ -1,1 +1,1 @@
-final int taskTimerDurationMinutes = 30;
+final int taskTimerDurationMinutes = 120;
