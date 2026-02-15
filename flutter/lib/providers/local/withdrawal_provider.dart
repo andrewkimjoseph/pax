@@ -98,7 +98,7 @@ class WithdrawNotifier extends Notifier<WithdrawStateModel> {
       // If no withdrawal method is verified, fail the withdrawal
       if (!hasVerifiedMethod) {
         throw Exception(
-          'You need to re-verify one of your withdrawal methods.',
+          'You need to complete face verification again in MiniPay or GoodWallet.',
         );
       }
 
