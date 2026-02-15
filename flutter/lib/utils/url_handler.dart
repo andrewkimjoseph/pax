@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart' as custom_tabs;
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Handles launching URLs either in an external browser or in-app WebView
@@ -28,13 +29,12 @@ class UrlHandler {
     }
   }
 
-  /// Launches a URL in an in-app WebView
-  // static void launchInAppWebView(BuildContext context, String url) {
-  //   if (url.isEmpty) {
-  //     throw ArgumentError('URL cannot be empty');
-  //   }
-  //   context.push('/webview', extra: url);
-  // }
+  static void launchInAppWebView(BuildContext context, String url) {
+    if (url.isEmpty) {
+      throw ArgumentError('URL cannot be empty');
+    }
+    context.push('/webview', extra: url);
+  }
 
   static Future<void> launchCustomTab(BuildContext context, String url) async {
     if (url.isEmpty) {
