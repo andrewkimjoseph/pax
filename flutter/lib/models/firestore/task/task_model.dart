@@ -151,7 +151,7 @@ class Task {
   /// - 0 (default): No cooldown, users can participate multiple times immediately
   /// - Positive integer: Number of hours to wait before re-participation is allowed
   ///
-  /// Note: This field is stored as [numberOfCooldownDays] in Firestore but converted to hours.
+  /// Note: This field is stored as [numberOfCooldownHours] in Firestore but converted to hours.
   final int numberOfCooldownHours;
 
   /// Creates a new [Task] instance.
@@ -199,7 +199,7 @@ class Task {
   ///
   /// Default values are applied for [type] and [category] if not present in the document.
   ///
-  /// Note: The [numberOfCooldownDays] field from Firestore is mapped to [numberOfCooldownHours].
+  /// Note: The [numberOfCooldownHours] field from Firestore is mapped to [numberOfCooldownHours].
   ///
   /// Example:
   /// ```dart
@@ -239,7 +239,7 @@ class Task {
       paymentTerms: StringUtil.capitalizeFirst(data['paymentTerms']),
       instructions: data['instructions'],
       targetCountry: data['targetCountry'],
-      numberOfCooldownHours: data['numberOfCooldownDays'] ?? 0,
+      numberOfCooldownHours: data['numberOfCooldownHours'] ?? 0,
     );
   }
 
@@ -310,7 +310,7 @@ class Task {
   /// - JSON serialization
   ///
   /// All fields, including null values, are included in the resulting map.
-  /// Note: [numberOfCooldownHours] is stored as 'numberOfCooldownDays' in the map.
+  /// Note: [numberOfCooldownHours] is stored as 'numberOfCooldownHours' in the map.
   ///
   /// Example:
   /// ```dart
@@ -345,7 +345,7 @@ class Task {
       'paymentTerms': paymentTerms,
       'instructions': instructions,
       'targetCountry': targetCountry,
-      'numberOfCooldownDays': numberOfCooldownHours,
+      'numberOfCooldownHours': numberOfCooldownHours,
     };
   }
 }
