@@ -111,6 +111,14 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
       });
       return;
     }
+    final isValid = claimContext.isValid ?? true;
+    if (isValid == false && claimContext.taskIsCompleted == true) {
+      _showErrorDialog('Cannot claim reward for invalid submission.');
+      setState(() {
+        isClaiming = false;
+      });
+      return;
+    }
     final taskId = claimContext.taskId;
     final screeningId = claimContext.screeningId;
     final taskCompletionId = claimContext.taskCompletionId;
@@ -584,6 +592,54 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
                             ),
                             textAlign: TextAlign.center,
                           ),
+                          if (taskCompletionId != null)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Task Completion ID: ${taskCompletionId.substring(0, 8)}...",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: PaxColors.darkGrey,
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                                InkWell(
+                                  onTap: () async {
+                                    await Clipboard.setData(
+                                      ClipboardData(text: taskCompletionId),
+                                    );
+                                    if (context.mounted) {
+                                      showToast(
+                                        context: context,
+                                        location: ToastLocation.topCenter,
+                                        builder:
+                                            (context, overlay) => Toast(
+                                              toastColor: PaxColors.green,
+                                              text: 'Task Completion ID copied',
+                                              trailingIcon:
+                                                  FontAwesomeIcons.solidCircleCheck,
+                                            ),
+                                      );
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: PaxColors.deepPurple.withValues(
+                                        alpha: 0.1,
+                                      ),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: FaIcon(
+                                      FontAwesomeIcons.copy,
+                                      size: 12,
+                                      color: PaxColors.deepPurple,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ).withPadding(top: 16),
                         ],
                       ),
                     ),

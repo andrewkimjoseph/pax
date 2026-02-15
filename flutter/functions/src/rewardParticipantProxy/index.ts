@@ -99,6 +99,18 @@ export const rewardParticipantProxy = onCall(
         throw new HttpsError("not-found", "Task completion data is empty");
       }
 
+      // Validate that the task completion is valid for reward
+      if (taskCompletionData.isValid === false) {
+        logger.error("Attempted to claim reward for invalid task completion", {
+          taskCompletionId,
+          isValid: taskCompletionData.isValid,
+        });
+        throw new HttpsError(
+          "failed-precondition",
+          "Cannot claim reward for invalid task completion"
+        );
+      }
+
       // Extract required data from the task completion
       const { taskId, participantId } = taskCompletionData;
       if (!taskId || !participantId) {

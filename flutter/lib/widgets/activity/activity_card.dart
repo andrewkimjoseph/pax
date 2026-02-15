@@ -114,7 +114,10 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
 
     return InkWell(
       onTap:
-          (isTaskCompletion && isTaskComplete && !activityIsClaimed)
+          (isTaskCompletion && 
+           isTaskComplete && 
+           !activityIsClaimed && 
+           isValid != false)
               ? () => _callBackFn()
               : null,
       child: Container(
