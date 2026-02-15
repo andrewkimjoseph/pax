@@ -15,6 +15,7 @@ import 'package:pax/providers/db/achievement/achievement_provider.dart';
 import 'package:pax/providers/fcm/fcm_provider.dart';
 import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/providers/local/task_completion_state_provider.dart';
+import 'package:pax/services/notifications/notification_service.dart';
 import 'package:pax/utils/achievement_constants.dart';
 
 class TaskCompletionService {
@@ -53,6 +54,8 @@ class TaskCompletionService {
         screeningId: screeningId,
         completedAt: DateTime.now(),
       );
+
+      await NotificationService().cancelTaskCooldownReminders();
 
       // Create achievements
       final authState = ref.read(authProvider);

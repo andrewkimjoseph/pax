@@ -2,9 +2,12 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:pax/constants/task_timer.dart';
 import 'package:pax/repositories/firestore/fcm_token/fcm_token_repository.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:intl/intl.dart';
+import 'package:timezone/data/latest.dart' as tz_data;
+import 'package:timezone/timezone.dart' as tz;
 
 /// A singleton service that handles both local and remote (Firebase Cloud Messaging) notifications
 /// for the application. It manages notification permissions, token management, and provides
@@ -34,6 +37,10 @@ class NotificationService {
     importance: Importance.high,
   );
 
+  /// Base notification ID for task cooldown reminders. IDs [taskCooldownNotificationIdBase, taskCooldownNotificationIdBase + 4]
+  /// are used for "task started" (immediate) and +30, +60, +90, +120 min scheduled reminders. Used for cancellation.
+  static const int taskCooldownNotificationIdBase = 2000;
+
   // Private constructor for singleton pattern
   NotificationService._internal() : _repository = FcmTokenRepository();
 
@@ -57,6 +64,12 @@ class NotificationService {
 
   /// Initializes local notifications with platform-specific settings
   Future<void> _initializeLocalNotifications() async {
+    if (!kIsWeb) {
+      tz_data.initializeTimeZones();
+      // Use UTC for scheduled times; screeningTimeCreated from Firestore is UTC.
+      tz.setLocalLocation(tz.getLocation('UTC'));
+    }
+
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('ic_main');
 
@@ -206,6 +219,12 @@ class NotificationService {
       id,
       title,
       body,
+      _defaultNotificationDetails,
+      payload: payload,
+    );
+  }
+
+  static NotificationDetails get _defaultNotificationDetails =>
       NotificationDetails(
         android: AndroidNotificationDetails(
           channel.id,
@@ -214,9 +233,63 @@ class NotificationService {
           icon: 'ic_main',
         ),
         iOS: const DarwinNotificationDetails(),
-      ),
-      payload: payload,
+      );
+
+  /// Schedules task cooldown reminders: one immediate "task started" and then
+  /// every [taskTimerReminderIntervalMinutes] until [taskTimerDurationMinutes].
+  /// Cancels any existing task-cooldown schedule first. Call when screening completes.
+  Future<void> scheduleTaskCooldownReminders(DateTime screeningTimeCreated) async {
+    if (kIsWeb) return;
+    await cancelTaskCooldownReminders();
+
+    await showNotification(
+      id: taskCooldownNotificationIdBase,
+      title: 'Task started',
+      body: 'Complete your task before the timer runs out.',
     );
+
+    final now = tz.TZDateTime.now(tz.local);
+    const skipTolerance = Duration(seconds: 60);
+
+    int scheduledId = taskCooldownNotificationIdBase + 1;
+    for (var minutes = taskTimerReminderIntervalMinutes;
+        minutes <= taskTimerDurationMinutes;
+        minutes += taskTimerReminderIntervalMinutes) {
+      final scheduledAt =
+          screeningTimeCreated.add(Duration(minutes: minutes));
+      final tzScheduled = tz.TZDateTime.from(scheduledAt, tz.local);
+      // Only skip if clearly in the past (tolerance avoids skipping due to device clock skew).
+      if (tzScheduled.isBefore(now.subtract(skipTolerance))) continue;
+      try {
+        await _flutterLocalNotificationsPlugin.zonedSchedule(
+          scheduledId,
+          'Task reminder',
+          minutes >= taskTimerDurationMinutes
+              ? 'Cooldown is ending soon.'
+              : '${taskTimerDurationMinutes - minutes} min left on your task.',
+          tzScheduled,
+          _defaultNotificationDetails,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        );
+      } catch (e) {
+        if (kDebugMode) {
+          print(
+            'Notification Service: Failed to schedule reminder at +$minutes min: $e',
+          );
+        }
+      }
+      scheduledId++;
+    }
+  }
+
+  /// Cancels all task cooldown reminders (IDs [taskCooldownNotificationIdBase] through +4).
+  /// Call when the user marks the task complete so no further reminders are sent.
+  Future<void> cancelTaskCooldownReminders() async {
+    for (var id = taskCooldownNotificationIdBase;
+        id <= taskCooldownNotificationIdBase + 4;
+        id++) {
+      await _flutterLocalNotificationsPlugin.cancel(id);
+    }
   }
 
   /// Sets up handling of foreground messages (when app is open).

@@ -8,11 +8,14 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
+import 'package:pax/providers/db/tasks/task_provider.dart';
 import 'package:pax/providers/db/withdrawal_method/withdrawal_method_provider.dart';
 import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/providers/local/screening_state_provider.dart';
+import 'package:pax/providers/local/screenings_provider.dart';
 import 'package:pax/providers/local/screening_context/screening_context_provider.dart';
 import 'package:pax/providers/withdrawal_method_connection/withdrawal_method_connection_provider.dart';
+import 'package:pax/services/notifications/notification_service.dart';
 
 class ScreeningService {
   final Ref ref;
@@ -29,6 +32,11 @@ class ScreeningService {
     try {
       // Update state to loading
       ref.read(screeningProvider.notifier).startScreening();
+
+      // Refresh withdrawal methods so we use the latest from Firestore (avoids
+      // stale or empty list when user just verified or navigated before initial
+      // load completed).
+      await ref.read(withdrawalMethodsProvider.notifier).refresh(participantId);
 
       final withdrawalMethods =
           ref.read(withdrawalMethodsProvider).withdrawalMethods;
@@ -85,6 +93,13 @@ class ScreeningService {
           .read(screeningContextProvider.notifier)
           .fetchScreeningById(screeningResult.screeningId);
 
+      final screening = ref.read(screeningContextProvider)?.screening;
+      if (screening?.timeCreated != null) {
+        await NotificationService().scheduleTaskCooldownReminders(
+          screening!.timeCreated!.toDate(),
+        );
+      }
+
       ref
           .read(screeningContextProvider.notifier)
           .setScreeningResult(screeningResult);
@@ -93,6 +108,8 @@ class ScreeningService {
       ref.read(screeningProvider.notifier).completeScreening(screeningResult);
 
       ref.invalidate(activityRepositoryProvider);
+      ref.invalidate(participantScreeningsStreamProvider);
+      ref.invalidate(availableTasksStreamProvider(participantId));
 
       ref.read(analyticsProvider).screeningComplete({
         "taskId": taskId,
