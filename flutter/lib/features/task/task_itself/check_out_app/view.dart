@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart' show InkWell;
-import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
@@ -12,7 +11,6 @@ import 'package:pax/utils/time_formatter.dart';
 import 'package:pax/utils/url_handler.dart';
 import 'package:pax/widgets/other_task_card.dart';
 import 'package:pax/widgets/task_timer.dart';
-import 'package:pax/widgets/toast.dart';
 import 'package:pax/widgets/check_out_product_drawer.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Consumer;
 import 'package:go_router/go_router.dart';
@@ -300,7 +298,88 @@ class _CheckOutAppViewState extends ConsumerState<CheckOutAppView> {
           padding: const EdgeInsets.only(top: 16),
           color: Colors.white,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
+              if (currentTask?.link != null &&
+                  currentTask!.link!.isNotEmpty) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: PrimaryButton(
+                      onPressed:
+                          _isCompleting
+                              ? null
+                              : () => UrlHandler.launchCustomTab(
+                                context,
+                                currentTask.link!,
+                              ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          FaIcon(
+                            FontAwesomeIcons.link,
+                            size: 18,
+                            color: PaxColors.white,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'Open product link',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                              color: PaxColors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
+              if (currentTask?.feedback != null &&
+                  currentTask!.feedback!.isNotEmpty) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: PrimaryButton(
+                      onPressed:
+                          _isCompleting
+                              ? null
+                              : () => _handleFeedbackFormClick(
+                                context,
+                                currentTask.feedback!,
+                              ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          FaIcon(
+                            FontAwesomeIcons.solidCommentDots,
+                            size: 18,
+                            color: PaxColors.white,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'Open feedback form',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                              color: PaxColors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: SizedBox(
@@ -421,121 +500,6 @@ class _CheckOutAppViewState extends ConsumerState<CheckOutAppView> {
                       ),
                     ).withPadding(bottom: 12),
 
-                    // Link Card
-                    if (currentTask?.link != null &&
-                        currentTask!.link!.isNotEmpty)
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: PaxColors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: PaxColors.lightGrey.withValues(alpha: 0.5),
-                            width: 1,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: PaxColors.lightGrey.withValues(
-                                alpha: 0.15,
-                              ),
-                              spreadRadius: 0,
-                              blurRadius: 8,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                FaIcon(
-                                  FontAwesomeIcons.link,
-                                  size: 18,
-                                  color: PaxColors.deepPurple,
-                                ),
-                                SizedBox(width: 8),
-                                Text(
-                                  "Link",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 18,
-                                    color: PaxColors.deepPurple,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: InkWell(
-                                    onTap: () {
-                                      UrlHandler.launchCustomTab(
-                                        context,
-                                        currentTask.link!,
-                                      );
-                                    },
-                                    child: Text(
-                                      currentTask.link ?? "",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.normal,
-                                        fontSize: 14,
-                                        color: PaxColors.deepPurple,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ).withPadding(right: 12),
-                                  ),
-                                ),
-                                // SizedBox(width: 12),
-                                InkWell(
-                                  onTap: () async {
-                                    if (currentTask.link != null &&
-                                        currentTask.link!.isNotEmpty) {
-                                      await Clipboard.setData(
-                                        ClipboardData(text: currentTask.link!),
-                                      );
-                                      if (context.mounted) {
-                                        showToast(
-                                          context: context,
-                                          location: ToastLocation.topCenter,
-                                          builder:
-                                              (context, overlay) => Toast(
-                                                toastColor: PaxColors.green,
-                                                text:
-                                                    'Link copied to clipboard',
-                                                trailingIcon:
-                                                    FontAwesomeIcons
-                                                        .solidCircleCheck,
-                                              ),
-                                        );
-                                      }
-                                    }
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: PaxColors.deepPurple.withValues(
-                                        alpha: 0.1,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: FaIcon(
-                                      FontAwesomeIcons.copy,
-                                      size: 14,
-                                      color: PaxColors.deepPurple,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ).withPadding(bottom: 12),
-
                     // Video Guide Card
                     // if (currentTask?.feedback != null &&
                     //     currentTask!.feedback!.isNotEmpty)
@@ -651,95 +615,6 @@ class _CheckOutAppViewState extends ConsumerState<CheckOutAppView> {
                     //       ],
                     //     ),
                     //   ).withPadding(bottom: 12),
-
-                    // Feedback Form Card
-                    if (currentTask?.feedback != null &&
-                        currentTask!.feedback!.isNotEmpty)
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: PaxColors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: PaxColors.lightGrey.withValues(alpha: 0.5),
-                            width: 1,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: PaxColors.lightGrey.withValues(
-                                alpha: 0.15,
-                              ),
-                              spreadRadius: 0,
-                              blurRadius: 8,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                FaIcon(
-                                  FontAwesomeIcons.solidCommentDots,
-                                  size: 18,
-                                  color: PaxColors.deepPurple,
-                                ),
-                                SizedBox(width: 8),
-                                Text(
-                                  "Feedback Form",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 18,
-                                    color: PaxColors.deepPurple,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: InkWell(
-                                    onTap:
-                                        () => _handleFeedbackFormClick(
-                                          context,
-                                          currentTask.feedback!,
-                                        ),
-                                    child: Text(
-                                      currentTask.feedback ?? "",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.normal,
-                                        fontSize: 14,
-                                        color: PaxColors.deepPurple,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: 12),
-                                Container(
-                                  padding: EdgeInsets.all(8),
-                                  // decoration: BoxDecoration(
-                                  //   color: PaxColors.deepPurple.withValues(
-                                  //     alpha: 0.1,
-                                  //   ),
-                                  //   borderRadius: BorderRadius.circular(8),
-                                  // ),
-                                  // child: FaIcon(
-                                  //   FontAwesomeIcons.copy,
-                                  //   size: 18,
-                                  //   color: PaxColors.deepPurple,
-                                  // ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ).withPadding(bottom: 12),
 
                     // Payment Terms Card
                   ],
