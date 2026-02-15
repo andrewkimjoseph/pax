@@ -65,6 +65,12 @@ class _TaskTimerState extends ConsumerState<TaskTimer> {
     if (seconds < 60) {
       return '${seconds}s';
     }
+    if (seconds >= 3600) {
+      final hours = seconds ~/ 3600;
+      final minutes = (seconds % 3600) ~/ 60;
+      final secs = seconds % 60;
+      return '$hours:${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
+    }
     final minutes = seconds ~/ 60;
     final remainingSeconds = seconds % 60;
     return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
@@ -101,7 +107,7 @@ class _TaskTimerState extends ConsumerState<TaskTimer> {
           ),
           SizedBox(width: 6),
           SizedBox(
-            width: 45, // Fixed width to accommodate "MM:SS" format
+            width: 58, // Fixed width to accommodate "H:MM:SS" format (e.g. 2:00:54)
             child: Text(
               _formatTime(_remainingSeconds),
               style: TextStyle(
