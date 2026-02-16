@@ -1,4 +1,4 @@
-final int taskTimerDurationMinutes = 120;
+final int taskTimerDurationMinutes = 360;
 
-/// Interval in minutes for task cooldown reminder notifications (e.g. at +30, +60, +90, +120).
-final int taskTimerReminderIntervalMinutes = 30;
+/// Interval in minutes for task cooldown reminder notifications (e.g. at +60, +120, +180, +240, +300, +360).
+final int taskTimerReminderIntervalMinutes = 60;

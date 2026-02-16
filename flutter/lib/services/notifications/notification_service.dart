@@ -37,8 +37,8 @@ class NotificationService {
     importance: Importance.high,
   );
 
-  /// Base notification ID for task cooldown reminders. IDs [taskCooldownNotificationIdBase, taskCooldownNotificationIdBase + 4]
-  /// are used for "task started" (immediate) and +30, +60, +90, +120 min scheduled reminders. Used for cancellation.
+  /// Base notification ID for task cooldown reminders. IDs [taskCooldownNotificationIdBase, taskCooldownNotificationIdBase + 6]
+  /// are used for "task started" (immediate) and +60, +120, +180, +240, +300, +360 min scheduled reminders. Used for cancellation.
   static const int taskCooldownNotificationIdBase = 2000;
 
   // Private constructor for singleton pattern
@@ -282,11 +282,11 @@ class NotificationService {
     }
   }
 
-  /// Cancels all task cooldown reminders (IDs [taskCooldownNotificationIdBase] through +4).
+  /// Cancels all task cooldown reminders (IDs [taskCooldownNotificationIdBase] through +6).
   /// Call when the user marks the task complete so no further reminders are sent.
   Future<void> cancelTaskCooldownReminders() async {
     for (var id = taskCooldownNotificationIdBase;
-        id <= taskCooldownNotificationIdBase + 4;
+        id <= taskCooldownNotificationIdBase + 6;
         id++) {
       await _flutterLocalNotificationsPlugin.cancel(id);
     }
