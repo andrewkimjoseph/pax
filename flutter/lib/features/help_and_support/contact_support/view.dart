@@ -83,7 +83,7 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
                   InkWell(
                     onTap: () {
                       ref.read(analyticsProvider).raiseTicketTapped();
-                      UrlHandler.launchCustomTab(
+                      UrlHandler.launchInAppWebView(
                         context,
                         "https://tally.so/r/nGy7V2?authId=${participant?.id}",
                       );
@@ -97,7 +97,7 @@ class _ContactSupportViewState extends ConsumerState<ContactSupportView> {
                   InkWell(
                     onTap: () {
                       ref.read(analyticsProvider).websiteTapped();
-                      UrlHandler.launchCustomTab(
+                      UrlHandler.launchInAppWebView(
                         context,
                         "https://thecanvassing.xyz",
                       );

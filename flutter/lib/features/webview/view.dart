@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart' show InkWell;
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:pax/theming/colors.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 class WebViewPage extends StatefulWidget {
@@ -15,35 +15,7 @@ class WebViewPage extends StatefulWidget {
 }
 
 class _WebViewPageState extends State<WebViewPage> {
-  late final WebViewController controller;
   bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    controller =
-        WebViewController()
-          ..setJavaScriptMode(JavaScriptMode.unrestricted)
-          ..setBackgroundColor(PaxColors.white)
-          ..setUserAgent(
-            'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36',
-          )
-          ..setNavigationDelegate(
-            NavigationDelegate(
-              onPageStarted: (String url) {
-                setState(() {
-                  isLoading = true;
-                });
-              },
-              onPageFinished: (String url) {
-                setState(() {
-                  isLoading = false;
-                });
-              },
-            ),
-          )
-          ..loadRequest(Uri.parse(widget.url));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +46,49 @@ class _WebViewPageState extends State<WebViewPage> {
           Expanded(
             child: Stack(
               children: [
-                WebViewWidget(controller: controller),
+                InAppWebView(
+                  initialUrlRequest: URLRequest(url: WebUri(widget.url)),
+                  initialSettings: InAppWebViewSettings(
+                    javaScriptEnabled: true,
+                    useWideViewPort: true,
+                  ),
+                  onLoadStart: (controller, url) {
+                    setState(() {
+                      isLoading = true;
+                    });
+                  },
+                  onLoadStop: (controller, url) {
+                    setState(() {
+                      isLoading = false;
+                    });
+                  },
+                  shouldOverrideUrlLoading: (
+                    controller,
+                    navigationAction,
+                  ) async {
+                    final url = navigationAction.request.url?.toString() ?? '';
+                    if (url.startsWith('thepaxtask://')) {
+                      if (mounted) {
+                        showDialog(
+                          context: context,
+                          builder:
+                              (dialogContext) => AlertDialog(
+                                title: Text('Redirect detected'),
+                                content: Text('"thepaxtask://" found in 301'),
+                                actions: [
+                                  OutlineButton(
+                                    onPressed: () => dialogContext.pop(),
+                                    child: Text('OK'),
+                                  ),
+                                ],
+                              ),
+                        );
+                      }
+                      return NavigationActionPolicy.CANCEL;
+                    }
+                    return NavigationActionPolicy.ALLOW;
+                  },
+                ),
                 if (isLoading) const Center(child: CircularProgressIndicator()),
               ],
             ),

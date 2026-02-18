@@ -5,8 +5,11 @@
 // - Provides error handling and state management for the screening process
 
 // lib/services/screening_service.dart
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pax/models/firestore/screening/screening_model.dart';
+import 'package:pax/models/firestore/task_completion/task_completion_model.dart';
 import 'package:pax/providers/analytics/analytics_provider.dart';
 import 'package:pax/providers/db/tasks/task_provider.dart';
 import 'package:pax/providers/db/withdrawal_method/withdrawal_method_provider.dart';
@@ -22,6 +25,65 @@ class ScreeningService {
 
   ScreeningService(this.ref);
 
+  /// Checks if a participant has already been screened for a specific task.
+  /// Returns a ScreeningResult if a completed screening exists, null otherwise.
+  Future<ScreeningResult?> checkIfParticipantIsAlreadyScreenedForTask({
+    required String participantId,
+    required String taskId,
+  }) async {
+    // Check if screening already exists in Firestore
+    final existingScreeningQuery =
+        await FirebaseFirestore.instance
+            .collection('screenings')
+            .where('participantId', isEqualTo: participantId)
+            .where('taskId', isEqualTo: taskId)
+            .limit(1)
+            .get();
+
+    if (existingScreeningQuery.docs.isEmpty) {
+      return null;
+    }
+
+    final existingScreeningDoc = existingScreeningQuery.docs.first;
+    final existingScreening = Screening.fromFirestore(existingScreeningDoc);
+
+    // Check if the screening is completed (has txnHash, signature, and nonce)
+    if (!existingScreening.isCompleted() ||
+        !existingScreening.hasValidSignature()) {
+      return null;
+    }
+
+    // Fetch the related task completion
+    final taskCompletionQuery =
+        await FirebaseFirestore.instance
+            .collection('task_completions')
+            .where('screeningId', isEqualTo: existingScreening.id)
+            .limit(1)
+            .get();
+
+    String? taskCompletionId;
+    if (taskCompletionQuery.docs.isNotEmpty) {
+      final taskCompletion = TaskCompletion.fromFirestore(
+        taskCompletionQuery.docs.first,
+      );
+      taskCompletionId = taskCompletion.id;
+    }
+
+    // Create ScreeningResult from existing screening data
+    // Note: participantProxy is not stored in Firestore, so we use an empty string
+    // as a placeholder. The actual proxy address can be derived from serverWalletId
+    // if needed in the future.
+    return ScreeningResult(
+      participantProxy: '', // Not stored in Firestore, using placeholder
+      taskId: existingScreening.taskId ?? taskId,
+      signature: existingScreening.signature ?? '',
+      nonce: existingScreening.nonce ?? '',
+      txnHash: existingScreening.txnHash ?? '',
+      screeningId: existingScreening.id,
+      taskCompletionId: taskCompletionId ?? '',
+    );
+  }
+
   Future<void> screenParticipant({
     required String serverWalletId,
     required String taskId,
@@ -32,6 +94,51 @@ class ScreeningService {
     try {
       // Update state to loading
       ref.read(screeningProvider.notifier).startScreening();
+
+      // Check if screening already exists in Firestore
+      final existingScreeningResult =
+          await checkIfParticipantIsAlreadyScreenedForTask(
+            participantId: participantId,
+            taskId: taskId,
+          );
+
+      if (existingScreeningResult != null) {
+        await ref
+            .read(screeningContextProvider.notifier)
+            .fetchScreeningById(existingScreeningResult.screeningId);
+
+        final screening = ref.read(screeningContextProvider)?.screening;
+        if (screening?.timeCreated != null) {
+          await NotificationService().scheduleTaskCooldownReminders(
+            screening!.timeCreated!.toDate(),
+          );
+        }
+
+        ref
+            .read(screeningContextProvider.notifier)
+            .setScreeningResult(existingScreeningResult);
+
+        // Update state to complete with the result
+        ref
+            .read(screeningProvider.notifier)
+            .completeScreening(existingScreeningResult);
+
+        ref.invalidate(activityRepositoryProvider);
+        ref.invalidate(participantScreeningsStreamProvider);
+        ref.invalidate(availableTasksStreamProvider(participantId));
+
+        ref.read(analyticsProvider).screeningComplete({
+          "taskId": taskId,
+          "taskManagerContractAddress": taskManagerContractAddress,
+          "screeningId": existingScreeningResult.screeningId,
+          "txnHash": existingScreeningResult.txnHash,
+          "signature": existingScreeningResult.signature,
+          "nonce": existingScreeningResult.nonce,
+          "taskCompletionId": existingScreeningResult.taskCompletionId,
+        });
+
+        return; // Early return with existing screening data
+      }
 
       // Refresh withdrawal methods so we use the latest from Firestore (avoids
       // stale or empty list when user just verified or navigated before initial

@@ -222,7 +222,7 @@ class _CheckOutAppViewState extends ConsumerState<CheckOutAppView> {
     // Create updated URI with all parameters
     Uri updatedUri = uri.replace(queryParameters: queryParams);
 
-    UrlHandler.launchCustomTab(context, updatedUri.toString());
+    UrlHandler.launchInAppWebView(context, updatedUri.toString());
   }
 
   // Error dialog

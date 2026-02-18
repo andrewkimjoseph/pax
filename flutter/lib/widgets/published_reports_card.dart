@@ -75,7 +75,7 @@ class _ForumReportCardState extends ConsumerState<ForumReportCard> {
         ref
             .read(analyticsProvider)
             .publishedReportTapped(widget.report.toMap());
-        UrlHandler.launchCustomTab(context, widget.report.postURI!);
+        UrlHandler.launchInAppWebView(context, widget.report.postURI!);
       },
       child: Container(
         decoration: BoxDecoration(

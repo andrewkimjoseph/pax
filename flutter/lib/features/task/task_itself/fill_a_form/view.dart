@@ -4,7 +4,7 @@ import 'package:pax/providers/db/participant/participant_provider.dart';
 import 'package:pax/providers/local/screening_context/screening_context_provider.dart';
 import 'package:pax/widgets/task_timer.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Consumer;
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:pax/theming/colors.dart';
@@ -23,63 +23,20 @@ class FillAFormView extends ConsumerStatefulWidget {
 }
 
 class _TaskItselfViewState extends ConsumerState<FillAFormView> {
-  late final WebViewController controller;
+  InAppWebViewController? _webViewController;
   bool isLoading = true;
-  bool _isCompleting = false; // Add flag to track completion state
+  bool _isCompleting = false;
 
   @override
   void initState() {
     super.initState();
-    // Reset task completion state
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       ref.read(taskCompletionProvider.notifier).reset();
     });
-
-    // Initialize the WebViewController with empty URL
-    controller =
-        WebViewController()
-          ..setJavaScriptMode(JavaScriptMode.unrestricted)
-          ..setBackgroundColor(PaxColors.white)
-          ..setUserAgent(
-            'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36',
-          )
-          ..setNavigationDelegate(
-            NavigationDelegate(
-              onPageStarted: (String url) {
-                setState(() {
-                  isLoading = true;
-                });
-              },
-              onPageFinished: (String url) {
-                setState(() {
-                  isLoading = false;
-                });
-                // ref.read(analyticsProvider).taskLoadingComplete({
-                //   "taskUrl": url,
-                // });
-              },
-              onNavigationRequest: (NavigationRequest request) {
-                // Check if the URL is a callback from the task
-                if (request.url.startsWith('thepaxtask://')) {
-                  // Handle the callback - mark task as complete
-                  _handleTaskCompletion();
-                  return NavigationDecision.prevent;
-                }
-                // Allow the WebView to handle regular web URLs
-                return NavigationDecision.navigate;
-              },
-            ),
-          );
-
-    // Load the task URL after first frame is rendered
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadTaskUrl();
-    });
   }
 
   void _loadTaskUrl() {
-    // Get task from context provider
     final taskContext = ref.read(taskContextProvider);
     final currentTask = taskContext?.task;
     final currentParticipant = ref.read(participantProvider).participant;
@@ -89,47 +46,36 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
       return;
     }
 
-    // Get the URL from the task
     final taskUrl = currentTask.link!;
-
-    // Parse the original URI
     Uri uri = Uri.parse(taskUrl);
 
-    // Add query parameters to the URL
     Map<String, String?> queryParams = Map<String, String?>.from(
       uri.queryParameters,
     );
 
-    // Add id if available
     if (currentParticipant?.id != null) {
       queryParams['id'] = currentParticipant?.id;
     }
-
-    // Add gender if available
     if (currentParticipant?.gender != null) {
       queryParams['gender'] = currentParticipant?.gender;
     }
-
-    // Add country if available
     if (currentParticipant?.country != null) {
       queryParams['country'] = currentParticipant?.country;
     }
-    // Calculate age from dateOfBirth if available
     if (currentParticipant?.dateOfBirth != null) {
       final dateOfBirthAsDateTime = currentParticipant!.dateOfBirth!.toDate();
       final age = calculateAge(dateOfBirthAsDateTime);
       queryParams['age'] = age.toString();
     }
-    // Create a new URI with the updated query parameters
+
     Uri updatedUri = uri.replace(queryParameters: queryParams);
 
-    // Load the URL in the WebView
-    controller.loadRequest(updatedUri);
+    _webViewController?.loadUrl(
+      urlRequest: URLRequest(url: WebUri(updatedUri.toString())),
+    );
   }
 
-  // Handle task completion
   Future<void> _handleTaskCompletion() async {
-    // Prevent multiple completion calls
     if (_isCompleting) return;
     _isCompleting = true;
 
@@ -162,7 +108,6 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
         throw Exception('Screening not found');
       }
 
-      // Show dialog and start the completion process
       showDialog(
         barrierDismissible: false,
         context: context,
@@ -174,7 +119,6 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
             ),
       );
 
-      // Start the task completion process
       await ref
           .read(taskCompletionServiceProvider)
           .markTaskAsComplete(
@@ -182,14 +126,13 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
             taskId: currentTask.id,
           );
     } catch (e) {
-      _isCompleting = false; // Reset flag on error
+      _isCompleting = false;
       if (mounted) {
         _showErrorDialog(context, e.toString());
       }
     }
   }
 
-  // Dialog showing completion process (without rewarding)
   Widget _buildCompletionDialog(
     BuildContext dialogContext,
     String? screeningId,
@@ -201,7 +144,6 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
         builder: (context, ref, _) {
           final completionState = ref.watch(taskCompletionProvider);
 
-          // Check for completion or errors
           if (completionState.state == TaskCompletionState.complete) {
             final taskCompletionId = completionState.result?.taskCompletionId;
 
@@ -211,7 +153,6 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
               "taskCompletionId": taskCompletionId,
             });
 
-            // Dismiss the dialog after a short delay and navigate
             Future.delayed(Duration(milliseconds: 500), () {
               if (dialogContext.mounted) {
                 if (dialogContext.canPop()) {
@@ -221,7 +162,6 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
               }
             });
           } else if (completionState.state == TaskCompletionState.error) {
-            // Dismiss the dialog after a short delay
             Future.delayed(Duration(milliseconds: 500), () {
               if (dialogContext.mounted) {
                 dialogContext.pop();
@@ -233,7 +173,6 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
             });
           }
 
-          // Show loading indicator with appropriate message
           return AlertDialog(
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -255,7 +194,6 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
     );
   }
 
-  // Error dialog
   void _showErrorDialog(BuildContext context, String errorMessage) {
     showDialog(
       barrierDismissible: false,
@@ -326,7 +264,33 @@ class _TaskItselfViewState extends ConsumerState<FillAFormView> {
         canPop: false,
         child: Stack(
           children: [
-            OptimizedWebView(controller: controller, isLoading: isLoading),
+            OptimizedWebView(
+              onWebViewCreated: (controller) {
+                _webViewController = controller;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  _loadTaskUrl();
+                });
+              },
+              onLoadStart: (controller, url) {
+                setState(() {
+                  isLoading = true;
+                });
+              },
+              onLoadStop: (controller, url) {
+                setState(() {
+                  isLoading = false;
+                });
+              },
+              shouldOverrideUrlLoading: (controller, navigationAction) async {
+                final url = navigationAction.request.url?.toString() ?? '';
+                if (url.startsWith('thepaxtask://')) {
+                  _handleTaskCompletion();
+                  return NavigationActionPolicy.CANCEL;
+                }
+                return NavigationActionPolicy.ALLOW;
+              },
+              isLoading: isLoading,
+            ),
             if (isLoading) Center(child: CircularProgressIndicator()),
           ],
         ),

@@ -1,5 +1,5 @@
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 import 'package:pax/theming/colors.dart';
@@ -14,38 +14,7 @@ class ReportPageView extends StatefulWidget {
 }
 
 class _ReportPageViewState extends State<ReportPageView> {
-  late final WebViewController controller;
   bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize the WebViewController
-    controller =
-        WebViewController()
-          ..setJavaScriptMode(JavaScriptMode.unrestricted)
-          ..setBackgroundColor(PaxColors.white)
-          ..setUserAgent(
-            'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36',
-          )
-          ..setNavigationDelegate(
-            NavigationDelegate(
-              onPageStarted: (String url) {
-                setState(() {
-                  isLoading = true;
-                });
-              },
-              onPageFinished: (String url) {
-                setState(() {
-                  isLoading = false;
-                });
-              },
-            ),
-          )
-          ..loadRequest(Uri.parse(widget.reportLink));
-  }
-
-  // Method to launch URLs in external apps
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +43,25 @@ class _ReportPageViewState extends State<ReportPageView> {
       ],
       child: Stack(
         children: [
-          WebViewWidget(controller: controller),
+          InAppWebView(
+            initialUrlRequest: URLRequest(
+              url: WebUri(widget.reportLink),
+            ),
+            initialSettings: InAppWebViewSettings(
+              javaScriptEnabled: true,
+              useWideViewPort: true,
+            ),
+            onLoadStart: (controller, url) {
+              setState(() {
+                isLoading = true;
+              });
+            },
+            onLoadStop: (controller, url) {
+              setState(() {
+                isLoading = false;
+              });
+            },
+          ),
           if (isLoading) Center(child: CircularProgressIndicator()),
         ],
       ),

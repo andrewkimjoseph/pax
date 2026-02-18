@@ -56,7 +56,7 @@ class Drawer extends ConsumerStatefulWidget {
                   ref.read(analyticsProvider).goodPaxAppTapped({
                     "link": goodPaxAppLink,
                   });
-                  UrlHandler.launchInExternalBrowser(goodPaxAppLink);
+                  UrlHandler.launchCustomTab(drawerContext, goodPaxAppLink);
                   // closeDrawer(drawerContext);
                 },
                 child: OptionCard(
@@ -68,7 +68,10 @@ class Drawer extends ConsumerStatefulWidget {
               InkWell(
                 onTap: () {
                   ref.read(analyticsProvider).esiTapped();
-                  UrlHandler.launchInExternalBrowser(esiRegistrationLink);
+                  UrlHandler.launchCustomTab(
+                    drawerContext,
+                    esiRegistrationLink,
+                  );
                 },
                 child: OptionCard('ESI Level 1', 'lib/assets/svgs/esi.svg'),
               ),

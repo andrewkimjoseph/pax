@@ -33,7 +33,7 @@ class FAQAccordionItem extends StatelessWidget {
                   recognizer:
                       TapGestureRecognizer()
                         ..onTap = () {
-                          UrlHandler.launchCustomTab(
+                          UrlHandler.launchInAppWebView(
                             context,
                             faq.answer.trim(),
                           );

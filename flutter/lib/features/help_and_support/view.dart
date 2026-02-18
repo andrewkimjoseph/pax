@@ -118,26 +118,23 @@ class _HelpAndSupportViewState extends ConsumerState<HelpAndSupportView> {
 
   void _onPrivacyPolicyTapped() {
     ref.read(analyticsProvider).privacyPolicyTapped();
-    UrlHandler.launchCustomTab(
+    UrlHandler.launchInAppWebView(
       context,
-      "https://canvassing.notion.site/Pax-PRIVACY-POLICY-2145e1ccc593803e87cdc48c334dc4de?pvs=74",
+      "https://thecanvassing.xyz/pax/privacy",
     );
   }
 
   void _onTermsOfServiceTapped() {
     ref.read(analyticsProvider).termsOfServiceTapped();
-    UrlHandler.launchCustomTab(
+    UrlHandler.launchInAppWebView(
       context,
-      "https://canvassing.notion.site/Pax-TERMS-OF-SERVICE-2145e1ccc593803d8c44e6ec05c695e7",
+      "https://thecanvassing.xyz/pax/terms",
     );
   }
 
   void _onAboutUsTapped() {
     ref.read(analyticsProvider).aboutUsTapped();
-    UrlHandler.launchCustomTab(
-      context,
-      "https://thecanvassing.framer.website/",
-    );
+    UrlHandler.launchInAppWebView(context, "https://thecanvassing.xyz/about");
   }
 }
 

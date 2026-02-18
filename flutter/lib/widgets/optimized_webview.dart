@@ -1,17 +1,28 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
-/// Optimized WebView widget with quality improvements for production
+/// Optimized WebView widget using InAppWebView with quality improvements for production
 class OptimizedWebView extends ConsumerStatefulWidget {
-  final WebViewController controller;
+  final URLRequest? initialUrlRequest;
+  final void Function(InAppWebViewController controller)? onWebViewCreated;
+  final void Function(InAppWebViewController controller, WebUri? url)? onLoadStart;
+  final void Function(InAppWebViewController controller, WebUri? url)? onLoadStop;
+  final Future<NavigationActionPolicy?> Function(
+    InAppWebViewController controller,
+    NavigationAction navigationAction,
+  )? shouldOverrideUrlLoading;
   final bool isLoading;
   final Widget? loadingWidget;
 
   const OptimizedWebView({
     super.key,
-    required this.controller,
+    this.initialUrlRequest,
+    this.onWebViewCreated,
+    this.onLoadStart,
+    this.onLoadStop,
+    this.shouldOverrideUrlLoading,
     this.isLoading = false,
     this.loadingWidget,
   });
@@ -26,13 +37,25 @@ class _OptimizedWebViewState extends ConsumerState<OptimizedWebView> {
     return Container(
       decoration: BoxDecoration(
         color: PaxColors.white,
-        // Add subtle border to improve visual quality
         border: Border.all(
           color: PaxColors.lightGrey.withValues(alpha: 0.3),
           width: 0.5,
         ),
       ),
-      child: ClipRect(child: WebViewWidget(controller: widget.controller)),
+      child: ClipRect(
+        child: InAppWebView(
+          initialUrlRequest: widget.initialUrlRequest,
+          initialSettings: InAppWebViewSettings(
+            javaScriptEnabled: true,
+            useWideViewPort: true,
+            useOnLoadResource: false,
+          ),
+          onWebViewCreated: widget.onWebViewCreated,
+          onLoadStart: widget.onLoadStart,
+          onLoadStop: widget.onLoadStop,
+          shouldOverrideUrlLoading: widget.shouldOverrideUrlLoading,
+        ),
+      ),
     );
   }
 }

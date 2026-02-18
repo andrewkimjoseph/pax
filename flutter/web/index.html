@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <!--
@@ -58,10 +58,7 @@
     <title>Pax</title>
     <link rel="manifest" href="manifest.json" />
 
-    <meta
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
-      name="viewport"
-    />
+    <!-- Viewport meta tag removed - Flutter Web manages viewport automatically -->
 
     <style id="splash-screen-style">
       html {
@@ -183,7 +180,9 @@
 
       /* Splash screen fade-out animation */
       #splash {
-        transition: opacity 0.3s ease-out, visibility 0.3s;
+        transition:
+          opacity 0.3s ease-out,
+          visibility 0.3s;
         opacity: 1;
         visibility: visible;
       }
@@ -198,18 +197,18 @@
       function removeSplashFromWeb() {
         const splash = document.getElementById("splash");
         const flutterApp = document.getElementById("flutter-app");
-        
+
         if (splash) {
           // Make Flutter app visible first
           if (flutterApp) {
             flutterApp.classList.add("ready");
           }
-          
+
           // Add fade-out class for smooth transition
           splash.classList.add("fade-out");
-          
+
           // Remove element after animation completes
-          setTimeout(function() {
+          setTimeout(function () {
             splash.remove();
             document.getElementById("splash-branding")?.remove();
             // Keep white background to prevent flash
@@ -225,6 +224,12 @@
         }
       }
     </script>
+
+    <script
+      type="application/javascript"
+      src="/assets/packages/flutter_inappwebview_web/assets/web/web_support.js"
+      defer
+    ></script>
   </head>
   <body>
     <picture id="splash">
@@ -254,7 +259,6 @@
       />
     </picture>
 
-
     <!-- Mobile-only message is now handled by Flutter MobileOnlyWrapper widget -->
 
     <!-- Flutter App Container -->
@@ -273,24 +277,26 @@
         // Check if Flutter app has rendered actual content
         const flutterApp = document.getElementById("flutter-app");
         if (!flutterApp) return false;
-        
+
         // Look for Flutter's rendered content (canvas or scene host)
-        const hasCanvas = flutterApp.querySelector('canvas');
-        const hasSceneHost = flutterApp.querySelector('flt-scene-host');
-        const hasFlutterContent = hasCanvas || hasSceneHost || 
+        const hasCanvas = flutterApp.querySelector("canvas");
+        const hasSceneHost = flutterApp.querySelector("flt-scene-host");
+        const hasFlutterContent =
+          hasCanvas ||
+          hasSceneHost ||
           (flutterApp.children.length > 0 && flutterApp.offsetHeight > 0);
-        
+
         // Check if minimum display time has passed
         const timeElapsed = Date.now() - splashStartTime;
         const minTimePassed = timeElapsed >= minSplashTime;
-        
+
         // Only remove if Flutter is ready, has content, and minimum time passed
         return flutterReady && hasFlutterContent && minTimePassed;
       }
 
       function tryRemoveSplash() {
         if (splashRemoved) return;
-        
+
         if (canRemoveSplash()) {
           splashRemoved = true;
           removeSplashFromWeb();
@@ -301,14 +307,14 @@
       }
 
       // Listen for Flutter first frame event
-      window.addEventListener('flutter-first-frame', function() {
+      window.addEventListener("flutter-first-frame", function () {
         flutterReady = true;
         // Wait a bit for content to fully render, then try to remove
         setTimeout(tryRemoveSplash, 300);
       });
 
       // Also watch for Flutter app content
-      const observer = new MutationObserver(function(mutations) {
+      const observer = new MutationObserver(function (mutations) {
         if (!flutterReady) {
           const flutterApp = document.getElementById("flutter-app");
           if (flutterApp && flutterApp.children.length > 0) {
@@ -317,18 +323,18 @@
           }
         }
       });
-      
+
       const flutterAppContainer = document.getElementById("flutter-app");
       if (flutterAppContainer) {
-        observer.observe(flutterAppContainer, { 
-          childList: true, 
+        observer.observe(flutterAppContainer, {
+          childList: true,
           subtree: true,
-          attributes: true
+          attributes: true,
         });
       }
 
       // Fallback: Remove splash after maximum time (prevents it staying forever)
-      setTimeout(function() {
+      setTimeout(function () {
         if (!splashRemoved) {
           splashRemoved = true;
           removeSplashFromWeb();
@@ -341,11 +347,13 @@
       // Lazy load third-party SDKs after Flutter app is ready
       function loadThirdPartySDKs() {
         // Load Farcaster SDK
-        import("https://esm.sh/@farcaster/miniapp-sdk").then((module) => {
-          module.sdk.actions.ready();
-        }).catch((err) => {
-          console.warn("Failed to load Farcaster SDK:", err);
-        });
+        import("https://esm.sh/@farcaster/miniapp-sdk")
+          .then((module) => {
+            module.sdk.actions.ready();
+          })
+          .catch((err) => {
+            console.warn("Failed to load Farcaster SDK:", err);
+          });
 
         // Load Branch SDK (deferred)
         (function (b, r, a, n, c, h, _, s, d, k) {
@@ -370,13 +378,13 @@
           },
           { _q: [], _v: 1 },
           "addListener banner closeBanner closeJourney data deepview deepviewCta first init link logout removeListener setBranchViewData setIdentity track trackCommerceEvent logEvent disableTracking getBrowserFingerprintId crossPlatformIds lastAttributedTouchData setAPIResponseCallback qrCode setRequestMetaData setAPIUrl getAPIUrl setDMAParamsForEEA".split(
-            " "
+            " ",
           ),
-          0
+          0,
         );
-        
+
         // Initialize Branch after SDK loads
-        setTimeout(function() {
+        setTimeout(function () {
           if (window.branch) {
             var options = { no_journeys: true, tracking_disabled: false };
             branch.init(
@@ -386,7 +394,7 @@
                 if (err != null) {
                   console.log("Branch init err: " + err);
                 }
-              }
+              },
             );
           }
         }, 1000);
@@ -422,14 +430,17 @@
                   };
                 },
                 o = function (e, t, r) {
-                  e._q.push({ name: t, args: Array.prototype.slice.call(r, 0) });
+                  e._q.push({
+                    name: t,
+                    args: Array.prototype.slice.call(r, 0),
+                  });
                 },
                 i = function (e, t, r) {
                   e[t] = function () {
                     if (r)
                       return {
                         promise: new Promise(
-                          s(e, t, Array.prototype.slice.call(arguments))
+                          s(e, t, Array.prototype.slice.call(arguments)),
                         ),
                       };
                     o(e, t, Array.prototype.slice.call(arguments));
@@ -441,7 +452,7 @@
                 };
               r.invoked = !0;
               var c = t.createElement("script");
-              (c.type = "text/javascript"),
+              ((c.type = "text/javascript"),
                 (c.integrity =
                   "sha384-R0H1kXlk6r2aEQMtwVcPolpk0NAuIqM/8NlxAv24Gr3/PBJPl+9elu0bc3o/FDjR"),
                 (c.crossOrigin = "anonymous"),
@@ -451,12 +462,12 @@
                 (c.onload = function () {
                   e.amplitude.runQueuedFunctions ||
                     console.log("[Amplitude] Error: could not load SDK");
-                });
+                }));
               var l = t.getElementsByTagName("script")[0];
               l.parentNode.insertBefore(c, l);
               for (
                 var u = function () {
-                    return (this._q = []), this;
+                    return ((this._q = []), this);
                   },
                   p = [
                     "add",
@@ -479,7 +490,7 @@
               r.Identify = u;
               for (
                 var f = function () {
-                    return (this._q = []), this;
+                    return ((this._q = []), this);
                   },
                   v = [
                     "getEventProperties",
@@ -520,11 +531,11 @@
                   "revenue",
                   "flush",
                 ];
-              a(r),
+              (a(r),
                 (r.createInstance = function (e) {
-                  return (r._iq[e] = { _q: [] }), a(r._iq[e]), r._iq[e];
+                  return ((r._iq[e] = { _q: [] }), a(r._iq[e]), r._iq[e]);
                 }),
-                (e.amplitude = r);
+                (e.amplitude = r));
             }
           })(window, document);
         })();
@@ -532,7 +543,7 @@
 
       // Wait for Flutter app to be ready before loading third-party SDKs
       if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
           // Delay loading SDKs to prioritize Flutter app initialization
           setTimeout(loadThirdPartySDKs, 2000);
         });
