@@ -1,13 +1,15 @@
 {
     "name": "Pax",
     "short_name": "Pax",
-    "start_url": ".",
+    "start_url": "/",
+    "scope": "/",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
+    "background_color": "#FFFFFF",
+    "theme_color": "#363062",
     "description": "micro tasks rewarded in tokens",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
+    "categories": ["productivity", "finance"],
     "icons": [
         {
             "src": "icons/Icon-192.png",

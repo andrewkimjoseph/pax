@@ -57,8 +57,12 @@
 
     <title>Pax</title>
     <link rel="manifest" href="manifest.json" />
-
-    <!-- Viewport meta tag removed - Flutter Web manages viewport automatically -->
+    
+    <!-- Viewport meta tag for PWA installability -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    
+    <!-- Theme color for mobile browsers -->
+    <meta name="theme-color" content="#363062" />
 
     <style id="splash-screen-style">
       html {
@@ -265,6 +269,21 @@
     <div id="flutter-app">
       <script src="flutter_bootstrap.js" async=""></script>
     </div>
+    
+    <!-- Service Worker Registration for PWA -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('flutter-first-frame', function () {
+          navigator.serviceWorker.register('/flutter_service_worker.js')
+            .then(function(registration) {
+              console.log('Service Worker registered successfully:', registration.scope);
+            })
+            .catch(function(error) {
+              console.log('Service Worker registration failed:', error);
+            });
+        });
+      }
+    </script>
 
     <!-- Remove splash screen when Flutter content is ready -->
     <script>

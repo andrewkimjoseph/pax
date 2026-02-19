@@ -5,6 +5,8 @@ hardhat/contracts/artifacts
 
 deployments/
 .DS_Store
+.cursor/
+CURSOR.md
 flutter/android/app/google-services.json
 flutter/firebase.json
 flutter/lib/firebase_options.dart
