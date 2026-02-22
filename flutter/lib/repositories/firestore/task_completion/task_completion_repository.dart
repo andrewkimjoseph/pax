@@ -19,8 +19,8 @@ class TaskCompletionRepository {
           await _firestore
               .collection(collectionName)
               .where('participantId', isEqualTo: participantId)
-              .where('timeCompleted', isNull: false)
-              .orderBy('timeCompleted', descending: true)
+              .where('timeCreated', isNull: false)
+              .orderBy('timeCreated', descending: true)
               .get();
 
       return snapshot.docs
@@ -60,7 +60,7 @@ class TaskCompletionRepository {
           await _firestore
               .collection(collectionName)
               .where('taskId', isEqualTo: taskId)
-              .orderBy('timeCompleted', descending: true)
+              .orderBy('timeCreated', descending: true)
               .get();
 
       return snapshot.docs
