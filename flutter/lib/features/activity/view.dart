@@ -1,4 +1,6 @@
 // lib/views/activity/activity_view.dart
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pax/models/local/activity_model.dart';
@@ -19,6 +21,26 @@ class ActivityView extends ConsumerStatefulWidget {
 }
 
 class _ActivityViewState extends ConsumerState<ActivityView> {
+  Timer? _refreshTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshTimer = Timer.periodic(Duration(seconds: 30), (_) {
+      if (!mounted) return;
+      if (ref.read(activityNotifierProvider).filterType ==
+          ActivityType.taskCompletion) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
   int get selectedIndex {
     final filterType = ref.watch(activityNotifierProvider).filterType;
     switch (filterType) {
@@ -104,7 +126,7 @@ class _ActivityViewState extends ConsumerState<ActivityView> {
                         ref.read(analyticsProvider).taskCompletionsTapped();
                       },
                       child: Text(
-                        'Task Completions',
+                        'Completions',
                         style: TextStyle(
                           color:
                               selectedIndex == 0

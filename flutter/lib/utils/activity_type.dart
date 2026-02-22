@@ -41,7 +41,7 @@ class ActivityTypeConverter {
   static String getDisplayName(ActivityType type) {
     switch (type) {
       case ActivityType.taskCompletion:
-        return 'Task Completion';
+        return 'Completion';
       case ActivityType.reward:
         return 'Reward';
       case ActivityType.withdrawal:
@@ -53,7 +53,7 @@ class ActivityTypeConverter {
   static String getSingularName(ActivityType type) {
     switch (type) {
       case ActivityType.taskCompletion:
-        return 'Task Completion';
+        return 'Completion';
       case ActivityType.reward:
         return 'Reward';
       case ActivityType.withdrawal:
@@ -65,7 +65,7 @@ class ActivityTypeConverter {
   static String getPluralName(ActivityType type) {
     switch (type) {
       case ActivityType.taskCompletion:
-        return 'Task Completions';
+        return 'Completions';
       case ActivityType.reward:
         return 'Rewards';
       case ActivityType.withdrawal:
