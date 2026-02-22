@@ -11,6 +11,7 @@ class ClaimRewardContext {
   bool? taskIsCompleted = false;
   final int numberOfCooldownHours;
   final Timestamp? timeCompleted;
+  final Timestamp? timeCreated;
   final bool? isValid;
 
   ClaimRewardContext({
@@ -23,6 +24,7 @@ class ClaimRewardContext {
     this.taskIsCompleted,
     this.numberOfCooldownHours = 0,
     this.timeCompleted,
+    this.timeCreated,
     this.isValid,
   });
 
@@ -36,6 +38,7 @@ class ClaimRewardContext {
     bool? taskIsCompleted,
     int? numberOfCooldownHours,
     Timestamp? timeCompleted,
+    Timestamp? timeCreated,
     bool? isValid,
   }) {
     return ClaimRewardContext(
@@ -49,6 +52,7 @@ class ClaimRewardContext {
       numberOfCooldownHours:
           numberOfCooldownHours ?? this.numberOfCooldownHours,
       timeCompleted: timeCompleted ?? this.timeCompleted,
+      timeCreated: timeCreated ?? this.timeCreated,
       isValid: isValid ?? this.isValid,
     );
   }
@@ -70,6 +74,7 @@ class ClaimRewardContextNotifier extends Notifier<ClaimRewardContext?> {
     bool? taskIsCompleted,
     int numberOfCooldownHours = 0,
     Timestamp? timeCompleted,
+    Timestamp? timeCreated,
     bool? isValid,
   }) {
     state = ClaimRewardContext(
@@ -82,6 +87,7 @@ class ClaimRewardContextNotifier extends Notifier<ClaimRewardContext?> {
       taskIsCompleted: taskIsCompleted,
       numberOfCooldownHours: numberOfCooldownHours,
       timeCompleted: timeCompleted,
+      timeCreated: timeCreated,
       isValid: isValid,
     );
   }

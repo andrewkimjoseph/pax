@@ -10,7 +10,6 @@ import 'package:pax/providers/local/task_context/repository_providers.dart';
 import 'package:pax/theming/colors.dart';
 import 'package:pax/utils/activity_type.dart';
 import 'package:pax/utils/currency_symbol.dart';
-import 'package:pax/utils/gradient_border.dart';
 import 'package:pax/utils/time_formatter.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:collection/collection.dart';
@@ -61,6 +60,7 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
     final tokenId = task?.rewardCurrencyId;
     final numberOfCooldownHours = task?.numberOfCooldownHours ?? 0;
     final timeCompleted = widget.activity.taskCompletion?.timeCompleted;
+    final timeCreated = widget.activity.taskCompletion?.timeCreated;
     final isValid = widget.activity.taskCompletion?.isValid;
 
     ref
@@ -75,6 +75,7 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
           taskIsCompleted: isTaskComplete,
           numberOfCooldownHours: numberOfCooldownHours,
           timeCompleted: timeCompleted,
+          timeCreated: timeCreated,
           isValid: isValid,
         );
 
@@ -111,37 +112,18 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
     final isTaskComplete = widget.activity.isComplete;
     final isTaskCompletion = widget.activity.taskCompletion != null;
     final isValid = widget.activity.taskCompletion?.isValid;
+    final isExpired = widget.activity.isExpired;
 
     return InkWell(
-      onTap:
-          (isTaskCompletion && 
-           isTaskComplete && 
-           !activityIsClaimed && 
-           isValid != false)
-              ? () => _callBackFn()
-              : null,
+      onTap: isTaskCompletion && isValid != false ? () => _callBackFn() : null,
       child: Container(
         width: MediaQuery.of(context).size.width,
         padding: EdgeInsets.all(10),
-        decoration:
-            isTaskCompletion && isTaskComplete && !activityIsClaimed
-                ? ShapeDecoration(
-                  shape: GradientBorder(
-                    gradient: LinearGradient(
-                      colors: PaxColors.orangeToPinkGradient,
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    width: 1,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  color: Colors.white,
-                )
-                : BoxDecoration(
-                  color: PaxColors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: PaxColors.lightLilac, width: 1),
-                ),
+        decoration: BoxDecoration(
+          color: PaxColors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: PaxColors.lightLilac, width: 1),
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -208,6 +190,8 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
                                         ? 'Claimed'
                                         : isTaskComplete
                                         ? 'Unclaimed'
+                                        : isExpired
+                                        ? 'Expired'
                                         : 'Incomplete',
                                   ).withPadding(right: 4),
                                   FaIcon(
@@ -222,7 +206,9 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
                                             ? PaxColors.red
                                             : (isTaskComplete)
                                             ? PaxColors.orange
-                                            : PaxColors.red,
+                                            : isExpired
+                                            ? PaxColors.red
+                                            : PaxColors.orange,
                                   ),
                                 ],
                               ),
@@ -240,6 +226,8 @@ class _ActivityCardState extends ConsumerState<ActivityCard> {
                         isTaskCompletion
                             ? isTaskComplete
                                 ? 'You have completed a task'
+                                : isExpired
+                                ? 'You have an expired task'
                                 : 'You have an incomplete task'
                             : widget.activity.reward != null
                             ? 'You have earned a reward'

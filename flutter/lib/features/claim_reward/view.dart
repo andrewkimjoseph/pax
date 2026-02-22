@@ -14,6 +14,7 @@ import 'package:pax/providers/local/claim_reward_context_provider.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pax/utils/token_balance_util.dart';
 import 'package:pax/utils/currency_symbol.dart';
+import 'package:pax/constants/task_timer.dart';
 import 'package:pax/widgets/toast.dart';
 
 class ClaimRewardView extends ConsumerStatefulWidget {
@@ -27,6 +28,7 @@ class ClaimRewardView extends ConsumerStatefulWidget {
 class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
   bool isClaiming = false;
   Timer? _countdownTimer;
+  Timer? _refreshTimer;
   Duration _remainingTime = Duration.zero;
 
   /// Checks if the cooldown period has elapsed
@@ -94,7 +96,24 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _refreshTimer = Timer.periodic(Duration(seconds: 30), (timer) {
+      if (!mounted) return;
+      final taskIsCompleted =
+          ref.read(claimRewardContextProvider)?.taskIsCompleted;
+      if (taskIsCompleted == true) {
+        timer.cancel();
+        _refreshTimer = null;
+        return;
+      }
+      setState(() {});
+    });
+  }
+
+  @override
   void dispose() {
+    _refreshTimer?.cancel();
     _stopCountdown();
     super.dispose();
   }
@@ -290,7 +309,14 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
     final taskIsCompleted = claimContext?.taskIsCompleted;
     final numberOfCooldownHours = claimContext?.numberOfCooldownHours ?? 0;
     final timeCompleted = claimContext?.timeCompleted?.toDate();
+    final timeCreated = claimContext?.timeCreated?.toDate();
     final isValid = claimContext?.isValid ?? true;
+
+    final isExpired = taskIsCompleted == false &&
+        (timeCreated == null ||
+            DateTime.now().isAfter(
+              timeCreated.add(Duration(minutes: taskTimerDurationMinutes)),
+            ));
 
     final canClaim = _canClaimReward(
       numberOfCooldownHours: numberOfCooldownHours,
@@ -334,7 +360,8 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
                   onPressed:
                       (txnHash != null && txnHash.isNotEmpty) ||
                               (!canClaim && taskIsCompleted == true) ||
-                              (isValid == false && taskIsCompleted == true)
+                              (isValid == false && taskIsCompleted == true) ||
+                              (taskIsCompleted == false && isExpired)
                           ? null
                           : () {
                             if (isClaiming) return;
@@ -350,7 +377,7 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
                           ? const CircularProgressIndicator()
                           : Text(
                             taskIsCompleted == false
-                                ? 'Complete Task'
+                                ? (isExpired ? 'Task Expired' : 'Complete Task')
                                 : (txnHash != null && txnHash.isNotEmpty)
                                 ? 'Claimed'
                                 : isValid == false
@@ -554,6 +581,56 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
                       ),
                     ),
 
+                  // Show expired task notice when task expired (past 6-hour window)
+                  if (taskIsCompleted == false && isExpired)
+                    Container(
+                      margin: EdgeInsets.only(top: 24),
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: PaxColors.red.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: PaxColors.red, width: 1),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.schedule,
+                                color: PaxColors.red,
+                                size: 20,
+                              ).withPadding(right: 8),
+                              Text(
+                                'Task expired.',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: PaxColors.red,
+                                ),
+                              ),
+                            ],
+                          ).withPadding(bottom: 8),
+                          Text(
+                            'This task can no longer be completed. The time to complete it has passed.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: PaxColors.black,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            'Contact support if you have questions.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: PaxColors.black,
+                            ),
+                            textAlign: TextAlign.center,
+                          ).withPadding(top: 12),
+                        ],
+                      ),
+                    ),
+
                   // Show invalid submission notice if isValid is false
                   if (isValid == false && taskIsCompleted == true)
                     Container(
@@ -618,7 +695,8 @@ class _ClaimRewardViewState extends ConsumerState<ClaimRewardView> {
                                               toastColor: PaxColors.green,
                                               text: 'Task Completion ID copied',
                                               trailingIcon:
-                                                  FontAwesomeIcons.solidCircleCheck,
+                                                  FontAwesomeIcons
+                                                      .solidCircleCheck,
                                             ),
                                       );
                                     }

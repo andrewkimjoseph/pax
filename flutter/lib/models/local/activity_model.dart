@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:pax/exports/shadcn.dart';
 import 'package:pax/models/firestore/reward/reward_model.dart';
+import 'package:pax/constants/task_timer.dart';
 import 'package:pax/models/firestore/task_completion/task_completion_model.dart';
 import 'package:pax/models/firestore/withdrawal/withdrawal_model.dart';
 
@@ -27,7 +28,7 @@ class Activity {
   Timestamp? get timestamp {
     switch (type) {
       case ActivityType.taskCompletion:
-        return taskCompletion?.timeCompleted;
+        return taskCompletion?.timeCompleted ?? taskCompletion?.timeCreated;
       case ActivityType.reward:
         return reward?.timeCreated;
       case ActivityType.withdrawal:
@@ -171,5 +172,17 @@ extension ActivityExtensions on Activity {
       case ActivityType.withdrawal:
         return withdrawal?.timeRequested != null;
     }
+  }
+
+  bool get isExpired {
+    if (type != ActivityType.taskCompletion) return false;
+    final tc = taskCompletion;
+    if (tc?.timeCompleted != null) return false;
+    final timeCreated = tc?.timeCreated;
+    if (timeCreated == null) return true;
+    final deadline = timeCreated.toDate().add(
+      Duration(minutes: taskTimerDurationMinutes),
+    );
+    return DateTime.now().isAfter(deadline);
   }
 }
