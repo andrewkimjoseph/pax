@@ -173,6 +173,16 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard>
             },
           ),
 
+          if (widget.nextLocation == "/wallet")
+            Text(
+              'Switch currency to view other balances',
+              style: TextStyle(
+                fontSize: 12,
+                color: PaxColors.darkGrey,
+                fontWeight: FontWeight.normal,
+              ),
+            ).withPadding(bottom: 8),
+
           Row(
             children: [
               // if (widget.nextLocation == "/wallet")
@@ -263,60 +273,65 @@ class _CurrentBalanceCardState extends ConsumerState<CurrentBalanceCard>
               //   ).withPadding(right: 8)
               // else
               SizedBox(
-                width: 150,
-                child: Select<String>(
-                  itemBuilder: (context, item) {
-                    return Row(
-                      children: [
-                        SvgPicture.asset(
-                          'lib/assets/svgs/currencies/$item.svg',
-                          height: 20,
-                        ).withPadding(right: 8),
-                        Text(CurrencySymbolUtil.getSymbolForCurrency(item)),
-                      ],
-                    );
-                  },
-                  onChanged: (value) {
-                    if (value != null) {
-                      ref
-                          .read(rewardCurrencyContextProvider.notifier)
-                          .setSelectedCurrency(value);
-
-                      ref
-                          .read(withdrawContextProvider.notifier)
-                          .setWithdrawContext(
-                            tokenId ?? 1,
-                            currentBalance ?? 0,
-                          );
-                    }
-                  },
-                  value: selectedCurrency,
-                  placeholder: const Text('Change currency'),
-                  popup:
-                      (context) => SelectPopup(
-                        items: SelectItemList(
+                    width: 150,
+                    child: Select<String>(
+                      itemBuilder: (context, item) {
+                        return Row(
                           children: [
-                            SelectCurrencyButton(
-                              'good_dollar',
-                              selectedCurrency == 'good_dollar',
-                            ),
-                            SelectCurrencyButton(
-                              'celo_dollar',
-                              selectedCurrency == 'celo_dollar',
-                            ),
-                            SelectCurrencyButton(
-                              'tether_usd',
-                              selectedCurrency == 'tether_usd',
-                            ),
-                            SelectCurrencyButton(
-                              'usd_coin',
-                              selectedCurrency == 'usd_coin',
-                            ).withPadding(bottom: kIsWeb ? 0 : 30),
+                            SvgPicture.asset(
+                              'lib/assets/svgs/currencies/$item.svg',
+                              height: 20,
+                            ).withPadding(right: 8),
+                            Text(CurrencySymbolUtil.getSymbolForCurrency(item)),
                           ],
-                        ),
-                      ),
-                ),
-              ).withPadding(right: 8),
+                        );
+                      },
+                      onChanged: (value) {
+                        if (value != null) {
+                          ref
+                              .read(rewardCurrencyContextProvider.notifier)
+                              .setSelectedCurrency(value);
+
+                          ref
+                              .read(withdrawContextProvider.notifier)
+                              .setWithdrawContext(
+                                tokenId ?? 1,
+                                currentBalance ?? 0,
+                              );
+                        }
+                      },
+                      value: selectedCurrency,
+                      placeholder: const Text('Change currency'),
+                      popup:
+                          (context) => SelectPopup(
+                            items: SelectItemList(
+                              children: [
+                                SelectCurrencyButton(
+                                  'good_dollar',
+                                  selectedCurrency == 'good_dollar',
+                                ),
+                                SelectCurrencyButton(
+                                  'celo_dollar',
+                                  selectedCurrency == 'celo_dollar',
+                                ),
+                                SelectCurrencyButton(
+                                  'tether_usd',
+                                  selectedCurrency == 'tether_usd',
+                                ),
+                                SelectCurrencyButton(
+                                  'usd_coin',
+                                  selectedCurrency == 'usd_coin',
+                                ).withPadding(bottom: kIsWeb ? 0 : 30),
+                              ],
+                            ),
+                          ),
+                    ),
+                  )
+                  .withToolTip(
+                    'View your balance in other currencies',
+                    showTooltip: widget.nextLocation == "/wallet",
+                  )
+                  .withPadding(right: 8),
 
               ref
                   .watch(featureFlagsProvider)
