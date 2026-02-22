@@ -161,6 +161,33 @@ final totalTaskCompletionsProvider = Provider<AsyncValue<int>>((ref) {
   );
 });
 
+// Provider for count of unclaimed task completions (complete, valid, no reward yet)
+final unclaimedTaskCompletionsCountProvider = Provider<AsyncValue<int>>((ref) {
+  final userId = ref.watch(authProvider).user.uid;
+  final allActivitiesAsync = ref.watch(allActivitiesProvider(userId));
+
+  return allActivitiesAsync.when(
+    data: (allActivities) {
+      int count = 0;
+      for (final activity in allActivities) {
+        if (activity.type != ActivityType.taskCompletion) continue;
+        if (!activity.isComplete) continue;
+        if (activity.taskCompletion?.isValid == false) continue;
+        final isClaimed = allActivities.any(
+          (a) =>
+              a.reward != null &&
+              a.reward?.txnHash != null &&
+              a.reward?.taskCompletionId == activity.taskCompletion?.id,
+        );
+        if (!isClaimed) count++;
+      }
+      return AsyncValue.data(count);
+    },
+    loading: () => const AsyncValue.loading(),
+    error: (error, stackTrace) => AsyncValue.error(error, stackTrace),
+  );
+});
+
 // Provider for total G$ tokens earned
 final totalGoodDollarTokensEarnedProvider = Provider<AsyncValue<double>>((ref) {
   final userId = ref.watch(authProvider).user.uid;

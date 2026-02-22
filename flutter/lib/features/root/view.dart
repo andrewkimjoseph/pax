@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart' show Badge;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/svg.dart' show SvgPicture;
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pax/exports/views.dart';
 import 'package:pax/providers/db/achievement/achievement_provider.dart';
+import 'package:pax/providers/local/activity_providers.dart';
 import 'package:pax/providers/route/root_selected_index_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import '../../theming/colors.dart' show PaxColors;
@@ -35,9 +36,15 @@ class _RootViewState extends ConsumerState<RootView> {
               },
               index: selected,
               children: [
-                buildButton('Home', selected == 0),
-                buildButton('Activity', selected == 1),
-                buildButton('Account', selected == 2),
+                buildButton('Home', selected == 0, badgeCount: null),
+                buildButton(
+                  'Activity',
+                  selected == 1,
+                  badgeCount: ref
+                      .watch(unclaimedTaskCompletionsCountProvider)
+                      .maybeWhen(data: (c) => c, orElse: () => null),
+                ),
+                buildButton('Account', selected == 2, badgeCount: null),
               ],
             ),
           ),
@@ -58,7 +65,24 @@ class _RootViewState extends ConsumerState<RootView> {
     );
   }
 
-  NavigationItem buildButton(String label, bool isSelected) {
+  IconData _getIconForLabel(String label) {
+    switch (label) {
+      case 'Home':
+        return FontAwesomeIcons.house;
+      case 'Activity':
+        return FontAwesomeIcons.chartLine;
+      case 'Account':
+        return FontAwesomeIcons.circleUser;
+      default:
+        return FontAwesomeIcons.circle;
+    }
+  }
+
+  NavigationItem buildButton(
+    String label,
+    bool isSelected, {
+    int? badgeCount,
+  }) {
     final achievementState = ref.watch(achievementsProvider);
 
     // Check for the presence of all three required achievements
@@ -77,6 +101,13 @@ class _RootViewState extends ConsumerState<RootView> {
       (ach) => userAchievementNames.contains(ach),
     );
 
+    final showAccountBadge =
+        label == 'Account' &&
+        achievementState.state == AchievementState.loaded &&
+        !hasAllRequired;
+    final showActivityBadge =
+        label == 'Activity' && badgeCount != null && badgeCount > 0;
+
     return NavigationItem(
       style: const ButtonStyle.ghost(density: ButtonDensity.icon),
       selectedStyle: const ButtonStyle.ghost(density: ButtonDensity.icon),
@@ -89,20 +120,24 @@ class _RootViewState extends ConsumerState<RootView> {
         ),
       ),
       child: Badge(
-        isLabelVisible:
-            label == 'Account' &&
-            achievementState.state == AchievementState.loaded &&
-            !hasAllRequired,
+        isLabelVisible: showAccountBadge || showActivityBadge,
         offset: const Offset(10, -5),
-        label: Text(""),
+        label: showActivityBadge
+            ? Text(
+                badgeCount > 99 ? '99+' : '$badgeCount',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: PaxColors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              )
+            : const Text(''),
         backgroundColor: PaxColors.red,
-
         smallSize: 10,
-        child: SvgPicture.asset(
-          isSelected
-              ? 'lib/assets/svgs/${label.toLowerCase()}_selected.svg'
-              : 'lib/assets/svgs/${label.toLowerCase()}_unselected.svg',
-          height: 24,
+        child: FaIcon(
+          _getIconForLabel(label),
+          size: 24,
+          color: isSelected ? PaxColors.deepPurple : PaxColors.lilac,
         ),
       ),
     );
